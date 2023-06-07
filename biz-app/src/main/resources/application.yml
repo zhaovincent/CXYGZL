@@ -1,0 +1,71 @@
+spring:
+  redis:
+    ##redis地址
+    host: localhost
+    ##redis端口
+    port: 6379
+    ##使用的db
+    database: 13
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  application:
+    name: cyxgjz-core-biz
+  datasource:
+    ##数据库地址
+    url: jdbc:mysql://localhost:3307/simple_flow_biz?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    ##数据库账号
+    username: root
+    ##数据库密码
+    password: 123456
+  jackson:
+    #字段为null时不返回该字段
+    default-property-inclusion: non_null
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+
+server:
+  port: 26859
+logging:
+  config: classpath:logback.xml
+
+#mybatis配置
+mybatis-plus:
+  global-config:
+    banner: false
+    db-config:
+      logic-delete-field: del_flag # 全局逻辑删除的实体字段名(since 3.3.0,配置后可以忽略不配置步骤2)
+      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
+      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+file:
+  ##静态文件在磁盘位置，此处与nginx配置要一直
+  dir: /tmp/cxygzl
+  ##静态文件访问路径
+  showUrl: http://127.0.0.1:${server.port}/file/show
+
+
+sa-token:
+  # token名称 (同时也是cookie名称)
+  token-name: cxygzl
+  # token有效期，单位s 默认30天, -1代表永不过期
+  timeout: -1
+  # token临时有效期 (指定时间内无操作就视为token过期) 单位: 秒
+  activity-timeout: -1
+  # 是否允许同一账号并发登录 (为true时允许一起登录, 为false时新登录挤掉旧登录)
+  is-concurrent: false
+  # 在多人登录同一账号时，是否共用一个token (为true时所有登录共用一个token, 为false时每次登录新建一个token)
+  is-share: false
+  # token风格
+  token-style: uuid
+  # 是否输出操作日志
+  is-log: true
+##核心模块访问路径
+core:
+  url: http://127.0.0.1:26858

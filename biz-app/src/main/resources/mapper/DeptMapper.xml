@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cxygzl.biz.mapper.DeptMapper">
+
+
+    <select id="selectChildrenByDept" resultType="com.cxygzl.biz.entity.Dept">
+        with RECURSIVE cte as(
+        select a.id, a.name `name` from dept a where id = #{deptId}
+        union all
+        select k.id, k.name `name` from dept k inner join cte c on c.id = k.parent_id
+        )select * from cte
+    </select>
+
+    <select id="selectParentByDept" resultType="com.cxygzl.biz.entity.Dept">
+        WITH recursive temp AS (
+        SELECT * FROM dept r WHERE r.id=#{deptId}
+        UNION ALL
+        SELECT r.* FROM dept r,temp t WHERE t.parent_id = r.id
+        )select * from temp
+    </select>
+
+</mapper>
