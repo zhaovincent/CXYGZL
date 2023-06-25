@@ -5,7 +5,7 @@
 
 前端管理后台框架使用的是 [vue3-element-admin](https://gitee.com/youlaiorg/vue3-element-admin "vue3-element-admin")，流程图使用的是[Workflow-Vue3](https://github.com/StavinLi/Workflow-Vue3 "Workflow-Vue3")。在此特别感谢两个产品的作者无私奉献，让我抄了个近道，特别感谢。
 
-> 前端代码开源地址：[https://gitee.com/junyue/cxygzl-web-vue3](https://gitee.com/junyue/cxygzl-web-vue3 "https://gitee.com/junyue/cxygzl-web-vue3")前端代码开源地址：[https://gitee.com/junyue/cxygzl-web-vue3](https://gitee.com/junyue/cxygzl-web-vue3 "https://gitee.com/junyue/cxygzl-web-vue3")
+> 前端代码开源地址：[https://gitee.com/junyue/cxygzl-web-vue3](https://gitee.com/junyue/cxygzl-web-vue3 "https://gitee.com/junyue/cxygzl-web-vue3")
 
 ### 官网
 
