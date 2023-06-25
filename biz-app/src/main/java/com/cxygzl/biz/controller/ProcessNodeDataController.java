@@ -34,13 +34,13 @@ public class ProcessNodeDataController {
 
     /**
      * 获取节点数据
-     * @param processId
+     * @param flowId
      * @param nodeId
      * @return
      */
     @GetMapping("getNodeData")
-    public R<String> getNodeData(String processId,String nodeId){
-        return processNodeDataService.getNodeData(processId, nodeId);
+    public R<String> getNodeData(String flowId,String nodeId){
+        return processNodeDataService.getNodeData(flowId, nodeId);
     }
 
 }

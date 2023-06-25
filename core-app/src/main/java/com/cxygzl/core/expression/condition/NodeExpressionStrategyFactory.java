@@ -2,10 +2,9 @@ package com.cxygzl.core.expression.condition;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.cxygzl.common.dto.process.NodeConditionDto;
-import com.cxygzl.common.dto.process.NodeDto;
-import com.cxygzl.common.dto.process.NodeGroupDto;
-import com.cxygzl.common.dto.process.NodePropDto;
+import com.cxygzl.common.dto.flow.Condition;
+import com.cxygzl.common.dto.flow.GroupCondition;
+import com.cxygzl.common.dto.flow.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +34,8 @@ public class NodeExpressionStrategyFactory {
     /**
      * 在Bean属性初始化后执行该方法
      *
-     * @param key 批次类型枚举
-     * @param nodeConditionHandler  表达式处理接口
+     * @param key                  批次类型枚举
+     * @param nodeConditionHandler 表达式处理接口
      */
     public static void register(String key, NodeConditionStrategy nodeConditionHandler) {
         STRATEGY_CONCURRENT_HASH_MAP.put(key, nodeConditionHandler);
@@ -44,14 +43,8 @@ public class NodeExpressionStrategyFactory {
 
 
 
-    /**
-     * 获取单个表达式
-     *
-     * @param nodeConditionDto
-     * @return
-     */
-    public static String handleSingleCondition(NodeConditionDto nodeConditionDto) {
-        NodeConditionStrategy nodeConditionHandler =getStrategy(nodeConditionDto.getValueType());
+    public static String handleSingleCondition(Condition nodeConditionDto) {
+        NodeConditionStrategy nodeConditionHandler = getStrategy(nodeConditionDto.getKeyType());
         if (nodeConditionHandler == null) {
             return "(1==1)";
         }
@@ -60,86 +53,87 @@ public class NodeExpressionStrategyFactory {
 
     /**
      * 组内处理表达式
+     *
      * @param groupDto
      * @return
      */
-
-    public static String handleGroupCondition(NodeGroupDto groupDto) {
+    public static String handleGroupCondition(GroupCondition groupDto) {
 
         List<String> exps = new ArrayList<>();
 
-        for (NodeConditionDto condition : groupDto.getConditions()) {
+
+        for (Condition condition : groupDto.getConditionList()) {
             String singleExpression = handleSingleCondition(condition);
             exps.add(singleExpression);
         }
+        Boolean mode = groupDto.getMode();
 
-        String groupType = groupDto.getGroupType();
-        if(StrUtil.equals(groupType, "OR")){
+        if (!mode) {
             String join = CollUtil.join(exps, "||");
 
-            return "("+join+")";
+            return "(" + join + ")";
         }
 
         String join = CollUtil.join(exps, "&&");
-        return "("+join+")";
+        return "(" + join + ")";
     }
 
     /**
      * 处理单个分支表达式
-     * @param nodePropDto 单个分支条件对象
+     *
      * @return
      */
-    public static String handle(NodePropDto nodePropDto) {
+    public static String handle(Node node) {
 
         List<String> exps = new ArrayList<>();
 
 
-        List<NodeGroupDto> groups = nodePropDto.getGroups();
-        if(groups==null){
+        List<GroupCondition> groups = node.getConditionList();
+        if (CollUtil.isEmpty(groups)) {
             return "${1==1}";
         }
-        for (NodeGroupDto group : groups) {
+        for (GroupCondition group : groups) {
             String s = handleGroupCondition(group);
             exps.add(s);
         }
 
-        String groupType = nodePropDto.getGroupType();
-        if(StrUtil.equals(groupType, "OR")){
-            String join = CollUtil.join(exps, "||");
 
-            return "${("+join+")}";
+        if (!node.getGroupMode()) {
+            String join = CollUtil.join(exps, "||");
+            return "${(" + join + ")}";
         }
 
         String join = CollUtil.join(exps, "&&");
-        return "${("+join+")}";
+        return "${(" + join + ")}";
     }
 
     /**
      * 处理默认分支表达式
+     *
      * @param branchs 所有分支
      * @return
      */
-    public static String handleDefaultBranch(List<NodeDto> branchs) {
+    public static String handleDefaultBranch(List<Node> branchs) {
 
-        List<String> expList=new ArrayList<>();
+        List<String> expList = new ArrayList<>();
 
         int size = branchs.size();
 
-        int index=1;
-        for (NodeDto branch : branchs) {
+        int index = 1;
+        for (Node branch : branchs) {
 
-            if(index==size){
+            if (index == size) {
                 continue;
             }
-            NodePropDto props = branch.getProps();
-            String exp = handle(props);
+
+            String exp = handle(branch);
             String s = StrUtil.subBetween(exp, "${", "}");
-            expList.add(StrUtil.format("({})",s));
+            expList.add(StrUtil.format("({})", s));
 
             index++;
         }
-        String join =StrUtil.format("!({})", CollUtil.join(expList, "||"));
-        return "${"+join+"}";
+        String join = StrUtil.format("!({})", CollUtil.join(expList, "||"));
+        return "${" + join + "}";
     }
 
 }

@@ -12,6 +12,7 @@ public enum NodeUserTypeEnum {
 
     USER("user","用户"),
     DEPT("dept","部门"),
+    ROLE("role","角色"),
     ;
 
     private String key;

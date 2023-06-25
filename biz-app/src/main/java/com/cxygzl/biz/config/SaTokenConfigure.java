@@ -25,7 +25,10 @@ public class SaTokenConfigure implements WebMvcConfigurer {
                     }
                 }))
                 .addPathPatterns("/**")
-                .excludePathPatterns("/user/login","/api/user/login",
+                .excludePathPatterns("/user/login",
+                        "/api/user/login",
+                        "/api/user/captcha",
+                        "/user/captcha",
 
 
                         "/remote/*",
@@ -35,7 +38,8 @@ public class SaTokenConfigure implements WebMvcConfigurer {
                         "/img/*",
                         "/fonts/*",
                         "/js/*",
-                        "/file/show/*","/processNodeData/saveNodeData",
+                        "/file/show/*",
+                        "/processNodeData/saveNodeData",
                         "/processNodeData/getNodeData")
 
         ;

@@ -24,10 +24,10 @@ public interface IProcessNodeDataService extends IService<ProcessNodeData> {
 
     /***
      * 获取节点数据
-     * @param processId
+     * @param flowId
      * @param nodeId
      * @return
      */
-    R<String> getNodeData(String processId,String nodeId);
+    R<String> getNodeData(String flowId,String nodeId);
 
 }

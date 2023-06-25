@@ -3,7 +3,7 @@ package com.cxygzl.biz.service.impl;
 import com.cxygzl.biz.entity.Dept;
 import com.cxygzl.biz.mapper.DeptMapper;
 import com.cxygzl.biz.service.IDeptService;
-import com.cxygzl.biz.utils.R;
+import com.cxygzl.common.dto.R;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +35,7 @@ public class DeptServiceImpl extends MPJBaseServiceImpl<DeptMapper, Dept> implem
 
         this.save(dept);
 
-        return R.ok("创建成功");
+        return R.success();
     }
 
     @Override
@@ -44,11 +44,11 @@ public class DeptServiceImpl extends MPJBaseServiceImpl<DeptMapper, Dept> implem
         List<Dept> deptList = deptMapper.selectChildrenByDept(dept.getId());
         boolean b = deptList.stream().anyMatch(w -> w.getId().longValue() == dept.getParentId().longValue());
         if(b){
-            return R.badRequest("当前部门的父级部门不能是当前部门或者当前部门的子级部门");
+            return R.fail("当前部门的父级部门不能是当前部门或者当前部门的子级部门");
         }
 
         this.updateById(dept);
-        return R.ok("修改成功");
+        return R.success("修改成功");
     }
 
 }

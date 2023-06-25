@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class ProcessNodeDataDto {
 
-    private String processId;
+    private String flowId;
 
     private String nodeId;
 

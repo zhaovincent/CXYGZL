@@ -29,10 +29,10 @@ public class FormGroupVo {
     @AllArgsConstructor
     public static class Form{
 
-        private String formId;
+        private String flowId;
 
 
-        private String formName;
+        private String name;
 
         private String logo;
 

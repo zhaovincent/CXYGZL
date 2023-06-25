@@ -1,10 +1,12 @@
 package com.cxygzl.biz.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import com.cxygzl.biz.utils.R;
+import com.cxygzl.biz.config.NotWriteLogAnno;
+import com.cxygzl.common.dto.R;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -41,17 +43,20 @@ public class FileController {
      */
     @SneakyThrows
     @PostMapping("upload")
+    @NotWriteLogAnno(exclude = false,all = true)
     public Object upload(MultipartFile file){
+
+        long loginIdAsLong = StpUtil.getLoginIdAsLong();
+
 
         String originalFilename = file.getOriginalFilename();
         long size = file.getSize();
-
 
         String format = StrUtil.format("{}-{}", IdUtil.fastSimpleUUID(), originalFilename);
 
         FileUtil.writeBytes(file.getBytes(), StrUtil.format("{}/{}",fileDir, format));
 
-        return R.ok(StrUtil.format("{}/{}",fileShowUrl,format));
+        return R.success(StrUtil.format("{}/{}",fileShowUrl,format));
     }
 
     /**
@@ -60,6 +65,7 @@ public class FileController {
      */
     @SneakyThrows
     @GetMapping("/show/{key}")
+    @NotWriteLogAnno(exclude = false,all = false,printResultLog = false,paramsExclude = "response")
     public void show(@PathVariable String key, HttpServletResponse response){
         String format = StrUtil.format("{}/{}", fileDir, key);
         IoUtil.write(response.getOutputStream(),true,FileUtil.readBytes(format));

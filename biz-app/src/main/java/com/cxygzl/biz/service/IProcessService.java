@@ -13,9 +13,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IProcessService extends IService<Process> {
 
-    Process getByFormId(String formId);
+    Process getByFlowId(String flowId);
 
-    void updateByFormId(Process process);
+    void updateByFlowId(Process process);
 
-    void hide(String formId);
+    void hide(String flowId);
 }

@@ -1,11 +1,9 @@
 package com.cxygzl.biz.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
-
-import java.io.Serializable;
-import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serializable;
 
 /**
  * <p>
@@ -17,15 +15,10 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class Dept implements Serializable {
+public class Dept extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 部门id
-     */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
 
     /**
      * 部门名
@@ -37,27 +30,14 @@ public class Dept implements Serializable {
      */
     private Long parentId;
 
-    /**
-     * 逻辑删除字段
-     */
-    @TableLogic
-    @TableField( fill = FieldFill.INSERT)
-    private Boolean delFlag;
+
 
     /**
      * 主管user_id
      */
     private Long leaderUserId;
 
-    /**
-     * 创建时间
-     */
-    @TableField( fill = FieldFill.INSERT)
-    private Date createTime;
 
-    /**
-     * 更新时间
-     */
-    @TableField( fill = FieldFill.INSERT_UPDATE)
-    private Date updateTime;
+    private Integer status;
+    private Integer sort;
 }

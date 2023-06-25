@@ -2,16 +2,10 @@ spring:
   application:
     name: cyxgjz-core-app
   datasource:
-    ##数据库地址
     url: jdbc:mysql://localhost:3307/simple_flow?allowPublicKeyRetrieval=true&useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
-    ##数据库账号
     username: root
-    ##数据库密码
     password: 123456
-biz:
-  ##业务模块访问地址
-  url: http://127.0.0.1:26859
 
 server:
   port: 26858
@@ -22,3 +16,5 @@ logging:
 node:
   data:
     store: remoteNodeDataStore
+biz:
+  url: http://127.0.0.1:26859

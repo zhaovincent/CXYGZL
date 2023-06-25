@@ -64,7 +64,7 @@ public class ProcessInstanceRecord {
     /**
      * 流程id
      */
-    private String processId;
+    private String flowId;
 
     /**
      * 流程实例id

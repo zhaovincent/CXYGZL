@@ -23,7 +23,7 @@ public class ProcessCopyDto {
     /**
      * 流程id
      */
-    private String processId;
+    private String flowId;
 
     /**
      * 实例id

@@ -1,33 +1,35 @@
 package com.cxygzl.biz.service.impl;
 
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeNode;
 import cn.hutool.core.lang.tree.TreeUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
-import com.cxygzl.biz.entity.Dept;
 import com.cxygzl.biz.entity.Process;
-import com.cxygzl.biz.entity.User;
+import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.mapper.DeptMapper;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.DeptUtil;
-import com.cxygzl.biz.utils.R;
 import com.cxygzl.biz.vo.OrgTreeVo;
+import com.cxygzl.biz.vo.UserFieldDataVo;
 import com.cxygzl.biz.vo.UserVO;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.dto.PageResultDto;
+import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskDto;
 import com.cxygzl.common.dto.TaskQueryParamDto;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,9 +41,16 @@ public class OrgServiceImpl implements IOrgService {
     @Resource
     private IDeptService deptService;
     @Resource
+    private IRoleService roleService;
+    @Resource
+    private IUserRoleService userRoleService;
+
+    @Resource
     private DeptMapper deptMapper;
-
-
+    @Resource
+    private IUserFieldDataService userFieldDataService;
+    @Resource
+    private IUserFieldService userFieldService;
 
     @Resource
     private IProcessService processService;
@@ -54,29 +63,56 @@ public class OrgServiceImpl implements IOrgService {
      * @return 组织架构树数据
      */
     @Override
-    public Object getOrgTreeData(Integer deptId, String type, Boolean showLeave) {
+    public Object getOrgTreeData(Long deptId, String type, Boolean showLeave) {
+        List<OrgTreeVo> orgs = new LinkedList<>();
+
+        if (StrUtil.equals(type, NodeUserTypeEnum.ROLE.getKey())) {
+            //角色
+
+            List<Role> roleList = roleService.lambdaQuery().list();
+
+            for (Role role : roleList) {
+                OrgTreeVo orgTreeVo = new OrgTreeVo();
+                orgTreeVo.setId(role.getId());
+                orgTreeVo.setName(role.getName());
+                orgTreeVo.setType(NodeUserTypeEnum.ROLE.getKey());
+                orgTreeVo.setSelected(false);
+                orgs.add(orgTreeVo);
+            }
+
+
+
+            return R.success(orgs);
+
+        }
+
+        Dict dict = Dict.create()
+                .set("titleDepartments",new ArrayList<>())
+                .set("employees",new ArrayList<>());
 
         List<Dept> deptList = deptService.lambdaQuery()
                 .eq(deptId != null, Dept::getParentId, deptId)
                 .list();
 
         //查询所有部门及员工
-        List<OrgTreeVo> orgs = new LinkedList<>();
         {
+            List deptVoList=new ArrayList();
             for (Dept dept : deptList) {
                 OrgTreeVo orgTreeVo = new OrgTreeVo();
                 orgTreeVo.setId(dept.getId());
                 orgTreeVo.setName(dept.getName());
                 orgTreeVo.setType(NodeUserTypeEnum.DEPT.getKey());
                 orgTreeVo.setSelected(false);
-                orgs.add(orgTreeVo);
+                deptVoList.add(orgTreeVo);
             }
+            dict.set("childDepartments",deptVoList);
         }
         if (!StrUtil.equals(type, NodeUserTypeEnum.DEPT.getKey())) {
 
+            List userVoList=new ArrayList();
+
             List<User> userList = userService.lambdaQuery()
-                    .eq(User::getDepId, deptId)
-                    .isNull(!(showLeave != null && showLeave), User::getLeaveDate)
+                    .eq(User::getDeptId, deptId)
                     .list();
             for (User user : userList) {
                 OrgTreeVo orgTreeVo = new OrgTreeVo();
@@ -85,11 +121,18 @@ public class OrgServiceImpl implements IOrgService {
                 orgTreeVo.setType(NodeUserTypeEnum.USER.getKey());
                 orgTreeVo.setSelected(false);
                 orgTreeVo.setAvatar(user.getAvatarUrl());
-                orgs.add(orgTreeVo);
+                userVoList.add(orgTreeVo);
 
             }
+            dict.set("employees",userVoList);
         }
-        return R.ok(orgs);
+
+        if(deptId>0){
+            List<Dept> depts = deptMapper.selectParentByDept(deptId);
+            dict.set("titleDepartments",CollUtil.reverse(depts));
+        }
+
+        return R.success(dict);
     }
 
 
@@ -99,9 +142,31 @@ public class OrgServiceImpl implements IOrgService {
      * @return
      */
     @Override
-    public Object getOrgTreeDataAll() {
+    public R getOrgTreeDataAll(String keywords, Integer status) {
 
-        List<Dept> deptList = deptService.lambdaQuery().list();
+        List<Dept> deptList = deptService.lambdaQuery()
+                .eq(status!=null,Dept::getStatus,status)
+                .like(StrUtil.isNotBlank(keywords),Dept::getName,keywords)
+                .list();
+
+        if(StrUtil.isNotBlank(keywords)||status!=null){
+            List list=new ArrayList();
+            for (Dept dept : deptList) {
+                Long leader = dept.getLeaderUserId();
+
+                User user = userService.getById(leader);
+                Dict set = Dict.create().set("leaderUserId", leader)
+                        .set("leaderName", user.getName())
+                        .set("leaderAvatar", user.getAvatarUrl())
+                        .set("status", dept.getStatus())
+                        .set("id", dept.getId())
+                        .set("name", dept.getName())
+                        .set("sort", dept.getSort())
+                        .set("roodIdList", CollUtil.reverse(DeptUtil.queryRootIdList(dept.getId(), deptList)));
+                list.add(set);
+            }
+           return  R.success(list);
+        }
 
         List<TreeNode<Long>> nodeList = CollUtil.newArrayList();
 
@@ -113,8 +178,12 @@ public class OrgServiceImpl implements IOrgService {
 
             User user = userService.getById(leader);
 
-            treeNode.setExtra(Dict.create().set("leaderId", leader)
+            treeNode.setExtra(Dict.create().set("leaderUserId", leader)
                     .set("leaderName", user.getName())
+                    .set("leaderAvatar", user.getAvatarUrl())
+
+                    .set("status", dept.getStatus())
+                    .set("sort", dept.getSort())
                     .set("roodIdList", CollUtil.reverse(DeptUtil.queryRootIdList(dept.getId(), deptList)))
             );
             nodeList.add(treeNode);
@@ -123,7 +192,7 @@ public class OrgServiceImpl implements IOrgService {
         // 0表示最顶层的id是0
         List<Tree<Long>> treeList = TreeUtil.build(nodeList, 0L);
 
-        return treeList;
+        return R.success(treeList);
     }
 
 
@@ -136,7 +205,7 @@ public class OrgServiceImpl implements IOrgService {
     @Override
     public Object getOrgTreeUser(String userName) {
 
-        List<User> userList = userService.lambdaQuery().isNull(User::getLeaveDate).and(k ->
+        List<User> userList = userService.lambdaQuery().and(k ->
                 k.like(User::getPinyin, userName)
                         .or(w -> w.like(User::getPy, userName))
                         .or(w -> w.like(User::getName, userName))
@@ -155,7 +224,7 @@ public class OrgServiceImpl implements IOrgService {
 
         }
 
-        return R.ok(orgTreeVoList);
+        return R.success(orgTreeVoList);
     }
 
 
@@ -173,15 +242,15 @@ public class OrgServiceImpl implements IOrgService {
         List<Dept> deptList = deptMapper.selectChildrenByDept(id);
         Set<Long> depIdSet = deptList.stream().map(w -> w.getId()).collect(Collectors.toSet());
 
-        Long count = userService.lambdaQuery().in(User::getDepId, depIdSet).count();
+        Long count = userService.lambdaQuery().in(User::getDeptId, depIdSet).count();
 
 
         if (count > 0) {
-            return R.badRequest("当前部门下有用户，不能删除");
+            return R.fail("当前部门下有用户，不能删除");
         }
 
         deptService.removeById(id);
-        return R.ok("删除成功");
+        return R.success();
     }
 
     /**
@@ -197,7 +266,7 @@ public class OrgServiceImpl implements IOrgService {
         MPJLambdaWrapper<User> lambdaQueryWrapper=new MPJLambdaWrapper<User>()
                 .selectAll(User.class)
                 .selectAs(Dept::getName, UserVO::getDeptName)
-                .leftJoin(Dept.class,Dept::getId,User::getDepId)
+                .leftJoin(Dept.class,Dept::getId,User::getDeptId)
 
                 .eq(User::getId, userId)
                 ;
@@ -205,14 +274,30 @@ public class OrgServiceImpl implements IOrgService {
         if(userVO!=null){
             List<Dept> deptList = deptService.lambdaQuery().list();
 
-            List<Long> depIdRootList = DeptUtil.queryRootIdList(userVO.getDepId(), deptList);
+            List<Long> depIdRootList = DeptUtil.queryRootIdList(userVO.getDeptId(), deptList);
 
             userVO.setDepIdList(CollUtil.reverse(depIdRootList));
 
         }
+        //添加扩展字段
+        List<UserFieldData> userFieldDataList = userFieldDataService.lambdaQuery().eq(UserFieldData::getUserId, userId).list();
+        //判断有没有新的扩展字段
+        List<UserField> userFieldList = userFieldService.lambdaQuery().ge(UserField::getId, 0).list();
+        List<UserFieldDataVo> userFieldDataVos = BeanUtil.copyToList(userFieldList, UserFieldDataVo.class);
+        for (UserFieldDataVo userFieldDataVo : userFieldDataVos) {
+            UserFieldData userFieldData = userFieldDataList.stream().filter(w -> StrUtil.equals(w.getKey(), userFieldDataVo.getKey())).findAny().orElse(null);
+            if(userFieldData!=null){
+                userFieldDataVo.setData(userFieldData.getData());
+            }
+        }
 
 
-        return R.ok(userVO);
+
+        userVO.setUserFieldDataList(userFieldDataVos);
+        List<UserRole> userRoleList = userRoleService.queryListByUserId(userId).getData();
+        userVO.setRoleIds(userRoleList.stream().map(w->w.getRoleId()).collect(Collectors.toList()));
+
+        return R.success(userVO);
     }
 
     /**
@@ -222,46 +307,45 @@ public class OrgServiceImpl implements IOrgService {
      * @return
      */
     @Override
-    public Object leave(User user) {
+    public Object delete(User user) {
 
         //判断是否有待办任务
         {
             TaskQueryParamDto taskQueryParamDto = new TaskQueryParamDto();
-            taskQueryParamDto.setPage(1);
-            taskQueryParamDto.setCount(1);
+            taskQueryParamDto.setPageNum(1);
+            taskQueryParamDto.setPageSize(1);
             taskQueryParamDto.setAssign(String.valueOf(user.getId()));
 
-            String post = CoreHttpUtil.queryAssignTask(taskQueryParamDto);
+            R<PageResultDto<TaskDto>> r = CoreHttpUtil.queryAssignTask(taskQueryParamDto);
 
-            com.cxygzl.common.dto.R<PageResultDto<TaskDto>> r = JSON.parseObject(post, new TypeReference<com.cxygzl.common.dto.R<PageResultDto<TaskDto>>>() {
-            });
+
             PageResultDto<TaskDto> pageResultDto = r.getData();
 
             Long total = pageResultDto.getTotal();
             if(total>0){
-                return R.badRequest("当前用户仍有待办任务，不能离职");
+                return R.fail("当前用户仍有待办任务，不能离职");
             }
 
         }
         //判断是否是流程管理员
         {
-            List<com.cxygzl.biz.entity.Process> processList = processService.lambdaQuery().eq(Process::getAdminId, user.getId()).list();
+            List<Process> processList = processService.lambdaQuery().eq(Process::getAdminId, user.getId()).list();
             if(!processList.isEmpty()){
-                return R.badRequest(StrUtil.format("当前用户是流程[{}]的管理员，请先修改流程管理员之后才能离职",processList.stream().map(w->w.getFormName()).collect(Collectors.joining(","))));
+                return R.fail(StrUtil.format("当前用户是流程[{}]的管理员，请先修改流程管理员之后才能离职",processList.stream().map(w->w.getName()).collect(Collectors.joining(","))));
             }
         }
         //判断是否是部门负责人
         {
             List<Dept> deptList = deptService.lambdaQuery().eq(Dept::getLeaderUserId, user.getId()).list();
             if(!deptList.isEmpty()){
-                return R.badRequest(StrUtil.format("当前用户是部门[{}]的负责人，请先修改部门负责人之后才能离职",deptList.stream().map(w->w.getName()).collect(Collectors.joining(","))));
+                return R.fail(StrUtil.format("当前用户是部门[{}]的负责人，请先修改部门负责人之后才能离职",deptList.stream().map(w->w.getName()).collect(Collectors.joining(","))));
             }
         }
 
 
 
-        userService.lambdaUpdate().set(User::getLeaveDate,new Date()).eq(User::getId,user.getId()).update(new User());
+        userService.removeById(user.getId());
 
-        return R.ok("离职成功");
+        return R.success();
     }
 }

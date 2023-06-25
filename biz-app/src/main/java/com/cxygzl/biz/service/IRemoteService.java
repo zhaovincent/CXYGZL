@@ -11,6 +11,13 @@ import java.util.Map;
  */
 public interface IRemoteService {
     /**
+     * 根据角色id集合查询用户id集合
+     * @param roleIdList
+     * @return
+     */
+    R<List<Long>> queryUserIdListByRoleIdList(List<Long> roleIdList);
+
+    /**
      * 保存抄送
      * @param copyDto
      * @return
@@ -98,8 +105,8 @@ public interface IRemoteService {
 
     /**
      * 查询流程管理员
-     * @param processId
+     * @param flowId
      * @return
      */
-    R<Long> queryProcessAdmin(String processId);
+    R<Long> queryProcessAdmin(String flowId);
 }

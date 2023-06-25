@@ -1,10 +1,13 @@
 package com.cxygzl.biz.controller;
 
+import com.cxygzl.biz.config.NotWriteLogAnno;
 import com.cxygzl.biz.entity.User;
+import com.cxygzl.biz.security.captcha.EasyCaptchaService;
 import com.cxygzl.biz.service.IOrgService;
 import com.cxygzl.biz.service.IUserService;
 import com.cxygzl.biz.vo.UserListQueryVO;
 import com.cxygzl.biz.vo.UserVO;
+import com.cxygzl.common.dto.R;
 import lombok.SneakyThrows;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,13 +24,26 @@ public class UserController {
     private IUserService userService;
     @Resource
     private IOrgService orgService;
+
+    @Resource
+    private EasyCaptchaService captchaService;
+
+    /**
+     * 获取验证码
+     * @return
+     */
+    @GetMapping("/captcha")
+    @NotWriteLogAnno(printResultLog = false)
+    public R getCaptcha() {
+       return captchaService.getCaptcha();
+    }
     /**
      * 创建用户
      * @param user
      * @return
      */
-    @PostMapping("createUser")
-    public Object createUser(@RequestBody UserVO user){
+    @PostMapping("create")
+    public Object create(@RequestBody UserVO user){
         return userService.createUser(user);
     }
     /**
@@ -35,7 +51,7 @@ public class UserController {
      * @param user
      * @return
      */
-    @PostMapping("editUser")
+    @PutMapping("edit")
     public Object editUser(@RequestBody UserVO user){
         return userService.editUser(user);
     }
@@ -49,10 +65,42 @@ public class UserController {
      */
     @SneakyThrows
     @PostMapping("login")
-    public Object login(@RequestBody User user) {
+    public Object login(@RequestBody UserVO user) {
 
         return userService.login(user);
 
+    }
+
+    /**
+     * 用户退出登录
+     *
+     * @return
+     */
+    @SneakyThrows
+    @PostMapping("logout")
+    public R logout() {
+
+        return userService.logout();
+
+    }
+
+    /**
+     * 修改密码
+     * @param user
+     * @return
+     */
+    @PostMapping("password")
+    public R password(@RequestBody User user){
+        return userService.password(user);
+    }
+    /**
+     * 修改状态
+     * @param user
+     * @return
+     */
+    @PostMapping("status")
+    public R status(@RequestBody User user){
+        return userService.status(user);
     }
 
     /**
@@ -62,8 +110,8 @@ public class UserController {
      * @return
      */
     @SneakyThrows
-    @PostMapping("getCurrentUserDetail")
-    public Object getCurrentUserDetail() {
+    @GetMapping("getCurrentUserDetail")
+    public R getCurrentUserDetail() {
 
         return userService.getCurrentUserDetail();
 
@@ -85,17 +133,17 @@ public class UserController {
      * @param userListQueryVO
      * @return
      */
-    @PostMapping("queryUserList")
-    public Object queryUserList(@RequestBody UserListQueryVO userListQueryVO){
-        return userService.queryUserList(userListQueryVO);
+    @PostMapping("queryList")
+    public Object queryList(@RequestBody UserListQueryVO userListQueryVO){
+        return userService.queryList(userListQueryVO);
     }
     /**
-     * 离职
+     * 删除用户
      * @param userListQueryVO
      * @return
      */
-    @PostMapping("leave")
-    public Object leave(@RequestBody User userListQueryVO){
-        return orgService.leave(userListQueryVO);
+    @DeleteMapping("delete")
+    public Object delete(@RequestBody User userListQueryVO){
+        return orgService.delete(userListQueryVO);
     }
 }

@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.*;
 import org.springframework.core.env.Environment;
 
@@ -11,12 +12,29 @@ import java.util.List;
 
 public class CoreHttpUtil {
 
+
+
+
+
     public static String post(Object object, String url) {
         Environment environment = SpringUtil.getBean(Environment.class);
         String bizUrl = environment.getProperty("biz.url");
 
 
-        return HttpUtil.post(StrUtil.format("{}{}", bizUrl, url), JSON.toJSONString(object));
+        String post = HttpUtil.post(StrUtil.format("{}{}", bizUrl, url), JSON.toJSONString(object));
+
+
+        return post;
+    }
+
+
+
+    public static <T> R<List<T>> postArray(Object object, String url, Class<T> tClass) {
+        String post = post(object, url);
+
+        R<List<T>> r = JSON.parseObject(post, new TypeReference<R<List<T>>>() {
+        });
+        return r;
     }
 
     public static String get(String url) {
@@ -27,50 +45,7 @@ public class CoreHttpUtil {
         return HttpUtil.get(StrUtil.format("{}{}", bizUrl, url));
     }
 
-    /**
-     * 检查列表是否是给定的部门的子级
-     * 全部都是
-     *
-     * @param depId
-     * @param deptIdList
-     * @return
-     */
-    public static String checkDepIsAllChild(Long depId, List<Long> deptIdList) {
-        CheckChildDto parentDto = new CheckChildDto();
-        parentDto.setChildId(depId);
-        parentDto.setDeptIdList(deptIdList);
 
-        return post(parentDto, "/remote/checkIsAllChild");
-
-    }
-
-    /**
-     * 检查列表是否是给定的部门的父级
-     * 全部都是
-     *
-     * @param depId
-     * @param deptIdList
-     * @return
-     */
-    public static String checkDepIsAllParent(Long depId, List<Long> deptIdList) {
-        CheckParentDto parentDto = new CheckParentDto();
-        parentDto.setParentId(depId);
-        parentDto.setDeptIdList(deptIdList);
-
-        return post(parentDto, "/remote/checkIsAllParent");
-
-    }
-
-    /**
-     * 查询用户所有的信息数据
-     *
-     * @param userId
-     * @return
-     */
-    public static String queryUserAllInfo(Long userId) {
-        return get("/remote/queryUserAllInfo?userId=" + userId);
-
-    }
 
     /**
      * 节点开始事件
@@ -109,12 +84,24 @@ public class CoreHttpUtil {
     }
 
     /**
+     * 根据角色id集合查询用户id集合
+     *
+     * @param roleIdList
+     */
+    public static R<List<String>> queryUserIdListByRoleIdList(List<String> roleIdList) {
+        return postArray(roleIdList, "/remote/queryUserIdListByRoleIdList", String.class);
+    }
+
+    /**
      * 根据部门id集合查询所有的用户id集合
      *
      * @param deptIdList
      */
-    public static String queryUserIdListByDepIdList(List<String> deptIdList) {
-        return post(deptIdList, "/remote/queryUserIdListByDepIdList");
+    public static  R<List<String>> queryUserIdListByDepIdList(List<String> deptIdList) {
+        String s = post(deptIdList, "/remote/queryUserIdListByDepIdList");
+        R<List<String>> r = JSON.parseObject(s, new TypeReference<R<List<String>>>() {
+        });
+        return r;
     }
 
     /**
@@ -122,63 +109,78 @@ public class CoreHttpUtil {
      *
      * @param userId 用户id
      */
-    public static String queryParentDepListByUserId(long userId) {
-        return get( "/remote/queryParentDepListByUserId?userId="+userId);
+    public static  R<List<DeptDto>> queryParentDepListByUserId(long userId) {
+        String s = get("/remote/queryParentDepListByUserId?userId=" + userId);
+        R<List<DeptDto>> r = JSON.parseObject(s, new TypeReference<R<List<DeptDto>>>() {
+        });
+        return r;
     }
 
     /**
      * 查询流程管理员
      *
-     * @param processId 流程id
+     * @param flowId 流程id
      */
-    public static String queryProcessAdmin(String processId) {
-        return get( "/remote/queryProcessAdmin?processId="+processId);
+    public static  R<Long>  queryProcessAdmin(String flowId) {
+        String s = get("/remote/queryProcessAdmin?flowId=" + flowId);
+        R<Long> longR = JSON.parseObject(s, new TypeReference<R<Long>>() {
+        });
+        return longR;
     }
 
     /**
      * 查询节点数据
-     * @param processId
+     *
+     * @param flowId
      * @param nodeId
      * @return
      */
-    public static String queryNodeOriData(String processId,String nodeId) {
-        return get( StrUtil.format("/processNodeData/getNodeData?processId" +
-                "={}&nodeId={}",processId,nodeId));
+    public static  R<String> queryNodeOriData(String flowId, String nodeId) {
+        String s = get(StrUtil.format("/processNodeData/getNodeData?flowId" +
+                "={}&nodeId={}", flowId, nodeId));
+        R<String> r = JSON.parseObject(s, new TypeReference<R<String>>() {
+        });
+
+        return r;
     }
 
     /**
      * 节点开始指派用户了
+     *
      * @param processNodeRecordAssignUserParamDto
      * @return
      */
-    public static String startAssignUser(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        return post(processNodeRecordAssignUserParamDto,"/remote/startAssignUser");
+    public static void startAssignUser(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
+          post(processNodeRecordAssignUserParamDto, "/remote/startAssignUser");
     }
 
     /**
      * 任务结束事件
+     *
      * @param processNodeRecordAssignUserParamDto
      * @return
      */
-    public static String taskEndEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        return post(processNodeRecordAssignUserParamDto,"/remote/taskEndEvent");
+    public static void taskEndEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
+          post(processNodeRecordAssignUserParamDto, "/remote/taskEndEvent");
     }
 
     /**
      * 保存抄送数据
+     *
      * @param processCopyDto
      * @return
      */
-    public static String saveCC(ProcessCopyDto processCopyDto) {
-        return post(processCopyDto,"/remote/savecc");
+    public static void saveCC(ProcessCopyDto processCopyDto) {
+          post(processCopyDto, "/remote/savecc");
     }
 
     /**
      * 保存节点原始数据
+     *
      * @param processNodeDataDto
      * @return
      */
-    public static String saveNodeOriData(ProcessNodeDataDto processNodeDataDto) {
-        return post(processNodeDataDto,"/processNodeData/saveNodeData");
+    public static void saveNodeOriData(ProcessNodeDataDto processNodeDataDto) {
+          post(processNodeDataDto, "/processNodeData/saveNodeData");
     }
 }

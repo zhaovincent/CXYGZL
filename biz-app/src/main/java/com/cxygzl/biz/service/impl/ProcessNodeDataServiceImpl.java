@@ -38,13 +38,13 @@ public class ProcessNodeDataServiceImpl extends ServiceImpl<ProcessNodeDataMappe
 
     /***
      * 获取节点数据
-     * @param processId
+     * @param flowId
      * @param nodeId
      * @return
      */
     @Override
-    public R<String> getNodeData(String processId, String nodeId) {
-        ProcessNodeData processNodeData = this.lambdaQuery().eq(ProcessNodeData::getProcessId, processId).eq(ProcessNodeData::getNodeId, nodeId).one();
+    public R<String> getNodeData(String flowId, String nodeId) {
+        ProcessNodeData processNodeData = this.lambdaQuery().eq(ProcessNodeData::getFlowId, flowId).eq(ProcessNodeData::getNodeId, nodeId).one();
         return R.success(processNodeData==null?null:processNodeData.getData());
     }
 }

@@ -1,11 +1,9 @@
 package com.cxygzl.biz.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.util.Date;
 
 /**
  * <p>
@@ -19,41 +17,18 @@ import java.util.Date;
 @Setter
 @Accessors(chain = true)
 @TableName("process_node_data")
-public class ProcessNodeData {
+public class ProcessNodeData extends BaseEntity{
 
-    /**
-     * 用户id
-     */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
-
-    /**
-     * 逻辑删除字段
-     */
-    @TableLogic
-    @TableField( fill = FieldFill.INSERT)
-    private Boolean delFlag;
-
-    /**
-     * 创建时间
-     */
-    @TableField( fill = FieldFill.INSERT)
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    @TableField( fill = FieldFill.INSERT_UPDATE)
-    private Date updateTime;
 
     /**
      * 流程id
      */
-    private String processId;
+    private String flowId;
 
     /**
      * 表单数据
      */
     private String data;
+
     private String nodeId;
 }

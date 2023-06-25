@@ -1,6 +1,6 @@
 package com.cxygzl.core.expression.condition;
 
-import com.cxygzl.common.dto.process.NodeConditionDto;
+import com.cxygzl.common.dto.flow.Condition;
 /**
  * 节点单个条件处理器
  */
@@ -20,7 +20,7 @@ public interface NodeConditionStrategy {
      *
      * @param nodeConditionDto
      */
-    String handle(NodeConditionDto nodeConditionDto);
+    String handle(Condition condition);
 
 
 }

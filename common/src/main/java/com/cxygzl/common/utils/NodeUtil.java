@@ -2,19 +2,20 @@ package com.cxygzl.common.utils;
 
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.constants.NodeTypeEnum;
-import com.cxygzl.common.dto.process.NodeDto;
-import com.cxygzl.common.dto.process.NodePropDto;
+import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.dto.flow.Node;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class NodeUtil {
 
-    public static String getProcessId(String processDefinitionId){
+    public static String getFlowId(String processDefinitionId){
         return StrUtil.subBefore(processDefinitionId, ":", false);
     }
 
-    public static boolean isNode(NodeDto childNode) {
+
+    public static boolean isNode(Node childNode) {
         if (childNode != null && StrUtil.isNotBlank(childNode.getId())) {
             return true;
         }
@@ -24,46 +25,47 @@ public class NodeUtil {
 
     /**
      * 需要发起人选择用户的节点
-     * @param nodeDto
+     * @param node
      */
-    public static List<String> selectUserNodeId(NodeDto nodeDto){
+    public static List<String> selectUserNodeId(Node node){
         List<String> list=new ArrayList();
 
-        if(!isNode(nodeDto)){
+        if(!isNode(node)){
             return list;
         }
 
-        String type = nodeDto.getType();
-        if(StrUtil.equals(type,NodeTypeEnum.EMPTY.getKey())){
-            return selectUserNodeId(nodeDto.getChildren());
-        }
+        Integer type = node.getType();
+//        if(StrUtil.equals(type,NodeTypeEnum.EMPTY.getKey())){
+//            return selectUserNodeId(nodeDto.getChildren());
+//        }
 
         //SELF_SELECT
 
 
 
 
-        if(StrUtil.equals(type, NodeTypeEnum.APPROVAL.getKey())){
-            NodePropDto props = nodeDto.getProps();
-            String assignedType = props.getAssignedType();
-            boolean selfSelect = StrUtil.equals(assignedType, "SELF_SELECT");
+        if(type==NodeTypeEnum.APPROVAL.getValue().intValue()){
+
+            Integer assignedType = node.getAssignedType();
+
+            boolean selfSelect =assignedType== ProcessInstanceConstant.AssignedTypeClass.SELF_SELECT;
             if(selfSelect){
-                list.add(nodeDto.getId());
+                list.add(node.getId());
             }
         }
 
-        if(StrUtil.equalsAny(type, NodeTypeEnum.INCLUSIVES.getKey(), NodeTypeEnum.CONCURRENTS.getKey(), NodeTypeEnum.CONDITIONS.getKey())){
+        if(type== NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()){
 
             //条件分支
-            List<NodeDto> branchs = nodeDto.getBranchs();
-            for (NodeDto branch : branchs) {
-                NodeDto children = branch.getChildren();
+            List<Node> branchs = node.getConditionNodes();
+            for (Node branch : branchs) {
+                Node children = branch.getChildren();
                 List<String> strings = selectUserNodeId(children);
                 list.addAll(strings);
             }
         }
 
-        List<String> next = selectUserNodeId(nodeDto.getChildren());
+        List<String> next = selectUserNodeId(node.getChildren());
         list.addAll(next);
         return list;
     }

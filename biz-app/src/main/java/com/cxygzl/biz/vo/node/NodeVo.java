@@ -17,7 +17,7 @@ public class NodeVo {
     /**
      * 用户列表
      */
-    private List<List<UserVo>> userDtoList;
+    private List<UserVo> userVoList;
 
     /**
      * 显示
@@ -36,7 +36,7 @@ public class NodeVo {
     /**
      * 节点类型
      */
-    private String type;
+    private Object type;
     /**
      * 发起人选择用户
      */

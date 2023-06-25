@@ -1,7 +1,7 @@
 package com.cxygzl.core.node;
 
-import com.alibaba.fastjson2.JSON;
-import com.cxygzl.common.dto.process.NodeDto;
+import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.utils.CommonUtil;
 
 /**
  * 节点数据处理接口
@@ -9,22 +9,26 @@ import com.cxygzl.common.dto.process.NodeDto;
 public interface INodeDataStoreHandler {
     /**
      * 节点数据存储
-     * @param processId 流程id
+     * @param flowId 流程id
      * @param nodeId 节点id
      * @param data 数据
      */
-    void save(String processId,String nodeId,String data);
-
+    void save(String flowId,String nodeId,Node data);
     /**
      * 获取节点数据
-     * @param processId 流程id
+     * @param flowId 流程id
      * @param nodeId 节点id
      * @return
      */
-    String get(String processId,String nodeId);
+    @Deprecated
+    String get(String flowId,String nodeId);
 
-    default NodeDto getNodeDto(String processId, String nodeId){
-        return JSON.parseObject(this.get(processId, nodeId),NodeDto.class);
+
+
+
+    default Node getNode(String flowId, String nodeId){
+        String text = this.get(flowId, nodeId);
+        return CommonUtil.toObj(text,Node.class);
     }
 
 

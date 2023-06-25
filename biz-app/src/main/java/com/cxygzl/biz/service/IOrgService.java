@@ -20,14 +20,14 @@ public interface IOrgService {
      * @param showLeave 是否显示离职员工
      * @return 组织架构树数据
      */
-    Object getOrgTreeData(Integer deptId, String type, Boolean showLeave);
+    Object getOrgTreeData(Long deptId, String type, Boolean showLeave);
 
 
     /**
      * 查询所有的组织架构 并树形显示
      * @return
      */
-    Object getOrgTreeDataAll();
+    Object getOrgTreeDataAll(String keywords,Integer status);
 
     /**
      * 模糊搜索用户
@@ -58,6 +58,6 @@ public interface IOrgService {
      * @param user
      * @return
      */
-    Object leave(User user);
+    Object delete(User user);
 
 }

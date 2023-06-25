@@ -4,13 +4,14 @@ import lombok.Data;
 
 @Data
 public class PageDto {
+
     /**
      * 页码
      */
-    private Integer page;
+    private Integer pageNum;
     /**
      * 每页的数量
      */
-    private Integer count;
+    private Integer pageSize;
 
 }

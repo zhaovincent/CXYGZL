@@ -6,7 +6,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cxygzl.biz.constants.NodeStatusEnum;
@@ -15,14 +14,14 @@ import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.NodeFormatUtil;
-import com.cxygzl.biz.utils.R;
+import com.cxygzl.biz.vo.FormItemVO;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.ProcessCopyVo;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
+import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
-import com.cxygzl.common.dto.process.NodeDto;
-import com.cxygzl.common.dto.process.NodeFormPermDto;
+import com.cxygzl.common.dto.flow.Node;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -70,15 +69,15 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         paramMap.put("root", CollUtil.newArrayList(rootUser));
 
         String post = CoreHttpUtil.startProcess(processInstanceParamDto);
-        com.cxygzl.common.dto.R<String> r = JSON.parseObject(post, new TypeReference<com.cxygzl.common.dto.R<String>>() {
+        R<String> r = JSON.parseObject(post, new TypeReference<R<String>>() {
         });
         if (!r.isOk()) {
-            return R.badRequest(r.getMsg());
+            return R.fail(r.getMsg());
         }
         String data = r.getData();
 
 
-        return R.ok(data);
+        return R.success(data);
     }
 
     /**
@@ -93,14 +92,13 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         TaskQueryParamDto taskQueryParamDto = BeanUtil.copyProperties(pageVO, TaskQueryParamDto.class);
         taskQueryParamDto.setAssign(StpUtil.getLoginIdAsString());
 
-        String post = CoreHttpUtil.queryAssignTask(taskQueryParamDto);
+        R<PageResultDto<TaskDto>> r = CoreHttpUtil.queryAssignTask(taskQueryParamDto);
 
-        com.cxygzl.common.dto.R<PageResultDto<TaskDto>> r = JSON.parseObject(post, new TypeReference<com.cxygzl.common.dto.R<PageResultDto<TaskDto>>>() {
-        });
+
         PageResultDto<TaskDto> pageResultDto = r.getData();
         List<TaskDto> records = pageResultDto.getRecords();
         if (CollUtil.isEmpty(records)) {
-            return R.ok(pageResultDto);
+            return R.success(pageResultDto);
 
         }
 
@@ -137,7 +135,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         }
 
 
-        return R.ok(pageResultDto);
+        return R.success(pageResultDto);
     }
 
     /**
@@ -151,14 +149,13 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         TaskQueryParamDto taskQueryParamDto = BeanUtil.copyProperties(pageVO, TaskQueryParamDto.class);
         taskQueryParamDto.setAssign(StpUtil.getLoginIdAsString());
 
-        String post = CoreHttpUtil.queryCompletedTask(taskQueryParamDto);
+        R<PageResultDto<TaskDto>> r= CoreHttpUtil.queryCompletedTask(taskQueryParamDto);
 
-        com.cxygzl.common.dto.R<PageResultDto<TaskDto>> r = JSON.parseObject(post, new TypeReference<com.cxygzl.common.dto.R<PageResultDto<TaskDto>>>() {
-        });
+
         PageResultDto<TaskDto> pageResultDto = r.getData();
         List<TaskDto> records = pageResultDto.getRecords();
         if (CollUtil.isEmpty(records)) {
-            return R.ok(pageResultDto);
+            return R.success(pageResultDto);
 
         }
 
@@ -195,7 +192,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         }
 
 
-        return R.ok(pageResultDto);
+        return R.success(pageResultDto);
     }
 
     /**
@@ -205,13 +202,13 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      * @return
      */
     @Override
-    public com.cxygzl.common.dto.R end(String processsInstanceId) {
+    public R end(String processsInstanceId) {
         processInstanceRecordService.lambdaUpdate()
                 .set(ProcessInstanceRecord::getEndTime, new Date())
                 .set(ProcessInstanceRecord::getStatus, NodeStatusEnum.YJS.getCode())
                 .eq(ProcessInstanceRecord::getProcessInstanceId, processsInstanceId)
                 .update(new ProcessInstanceRecord());
-        return com.cxygzl.common.dto.R.success();
+        return R.success();
     }
 
     /**
@@ -227,10 +224,10 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         Page<ProcessInstanceRecord> instanceRecordPage = processInstanceRecordService.lambdaQuery()
                 .eq(ProcessInstanceRecord::getUserId, userId)
-                .orderByDesc(ProcessInstanceRecord::getUpdateTime)
-                .page(new Page<>(pageDto.getPage(), pageDto.getCount()));
+                .orderByDesc(ProcessInstanceRecord::getCreateTime)
+                .page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()));
 
-        return R.ok(instanceRecordPage);
+        return R.success(instanceRecordPage);
     }
 
     /**
@@ -247,7 +244,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         Page<ProcessCopy> page = processCopyService.lambdaQuery()
                 .eq(ProcessCopy::getUserId, userId)
                 .orderByDesc(ProcessCopy::getNodeTime)
-                .page(new Page<>(pageDto.getPage(), pageDto.getCount()));
+                .page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()));
 
         List<ProcessCopy> records = page.getRecords();
 
@@ -274,7 +271,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         p.setRecords(processCopyVoList);
 
-        return R.ok(p);
+        return R.success(p);
     }
 
     /**
@@ -286,14 +283,14 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     @Override
     public Object showImg(String procInsId) {
         String s = CoreHttpUtil.showImg(procInsId);
-        com.cxygzl.common.dto.R<String> stringR = JSON.parseObject(s, new TypeReference<com.cxygzl.common.dto.R<String>>() {
+        R<String> stringR = JSON.parseObject(s, new TypeReference<R<String>>() {
         });
         String data = stringR.getData();
 //
 //        OutputStream out = response.getOutputStream();
 //
 //        Base64.decodeToStream(data, out, true);
-        return com.cxygzl.biz.utils.R.ok(data);
+        return R.success(data);
     }
 
     /**
@@ -304,24 +301,24 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      */
     @Override
     public Object formatStartNodeShow(NodeFormatParamVo nodeFormatParamVo) {
-        String formId = nodeFormatParamVo.getFormId();
+        String flowId = nodeFormatParamVo.getFlowId();
         String processInstanceId = nodeFormatParamVo.getProcessInstanceId();
-        if (StrUtil.isAllBlank(formId, processInstanceId)) {
-            return R.ok(new ArrayList<>());
+        if (StrUtil.isAllBlank(flowId, processInstanceId)) {
+            return R.success(new ArrayList<>());
         }
 
-        if (StrUtil.isBlankIfStr(formId) && StrUtil.isNotBlank(processInstanceId)) {
+        if (StrUtil.isBlankIfStr(flowId) && StrUtil.isNotBlank(processInstanceId)) {
             ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
                     processInstanceId).one();
-            formId = processInstanceRecord.getProcessId();
+            flowId = processInstanceRecord.getFlowId();
 
 
         }
         Map<String, Object> paramMap = nodeFormatParamVo.getParamMap();
         if (StrUtil.isNotBlank(nodeFormatParamVo.getTaskId())) {
             String s = CoreHttpUtil.queryTaskVariables(nodeFormatParamVo.getTaskId(), null);
-            com.cxygzl.common.dto.R<Map<String, Object>> r = JSON.parseObject(s,
-                    new TypeReference<com.cxygzl.common.dto.R<Map<String, Object>>>() {
+            R<Map<String, Object>> r = JSON.parseObject(s,
+                    new TypeReference<R<Map<String, Object>>>() {
                     });
             if (!r.isOk()) {
 
@@ -345,15 +342,26 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         }
 
+        Set<String> completeNodeSet=new HashSet<>();
 
-        Process oaForms = processService.getByFormId(formId);
+        if(StrUtil.isNotBlank(processInstanceId)){
+            List<ProcessNodeRecord> processNodeRecordList = processNodeRecordService.lambdaQuery()
+                    .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId)
+                    .eq(ProcessNodeRecord::getStatus, NodeStatusEnum.YJS.getCode())
+                    .list();
+            Set<String> collect = processNodeRecordList.stream().map(w -> w.getNodeId()).collect(Collectors.toSet());
+            completeNodeSet.addAll(collect);
+        }
+
+
+        Process oaForms = processService.getByFlowId(flowId);
         String process = oaForms.getProcess();
-        NodeDto nodeDto = JSON.parseObject(process, NodeDto.class);
+        Node nodeDto = JSON.parseObject(process, Node.class);
 
-        List<NodeVo> processNodeShowDtos = NodeFormatUtil.formatProcessNodeShow(nodeDto, new HashSet<>(),
+        List<NodeVo> processNodeShowDtos = NodeFormatUtil.formatProcessNodeShow(nodeDto, completeNodeSet,
                 new HashSet<>(), processInstanceId, paramMap);
 
-        return R.ok(processNodeShowDtos);
+        return R.success(processNodeShowDtos);
     }
 
     /**
@@ -372,9 +380,9 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
 
 
-        Process oaForms = processService.getByFormId(processInstanceRecord.getProcessId());
+        Process oaForms = processService.getByFlowId(processInstanceRecord.getFlowId());
         if (oaForms == null) {
-            return com.cxygzl.biz.utils.R.badRequest("流程不存在");
+            return R.fail("流程不存在");
         }
 
 
@@ -384,20 +392,18 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         });
         //发起人表单权限
         String process = oaForms.getProcess();
-        NodeDto nodeDto = JSON.parseObject(process, NodeDto.class);
-        List<NodeFormPermDto> formPerms = nodeDto.getProps().getFormPerms();
+        Node nodeDto = JSON.parseObject(process, Node.class);
+        Map<String, String> formPerms1 = nodeDto.getFormPerms();
 
 
-        List<JSONObject> jsonObjectList = JSON.parseArray(oaForms.getFormItems(), JSONObject.class);
-        for (JSONObject jsonObject : jsonObjectList) {
-            String id = jsonObject.getString("id");
+        List<FormItemVO> jsonObjectList = JSON.parseArray(oaForms.getFormItems(), FormItemVO.class);
+        for (FormItemVO jsonObject : jsonObjectList) {
+            String id = jsonObject.getId();
+            String perm = formPerms1.get(id);
 
-            NodeFormPermDto nodeFormPermDto = formPerms.stream().filter(w -> StrUtil.equals(w.getId(), id)).findAny().orElse(null);
+            jsonObject.setPerm(StrUtil.isBlankIfStr(perm)? ProcessInstanceConstant.FormPermClass.READ:perm);
+            jsonObject.getProps().setValue(variableMap.get(id));
 
-            JSONObject props = jsonObject.getJSONObject("props");
-            String perm =nodeFormPermDto==null?"R": nodeFormPermDto.getPerm();
-            props.put("perm", nodeFormPermDto==null?"R": (StrUtil.equals("E",perm)?"R":perm));
-            jsonObject.put("value", variableMap.get(id));
         }
         Dict set = Dict.create()
                 .set("processInstanceId", processInstanceId)
@@ -406,6 +412,6 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
                 .set("formItems", jsonObjectList);
 
-        return com.cxygzl.biz.utils.R.ok(set);
+        return R.success(set);
     }
 }

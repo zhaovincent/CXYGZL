@@ -1,14 +1,14 @@
 package com.cxygzl.core.controller;
 
+import com.cxygzl.common.dto.IndexPageStatistics;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.VariableQueryParamDto;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.*;
+import org.flowable.engine.history.HistoricActivityInstanceQuery;
+import org.flowable.task.api.TaskQuery;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.Map;
@@ -35,6 +35,27 @@ public class ProcessInstanceController {
     @Resource
     private RuntimeService runtimeService;
 
+    /**
+     * 查询统计数量
+     * @param userId
+     * @return
+     */
+    @GetMapping("querySimpleData")
+    public R<IndexPageStatistics> querySimpleData(long userId){
+        TaskQuery taskQuery = taskService.createTaskQuery();
+
+        //待办数量
+        long pendingNum = taskQuery.taskAssignee(String.valueOf(userId)).count();
+        //已完成任务
+        HistoricActivityInstanceQuery historicActivityInstanceQuery = historyService.createHistoricActivityInstanceQuery();
+
+        long completedNum = historicActivityInstanceQuery.taskAssignee(String.valueOf(userId)).finished().count();
+
+
+        IndexPageStatistics indexPageStatistics = IndexPageStatistics.builder().pendingNum(pendingNum).completedNum(completedNum).build();
+
+        return R.success(indexPageStatistics);
+    }
 
     /**
      * 查询变量

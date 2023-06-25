@@ -18,9 +18,11 @@ import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.biz.vo.node.UserVo;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
-import com.cxygzl.common.dto.process.NodeDto;
-import com.cxygzl.common.dto.process.NodePropDto;
-import com.cxygzl.common.dto.process.NodeUserDto;
+import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.dto.DeptDto;
+import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.utils.NodeUtil;
 
 import java.util.ArrayList;
@@ -37,71 +39,68 @@ public class NodeFormatUtil {
     /**
      * 格式化流程节点显示
      *
-     * @param nodeDto
+     * @param node
      * @param completeNodeSet
      * @param continueNodeSet
      * @param processInstanceId
      * @param paramMap
      */
-    public static List<NodeVo> formatProcessNodeShow(NodeDto nodeDto,
+    public static List<NodeVo> formatProcessNodeShow(Node node,
                                                      Set<String> completeNodeSet,
                                                      Set<String> continueNodeSet,
                                                      String processInstanceId,
                                                      Map<String, Object> paramMap) {
         List<NodeVo> list = new ArrayList();
 
-        if (!NodeUtil.isNode(nodeDto)) {
+        if (!NodeUtil.isNode(node)) {
             return list;
         }
 
-        String name = nodeDto.getName();
-        String type = nodeDto.getType();
-        if (StrUtil.equals(type, NodeTypeEnum.EMPTY.getKey())) {
-            return formatProcessNodeShow(nodeDto.getChildren(), completeNodeSet, continueNodeSet, processInstanceId, paramMap);
-        }
+        String name = node.getName();
+        Integer type = node.getType();
+
 
         //SELF_SELECT
 
 
         NodeVo nodeVo = new NodeVo();
-        nodeVo.setId(nodeDto.getId());
+        nodeVo.setId(node.getId());
         nodeVo.setName(name);
         nodeVo.setType(type);
         nodeVo.setStatus(NodeStatusEnum.WKS.getCode());
-        if (completeNodeSet.contains(nodeDto.getId())) {
+        if (completeNodeSet.contains(node.getId())) {
             nodeVo.setStatus(NodeStatusEnum.YJS.getCode());
 
         }
-        if (continueNodeSet.contains(nodeDto.getId())) {
+        if (continueNodeSet.contains(node.getId())) {
             nodeVo.setStatus(NodeStatusEnum.JXZ.getCode());
 
         }
 
         {
-            NodePropDto props = nodeDto.getProps();
 
-            nodeVo.setPlaceholder(props.getPlaceholder());
+            nodeVo.setPlaceholder(node.getPlaceHolder());
 
         }
 
-        NodePropDto props = nodeDto.getProps();
 
-        List<List<UserVo>> userDto1List = new ArrayList<>();
-        if (StrUtil.equals(type, NodeTypeEnum.APPROVAL.getKey())) {
-            String assignedType = props.getAssignedType();
-            boolean selfSelect = StrUtil.equals(assignedType, "SELF_SELECT");
+        List<UserVo> userVoList = new ArrayList<>();
+        if (type == NodeTypeEnum.APPROVAL.getValue().intValue()) {
+
+            Integer assignedType = node.getAssignedType();
+
+            boolean selfSelect = assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF_SELECT;
             nodeVo.setSelectUser(selfSelect);
             if (selfSelect) {
-                Boolean multiple = props.getSelfSelect().getMultiple();
-                nodeVo.setMultiple(multiple);
+                nodeVo.setMultiple(node.getMultiple());
             }
-            nodeVo.setPlaceholder(props.getPlaceholder());
+
             // 用户列表
             if (StrUtil.isNotBlank(processInstanceId)) {
                 IProcessNodeRecordAssignUserService processNodeRecordAssignUserService = SpringUtil.getBean(IProcessNodeRecordAssignUserService.class);
                 List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = processNodeRecordAssignUserService
                         .lambdaQuery().
-                        eq(ProcessNodeRecordAssignUser::getNodeId, nodeDto.getId())
+                        eq(ProcessNodeRecordAssignUser::getNodeId, node.getId())
                         .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processInstanceId)
                         .orderByAsc(ProcessNodeRecordAssignUser::getCreateTime)
                         .list();
@@ -117,143 +116,155 @@ public class NodeFormatUtil {
                         userVo.setOperType(w.getTaskType());
                         return userVo;
                     }).collect(Collectors.toList());
-                    userDto1List.add(collect);
+                    userVoList.addAll(collect);
 
                 }
 
                 if (processNodeRecordAssignUserList.isEmpty()) {
-                    if (StrUtil.equals(props.getAssignedType(), "SELF")) {
+                    if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF) {
                         //发起人自己
-                        userDto1List.add(CollUtil.newArrayList(buildRootUser(processInstanceId)));
+                        userVoList.addAll(CollUtil.newArrayList(buildRootUser(processInstanceId)));
                     }
-                    if (StrUtil.equals(props.getAssignedType(), "SELF_SELECT")) {
+                    if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF_SELECT) {
                         //发起人自选
-                        Object variable = paramMap.get(StrUtil.format("{}_assignee_select", nodeDto.getId()));
-                        List<NodeUserDto> nodeUserDtos = JSON.parseArray(JSON.toJSONString(variable), NodeUserDto.class);
+                        Object variable = paramMap.get(StrUtil.format("{}_assignee_select", node.getId()));
+                        List<NodeUser> nodeUserDtos = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class);
 
-                        List<Long> collect = nodeUserDtos.stream().map(w -> (w.getId())).collect(Collectors.toList());
+                        List<Long> collect = nodeUserDtos.stream().map(w -> Long.valueOf(w.getId())).collect(Collectors.toList());
                         for (Long aLong : collect) {
                             UserVo userVo = buildUser(aLong);
-                            userDto1List.add(CollUtil.newArrayList(userVo));
+                            userVoList.addAll(CollUtil.newArrayList(userVo));
                         }
                     }
                 }
 
 
-            } else if (StrUtil.equals(props.getAssignedType(), "ASSIGN_USER")) {
+            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.USER) {
                 //指定用户
-                List<NodeUserDto> userDtoTempList = props.getAssignedUser();
-                //用户id
-                List<Long> userIdList = userDtoTempList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.USER.getKey())).map(w -> Convert.toLong(w.getId())).collect(Collectors.toList());
-                //部门id
-                List<Long> deptIdList = userDtoTempList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.DEPT.getKey())).map(w -> Convert.toLong(w.getId())).collect(Collectors.toList());
 
-                if (CollUtil.isNotEmpty(deptIdList)) {
-
-                    IRemoteService iRemoteService = SpringUtil.getBean(IRemoteService.class);
-
-                    List<Long> data = iRemoteService.queryUserIdListByDepIdList(deptIdList).getData();
-
-                    if (CollUtil.isNotEmpty(data)) {
-                        for (long datum : data) {
-                            if (!userIdList.contains(datum)) {
-                                userIdList.add(datum);
-                            }
-                        }
-                    }
-                }
-                {
-                    for (Long aLong : userIdList) {
-                        userDto1List.add(CollUtil.newArrayList(buildUser(aLong)));
-                    }
-                }
+                List<NodeUser> nodeUserList = node.getNodeUserList();
+                List<UserVo> tempList = buildUser(nodeUserList);
+                userVoList.addAll(tempList);
 
 
-            } else if (StrUtil.equals(props.getAssignedType(), "FORM_USER")) {
+            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.FORM_USER) {
                 //表单人员
-                String formUser = props.getFormUser();
+                String formUser = node.getFormUserId();
 
                 Object o = paramMap.get(formUser);
                 if (o != null) {
                     String jsonString = JSON.toJSONString(o);
                     if (StrUtil.isNotBlank(jsonString)) {
-                        List<NodeUserDto> nodeUserDtoList = JSON.parseArray(jsonString, NodeUserDto.class);
-                        List<Long> userIdList = nodeUserDtoList.stream().map(w -> (w.getId())).collect(Collectors.toList());
+                        List<NodeUser> nodeUserDtoList = JSON.parseArray(jsonString, NodeUser.class);
+                        List<Long> userIdList = nodeUserDtoList.stream().map(w -> Long.valueOf(w.getId())).collect(Collectors.toList());
                         for (Long aLong : userIdList) {
-                            userDto1List.add(CollUtil.newArrayList(buildUser(aLong)));
+                            userVoList.addAll(CollUtil.newArrayList(buildUser(aLong)));
                         }
                     }
                 }
 
 
-            } else if (StrUtil.equals(props.getAssignedType(), "SELF")) {
+            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF) {
                 //发起人自己
-                userDto1List.add(CollUtil.newArrayList(buildUser(StpUtil.getLoginIdAsLong())));
+                userVoList.addAll(CollUtil.newArrayList(buildUser(StpUtil.getLoginIdAsLong())));
+            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.LEADER) {
+                //制定主管
+
+                //指定主管审批
+                //第几级主管审批
+                Integer level = node.getDeptLeaderLevel();
+
+                //去获取主管
+
+                IRemoteService remoteService = SpringUtil.getBean(IRemoteService.class);
+
+                R<List<DeptDto>> r = remoteService.queryParentDepListByUserId(StpUtil.getLoginIdAsLong());
+
+                List<DeptDto> deptDtoList = r.getData();
+                if (CollUtil.isNotEmpty(deptDtoList)) {
+                    if (deptDtoList.size() >= level) {
+                        DeptDto deptDto = deptDtoList.get(level - 1);
+
+
+                        userVoList.addAll(CollUtil.newArrayList(buildUser(deptDto.getLeaderUserId())));
+
+                    }
+                }
+
+            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.LEADER_TOP) {
+
+                //指定主管审批
+                //第几级主管审批
+                Integer level = node.getDeptLeaderLevel();
+
+                //去获取主管
+
+                IRemoteService remoteService = SpringUtil.getBean(IRemoteService.class);
+
+                R<List<DeptDto>> r = remoteService.queryParentDepListByUserId(StpUtil.getLoginIdAsLong());
+
+                List<DeptDto> deptDtoList = r.getData();
+
+
+                if (CollUtil.isNotEmpty(deptDtoList)) {
+                    int index = 1;
+                    for (DeptDto deptDto : deptDtoList) {
+                        if (level != null && level < index) {
+                            break;
+                        }
+                        userVoList.addAll(CollUtil.newArrayList(buildUser(deptDto.getLeaderUserId())));
+
+                        index++;
+                    }
+                }
             }
 
 
-        } else if (nodeDto.getType().equals(NodeTypeEnum.ROOT.getKey())) {
+        } else if (node.getType() == NodeTypeEnum.ROOT.getValue()) {
             //发起节点
             if (StrUtil.isBlank(processInstanceId)) {
                 UserVo userVo = buildUser(StpUtil.getLoginIdAsLong());
 
-                userDto1List.add(CollUtil.newArrayList(userVo));
+                userVoList.addAll(CollUtil.newArrayList(userVo));
 
             } else {
 
+                IProcessInstanceRecordService processInstanceRecordService = SpringUtil.getBean(IProcessInstanceRecordService.class);
+                ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
+
 
                 UserVo userVo = buildRootUser(processInstanceId);
-                userVo.setOperType("COMPLETE");
+                userVo.setShowTime(processInstanceRecord.getCreateTime());
                 userVo.setStatus(NodeStatusEnum.YJS.getCode());
-                userDto1List.add(CollUtil.newArrayList(userVo));
+                userVoList.addAll(CollUtil.newArrayList(userVo));
 
             }
-        } else if (nodeDto.getType().equals(NodeTypeEnum.CC.getKey())) {
-            //指定用户
-            List<NodeUserDto> userDtoTempList = props.getAssignedUser();
-            //用户id
-            List<Long> userIdList = userDtoTempList.stream().filter(w -> StrUtil.equals(w.getType(),NodeUserTypeEnum.USER.getKey())).map(w -> Convert.toLong(w.getId())).collect(Collectors.toList());
-            //部门id
-            List<Long> deptIdList = userDtoTempList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.DEPT.getKey())).map(w -> Convert.toLong(w.getId())).collect(Collectors.toList());
+        }else if (node.getType() == NodeTypeEnum.CC.getValue()) {
+            //抄送节点
 
-            if (CollUtil.isNotEmpty(deptIdList)) {
+            List<NodeUser> nodeUserList = node.getNodeUserList();
 
-                IRemoteService iRemoteService = SpringUtil.getBean(IRemoteService.class);
-
-                List<Long> data = iRemoteService.queryUserIdListByDepIdList(deptIdList).getData();
-
-                if (CollUtil.isNotEmpty(data)) {
-                    for (long datum : data) {
-                        if (!userIdList.contains(datum)) {
-                            userIdList.add(datum);
-                        }
-                    }
-                }
-            }
-            {
-                for (Long aLong : userIdList) {
-                    userDto1List.add(CollUtil.newArrayList(buildUser(aLong)));
-                }
-            }
+            List<UserVo> tempList = buildUser(nodeUserList);
+            userVoList.addAll(tempList);
 
         }
-        nodeVo.setUserDtoList(userDto1List);
+        nodeVo.setUserVoList(userVoList);
 
 
         List<NodeVo> branchList = new ArrayList<>();
 
-        if (StrUtil.equalsAny(type, NodeTypeEnum.CONDITIONS.getKey(), NodeTypeEnum.INCLUSIVES.getKey(), NodeTypeEnum.CONCURRENTS.getKey())) {
+        if (type == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()) {
             //条件分支
+            List<Node> branchs = node.getConditionNodes();
 
-            List<NodeDto> branchs = nodeDto.getBranchs();
-            for (NodeDto branch : branchs) {
-                NodeDto children = branch.getChildren();
+            for (Node branch : branchs) {
+                Node children = branch.getChildren();
                 List<NodeVo> processNodeShowDtos = formatProcessNodeShow(children, completeNodeSet, continueNodeSet, processInstanceId, paramMap);
 
                 NodeVo p = new NodeVo();
                 p.setChildren(processNodeShowDtos);
 
-                p.setPlaceholder(branch.getProps().getPlaceholder());
+                p.setPlaceholder(branch.getPlaceHolder());
                 branchList.add(p);
             }
         }
@@ -262,12 +273,13 @@ public class NodeFormatUtil {
 
         list.add(nodeVo);
 
-        List<NodeVo> next = formatProcessNodeShow(nodeDto.getChildren(), completeNodeSet, continueNodeSet, processInstanceId, paramMap);
+        List<NodeVo> next = formatProcessNodeShow(node.getChildren(), completeNodeSet, continueNodeSet, processInstanceId, paramMap);
         list.addAll(next);
 
 
         return list;
     }
+
 
     /**
      * 根据实例id
@@ -299,6 +311,35 @@ public class NodeFormatUtil {
                 .avatar(user.getAvatarUrl())
                 .build();
         return nodeUserDto;
+    }
+
+    private static List<UserVo> buildUser(List<NodeUser> nodeUserList ){
+        List<UserVo> userVoList=new ArrayList<>();
+        //用户id
+        List<Long> userIdList = nodeUserList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.USER.getKey())).map(w -> Convert.toLong(w.getId())).collect(Collectors.toList());
+        //部门id
+        List<Long> deptIdList = nodeUserList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.DEPT.getKey())).map(w -> Convert.toLong(w.getId())).collect(Collectors.toList());
+
+        if (CollUtil.isNotEmpty(deptIdList)) {
+
+            IRemoteService iRemoteService = SpringUtil.getBean(IRemoteService.class);
+
+            List<Long> data = iRemoteService.queryUserIdListByDepIdList(deptIdList).getData();
+
+            if (CollUtil.isNotEmpty(data)) {
+                for (long datum : data) {
+                    if (!userIdList.contains(datum)) {
+                        userIdList.add(datum);
+                    }
+                }
+            }
+        }
+        {
+            for (Long aLong : userIdList) {
+                userVoList.addAll(CollUtil.newArrayList(buildUser(aLong)));
+            }
+        }
+        return userVoList;
     }
 
 }

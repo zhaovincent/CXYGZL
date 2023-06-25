@@ -1,6 +1,5 @@
 package com.cxygzl.biz.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,15 +17,10 @@ import java.util.Date;
  */
 @Getter
 @Setter
-public class User implements Serializable {
+public class User extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 用户id
-     */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
 
     /**
      * 用户名
@@ -71,14 +65,8 @@ public class User implements Serializable {
     /**
      * 部门id
      */
-    private Long depId;
+    private Long deptId;
 
-    /**
-     * 逻辑删除字段
-     */
-    @TableLogic
-    @TableField( fill = FieldFill.INSERT)
-    private Boolean delFlag;
 
     /**
      * 入职日期
@@ -86,21 +74,7 @@ public class User implements Serializable {
     @JsonFormat( timezone="GMT+8", pattern="yyyy-MM-dd")
     private Date entryDate;
 
-    /**
-     * 离职日期
-     */
-    @JsonFormat( timezone="GMT+8", pattern="yyyy-MM-dd")
-    private Date leaveDate;
 
-    /**
-     * 创建时间
-     */
-    @TableField( fill = FieldFill.INSERT)
-    private Date createTime;
 
-    /**
-     * 更新时间
-     */
-    @TableField( fill = FieldFill.INSERT_UPDATE)
-    private Date updateTime;
+    private Integer status;
 }

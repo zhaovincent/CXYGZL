@@ -1,9 +1,10 @@
 package com.cxygzl.core.node.impl;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.ProcessNodeDataDto;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.core.node.INodeDataStoreHandler;
 import com.cxygzl.core.utils.CoreHttpUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -21,41 +22,39 @@ public class RemoteNodeDataStoreHandler implements INodeDataStoreHandler {
     /**
      * 节点数据存储
      *
-     * @param processId 流程id
-     * @param nodeId    节点id
-     * @param data      数据
+     * @param flowId 流程id
+     * @param nodeId 节点id
+     * @param data   数据
      */
     @Override
-    public void save(String processId, String nodeId, String data) {
-        log.debug("processId={} nodeId={} data={}", processId, nodeId, data);
+    public void save(String flowId, String nodeId, Node data) {
+        log.debug("flowId={} nodeId={} data={}", flowId, nodeId, data);
         ProcessNodeDataDto processNodeDataDto = new ProcessNodeDataDto();
-        processNodeDataDto.setProcessId(processId);
+        processNodeDataDto.setFlowId(flowId);
         processNodeDataDto.setNodeId(nodeId);
-        processNodeDataDto.setData(data);
+        processNodeDataDto.setData(CommonUtil.toJson(data));
 
 
-        String post = CoreHttpUtil.saveNodeOriData(processNodeDataDto);
-        log.debug("保存节点数据返回值：{}", post);
+        CoreHttpUtil.saveNodeOriData(processNodeDataDto);
+
     }
 
     /**
      * 获取节点数据
      *
-     * @param processId 流程id
-     * @param nodeId    节点id
+     * @param flowId 流程id
+     * @param nodeId 节点id
      * @return
      */
     @Override
-    public String get(String processId, String nodeId) {
+    public String get(String flowId, String nodeId) {
 
 
-        String post = CoreHttpUtil.queryNodeOriData(processId, nodeId);
+        R<String> r = CoreHttpUtil.queryNodeOriData(flowId, nodeId);
 
 
-        log.debug("processId={} nodeId={} data={}", processId, nodeId, post);
+        log.debug("flowId={} nodeId={} data={}", flowId, nodeId, JSON.toJSONString(r));
 
-        R<String> r = JSON.parseObject(post, new TypeReference<R<String>>() {
-        });
 
         return r.getData();
     }

@@ -8,7 +8,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.cxygzl.common.dto.*;
-import com.cxygzl.common.dto.process.NodeDto;
+import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.utils.ModelUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -57,15 +57,15 @@ public class FlowController {
 
 
     @PostMapping("create")
-    public R create(@RequestBody NodeDto nodeDto, long userId) {
-        String processId =
+    public R create(@RequestBody Node nodeDto, long userId) {
+        String flowId =
                 "P"+userId + DateUtil.format(new Date(), "yyyyMMddHHmmssSSS") + RandomUtil.randomString(5);
-        log.info("processId={}", processId);
-        BpmnModel bpmnModel = ModelUtil.buildBpmnModel(nodeDto, "测试1", processId);
+        log.info("flowId={}", flowId);
+        BpmnModel bpmnModel = ModelUtil.buildBpmnModel(nodeDto, "测试1", flowId);
         {
             byte[] bpmnBytess = new BpmnXMLConverter().convertToXML(bpmnModel);
             // ByteArrayInputStream in = new ByteArrayInputStream(bpmnBytess);
-            String filename = "/tmp/flowable-deployment/" + processId + ".bpmn20.xml";
+            String filename = "/tmp/flowable-deployment/" + flowId + ".bpmn20.xml";
             log.debug("部署时的模型文件：{}", filename);
             FileUtil.writeBytes(bpmnBytess, filename);
         }
@@ -73,7 +73,7 @@ public class FlowController {
                 .addBpmnModel(StrUtil.format("{}.bpmn20.xml", "test1"), bpmnModel).deploy();
 
 
-        return R.success(processId);
+        return R.success(flowId);
     }
 
     /**
@@ -205,7 +205,8 @@ public class FlowController {
                 List<Execution> executions = runtimeService.createExecutionQuery().parentId(processInstanceId).list();
                 List<String> executionIds = new ArrayList<>();
                 executions.forEach(execution -> executionIds.add(execution.getId()));
-                runtimeService.createChangeActivityStateBuilder().moveExecutionsToSingleActivityId(executionIds, "root_end").changeState();
+                runtimeService.createChangeActivityStateBuilder().moveExecutionsToSingleActivityId(executionIds,
+                        "end").changeState();
             }
         }
 
@@ -225,8 +226,8 @@ public class FlowController {
                 .taskAssignee(taskQueryParamDto.getAssign())
                 .finished()
                 .orderByHistoricActivityInstanceEndTime().desc()
-                .listPage((taskQueryParamDto.getPage() - 1) * taskQueryParamDto.getCount(),
-                        taskQueryParamDto.getCount());
+                .listPage((taskQueryParamDto.getPageNum() - 1) * taskQueryParamDto.getPageSize(),
+                        taskQueryParamDto.getPageSize());
 
         long count = historicActivityInstanceQuery.taskAssignee(taskQueryParamDto.getAssign()).finished().count();
         List<TaskDto> taskDtoList = new ArrayList<>();
@@ -243,10 +244,10 @@ public class FlowController {
 
             String processDefinitionId = historicActivityInstance.getProcessDefinitionId();
             //流程id
-            String processId = NodeUtil.getProcessId(processDefinitionId);
+            String flowId = NodeUtil.getFlowId(processDefinitionId);
 
             TaskDto taskDto = new TaskDto();
-            taskDto.setFlowId(processId);
+            taskDto.setFlowId(flowId);
             taskDto.setTaskCreateTime(startTime);
             taskDto.setTaskEndTime(endTime);
             taskDto.setNodeId(activityId);
@@ -279,8 +280,8 @@ public class FlowController {
 
         TaskQuery taskQuery = taskService.createTaskQuery();
         List<Task> tasks =
-                taskQuery.taskAssignee(assign).orderByTaskCreateTime().desc().listPage((taskQueryParamDto.getPage() - 1) * taskQueryParamDto.getCount(),
-                        taskQueryParamDto.getCount());
+                taskQuery.taskAssignee(assign).orderByTaskCreateTime().desc().listPage((taskQueryParamDto.getPageNum() - 1) * taskQueryParamDto.getPageSize(),
+                        taskQueryParamDto.getPageSize());
         long count = taskQuery.taskAssignee(assign).count();
 
         List<TaskDto> taskDtoList = new ArrayList<>();
@@ -304,10 +305,10 @@ public class FlowController {
 
             String processDefinitionId = task.getProcessDefinitionId();
             //流程id
-            String processId = NodeUtil.getProcessId(processDefinitionId);
+            String flowId = NodeUtil.getFlowId(processDefinitionId);
 
             TaskDto taskDto = new TaskDto();
-            taskDto.setFlowId(processId);
+            taskDto.setFlowId(flowId);
             taskDto.setTaskCreateTime(task.getCreateTime());
             taskDto.setNodeId(taskDefinitionKey);
             taskDto.setParamMap(taskServiceVariables);

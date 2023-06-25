@@ -1,6 +1,7 @@
 package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.entity.Process;
+import com.cxygzl.biz.entity.ProcessGroup;
 import com.cxygzl.biz.service.FormGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +13,7 @@ import java.util.List;
  * @date : 2020/9/17
  */
 @RestController
-@RequestMapping(value = {"admin/form","api/admin/form"})
+@RequestMapping(value = {"admin/flow","api/admin/flow"})
 public class FormGroupController {
 
     @Autowired
@@ -85,9 +86,9 @@ public class FormGroupController {
      * @param name 分组名
      * @return 添加结果
      */
-    @PostMapping("group")
-    public Object createFormGroup(@RequestParam String name){
-        return formGroupService.createFormGroup(name);
+    @PostMapping("createGroup")
+    public Object createFormGroup(@RequestBody ProcessGroup processGroup){
+        return formGroupService.createFormGroup(processGroup);
     }
 
     /**
@@ -96,7 +97,7 @@ public class FormGroupController {
      * @return 删除结果
      */
     @DeleteMapping("group/{groupId}")
-    public Object deleteFormGroup(@PathVariable Integer groupId){
+    public Object deleteFormGroup(@PathVariable long groupId){
         return formGroupService.deleteFormGroup(groupId);
     }
     /**
@@ -104,46 +105,36 @@ public class FormGroupController {
      * @return 删除结果
      */
     @DeleteMapping("group")
-    public Object deleteFormGroup1( Integer id){
+    public Object deleteFormGroup1( long id){
         return formGroupService.deleteFormGroup(id);
     }
 
-    @PostMapping
-    public Object createForm(@RequestBody Process form){
-        return formGroupService.createForm(form);
+    @PostMapping("create")
+    public Object createFlow(@RequestBody Process form){
+        return formGroupService.createFlow(form);
     }
 
     /**
      * 查询表单模板数据
-     * @param formId 模板id
+     * @param flowId 模板id
      * @return 模板详情数据
      */
-    @GetMapping("detail/{formId}")
-    public Object getFormById(@PathVariable String formId){
-        return formGroupService.getFormById(formId);
+    @GetMapping("detail/{flowId}")
+    public Object getFormById(@PathVariable String flowId){
+        return formGroupService.getFormById(flowId);
     }
-
 
     /**
      * 编辑表单
-     * @param formId 摸板ID
+     * @param flowId 摸板ID
      * @param type 类型 stop using delete
      * @return 操作结果
      */
-    @PutMapping("{formId}")
-    public Object updateForm(@PathVariable String formId,
+    @PutMapping("{flowId}")
+    public Object updateForm(@PathVariable String flowId,
                              @RequestParam String type,
                              @RequestParam(required = false) Long groupId){
-        return formGroupService.updateForm(formId, type, groupId);
+        return formGroupService.updateForm(flowId, type, groupId);
     }
 
-    /**
-     * 编辑表单详情
-     * @param template 表单模板信息
-     * @return 修改结果
-     */
-    @PutMapping("detail")
-    public Object updateFormDetail(@RequestBody Process template){
-        return formGroupService.updateFormDetail(template);
-    }
 }

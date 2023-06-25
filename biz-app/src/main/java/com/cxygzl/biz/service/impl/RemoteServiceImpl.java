@@ -17,6 +17,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -25,7 +26,8 @@ import java.util.stream.Collectors;
 public class RemoteServiceImpl implements IRemoteService {
     @Resource
     private IUserService userService;
-
+    @Resource
+    private IUserFieldDataService userFieldDataService;
     @Resource
     private IProcessInstanceRecordService processInstanceRecordService;
     @Resource
@@ -42,6 +44,23 @@ public class RemoteServiceImpl implements IRemoteService {
     private IProcessService processService;
     @Resource
     private IProcessGroupService processGroupService;
+    @Resource
+    private IUserRoleService userRoleService;
+
+    /**
+     * 根据角色id集合查询用户id集合
+     *
+     * @param roleIdList
+     * @return
+     */
+    @Override
+    public R<List<Long>> queryUserIdListByRoleIdList(List<Long> roleIdList) {
+
+        List<UserRole> userRoleList = userRoleService.lambdaQuery().in(UserRole::getRoleId, roleIdList).list();
+        Set<Long> userIdSet = userRoleList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
+
+        return R.success(userIdSet);
+    }
 
     /**
      * 保存抄送
@@ -119,7 +138,7 @@ public class RemoteServiceImpl implements IRemoteService {
         if (CollUtil.isEmpty(depIdList)) {
             return R.success(new ArrayList<>());
         }
-        List<User> userList = userService.lambdaQuery().in(User::getDepId, depIdList).list();
+        List<User> userList = userService.lambdaQuery().in(User::getDeptId, depIdList).list();
         return R.success(userList.stream().map(w -> w.getId()).collect(Collectors.toList()));
     }
 
@@ -153,8 +172,12 @@ public class RemoteServiceImpl implements IRemoteService {
     public R<Map<String, Object>> queryUserAllInfo(long userId) {
         User user = userService.getById(userId);
 
-        Map<String, Object> map = BeanUtil.beanToMap(user, "id", "name", "phone", "gender", "depId", "entryDate", "leaveDate");
-
+        Map<String, Object> map = BeanUtil.beanToMap(user, "id", "name", "phone", "gender", "deptId", "entryDate"
+                );
+        List<UserFieldData> userFieldDataList = userFieldDataService.lambdaQuery().eq(UserFieldData::getUserId, userId).list();
+        for (UserFieldData userFieldData : userFieldDataList) {
+            map.put(userFieldData.getKey(), userFieldData.getData());
+        }
 
         return R.success(map);
     }
@@ -168,9 +191,9 @@ public class RemoteServiceImpl implements IRemoteService {
     @Override
     public R<List<DeptDto>> queryParentDepListByUserId(long userId) {
         User user = userService.getById(userId);
-        Long depId = user.getDepId();
+        Long deptId = user.getDeptId();
 
-        List<Dept> deptList = deptMapper.selectParentByDept(depId);
+        List<Dept> deptList = deptMapper.selectParentByDept(deptId);
         List<DeptDto> dtoList = BeanUtil.copyToList(deptList, DeptDto.class);
 
         return R.success(dtoList);
@@ -199,14 +222,14 @@ public class RemoteServiceImpl implements IRemoteService {
                 ProcessInstanceRecord.class);
 
 
-        Process oaForms = processService.getByFormId(processInstanceRecordParamDto.getProcessId());
+        Process oaForms = processService.getByFlowId(processInstanceRecordParamDto.getFlowId());
 
         ProcessGroup oaFormGroups = processGroupService.getById(oaForms.getGroupId());
 
-        entity.setName(oaForms.getFormName());
+        entity.setName(oaForms.getName());
         entity.setLogo(oaForms.getLogo());
         entity.setUserId(processInstanceRecordParamDto.getUserId());
-        entity.setProcessId(processInstanceRecordParamDto.getProcessId());
+        entity.setFlowId(processInstanceRecordParamDto.getFlowId());
         entity.setProcessInstanceId(processInstanceRecordParamDto.getProcessInstanceId());
         entity.setGroupId(oaFormGroups.getId());
         entity.setGroupName(oaFormGroups.getGroupName());
@@ -264,12 +287,12 @@ public class RemoteServiceImpl implements IRemoteService {
     /**
      * 查询流程管理员
      *
-     * @param processId
+     * @param flowId
      * @return
      */
     @Override
-    public R<Long> queryProcessAdmin(String processId) {
-        Process process = processService.getByFormId(processId);
+    public R<Long> queryProcessAdmin(String flowId) {
+        Process process = processService.getByFlowId(flowId);
         return R.success(process.getAdminId());
     }
 }

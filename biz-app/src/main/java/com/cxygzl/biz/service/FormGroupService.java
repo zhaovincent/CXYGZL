@@ -2,6 +2,7 @@ package com.cxygzl.biz.service;
 
 
 import com.cxygzl.biz.entity.Process;
+import com.cxygzl.biz.entity.ProcessGroup;
 
 import java.util.List;
 
@@ -41,6 +42,7 @@ public interface FormGroupService {
     Object getFormById(String templateId);
 
 
+
     /**
      * 修改分组
      *
@@ -53,10 +55,10 @@ public interface FormGroupService {
     /**
      * 新增表单分组
      *
-     * @param name 分组名
+     * @param processGroup 分组名
      * @return 添加结果
      */
-    Object createFormGroup(String name);
+    Object createFormGroup(ProcessGroup processGroup);
 
     /**
      * 删除分组
@@ -64,28 +66,23 @@ public interface FormGroupService {
      * @param id 分组ID
      * @return 删除结果
      */
-    Object deleteFormGroup(Integer id);
+    Object deleteFormGroup(long id);
 
-    /**
-     * 编辑表单
-     *
-     * @param formId 摸板ID
-     * @param type       类型 stop using delete
-     * @return 操作结果
-     */
-    Object updateForm(String formId, String type, Long groupId);
 
-    /**
-     * 编辑表单详情
-     *
-     * @param template 表单模板信息
-     * @return 修改结果
-     */
-    Object updateFormDetail(Process template);
 
     Object formsSort(Long groupId, List<String> fromIds);
 
     Object getFormGroupList();
 
-    Object createForm(Process form);
+    Object createFlow(Process form);
+
+
+    /**
+     * 编辑表单
+     *
+     * @param flowId 摸板ID
+     * @param type       类型 stop using delete
+     * @return 操作结果
+     */
+    Object updateForm(String flowId, String type, Long groupId);
 }

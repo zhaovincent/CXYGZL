@@ -18,7 +18,16 @@ public class RemoteController {
     @Resource
     private IRemoteService remoteService;
 
-
+    /**
+     * 根据角色id集合查询用户id集合
+     *
+     * @param roleIdList
+     * @return
+     */
+    @PostMapping("queryUserIdListByRoleIdList")
+    public R<List<Long>> queryUserIdListByRoleIdList(@RequestBody List<Long> roleIdList) {
+        return remoteService.queryUserIdListByRoleIdList(roleIdList);
+    }
     /**
      * 保存抄送
      *
@@ -40,6 +49,7 @@ public class RemoteController {
     public R<Boolean> checkIsAllParent(@RequestBody CheckParentDto checkParentDto) {
         return remoteService.checkIsAllParent(checkParentDto);
     }
+
 
     /**
      * 根据部门id集合查询用户id集合
@@ -157,11 +167,11 @@ public class RemoteController {
     /**
      * 查询流程管理员
      *
-     * @param processId
+     * @param flowId
      * @return
      */
     @GetMapping("queryProcessAdmin")
-    public R<Long> queryProcessAdmin(String processId) {
-        return remoteService.queryProcessAdmin(processId);
+    public R<Long> queryProcessAdmin(String flowId) {
+        return remoteService.queryProcessAdmin(flowId);
     }
 }

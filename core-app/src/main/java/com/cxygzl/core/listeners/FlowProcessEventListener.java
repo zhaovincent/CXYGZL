@@ -8,11 +8,9 @@ import com.cxygzl.common.dto.ProcessInstanceParamDto;
 import com.cxygzl.common.dto.ProcessInstanceRecordParamDto;
 import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
 import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
-import com.cxygzl.common.dto.process.NodeDto;
-import com.cxygzl.common.dto.process.NodePropDto;
-import com.cxygzl.common.dto.process.NodeUserDto;
+import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.utils.NodeUtil;
-import com.cxygzl.core.node.INodeDataStoreHandler;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.CoreHttpUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -46,11 +44,11 @@ public class FlowProcessEventListener implements FlowableEventListener {
      */
     @Override
     public void onEvent(FlowableEvent event) {
-        log.debug("分支监听器 类型={} class={}", event.getType(), event.getClass().getCanonicalName());
+        log.info("分支监听器 类型={} class={}", event.getType(), event.getClass().getCanonicalName());
         if (event.getType().toString().equals(FlowableEngineEventType.ACTIVITY_STARTED.toString())) {
             //节点开始执行
             //org.flowable.engine.delegate.event.impl.FlowableActivityEventImpl
-            org.flowable.engine.delegate.event.impl.FlowableActivityEventImpl flowableActivityEvent = (FlowableActivityEventImpl) event;
+            FlowableActivityEventImpl flowableActivityEvent = (FlowableActivityEventImpl) event;
             String activityId = flowableActivityEvent.getActivityId();
             String activityName = flowableActivityEvent.getActivityName();
             log.debug("节点id：{} 名字:{}", activityId, activityName);
@@ -59,19 +57,19 @@ public class FlowProcessEventListener implements FlowableEventListener {
             String processInstanceId = flowableActivityEvent.getProcessInstanceId();
 
             String processDefinitionId = flowableActivityEvent.getProcessDefinitionId();
-            String processId = NodeUtil.getProcessId(processDefinitionId);
+            String flowId = NodeUtil.getFlowId(processDefinitionId);
 
-            String s = NodeDataStoreFactory.getInstance().get(processId, activityId);
+            Node node = NodeDataStoreFactory.getInstance().getNode(flowId, activityId);
 
 
             ProcessNodeRecordParamDto processNodeRecordParamDto = new ProcessNodeRecordParamDto();
-            processNodeRecordParamDto.setProcessId(processId);
+            processNodeRecordParamDto.setFlowId(flowId);
             processNodeRecordParamDto.setProcessInstanceId(processInstanceId);
 //            processNodeRecordParamDto.setData(JSON.toJSONString(processVariables));
             processNodeRecordParamDto.setNodeId(activityId);
-            if (StrUtil.isNotBlank(s)) {
-                NodeDto nodeDto = JSON.parseObject(s, NodeDto.class);
-                processNodeRecordParamDto.setNodeType(nodeDto.getType());
+            if (node!=null) {
+
+                processNodeRecordParamDto.setNodeType(String.valueOf(node.getType()));
 
             }
             processNodeRecordParamDto.setNodeName(activityName);
@@ -80,9 +78,13 @@ public class FlowProcessEventListener implements FlowableEventListener {
 
         }
 
-        if (event.getType().toString().equals(FlowableEngineEventType.MULTI_INSTANCE_ACTIVITY_COMPLETED_WITH_CONDITION.toString())) {
+        if (
+                event.getType().toString().equals(FlowableEngineEventType.MULTI_INSTANCE_ACTIVITY_COMPLETED_WITH_CONDITION.toString())
+            ||
+                event.getType().toString().equals(FlowableEngineEventType.MULTI_INSTANCE_ACTIVITY_COMPLETED.toString())
+        ) {
             //多实例任务
-            org.flowable.engine.delegate.event.impl.FlowableMultiInstanceActivityCompletedEventImpl flowableActivityEvent = (FlowableMultiInstanceActivityCompletedEventImpl) event;
+            FlowableMultiInstanceActivityCompletedEventImpl flowableActivityEvent = (FlowableMultiInstanceActivityCompletedEventImpl) event;
             String activityId = flowableActivityEvent.getActivityId();
             String activityName = flowableActivityEvent.getActivityName();
             log.debug("节点id：{} 名字:{}", activityId, activityName);
@@ -91,10 +93,10 @@ public class FlowProcessEventListener implements FlowableEventListener {
             String processInstanceId = flowableActivityEvent.getProcessInstanceId();
 
             String processDefinitionId = flowableActivityEvent.getProcessDefinitionId();
-            String processId = NodeUtil.getProcessId(processDefinitionId);
+            String flowId = NodeUtil.getFlowId(processDefinitionId);
 
             ProcessNodeRecordParamDto processNodeRecordParamDto = new ProcessNodeRecordParamDto();
-            processNodeRecordParamDto.setProcessId(processId);
+            processNodeRecordParamDto.setFlowId(flowId);
             processNodeRecordParamDto.setExecutionId(flowableActivityEvent.getExecutionId());
             processNodeRecordParamDto.setProcessInstanceId(processInstanceId);
 //            processNodeRecordParamDto.setData(JSON.toJSONString(processVariables));
@@ -107,7 +109,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
         if (event.getType().toString().equals(FlowableEngineEventType.ACTIVITY_COMPLETED.toString())) {
             //节点完成执行
 
-            org.flowable.engine.delegate.event.impl.FlowableActivityEventImpl flowableActivityEvent = (FlowableActivityEventImpl) event;
+            FlowableActivityEventImpl flowableActivityEvent = (FlowableActivityEventImpl) event;
             String activityId = flowableActivityEvent.getActivityId();
             String activityName = flowableActivityEvent.getActivityName();
             log.debug("节点id：{} 名字:{}", activityId, activityName);
@@ -116,10 +118,10 @@ public class FlowProcessEventListener implements FlowableEventListener {
             String processInstanceId = flowableActivityEvent.getProcessInstanceId();
 
             String processDefinitionId = flowableActivityEvent.getProcessDefinitionId();
-            String processId = NodeUtil.getProcessId(processDefinitionId);
+            String flowId = NodeUtil.getFlowId(processDefinitionId);
 
             ProcessNodeRecordParamDto processNodeRecordParamDto = new ProcessNodeRecordParamDto();
-            processNodeRecordParamDto.setProcessId(processId);
+            processNodeRecordParamDto.setFlowId(flowId);
             processNodeRecordParamDto.setExecutionId(flowableActivityEvent.getExecutionId());
             processNodeRecordParamDto.setProcessInstanceId(processInstanceId);
 //            processNodeRecordParamDto.setData(JSON.toJSONString(processVariables));
@@ -158,9 +160,12 @@ public class FlowProcessEventListener implements FlowableEventListener {
         }
         if (event.getType().toString().equals(FlowableEngineEventType.PROCESS_COMPLETED_WITH_TERMINATE_END_EVENT.toString())) {
             //流程开完成
-            org.flowable.engine.delegate.event.impl.FlowableProcessTerminatedEventImpl e = (FlowableProcessTerminatedEventImpl) event;
-
+            FlowableProcessTerminatedEventImpl e = (FlowableProcessTerminatedEventImpl) event;
+            DelegateExecution execution = e.getExecution();
             String processInstanceId = e.getProcessInstanceId();
+            ExecutionEntityImpl entity = (ExecutionEntityImpl) e.getEntity();
+
+
 
 
             ProcessInstanceParamDto processInstanceParamDto = new ProcessInstanceParamDto();
@@ -175,7 +180,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
 
             //任务完成
             FlowableEntityEvent flowableEntityEvent = (FlowableEntityEvent) event;
-            org.flowable.task.service.impl.persistence.entity.TaskEntityImpl task = (TaskEntityImpl) flowableEntityEvent.getEntity();
+            TaskEntityImpl task = (TaskEntityImpl) flowableEntityEvent.getEntity();
             //执行人id
             String assignee = task.getAssignee();
 
@@ -187,9 +192,9 @@ public class FlowProcessEventListener implements FlowableEventListener {
 
             String processDefinitionId = task.getProcessDefinitionId();
             //流程id
-            String processId = NodeUtil.getProcessId(processDefinitionId);
+            String flowId = NodeUtil.getFlowId(processDefinitionId);
             ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto = new ProcessNodeRecordAssignUserParamDto();
-            processNodeRecordAssignUserParamDto.setProcessId(processId);
+            processNodeRecordAssignUserParamDto.setFlowId(flowId);
             processNodeRecordAssignUserParamDto.setProcessInstanceId(processInstanceId);
             processNodeRecordAssignUserParamDto.setData(JSON.toJSONString(taskService.getVariables(task.getId())));
             processNodeRecordAssignUserParamDto.setLocalData(JSON.toJSONString(taskService.getVariablesLocal(task.getId())));
@@ -207,7 +212,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
         if (event.getType().toString().equals(FlowableEngineEventType.TASK_ASSIGNED.toString())) {
             //任务被指派了人员
             FlowableEntityEvent flowableEntityEvent = (FlowableEntityEvent) event;
-            org.flowable.task.service.impl.persistence.entity.TaskEntityImpl task = (TaskEntityImpl) flowableEntityEvent.getEntity();
+            TaskEntityImpl task = (TaskEntityImpl) flowableEntityEvent.getEntity();
             //执行人id
             String assignee = task.getAssignee();
             //任务拥有者
@@ -224,9 +229,9 @@ public class FlowProcessEventListener implements FlowableEventListener {
 
             String processDefinitionId = task.getProcessDefinitionId();
             //流程id
-            String processId = NodeUtil.getProcessId(processDefinitionId);
+            String flowId = NodeUtil.getFlowId(processDefinitionId);
             ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto = new ProcessNodeRecordAssignUserParamDto();
-            processNodeRecordAssignUserParamDto.setProcessId(processId);
+            processNodeRecordAssignUserParamDto.setFlowId(flowId);
             processNodeRecordAssignUserParamDto.setProcessInstanceId(processInstanceId);
 //        processNodeRecordAssignUserParamDto.setData();
             processNodeRecordAssignUserParamDto.setNodeId(taskDefinitionKey);
@@ -244,7 +249,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
 
         if (event.getType().toString().equals(FlowableEngineEventType.PROCESS_STARTED.toString())) {
             //流程开始了
-            org.flowable.engine.delegate.event.impl.FlowableProcessStartedEventImpl flowableProcessStartedEvent = (FlowableProcessStartedEventImpl) event;
+            FlowableProcessStartedEventImpl flowableProcessStartedEvent = (FlowableProcessStartedEventImpl) event;
 
             ExecutionEntityImpl entity = (ExecutionEntityImpl) flowableProcessStartedEvent.getEntity();
             DelegateExecution execution = flowableProcessStartedEvent.getExecution();
@@ -253,28 +258,22 @@ public class FlowProcessEventListener implements FlowableEventListener {
                 //上级实例id
                 String nestedProcessInstanceId = flowableProcessStartedEvent.getNestedProcessInstanceId();
 
-                String processId = entity.getProcessDefinitionKey();
+                String flowId = entity.getProcessDefinitionKey();
 
                 Object variable = execution.getVariable(
                         "root");
-                Long startUserId = JSON.parseArray(JSON.toJSONString(variable), NodeUserDto.class).get(0).getId();
+                Long startUserId = Long.valueOf(JSON.parseArray(JSON.toJSONString(variable), NodeUser.class).get(0).getId());
                 Map<String, Object> variables = execution.getVariables();
 
                 ProcessInstanceRecordParamDto processInstanceRecordParamDto = new ProcessInstanceRecordParamDto();
                 processInstanceRecordParamDto.setUserId(startUserId);
                 processInstanceRecordParamDto.setParentProcessInstanceId(nestedProcessInstanceId);
-                processInstanceRecordParamDto.setProcessId(processId);
+                processInstanceRecordParamDto.setFlowId(flowId);
                 processInstanceRecordParamDto.setProcessInstanceId(processInstanceId);
                 processInstanceRecordParamDto.setFormData(JSON.toJSONString(variables));
                 CoreHttpUtil.createProcessEvent(processInstanceRecordParamDto);
             }
 
-            //获取节点数据
-            INodeDataStoreHandler nodeDataStoreHandler = NodeDataStoreFactory.getInstance();
-            String s = nodeDataStoreHandler.get(entity.getProcessDefinitionKey(), entity.getActivityId());
-            NodeDto nodeDto = JSON.parseObject(s, NodeDto.class);
-
-            NodePropDto props = nodeDto.getProps();
 
 
         }

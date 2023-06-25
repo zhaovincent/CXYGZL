@@ -1,7 +1,9 @@
 package com.cxygzl.common.dto;
 
-import com.cxygzl.common.dto.process.NodeDto;
+import com.cxygzl.common.dto.flow.Node;
 import lombok.Data;
+
+import java.util.Map;
 
 /**
  * 任务结果对象
@@ -16,10 +18,10 @@ public class TaskResultDto {
      * 流程id
      */
     private String flowId;
-    /**
-     * 当前任务节点对象
-     */
-    private NodeDto taskNodeDto;
+
+    private Node taskNode;
+
+    private String nodeId;
     /**
      * 实例id
      */
@@ -32,5 +34,8 @@ public class TaskResultDto {
      * 是否允许继续委派
      */
     private Boolean delegate;
-
+    /**
+     * 所有变量
+     */
+    private Map<String, Object> variableAll;
 }

@@ -5,27 +5,25 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
-import com.cxygzl.biz.entity.ProcessNodeData;
 import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
+import com.cxygzl.biz.vo.FormItemVO;
+import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.TaskResultDto;
-import com.cxygzl.common.dto.process.NodeDto;
-import com.cxygzl.common.dto.process.NodeFormMappingDto;
-import com.cxygzl.common.dto.process.NodeFormPermDto;
-import com.cxygzl.common.dto.process.NodeUserDto;
+import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.utils.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -57,19 +55,16 @@ public class TaskServiceImpl implements ITaskService {
         long userId = StpUtil.getLoginIdAsLong();
 
 
-        String post = CoreHttpUtil.queryTask(taskId,userId);
-        com.cxygzl.common.dto.R<TaskResultDto> r = JSON.parseObject(post, new TypeReference<R<TaskResultDto>>() {
-        });
+        R<TaskResultDto> r = CoreHttpUtil.queryTask(taskId,userId);
+
         if (!r.isOk()) {
-            return com.cxygzl.biz.utils.R.badRequest(r.getMsg());
+            return R.fail(r.getMsg());
         }
 
         TaskResultDto taskResultDto = r.getData();
 
-        List<NodeFormPermDto> formPerms = taskResultDto.getTaskNodeDto().getProps().getFormPerms();
-
         //变量
-        Map<String, Object> paramMap=new HashMap<>();
+        Map<String, Object> paramMap=taskResultDto.getVariableAll();
         //是否是当前活动任务
         Boolean currentTask = taskResultDto.getCurrentTask();
         if(!currentTask){
@@ -81,53 +76,65 @@ public class TaskServiceImpl implements ITaskService {
                     .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
                     .one();
 
-            String data = processNodeRecordAssignUser.getData();
-            if(StrUtil.isNotBlank(data)){
-                Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
-                });
-                paramMap.putAll(collect);
+            if(processNodeRecordAssignUser!=null){
+                String data = processNodeRecordAssignUser.getData();
+                if(StrUtil.isNotBlank(data)){
+                    Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
+                    });
+                    paramMap.putAll(collect);
 
+                }
             }
+
         }else{
-            Map<String, Object> collect = formPerms.stream().collect(Collectors.toMap(w -> w.getId(), w -> w.getValue()));
-            paramMap.putAll(collect);
+
         }
 
+        //当前节点数据
+        String nodeDataJson =
+                nodeDataService.getNodeData(taskResultDto.getFlowId(), taskResultDto.getNodeId()).getData();
+        Node node = CommonUtil.toObj(nodeDataJson, Node.class);
+        Map<String, String> formPerms = node.getFormPerms();
 
 
-        Process oaForms = processService.getByFormId(taskResultDto.getFlowId());
+        Process oaForms = processService.getByFlowId(taskResultDto.getFlowId());
         if (oaForms == null) {
-            return com.cxygzl.biz.utils.R.badRequest("流程不存在");
+            return  R.fail("流程不存在");
         }
 
-        List<JSONObject> jsonObjectList = JSON.parseArray(oaForms.getFormItems(), JSONObject.class);
-        for (JSONObject jsonObject : jsonObjectList) {
-            String id = jsonObject.getString("id");
-            NodeFormPermDto nodeFormPermDto = formPerms.stream().filter(w -> StrUtil.equals(id, w.getId())).findAny().orElse(null);
-            if (nodeFormPermDto != null) {
-                JSONObject props = jsonObject.getJSONObject("props");
-                props.put("perm", nodeFormPermDto.getPerm());
+        List<FormItemVO> formItemVOList = CommonUtil.toArray(oaForms.getFormItems(), FormItemVO.class);
+        for (FormItemVO formItemVO : formItemVOList) {
+
+
+
+            String id = formItemVO.getId();
+
+            String perm = formPerms.get(id);
+
+            formItemVO.getProps().setValue(paramMap.get(id));
+
+            if (StrUtil.isNotBlank(perm)) {
+                formItemVO.setPerm(perm);
                 if(!currentTask){
-                    props.put("perm", StrUtil.equals(nodeFormPermDto.getPerm(),"H")?nodeFormPermDto.getPerm():"R");
+                  formItemVO.setPerm( StrUtil.equals(perm, ProcessInstanceConstant.FormPermClass.HIDE)?perm:
+                          ProcessInstanceConstant.FormPermClass.READ);
 
                 }
 
-                jsonObject.put("value",paramMap.get(id));
             }else{
-                JSONObject props = jsonObject.getJSONObject("props");
-                props.put("perm", "H");
+              formItemVO.setPerm(ProcessInstanceConstant.FormPermClass.HIDE);
             }
         }
         Dict set = Dict.create()
                 .set("processInstanceId", taskResultDto.getProcessInstanceId())
-                .set("node", taskResultDto.getTaskNodeDto())
+                .set("node", taskResultDto.getTaskNode())
                 .set("process",oaForms.getProcess())
                 .set("delegateAgain", taskResultDto.getDelegate())
                 .set("delegationTask",StrUtil.equals(taskResultDto.getDelegationState(),"PENDING"))
 
-                .set("formItems", jsonObjectList);
+                .set("formItems", formItemVOList);
 
-        return com.cxygzl.biz.utils.R.ok(set);
+        return R.success(set);
     }
 
     /**
@@ -141,47 +148,78 @@ public class TaskServiceImpl implements ITaskService {
         long userId = StpUtil.getLoginIdAsLong();
         taskParamDto.setUserId(String.valueOf(userId));
 
-        Map<String, Object> paramMap = taskParamDto.getParamMap();
 
-        Boolean appendChildProcessRootId = taskParamDto.getAppendChildProcessRootId();
-        if (appendChildProcessRootId != null && appendChildProcessRootId) {
+        R r =CoreHttpUtil.completeTask(taskParamDto);
 
-
-
-            //子流程
-            String nodeId = taskParamDto.getNodeId();
-
-
-            ProcessNodeData processNodeData =
-                    nodeDataService.lambdaQuery().eq(ProcessNodeData::getProcessId, taskParamDto.getProcessId()).eq(ProcessNodeData::getNodeId,
-                            nodeId).one();
-
-            String data = processNodeData.getData();
-            NodeDto nodeDto = JSON.parseObject(data, NodeDto.class);
-            List<NodeFormMappingDto> inputFormMapping = nodeDto.getProps().getInputFormMapping();
-
-            for (NodeFormMappingDto nodeFormMappingDto : inputFormMapping) {
-                String childId = nodeFormMappingDto.getChildId();
-                Object o = paramMap.get(childId);
-                paramMap.put(nodeFormMappingDto.getMainId(),o);
-            }
-
-
-            NodeUserDto nodeUserDto = new NodeUserDto();
-            nodeUserDto.setId(userId);
-            paramMap.put(StrUtil.format("{}_root", nodeId), CollUtil.newArrayList(nodeUserDto));
+        if (!r.isOk()) {
+            return R.fail(r.getMsg());
         }
 
 
-        String post =CoreHttpUtil.completeTask(taskParamDto);
-        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
+        return R.success();
+    }
+
+    /**
+     * 前加签
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @Transactional
+    @Override
+    public Object delegateTask(TaskParamDto taskParamDto) {
+
+
+        taskParamDto.setUserId(StpUtil.getLoginIdAsString());
+
+        String post =CoreHttpUtil.delegateTask(taskParamDto);
+        R r = JSON.parseObject(post, new TypeReference<R>() {
         });
         if (!r.isOk()) {
-            return com.cxygzl.biz.utils.R.badRequest(r.getMsg());
+            return  R.fail(r.getMsg());
         }
 
 
-        return com.cxygzl.biz.utils.R.ok("提交成功");
+        return R.success();
+    }
+
+    /**
+     * 加签完成任务
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @Override
+    public Object resolveTask(TaskParamDto taskParamDto) {
+        String post = CoreHttpUtil.resolveTask(taskParamDto);
+        R r = JSON.parseObject(post, new TypeReference<R>() {
+        });
+        if (!r.isOk()) {
+            return  R.fail(r.getMsg());
+        }
+
+
+        return  R.success();
+    }
+
+    /**
+     * 设置执行人
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @Override
+    public Object setAssignee(TaskParamDto taskParamDto) {
+        taskParamDto.setUserId(StpUtil.getLoginIdAsString());
+        String post = CoreHttpUtil.setAssignee(taskParamDto);
+        R r = JSON.parseObject(post, new TypeReference<R>() {
+        });
+        if (!r.isOk()) {
+            return  R.fail(r.getMsg());
+        }
+
+
+        return  R.success();
     }
 
     /**
@@ -201,17 +239,35 @@ public class TaskServiceImpl implements ITaskService {
 
         taskParamDto.setProcessInstanceIdList(allStopProcessInstanceIdList);
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
-        String post = CoreHttpUtil.stopProcessInstance(taskParamDto);
-        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
-        });
+        R r= CoreHttpUtil.stopProcessInstance(taskParamDto);
+
         if (!r.isOk()) {
-            return com.cxygzl.biz.utils.R.badRequest(r.getMsg());
+            return R.fail(r.getMsg());
         }
 
 
-        return com.cxygzl.biz.utils.R.ok("提交成功");
+        return R.success();
     }
 
+    /**
+     * 退回
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @Override
+    public Object back(TaskParamDto taskParamDto) {
+        taskParamDto.setUserId(StpUtil.getLoginIdAsString());
+        String post = CoreHttpUtil.back(taskParamDto);
+        R r = JSON.parseObject(post, new TypeReference<R>() {
+        });
+        if (!r.isOk()) {
+            return  R.fail(r.getMsg());
+        }
+
+
+        return R.success();
+    }
 
     private List<String> getAllStopProcessInstanceIdList(String processInstanceId){
         List<ProcessInstanceRecord> list = processInstanceRecordService.lambdaQuery()

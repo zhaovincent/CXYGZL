@@ -17,17 +17,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> implements IProcessService {
     @Override
-    public Process getByFormId(String formId) {
-        return this.lambdaQuery().eq(Process::getFormId,formId).one();
+    public Process getByFlowId(String flowId) {
+        return this.lambdaQuery().eq(Process::getFlowId, flowId).one();
     }
 
     @Override
-    public void updateByFormId(Process process) {
-        this.lambdaUpdate().eq(Process::getFormId,process.getFormId()).update(process);
+    public void updateByFlowId(Process process) {
+        this.lambdaUpdate().eq(Process::getFlowId,process.getFlowId()).update(process);
     }
 
     @Override
-    public void hide(String formId) {
-        this.lambdaUpdate().set(Process::getIsHidden,true).eq(Process::getFormId,formId).update(new Process());
+    public void hide(String flowId) {
+        this.lambdaUpdate().set(Process::getIsHidden,true).eq(Process::getFlowId,flowId).update(new Process());
     }
 }

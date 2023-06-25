@@ -2,27 +2,25 @@ package com.cxygzl.biz.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Dict;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessGroup;
 import com.cxygzl.biz.entity.ProcessStarter;
 import com.cxygzl.biz.entity.User;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
-import com.cxygzl.biz.utils.R;
 import com.cxygzl.biz.vo.FormGroupVo;
-import com.cxygzl.biz.vo.ProcessSettingVo;
+import com.cxygzl.biz.vo.FormItemVO;
 import com.cxygzl.biz.vo.ProcessVO;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
-import com.cxygzl.common.dto.process.NodeDto;
-import com.cxygzl.common.dto.process.NodeFormMappingDto;
-import com.cxygzl.common.dto.process.NodePropDto;
-import com.cxygzl.common.dto.process.NodeUserDto;
+import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,10 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -80,8 +74,8 @@ public class FormGroupServiceImpl implements FormGroupService {
 
             processList.forEach(process -> {
                 formGroupVo.getItems().add(FormGroupVo.Form.builder()
-                        .formId(process.getFormId())
-                        .formName(process.getFormName())
+                        .flowId(process.getFlowId())
+                        .name(process.getName())
                         .logo(process.getLogo())
                         .remark(process.getRemark())
                         .isStop(process.getIsStop())
@@ -89,7 +83,7 @@ public class FormGroupServiceImpl implements FormGroupService {
                         .build());
             });
         });
-        return R.ok(formGroupVos);
+        return R.success(formGroupVos);
     }
 
     /**
@@ -143,7 +137,7 @@ public class FormGroupServiceImpl implements FormGroupService {
                     }
                     Set<Long> deptIdSet = processStarters.stream().filter(w -> w.getType().equals(NodeUserTypeEnum.DEPT.getKey())).map(w -> w.getTypeId()).collect(Collectors.toSet());
 
-                    existMap.put(process.getId(), deptIdSet.contains(user.getDepId()));
+                    existMap.put(process.getId(), deptIdSet.contains(user.getDeptId()));
 
 
                 }
@@ -153,13 +147,13 @@ public class FormGroupServiceImpl implements FormGroupService {
 
             processList.forEach(process -> {
 
-                if(!existMap.get(process.getId())){
+                if (!existMap.get(process.getId())) {
                     return;
                 }
 
                 formGroupVo.getItems().add(FormGroupVo.Form.builder()
-                        .formId(process.getFormId())
-                        .formName(process.getFormName())
+                        .flowId(process.getFlowId())
+                        .name(process.getName())
                         .logo(process.getLogo())
                         .remark(process.getRemark())
                         .isStop(process.getIsStop())
@@ -167,32 +161,44 @@ public class FormGroupServiceImpl implements FormGroupService {
                         .build());
             });
         });
-        return R.ok(formGroupVos);
+        return R.success(formGroupVos);
     }
 
     @Transactional
     @Override
     public Object formGroupsSort(List<Integer> groups) {
-        int index=1;
+        int index = 1;
         for (Integer group : groups) {
-            processGroupService.lambdaUpdate().set(ProcessGroup::getSort,index).eq(ProcessGroup::getId,group).update(new ProcessGroup());
+            processGroupService.lambdaUpdate().set(ProcessGroup::getSort, index).eq(ProcessGroup::getId, group).update(new ProcessGroup());
             index++;
         }
-        return R.ok("排序成功");
+        return R.success();
     }
 
     @Override
-    public Object getFormById(String formId) {
-        ProcessVO processVO = getProcessVO(formId);
-        return R.ok(processVO);
+    public Object getFormById(String flowId) {
+        ProcessVO processVO = getProcessVO(flowId);
+        return R.success(processVO);
     }
 
-    private ProcessVO getProcessVO(String formId) {
-        Process oaForms = processService.getByFormId(formId);
+    private ProcessVO getProcessVO(String flowId) {
+        Process oaForms = processService.getByFlowId(flowId);
         String process = oaForms.getProcess();
-        NodeDto nodeDto = JSON.parseObject(process, NodeDto.class);
+        String formItems = oaForms.getFormItems();
+        Node startNode = CommonUtil.toObj(process, Node.class);
 
-        List<String> selectUserNodeId = NodeUtil.selectUserNodeId(nodeDto);
+
+        Map<String, String> formPerms = startNode.getFormPerms();
+        List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
+
+        for (FormItemVO formItemVO : formItemVOList) {
+            String str = MapUtil.getStr(formPerms, formItemVO.getId(), ProcessInstanceConstant.FormPermClass.EDIT);
+            formItemVO.setPerm(str);
+        }
+        oaForms.setFormItems(CommonUtil.toJson(formItemVOList));
+
+
+        List<String> selectUserNodeId = NodeUtil.selectUserNodeId(startNode);
 
         ProcessVO processVO = BeanUtil.copyProperties(oaForms, ProcessVO.class);
         processVO.setSelectUserNodeId(selectUserNodeId);
@@ -200,111 +206,35 @@ public class FormGroupServiceImpl implements FormGroupService {
         return processVO;
     }
 
-
-
     @Override
     public Object updateFormGroupName(Long id, String name) {
         processGroupService.updateById(ProcessGroup.builder().id(id).groupName(name).build());
-        return R.ok("更新成功");
+        return R.success("更新成功");
     }
 
     @Override
-    public Object createFormGroup(String name) {
-        processGroupService.save(ProcessGroup.builder().sort(1).groupName(name).build());
-        return R.ok("新增成功");
+    public Object createFormGroup(ProcessGroup processGroup) {
+        processGroupService.save(ProcessGroup.builder().sort(1).groupName(processGroup.getGroupName()).build());
+        return R.success();
     }
 
     @Override
-    public Object deleteFormGroup(Integer id) {
+    public Object deleteFormGroup(long id) {
         processGroupService.removeById(id);
-        return R.ok("删除成功");
+        return R.success();
 
     }
 
-    @Override
-    public Object updateForm(String formId, String type, Long groupId) {
-        Process process = Process.builder().formId(formId)
-                .isStop("stop".equals(type))
-                .isHidden("delete".equals(type))
-                .groupId(groupId).build();
-
-        processService.updateByFormId(process);
-
-        return R.ok("操作成功");
-    }
-
-    @Transactional
-    @Override
-    public Object updateFormDetail(Process forms) {
-
-        String process = forms.getProcess();
-        String settings = forms.getSettings();
-
-        NodeDto nodeDto = JSON.parseObject(process, NodeDto.class);
-
-        JSONObject processJSON = JSON.parseObject(process);
-        JSONObject settingJSON = JSON.parseObject(settings);
-        JSONObject props = processJSON.getJSONObject("props");
-        props.putAll(settingJSON);
-
-        String post = CoreHttpUtil.createProcess(processJSON,StpUtil.getLoginIdAsLong());
-        com.cxygzl.common.dto.R<String> r = JSON.parseObject(post, com.cxygzl.common.dto.R.class);
-        if (!r.isOk()) {
-            return R.badRequest(r.getMsg());
-        }
-
-
-        String oldFormId = forms.getFormId();
-
-        Process oldProcess = processService.getByFormId(oldFormId);
-
-        ProcessSettingVo processSettingVo = JSON.parseObject(settings, ProcessSettingVo.class);
-        List<NodeUserDto> adminList = processSettingVo.getAdmin();
-        NodeUserDto nodeUserDtoAdmin = adminList.get(0);
-
-
-        String processId = r.getData();
-
-        forms.setFormId(processId);
-        forms.setIsStop(false);
-        forms.setFormId(processId);
-        forms.setIsHidden(false);
-        forms.setSort(oldProcess.getSort());
-        forms.setAdminId(nodeUserDtoAdmin.getId());
-        forms.setUniqueId(oldProcess.getUniqueId());
-        {
-            processService.hide(oldFormId);
-            processService.save(forms);
-        }
-
-        //保存范围
-        List<NodeUserDto> assignedUser = nodeDto.getProps().getAssignedUser();
-        for (NodeUserDto nodeUserDto : assignedUser) {
-            ProcessStarter processStarter = new ProcessStarter();
-
-            processStarter.setProcessId(forms.getId());
-            processStarter.setTypeId(nodeUserDto.getId());
-            processStarter.setType(nodeUserDto.getType());
-            processStarterService.save(processStarter);
-
-        }
-
-        //修改所有的管理员
-        processService.lambdaUpdate().set(Process::getAdminId,nodeUserDtoAdmin.getId()).eq(Process::getUniqueId,oldProcess.getUniqueId()).update(new Process());
-
-
-        return R.ok("操作成功");
-    }
 
     @Override
     public Object formsSort(Long groupId, List<String> fromIds) {
         Process oaForms = Process.builder().groupId(groupId).build();
         for (int i = 0; i < fromIds.size(); i++) {
-            oaForms.setFormId(fromIds.get(i));
+            oaForms.setFlowId(fromIds.get(i));
             oaForms.setSort(i);
-            processService.updateByFormId(oaForms);
+            processService.updateByFlowId(oaForms);
         }
-        return R.ok("更新成功");
+        return R.success("更新成功");
     }
 
     @Override
@@ -312,43 +242,80 @@ public class FormGroupServiceImpl implements FormGroupService {
 
         List<ProcessGroup> processGroupList = processGroupService.lambdaQuery().orderByAsc(ProcessGroup::getSort).list();
 
-        return processGroupList;
+        return R.success(processGroupList);
     }
 
     @Override
-    public Object createForm(Process form) {
-        String process = form.getProcess();
+    public Object createFlow(Process process) {
+        String processStr = process.getProcess();
 
-        String post = CoreHttpUtil.createProcess(JSON.parseObject(process),StpUtil.getLoginIdAsLong());
-        com.cxygzl.common.dto.R<String> r = JSON.parseObject(post, com.cxygzl.common.dto.R.class);
+        R<String> r = CoreHttpUtil.createFlow(JSON.parseObject(processStr), StpUtil.getLoginIdAsLong());
         if (!r.isOk()) {
-            return R.badRequest(r.getMsg());
+            return R.fail(r.getMsg());
         }
-        String processId = r.getData();
+        String flowId = r.getData();
 
 
-        ProcessSettingVo processSettingVo = JSON.parseObject(form.getSettings(), ProcessSettingVo.class);
-        List<NodeUserDto> adminList = processSettingVo.getAdmin();
-        NodeUserDto nodeUserDtoAdmin = adminList.get(0);
+        NodeUser nodeUser = CommonUtil.toArray(process.getAdmin(), NodeUser.class).get(0);
 
+        if (StrUtil.isNotBlank(process.getFlowId())) {
+
+            Process oldProcess = processService.getByFlowId(process.getFlowId());
+            processService.hide(process.getFlowId());
+            //修改所有的管理员
+            processService.lambdaUpdate().set(Process::getAdminId, nodeUser.getId()).eq(Process::getUniqueId,
+                    oldProcess.getUniqueId()).update(new Process());
+
+        }
 
 
         Process oaForms = Process.builder()
-                .groupId(form.getGroupId())
-                .formId(processId)
-                .formItems(form.getFormItems())
-                .formName(form.getFormName())
-                .logo(form.getLogo())
-                .process(process)
-                .settings(form.getSettings())
+                .groupId(process.getGroupId())
+                .flowId(flowId)
+                .formItems(process.getFormItems())
+                .name(process.getName())
+                .admin(process.getAdmin())
+                .logo(process.getLogo())
+                .remark(process.getRemark())
+                .process(processStr)
+                .settings(process.getSettings())
                 .sort(0)
-                .adminId(nodeUserDtoAdmin.getId())
+                .adminId(Long.valueOf(nodeUser.getId()))
                 .uniqueId(IdUtil.fastSimpleUUID())
                 .isStop(false)
                 .isHidden(false)
                 .build();
         processService.save(oaForms);
 
-        return R.ok("创建表单成功");
+        //保存范围
+
+        Node startNode = CommonUtil.toObj(processStr, Node.class);
+
+
+        List<NodeUser> nodeUserList = startNode.getNodeUserList();
+        for (NodeUser nodeUserDto : nodeUserList) {
+            ProcessStarter processStarter = new ProcessStarter();
+
+            processStarter.setProcessId(oaForms.getId());
+            processStarter.setTypeId(Long.valueOf(nodeUserDto.getId()));
+            processStarter.setType(nodeUserDto.getType());
+            processStarterService.save(processStarter);
+
+        }
+
+
+        return R.success();
+    }
+
+    @Override
+    public Object updateForm(String flowId, String type, Long groupId) {
+        Process process = Process.builder().flowId(flowId)
+                .isStop("stop".equals(type))
+                .isHidden("delete".equals(type))
+                .groupId(groupId).build();
+
+        processService.updateByFlowId(process);
+
+        return R.success();
     }
 }

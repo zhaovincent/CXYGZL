@@ -1,6 +1,7 @@
 package com.cxygzl.biz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.alibaba.fastjson2.JSON;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.ProcessNodeRecord;
 import com.cxygzl.biz.mapper.ProcessNodeRecordMapper;
@@ -50,6 +51,7 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
     @Override
     public R complete(ProcessNodeRecordParamDto processNodeRecordParamDto) {
 
+        log.info("节点结束---{}", JSON.toJSONString(processNodeRecordParamDto));
 
         //TODO 完成节点和完成任务要区分下
         this.lambdaUpdate()

@@ -12,7 +12,7 @@ import java.util.Map;
 @Data
 public class TaskParamDto {
 
-    private String processId;
+
     private String processInstanceId;
     private List<String> processInstanceIdList;
 

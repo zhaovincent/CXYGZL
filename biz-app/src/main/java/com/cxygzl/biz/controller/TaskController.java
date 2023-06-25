@@ -46,6 +46,49 @@ public class TaskController {
     }
 
 
+    /**
+     * 前加签
+     *
+     * @param completeParamDto
+     * @return
+     */
+    @SneakyThrows
+    @PostMapping("delegateTask")
+    public Object delegateTask(@RequestBody TaskParamDto completeParamDto) {
+
+        return taskService.delegateTask(completeParamDto);
+
+    }
+
+
+    /**
+     * 加签完成任务
+     *
+     * @param completeParamDto
+     * @return
+     */
+    @SneakyThrows
+    @PostMapping("resolveTask")
+    public Object resolveTask(@RequestBody TaskParamDto completeParamDto) {
+
+        return taskService.resolveTask(completeParamDto);
+
+    }
+
+    /**
+     * 设置执行人
+     *
+     * @param completeParamDto
+     * @return
+     */
+    @SneakyThrows
+    @PostMapping("setAssignee")
+    public Object setAssignee(@RequestBody TaskParamDto completeParamDto) {
+
+        return taskService.setAssignee(completeParamDto);
+
+    }
+
 
     /**
      * 结束流程
@@ -61,6 +104,16 @@ public class TaskController {
 
     }
 
+
+    /**
+     * 退回
+     * @param taskParamDto
+     * @return
+     */
+    @PostMapping("back")
+    public Object back(@RequestBody TaskParamDto taskParamDto){
+        return taskService.back(taskParamDto);
+    }
 
 
 

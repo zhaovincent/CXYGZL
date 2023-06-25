@@ -5,23 +5,32 @@ import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.cxygzl.common.dto.ProcessInstanceParamDto;
-import com.cxygzl.common.dto.TaskParamDto;
-import com.cxygzl.common.dto.TaskQueryParamDto;
-import com.cxygzl.common.dto.VariableQueryParamDto;
+import com.alibaba.fastjson2.TypeReference;
+import com.cxygzl.common.dto.*;
+import com.cxygzl.common.dto.R;
+import com.cxygzl.common.utils.CommonUtil;
 import org.springframework.core.env.Environment;
 
 import java.util.List;
 
 public class CoreHttpUtil {
 
-    public static String post(Object object, String url) {
+    private static String getBaseUrl() {
         Environment environment = SpringUtil.getBean(Environment.class);
         String bizUrl = environment.getProperty("core.url");
-
-
-        return HttpUtil.post(StrUtil.format("{}{}", bizUrl, url), JSON.toJSONString(object));
+        return bizUrl;
     }
+
+
+    public static String post(Object object, String url) {
+
+
+        String post = HttpUtil.post(StrUtil.format("{}{}", getBaseUrl(), url), JSON.toJSONString(object));
+
+
+        return post;
+    }
+
 
     public static String get(String url) {
         Environment environment = SpringUtil.getBean(Environment.class);
@@ -40,7 +49,7 @@ public class CoreHttpUtil {
      * @return
      */
     public static String queryTaskVariables(String taskId, List<String> keyList) {
-        VariableQueryParamDto variableQueryParamDto=new VariableQueryParamDto();
+        VariableQueryParamDto variableQueryParamDto = new VariableQueryParamDto();
         variableQueryParamDto.setKeyList(keyList);
         variableQueryParamDto.setTaskId(taskId);
 
@@ -54,26 +63,31 @@ public class CoreHttpUtil {
      *
      * @return
      */
-    public static String queryProcessInstanceVariables(String executionId) {
-        VariableQueryParamDto variableQueryParamDto=new VariableQueryParamDto();
-        variableQueryParamDto.setExecutionId(executionId);
-        return post(variableQueryParamDto, "/process-instance/queryVariables");
+    public static R<IndexPageStatistics> querySimpleData(long userId) {
+
+        String s = com.cxygzl.common.utils.HttpUtil.get("/process-instance/querySimpleData?userId=" + userId, getBaseUrl());
+        return JSON.parseObject(s, new TypeReference<R<IndexPageStatistics>>() {
+        });
 
     }
 
     /**
      * 创建流程
+     *
      * @param jsonObject
      * @return
      */
-    public static String createProcess(JSONObject jsonObject,long userId) {
+    public static R<String> createFlow(JSONObject jsonObject, long userId) {
 
-        return post(jsonObject, "/flow/create?userId="+userId);
+        String post = post(jsonObject, "/flow/create?userId=" + userId);
+        R<String> r = JSON.parseObject(post, R.class);
+        return r;
 
     }
 
     /**
      * 启动流程
+     *
      * @param jsonObject
      * @return
      */
@@ -86,38 +100,51 @@ public class CoreHttpUtil {
 
     /**
      * 查询指派任务
+     *
      * @param jsonObject
      * @return
      */
-    public static String queryAssignTask(TaskQueryParamDto jsonObject) {
+    public static R<PageResultDto<TaskDto>> queryAssignTask(TaskQueryParamDto jsonObject) {
 
-        return post(jsonObject, "/flow/queryAssignTask");
+        String post = post(jsonObject, "/flow/queryAssignTask");
+
+        R<PageResultDto<TaskDto>> r = JSON.parseObject(post, new TypeReference<R<PageResultDto<TaskDto>>>() {
+        });
+        return r;
 
     }
+
     /**
      * 查询已办任务
+     *
      * @param jsonObject
      * @return
      */
-    public static String queryCompletedTask(TaskQueryParamDto jsonObject) {
+    public static  R<PageResultDto<TaskDto>> queryCompletedTask(TaskQueryParamDto jsonObject) {
 
-        return post(jsonObject, "/flow/queryCompletedTask");
+        String post = post(jsonObject, "/flow/queryCompletedTask");
+        R<PageResultDto<TaskDto>> r = JSON.parseObject(post, new TypeReference<R<PageResultDto<TaskDto>>>() {
+        });
+        return r;
 
     }
 
     /**
      * 完成任务
+     *
      * @param jsonObject
      * @return
      */
-    public static String completeTask(TaskParamDto jsonObject) {
+    public static R completeTask(TaskParamDto jsonObject) {
 
-        return post(jsonObject, "/task/complete");
+        String post = post(jsonObject, "/task/complete");
+        return CommonUtil.toObj(post,R.class);
 
     }
 
     /**
      * 转交
+     *
      * @param jsonObject
      * @return
      */
@@ -129,17 +156,22 @@ public class CoreHttpUtil {
 
     /**
      * 终止流程
+     *
      * @param jsonObject
      * @return
      */
-    public static String stopProcessInstance(TaskParamDto jsonObject) {
+    public static  R stopProcessInstance(TaskParamDto jsonObject) {
 
-        return post(jsonObject, "/flow/stopProcessInstance");
+        String post = post(jsonObject, "/flow/stopProcessInstance");
+        R r = JSON.parseObject(post, new TypeReference<R>() {
+        });
+        return r;
 
     }
 
     /**
      * 解决委派任务
+     *
      * @param jsonObject
      * @return
      */
@@ -149,9 +181,21 @@ public class CoreHttpUtil {
 
     }
 
+    /**
+     * 退回
+     *
+     * @param jsonObject
+     * @return
+     */
+    public static String back(TaskParamDto jsonObject) {
+
+        return post(jsonObject, "/task/back");
+
+    }
 
     /**
      * 委派任务
+     *
      * @param jsonObject
      * @return
      */
@@ -163,27 +207,31 @@ public class CoreHttpUtil {
 
     /**
      * 显示图片
+     *
      * @param procInsId
      * @return
      */
     public static String showImg(String procInsId) {
 
-        return get( "/flow/showImg?procInsId="+procInsId);
+        return get("/flow/showImg?procInsId=" + procInsId);
 
     }
 
     /**
      * 查询任务
+     *
      * @param taskId
      * @param userId
      * @return
      */
-    public static String queryTask(String taskId,long userId) {
+    public static  R<TaskResultDto> queryTask(String taskId, long userId) {
 
-        return get(StrUtil.format("/task/queryTask?taskId={}&userId={}", taskId, userId));
+        String s = get(StrUtil.format("/task/queryTask?taskId={}&userId={}", taskId, userId));
+        R<TaskResultDto> r = JSON.parseObject(s, new TypeReference<R<TaskResultDto>>() {
+        });
+        return r;
 
     }
-
 
 
 }

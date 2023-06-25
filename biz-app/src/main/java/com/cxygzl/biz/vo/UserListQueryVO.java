@@ -13,7 +13,11 @@ public class UserListQueryVO extends PageDto {
     private Integer status;
 
     private String name;
+    private String keywords;
 
     private List<Long> depIdList;
+
+    private Long deptId;
+
 
 }

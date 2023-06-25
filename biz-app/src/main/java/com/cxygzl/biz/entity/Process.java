@@ -50,12 +50,12 @@ public class Process implements Serializable {
     /**
      * 表单ID
      */
-    private String formId;
+    private String flowId;
 
     /**
      * 表单名称
      */
-    private String formName;
+    private String name;
 
     /**
      * 图标配置
@@ -106,4 +106,5 @@ public class Process implements Serializable {
      * 唯一id
      */
     private String uniqueId;
+    private String admin;
 }

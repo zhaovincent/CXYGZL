@@ -3,6 +3,7 @@ package com.cxygzl.biz.service;
 import com.cxygzl.biz.entity.User;
 import com.cxygzl.biz.vo.UserListQueryVO;
 import com.cxygzl.biz.vo.UserVO;
+import com.cxygzl.common.dto.R;
 import com.github.yulichang.base.MPJBaseService;
 
 /**
@@ -16,16 +17,37 @@ import com.github.yulichang.base.MPJBaseService;
 public interface IUserService extends MPJBaseService<User> {
     /**
      * 登录
+     * @param userVO
+     * @return
+     */
+    Object login(UserVO userVO);
+
+    /**
+     * 退出登录
+     * @return
+     */
+    R logout();
+
+    /**
+     * 修改密码
      * @param user
      * @return
      */
-    Object login(User user);
+    R password(User user);
+
+    /**
+     * 修改用户状态
+     * @param user
+     * @return
+     */
+    R status(User user);
 
     /**
      * 获取当前用户详细信息
+     *
      * @return
      */
-    Object getCurrentUserDetail();
+    R getCurrentUserDetail();
     /**
      * 创建用户
      * @param userVO
@@ -49,7 +71,7 @@ public interface IUserService extends MPJBaseService<User> {
      * @param userListQueryVO
      * @return
      */
-    Object queryUserList(UserListQueryVO userListQueryVO);
+    Object queryList(UserListQueryVO userListQueryVO);
 
 
 }

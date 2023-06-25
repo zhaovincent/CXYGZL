@@ -5,30 +5,25 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.EscapeUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.dto.R;
-import com.cxygzl.common.dto.process.NodeUserDto;
+import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.core.utils.CoreHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.core.Configuration;
 import org.beetl.core.GroupTemplate;
 import org.beetl.core.Template;
 import org.beetl.core.resource.StringTemplateResourceLoader;
-import org.flowable.engine.RuntimeService;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -53,10 +48,10 @@ public class ExpressionHandler {
 
     }
 
-    public Long getUserId(String key,DelegateExecution execution){
+    public Long getUserId(String key, DelegateExecution execution) {
         Object variable = execution.getVariable(key);
-        NodeUserDto nodeUserDto = JSON.parseArray(JSON.toJSONString(variable), NodeUserDto.class).get(0);
-        return nodeUserDto.getId();
+        NodeUser nodeUserDto = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class).get(0);
+        return Long.valueOf(nodeUserDto.getId());
     }
 
     /**
@@ -134,39 +129,6 @@ public class ExpressionHandler {
 
         //获取模板
         return compare(StrUtil.format("${key{}{}}", symbol, paramDateTime.getTime()), Dict.create().set("key", valueDateTime.getTime()));
-
-    }
-
-    /**
-     * 数字 多符号比较
-     * 类似于 1<x<2
-     *
-     * @param key
-     * @param symbol1   符号1
-     * @param param1    表单参数1
-     * @param symbol2   符号2
-     * @param param2    表单参数2
-     * @param execution
-     * @return
-     */
-    public boolean numberCompare(String key, String symbol1, Object param1, String symbol2, Object param2,
-                                 DelegateExecution execution) {
-
-        Object value = execution.getVariable(key);
-
-
-        log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
-        log.debug("条件 标识1:{} 参数1：{}", symbol1, JSON.toJSONString(param1));
-        log.debug("条件 标识2:{} 参数2：{}", symbol2, JSON.toJSONString(param2));
-
-        //表单值为空
-        if (value == null) {
-            return false;
-        }
-
-
-        //获取模板
-        return compare(StrUtil.format("${key{}{}&&key{}{}}", symbol1, param1, symbol2, param2), Dict.create().set("key", value));
 
     }
 
@@ -254,55 +216,30 @@ public class ExpressionHandler {
         }
 
         //表单值
-        List<NodeUserDto> nodeUserDtoList = JSON.parseArray(jsonString, NodeUserDto.class);
-        if (CollUtil.isEmpty(nodeUserDtoList)) {
+        List<NodeUser> nodeUserDtoList = JSON.parseArray(jsonString, NodeUser.class);
+        if (CollUtil.isEmpty(nodeUserDtoList) || nodeUserDtoList.size() != 1) {
             return false;
         }
-        NodeUserDto nodeUserDto = nodeUserDtoList.get(0);
+        NodeUser nodeUserDto = nodeUserDtoList.get(0);
 
         //参数
-        List<NodeUserDto> paramDeptList = JSON.parseArray(param, NodeUserDto.class);
-        Long depId = nodeUserDto.getId();
-        List<Long> deptIdList = paramDeptList.stream().map(w -> w.getId()).collect(Collectors.toList());
+        List<NodeUser> paramDeptList = JSON.parseArray(param, NodeUser.class);
+        Long deptId = Long.valueOf(nodeUserDto.getId());
+        List<Long> deptIdList = paramDeptList.stream().map(w -> Long.parseLong(w.getId())).collect(Collectors.toList());
 
 
-        return deptCompare(symbol, depId, deptIdList);
+        return inCompare(symbol, deptId, deptIdList);
 
     }
 
-    private static boolean deptCompare(String symbol, Long depId, List<Long> deptIdList) {
-        if (StrUtil.equals(symbol, "belong")) {
+    private static boolean inCompare(String symbol, Long deptId, List<Long> deptIdList) {
+        if (StrUtil.equals(symbol, "in")) {
             //属于
-            return deptIdList.contains(depId);
+            return deptIdList.contains(deptId);
         }
-        //父级
-        if (StrUtil.equals(symbol, "parent")) {
-            String s = CoreHttpUtil.checkDepIsAllParent(depId,deptIdList);
-            log.debug("查询到的数据：{}", s);
-            if (StrUtil.isBlank(s)) {
-                return false;
-            }
-            R<Boolean> r = JSON.parseObject(s, new TypeReference<R<Boolean>>() {
-            });
-            if (!r.isOk()) {
-                return false;
-            }
-            return r.getData();
-        }
-
-        //子级
-        if (StrUtil.equals(symbol, "child")) {
-            String s = CoreHttpUtil.checkDepIsAllChild(depId,deptIdList);
-            log.debug("查询到的数据：{}", s);
-            if (StrUtil.isBlank(s)) {
-                return false;
-            }
-            R<Boolean> r = JSON.parseObject(s, new TypeReference<R<Boolean>>() {
-            });
-            if (!r.isOk()) {
-                return false;
-            }
-            return r.getData();
+        if (StrUtil.equals(symbol, "notin")) {
+            //属于
+            return !deptIdList.contains(deptId);
         }
 
 
@@ -318,123 +255,47 @@ public class ExpressionHandler {
      * @param userType 比如数字类型 Number
      * @return
      */
-    public boolean userCompare(String key, String param, String userKey, String userType, String symbol, DelegateExecution execution) {
-        RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
-        Map<String, Object> variables = runtimeService.getVariables(execution.getId());
-        return userCompare(key,param,userKey,userType,symbol,variables);
-    }
-    public boolean userCompare(String key, String param, String userKey, String userType, String symbol, Map<String,Object> paramAllMap) {
+    public boolean userCompare(String key, String param, String symbol, DelegateExecution execution) {
 
         param = EscapeUtil.unescape(param);
 
 
-        Object value = paramAllMap.get(key);
+        Object value = execution.getVariable(key);
 
         String jsonString = JSON.toJSONString(value);
-        log.debug("表单值：key={} value={} userKey={} userType={} symbol={}", key, jsonString, userKey, userType, symbol);
+        log.debug("表单值：key={} value={}   symbol={} ", key, jsonString, symbol);
         log.debug("条件  参数：{}", param);
         if (value == null) {
             return false;
         }
 
         //表单值
-        NodeUserDto formConditionUserVOFormValue = null;
-        if (StrUtil.startWith(jsonString, "[")) {
-            formConditionUserVOFormValue = JSON.parseArray(jsonString, NodeUserDto.class).get(0);
+        List<NodeUser> nodeUserDtoList = JSON.parseArray(jsonString, NodeUser.class);
+        if (CollUtil.isEmpty(nodeUserDtoList) || nodeUserDtoList.size() != 1) {
+            return false;
+        }
+        NodeUser nodeUserDto = nodeUserDtoList.get(0);
 
-        } else {
-            formConditionUserVOFormValue = JSON.parseObject(jsonString, NodeUserDto.class);
-        }
-        Long userId = formConditionUserVOFormValue.getId();
-        //获取用户数据
-        String s = CoreHttpUtil.queryUserAllInfo(userId);
-        log.debug("用户{}查询到的数据：{}", userId, s);
-        if (StrUtil.isBlank(s)) {
-            return false;
-        }
-        R<Map<String, Object>> r = JSON.parseObject(s, new TypeReference<R<Map<String, Object>>>() {
-        });
-        if (!r.isOk()) {
-            return false;
-        }
+        //参数
+        List<NodeUser> paramDeptList = JSON.parseArray(param, NodeUser.class);
 
-        Map<String, Object> userData = r.getData();
-        Object o = MapUtil.get(userData, userKey, Object.class);
-        if (o == null) {
-            return false;
-        }
-        {
-            //获取模板
-            if (StrUtil.equals(userType, "Number")) {
-                List<Number> numbers = JSON.parseArray(param, Number.class);
-                Number[] array = ArrayUtil.toArray(numbers, Number.class);
-                if (StrUtil.equals(symbol, "IN")) {
-                    return numberContain(o, array);
+        List<String> deptIdList = paramDeptList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.DEPT.getKey())).map(w -> (w.getId())).collect(Collectors.toList());
+        List<Long> userIdList = paramDeptList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.USER.getKey())).map(w -> Long.parseLong(w.getId())).collect(Collectors.toList());
+
+
+        if(CollUtil.isNotEmpty(deptIdList)) {
+            R<List<String>> r = CoreHttpUtil.queryUserIdListByDepIdList(deptIdList);
+            List<String> data = r.getData();
+            for (String datum : data) {
+                Long aLong = Convert.toLong(datum);
+                if(!userIdList.contains(aLong)){
+                    userIdList.add(aLong);
                 }
-                return compare(StrUtil.format("${key{}{}}", symbol, numbers.get(0)), Dict.create().set("key", Convert.toNumber(o)));
-
-            }
-            if (StrUtil.equalsAny(userType, "String", "Select")) {
-                List<String> numbers = JSON.parseArray(param, String.class);
-
-                if (StrUtil.equals(symbol, "IN")) {
-                    return numbers.contains(o.toString());
-                }
-                return StrUtil.equals(o.toString(), numbers.get(0));
-
-            }
-            if (StrUtil.equals(userType, "Date")) {
-                List<String> numbers = JSON.parseArray(param, String.class);
-
-                DateTime dateTime = DateUtil.parseDate(numbers.get(0));
-                DateTime value1 = DateUtil.parseDate(o.toString());
-                return compare(StrUtil.format("${key{}{}}", symbol, dateTime.getTime()), Dict.create().set("key", value1.getTime()));
-
-
-            }
-            if (StrUtil.equals(userType, "DateTime")) {
-                List<String> numbers = JSON.parseArray(param, String.class);
-
-                return compare(StrUtil.format("${key{}{}}", symbol, DateUtil.parseDateTime(numbers.get(0)).getTime()), Dict.create().set("key", DateUtil.parseDateTime(o.toString()).getTime()));
-
-
-            }
-            if (StrUtil.equals(userType, "Time")) {
-                List<String> numbers = JSON.parseArray(param, String.class);
-
-
-                return compare(StrUtil.format("${key{}{}}", symbol, DateUtil.parse(numbers.get(0)).getTime()), Dict.create().set("key", DateUtil.parse(o.toString()).getTime()));
-
-
-            }
-            if (StrUtil.equals(userType, "Dept")) {
-                List<NodeUserDto> nodeUserDtoList = JSON.parseArray(param, NodeUserDto.class);
-
-                return deptCompare(symbol,Convert.toLong(o),nodeUserDtoList.stream().map(w->w.getId()).collect(Collectors.toList()));
-
-
-
             }
         }
 
-        //表单参数值
-        List<NodeUserDto> formConditionUserVOList = JSON.parseArray(param, NodeUserDto.class);
-        //先精确匹配用户
-        boolean match = formConditionUserVOList.stream().anyMatch(w -> {
-            return w.getId().longValue() == userId && StrUtil.equals(w.getType(), NodeUserTypeEnum.USER.getKey());
-        });
-        if (match) {
-            return true;
-        }
-        //再匹配部门
-        match = formConditionUserVOList.stream().anyMatch(w -> {
-            Long depId = MapUtil.getLong(userData, "depId", 0L);
-            return w.getId().longValue() == depId && StrUtil.equals(w.getType(), NodeUserTypeEnum.DEPT.getKey());
-        });
-        if (match) {
-            return true;
-        }
-        return false;
+
+        return inCompare(symbol, Convert.toLong(nodeUserDto.getId()),userIdList);
     }
 
 }
