@@ -8,10 +8,12 @@ import com.cxygzl.common.dto.TaskParamDto;
 public interface ITaskService {
     /**
      * 查询任务
+     *
      * @param taskId
+     * @param view
      * @return
      */
-    Object queryTask(String taskId);
+    Object queryTask(String taskId,boolean view);
 
     /**
      * 完成任务

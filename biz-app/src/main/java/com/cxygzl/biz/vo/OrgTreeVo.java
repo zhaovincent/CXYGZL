@@ -37,4 +37,6 @@ public class OrgTreeVo    {
 
     private String avatar;
 
+    private Integer status;
+
 }

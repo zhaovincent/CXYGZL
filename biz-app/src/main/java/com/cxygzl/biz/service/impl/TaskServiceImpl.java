@@ -2,7 +2,9 @@ package com.cxygzl.biz.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
@@ -13,6 +15,7 @@ import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.vo.FormItemVO;
+import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskParamDto;
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,10 +50,11 @@ public class TaskServiceImpl implements ITaskService {
      * 查询任务
      *
      * @param taskId
+     * @param view
      * @return
      */
     @Override
-    public Object queryTask(String taskId) {
+    public Object queryTask(String taskId, boolean view) {
 
 
         long userId = StpUtil.getLoginIdAsLong();
@@ -111,19 +116,68 @@ public class TaskServiceImpl implements ITaskService {
 
             String perm = formPerms.get(id);
 
-            formItemVO.getProps().setValue(paramMap.get(id));
 
             if (StrUtil.isNotBlank(perm)) {
-                formItemVO.setPerm(perm);
-                if(!currentTask){
-                  formItemVO.setPerm( StrUtil.equals(perm, ProcessInstanceConstant.FormPermClass.HIDE)?perm:
-                          ProcessInstanceConstant.FormPermClass.READ);
 
-                }
+                formItemVO.setPerm(view?(ProcessInstanceConstant.FormPermClass.EDIT.equals(perm)?ProcessInstanceConstant.FormPermClass.READ:perm):perm);
 
             }else{
               formItemVO.setPerm(ProcessInstanceConstant.FormPermClass.HIDE);
             }
+
+            if(formItemVO.getType().equals(FormTypeEnum.LAYOUT.getType())){
+                //明细
+
+                List<Map<String, Object>> subParamList = MapUtil.get(paramMap, id, new cn.hutool.core.lang.TypeReference<List<Map<String, Object>>>() {
+                });
+
+                Object value = formItemVO.getProps().getValue();
+
+                List<List<FormItemVO>> l=new ArrayList<>();
+                for (Map<String, Object> map : subParamList) {
+                    List<FormItemVO> subItemList = Convert.toList(FormItemVO.class, value);
+                    for (FormItemVO itemVO : subItemList) {
+                        itemVO.getProps().setValue(map.get(itemVO.getId()));
+
+                        String permSub = formPerms.get(itemVO.getId());
+                        if (StrUtil.isNotBlank(permSub)) {
+                            itemVO.setPerm(view?(ProcessInstanceConstant.FormPermClass.EDIT.equals(permSub)?ProcessInstanceConstant.FormPermClass.READ:permSub)
+                                    :permSub
+                                    );
+
+
+                        }else{
+                            itemVO.setPerm(ProcessInstanceConstant.FormPermClass.HIDE);
+                        }
+
+                    }
+                    l.add(subItemList);
+                }
+                formItemVO.getProps().setValue(l);
+                {
+                    List<FormItemVO> subItemList = Convert.toList(FormItemVO.class, value);
+                    for (FormItemVO itemVO : subItemList) {
+
+                        String permSub = formPerms.get(itemVO.getId());
+                        if (StrUtil.isNotBlank(permSub)) {
+
+
+                            itemVO.setPerm(permSub);
+
+                        }else{
+                            itemVO.setPerm(ProcessInstanceConstant.FormPermClass.HIDE);
+                        }
+
+                    }
+                    formItemVO.getProps().setOriForm(subItemList);
+
+                }
+
+            }else{
+                formItemVO.getProps().setValue(paramMap.get(id));
+
+            }
+
         }
         Dict set = Dict.create()
                 .set("processInstanceId", taskResultDto.getProcessInstanceId())

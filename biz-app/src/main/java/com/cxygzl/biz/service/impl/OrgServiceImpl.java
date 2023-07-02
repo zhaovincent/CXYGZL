@@ -80,14 +80,18 @@ public class OrgServiceImpl implements IOrgService {
                 orgs.add(orgTreeVo);
             }
 
+            Dict dict = Dict.create()
+                    .set("roleList",orgs)
+                    .set("childDepartments",orgs)
+                    .set("employees",new ArrayList<>());
 
-
-            return R.success(orgs);
+            return R.success(dict);
 
         }
 
         Dict dict = Dict.create()
                 .set("titleDepartments",new ArrayList<>())
+                .set("roleList",new ArrayList<>())
                 .set("employees",new ArrayList<>());
 
         List<Dept> deptList = deptService.lambdaQuery()
@@ -103,6 +107,7 @@ public class OrgServiceImpl implements IOrgService {
                 orgTreeVo.setName(dept.getName());
                 orgTreeVo.setType(NodeUserTypeEnum.DEPT.getKey());
                 orgTreeVo.setSelected(false);
+                orgTreeVo.setStatus(dept.getStatus());
                 deptVoList.add(orgTreeVo);
             }
             dict.set("childDepartments",deptVoList);
@@ -120,6 +125,7 @@ public class OrgServiceImpl implements IOrgService {
                 orgTreeVo.setName(user.getName());
                 orgTreeVo.setType(NodeUserTypeEnum.USER.getKey());
                 orgTreeVo.setSelected(false);
+                orgTreeVo.setStatus(user.getStatus());
                 orgTreeVo.setAvatar(user.getAvatarUrl());
                 userVoList.add(orgTreeVo);
 
@@ -220,6 +226,7 @@ public class OrgServiceImpl implements IOrgService {
             orgTreeVo.setType(NodeUserTypeEnum.USER.getKey());
             orgTreeVo.setAvatar(user.getAvatarUrl());
 
+            orgTreeVo.setStatus(user.getStatus());
             orgTreeVoList.add(orgTreeVo);
 
         }

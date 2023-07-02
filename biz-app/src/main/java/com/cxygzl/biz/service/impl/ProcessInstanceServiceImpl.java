@@ -3,7 +3,9 @@ package com.cxygzl.biz.service.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
@@ -18,6 +20,7 @@ import com.cxygzl.biz.vo.FormItemVO;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.ProcessCopyVo;
 import com.cxygzl.biz.vo.node.NodeVo;
+import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
@@ -397,12 +400,50 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
 
         List<FormItemVO> jsonObjectList = JSON.parseArray(oaForms.getFormItems(), FormItemVO.class);
-        for (FormItemVO jsonObject : jsonObjectList) {
-            String id = jsonObject.getId();
+        for (FormItemVO formItemVO : jsonObjectList) {
+            String id = formItemVO.getId();
             String perm = formPerms1.get(id);
 
-            jsonObject.setPerm(StrUtil.isBlankIfStr(perm)? ProcessInstanceConstant.FormPermClass.READ:perm);
-            jsonObject.getProps().setValue(variableMap.get(id));
+            formItemVO.setPerm(StrUtil.isBlankIfStr(perm)? ProcessInstanceConstant.FormPermClass.READ:
+                            ( StrUtil.equals(perm,ProcessInstanceConstant.FormPermClass.HIDE)?
+                                    perm:ProcessInstanceConstant.FormPermClass.READ
+                            )
+                    );
+
+            if(formItemVO.getType().equals(FormTypeEnum.LAYOUT.getType())){
+                //明细
+
+                List<Map<String, Object>> subParamList = MapUtil.get(variableMap, id, new cn.hutool.core.lang.TypeReference<List<Map<String, Object>>>() {
+                });
+
+                Object value = formItemVO.getProps().getValue();
+
+                List<List<FormItemVO>> l=new ArrayList<>();
+                for (Map<String, Object> map : subParamList) {
+                    List<FormItemVO> subItemList = Convert.toList(FormItemVO.class, value);
+                    for (FormItemVO itemVO : subItemList) {
+                        itemVO.getProps().setValue(map.get(itemVO.getId()));
+
+                        String permSub = formPerms1.get(itemVO.getId());
+
+                            itemVO.setPerm(StrUtil.isBlankIfStr(permSub)? ProcessInstanceConstant.FormPermClass.READ:
+                                    ( StrUtil.equals(permSub,ProcessInstanceConstant.FormPermClass.HIDE)?
+                                            permSub:ProcessInstanceConstant.FormPermClass.READ
+                                    ));
+
+
+
+                    }
+                    l.add(subItemList);
+                }
+                formItemVO.getProps().setValue(l);
+
+
+            }else{
+                formItemVO.getProps().setValue(variableMap.get(id));
+
+            }
+
 
         }
         Dict set = Dict.create()

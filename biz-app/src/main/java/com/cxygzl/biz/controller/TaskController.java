@@ -25,9 +25,9 @@ public class TaskController {
      */
     @SneakyThrows
     @GetMapping("queryTask")
-    public Object queryTask(String taskId) {
+    public Object queryTask(String taskId,boolean view) {
 
-        return taskService.queryTask(taskId);
+        return taskService.queryTask(taskId,view );
 
     }
 

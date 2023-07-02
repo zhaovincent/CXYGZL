@@ -107,4 +107,8 @@ public class Process implements Serializable {
      */
     private String uniqueId;
     private String admin;
+    /**
+     * 范围显示
+     */
+    private String rangeShow;
 }

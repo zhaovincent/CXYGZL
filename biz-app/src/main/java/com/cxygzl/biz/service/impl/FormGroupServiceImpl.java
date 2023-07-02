@@ -2,6 +2,8 @@ package com.cxygzl.biz.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -15,6 +17,7 @@ import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.vo.FormGroupVo;
 import com.cxygzl.biz.vo.FormItemVO;
 import com.cxygzl.biz.vo.ProcessVO;
+import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
@@ -70,11 +73,15 @@ public class FormGroupServiceImpl implements FormGroupService {
             List<Process> processList = processService.lambdaQuery()
                     .eq(Process::getGroupId, group.getId())
                     .eq(hidden != null, Process::getIsHidden, hidden)
-                    .orderByAsc(Process::getSort).list();
+                    .orderByAsc(Process::getSort).orderByDesc(Process::getCreateTime).list();
 
             processList.forEach(process -> {
-                formGroupVo.getItems().add(FormGroupVo.Form.builder()
+
+
+
+                formGroupVo.getItems().add(FormGroupVo.FlowVo.builder()
                         .flowId(process.getFlowId())
+                                .rangeShow(process.getRangeShow())
                         .name(process.getName())
                         .logo(process.getLogo())
                         .remark(process.getRemark())
@@ -151,7 +158,7 @@ public class FormGroupServiceImpl implements FormGroupService {
                     return;
                 }
 
-                formGroupVo.getItems().add(FormGroupVo.Form.builder()
+                formGroupVo.getItems().add(FormGroupVo.FlowVo.builder()
                         .flowId(process.getFlowId())
                         .name(process.getName())
                         .logo(process.getLogo())
@@ -192,8 +199,24 @@ public class FormGroupServiceImpl implements FormGroupService {
         List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
 
         for (FormItemVO formItemVO : formItemVOList) {
-            String str = MapUtil.getStr(formPerms, formItemVO.getId(), ProcessInstanceConstant.FormPermClass.EDIT);
-            formItemVO.setPerm(str);
+            String perm = MapUtil.getStr(formPerms, formItemVO.getId(), ProcessInstanceConstant.FormPermClass.EDIT);
+            formItemVO.setPerm(perm);
+
+            if(StrUtil.equals(formItemVO.getType(), FormTypeEnum.LAYOUT.getType())){
+                //明细
+                Object value = formItemVO.getProps().getValue();
+                List<FormItemVO> subList = Convert.toList(FormItemVO.class, value);
+                for (FormItemVO itemVO : subList) {
+                    String perm1 = MapUtil.getStr(formPerms, itemVO.getId(), ProcessInstanceConstant.FormPermClass.EDIT);
+                    itemVO.setPerm(perm1);
+                }
+
+
+                formItemVO.getProps().setValue(subList);
+                formItemVO.getProps();
+
+            }
+
         }
         oaForms.setFormItems(CommonUtil.toJson(formItemVOList));
 
@@ -268,6 +291,27 @@ public class FormGroupServiceImpl implements FormGroupService {
 
         }
 
+        Node startNode = CommonUtil.toObj(processStr, Node.class);
+
+
+        List<NodeUser> nodeUserList = startNode.getNodeUserList();
+
+        StringBuilder stringBuilder=new StringBuilder("");
+        if(CollUtil.isNotEmpty(nodeUserList)){
+            int index=0;
+
+            for (NodeUser user : nodeUserList) {
+                if(index>0){
+                    stringBuilder.append(",");
+                }
+                stringBuilder.append(user.getName());
+                index++;
+                if(index>5){
+                    break;
+                }
+
+            }
+        }
 
         Process oaForms = Process.builder()
                 .groupId(process.getGroupId())
@@ -284,15 +328,12 @@ public class FormGroupServiceImpl implements FormGroupService {
                 .uniqueId(IdUtil.fastSimpleUUID())
                 .isStop(false)
                 .isHidden(false)
+                .rangeShow(stringBuilder.toString())
                 .build();
         processService.save(oaForms);
 
         //保存范围
 
-        Node startNode = CommonUtil.toObj(processStr, Node.class);
-
-
-        List<NodeUser> nodeUserList = startNode.getNodeUserList();
         for (NodeUser nodeUserDto : nodeUserList) {
             ProcessStarter processStarter = new ProcessStarter();
 

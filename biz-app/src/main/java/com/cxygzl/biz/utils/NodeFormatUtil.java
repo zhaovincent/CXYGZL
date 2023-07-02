@@ -108,7 +108,7 @@ public class NodeFormatUtil {
 
                 for (Map.Entry<String, List<ProcessNodeRecordAssignUser>> entry : map.entrySet()) {
                     List<ProcessNodeRecordAssignUser> value = entry.getValue();
-                    List<UserVo> collect = value.stream().map(w -> {
+                    List<UserVo> collect = value.stream().filter(w->!ProcessInstanceConstant.DEFAULT_EMPTY_ASSIGN.equals(w.getUserId())).map(w -> {
                         UserVo userVo = buildUser(Long.parseLong(w.getUserId()));
                         userVo.setShowTime(w.getEndTime());
                         userVo.setApproveDesc(w.getApproveDesc());
@@ -239,7 +239,7 @@ public class NodeFormatUtil {
                 userVoList.addAll(CollUtil.newArrayList(userVo));
 
             }
-        }else if (node.getType() == NodeTypeEnum.CC.getValue()) {
+        } else if (node.getType() == NodeTypeEnum.CC.getValue()) {
             //抄送节点
 
             List<NodeUser> nodeUserList = node.getNodeUserList();
@@ -253,7 +253,7 @@ public class NodeFormatUtil {
 
         List<NodeVo> branchList = new ArrayList<>();
 
-        if (type == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()) {
+        if (type == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()||type == NodeTypeEnum.PARALLEL_GATEWAY.getValue().intValue()) {
             //条件分支
             List<Node> branchs = node.getConditionNodes();
 
@@ -306,6 +306,9 @@ public class NodeFormatUtil {
 
         IUserService userService = SpringUtil.getBean(IUserService.class);
         User user = userService.getById(userId);
+        if (user == null) {
+            return null;
+        }
 
         UserVo nodeUserDto = UserVo.builder().id(userId).name(user.getName())
                 .avatar(user.getAvatarUrl())
@@ -313,8 +316,8 @@ public class NodeFormatUtil {
         return nodeUserDto;
     }
 
-    private static List<UserVo> buildUser(List<NodeUser> nodeUserList ){
-        List<UserVo> userVoList=new ArrayList<>();
+    private static List<UserVo> buildUser(List<NodeUser> nodeUserList) {
+        List<UserVo> userVoList = new ArrayList<>();
         //用户id
         List<Long> userIdList = nodeUserList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.USER.getKey())).map(w -> Convert.toLong(w.getId())).collect(Collectors.toList());
         //部门id

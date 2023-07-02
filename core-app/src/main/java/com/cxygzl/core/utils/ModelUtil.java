@@ -94,7 +94,10 @@ public class ModelUtil {
 
         //子节点
         Node children = nodeDto.getChildren();
-        if (nodeDto.getType()== NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue()) {
+        if (nodeDto.getType() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue()
+                ||
+                nodeDto.getType() == NodeTypeEnum.PARALLEL_GATEWAY.getValue()
+        ) {
 
             //条件分支
             List<Node> branchs = nodeDto.getConditionNodes();
@@ -135,7 +138,10 @@ public class ModelUtil {
 
         //子节点
         Node children = nodeDto.getChildren();
-        if (nodeDto.getType()== NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()) {
+        if (nodeDto.getType() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()
+                ||
+                nodeDto.getType() == NodeTypeEnum.PARALLEL_GATEWAY.getValue().intValue()
+        ) {
             //条件分支
             List<Node> branchs = nodeDto.getConditionNodes();
             for (Node branch : branchs) {
@@ -170,21 +176,26 @@ public class ModelUtil {
 
         //子节点
         Node children = nodeDto.getChildren();
-        if (nodeDto.getType()== NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()) {
+        if (nodeDto.getType() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue() ||
+                nodeDto.getType() == NodeTypeEnum.PARALLEL_GATEWAY.getValue().intValue()
+        ) {
 //            children = children.getChildren();
             //条件分支
             List<Node> branchs = nodeDto.getConditionNodes();
             int ord = 1;
             int size = branchs.size();
             for (Node branch : branchs) {
-                buildAllNodeOuterSequence(process, branch.getChildren(), NodeUtil.isNode(children) ? children : nextNodeDto );
+                buildAllNodeOuterSequence(process, branch.getChildren(), NodeUtil.isNode(children) ? children : nextNodeDto);
 
                 String expression = null;
 
-                if (ord == size ) {
-                    expression = NodeExpressionStrategyFactory.handleDefaultBranch(branchs);
-                } else {
-                    expression = NodeExpressionStrategyFactory.handle(branch);
+                if (nodeDto.getType() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()) {
+                    if (ord == size) {
+                        expression = NodeExpressionStrategyFactory.handleDefaultBranch(branchs);
+                    } else {
+                        expression = NodeExpressionStrategyFactory.handle(branch);
+                    }
+
                 }
 
 
@@ -232,7 +243,7 @@ public class ModelUtil {
     /**
      * 构建节点
      *
-     * @param node      前端传输节点
+     * @param node   前端传输节点
      * @param flowId
      * @return
      */
@@ -250,27 +261,32 @@ public class ModelUtil {
         nodeDataStoreHandler.save(flowId, node.getId(), node);
 
         //开始
-        if (node.getType()== NodeTypeEnum.ROOT.getValue().intValue()) {
+        if (node.getType() == NodeTypeEnum.ROOT.getValue().intValue()) {
             flowElementList.addAll(buildStartNode(node));
         }
 
         //审批
-        if (node.getType()== NodeTypeEnum.APPROVAL.getValue().intValue()) {
+        if (node.getType() == NodeTypeEnum.APPROVAL.getValue().intValue()) {
 
 
             flowElementList.addAll(buildApproveNode(node));
         }
 
         //抄送
-        if (node.getType()== NodeTypeEnum.CC.getValue().intValue()) {
+        if (node.getType() == NodeTypeEnum.CC.getValue().intValue()) {
 
 
             flowElementList.add(buildCCNode(node));
         }
         //条件分支
-        if (node.getType()== NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()) {
+        if (node.getType() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()) {
 
             flowElementList.add(buildExclusiveGatewayNode(node));
+        }
+        //并行分支
+        if (node.getType() == NodeTypeEnum.PARALLEL_GATEWAY.getValue().intValue()) {
+
+            flowElementList.addAll(buildParallelGatewayNode(node));
         }
         return flowElementList;
     }
@@ -332,9 +348,6 @@ public class ModelUtil {
         flowElementList.add(endEvent);
 
 
-
-
-
         {
 
 
@@ -349,15 +362,15 @@ public class ModelUtil {
 
             Integer multipleMode = node.getMultipleMode();
             //多人
-            if ((multipleMode== ProcessInstanceConstant.MULTIPLE_MODE_AL_SAME)) {
+            if ((multipleMode == ProcessInstanceConstant.MULTIPLE_MODE_AL_SAME)) {
                 //并行会签
                 isSequential = false;
             }
-            if ((multipleMode==ProcessInstanceConstant.MULTIPLE_MODE_ALL_SORT)) {
+            if ((multipleMode == ProcessInstanceConstant.MULTIPLE_MODE_ALL_SORT)) {
 
                 //串行会签
             }
-            if ((multipleMode==ProcessInstanceConstant.MULTIPLE_MODE_ONE)) {
+            if ((multipleMode == ProcessInstanceConstant.MULTIPLE_MODE_ONE)) {
 
                 //或签
                 isSequential = false;
@@ -413,8 +426,33 @@ public class ModelUtil {
         exclusiveGateway.setId(node.getId());
         exclusiveGateway.setName(node.getName());
         return exclusiveGateway;
+
     }
 
+    /**
+     * 构建并行网关
+     *
+     * @param node
+     * @return
+     */
+    private static List<FlowElement> buildParallelGatewayNode(Node node) {
+//         node.setTailId(StrUtil.format("{}_merge_gateway", node.getId()));
+
+        List<FlowElement> flowElementList = new ArrayList<>();
+
+        ParallelGateway inclusiveGateway = new ParallelGateway();
+        inclusiveGateway.setId(node.getId());
+        inclusiveGateway.setName(node.getName());
+        flowElementList.add(inclusiveGateway);
+
+        //合并网关
+        ParallelGateway parallelGateway = new ParallelGateway();
+        parallelGateway.setId(StrUtil.format("{}_merge_gateway", node.getId()));
+        parallelGateway.setName(StrUtil.format("{}_合并网关", node.getName()));
+        flowElementList.add(parallelGateway);
+
+        return flowElementList;
+    }
 
     /**
      * 构建结束节点
@@ -467,6 +505,7 @@ public class ModelUtil {
 
         return sequenceFlowList;
     }
+
     /**
      * 生成扩展数据
      *
@@ -481,6 +520,7 @@ public class ModelUtil {
         ea.setValue(val);
         return ea;
     }
+
     /**
      * 创建抄送节点
      *
@@ -489,7 +529,7 @@ public class ModelUtil {
      */
     private static FlowElement buildCCNode(Node node) {
 
-        ServiceTask serviceTask=new ServiceTask();
+        ServiceTask serviceTask = new ServiceTask();
         serviceTask.setId(node.getId());
         serviceTask.setName(node.getName());
         serviceTask.setImplementationType("class");
@@ -500,7 +540,7 @@ public class ModelUtil {
     /**
      * 创建连接线
      *
-     * @param node      父级节点
+     * @param node   父级节点
      * @param flowId
      * @return 所有连接线
      */
@@ -517,16 +557,14 @@ public class ModelUtil {
         }
         boolean parentIsGateway = false;
         Node prevNode = null;
-        {
+        if (StrUtil.isNotBlank(node.getParentId())) {
             //判断父级是否是包容或者并行网关
-            Node parentNodeDto = NodeDataStoreFactory.getInstance().getNode(flowId, node.getParentId());
-            if (parentNodeDto != null) {
-                prevNode = NodeDataStoreFactory.getInstance().getNode(flowId, parentNodeDto.getParentId());
+            prevNode = NodeDataStoreFactory.getInstance().getNode(flowId, node.getParentId());
+            if (prevNode != null) {
+                parentIsGateway = (
+                        prevNode.getType() == NodeTypeEnum.PARALLEL_GATEWAY.getValue()
+                );
 
-                //父级是否是网关
-//    TODO            parentIsGateway = prevNode == null ? false : StrUtil.equalsAny(prevNode.getType(), NodeTypeEnum
-//    .CONCURRENTS.getKey(), NodeTypeEnum.INCLUSIVES.getKey());
-                parentIsGateway = prevNode == null ? false : false;
 
             }
 
@@ -543,26 +581,7 @@ public class ModelUtil {
 
         }
 
-
-//   TODO     if (StrUtil.equals(node.getType(), NodeTypeEnum.TRIGGER.getKey())) {
-        if (false) {
-
-
-            String triggerGatewayId = StrUtil.format("trigger_gateway_{}", nodeId);
-            String triggerGatewayEndId = StrUtil.format("trigger_gateway_end_{}", nodeId);
-
-            {
-                SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeId, triggerGatewayId, "${12==12}");
-                sequenceFlowList.add(sequenceFlow);
-            }
-
-            {
-                SequenceFlow sequenceFlow = buildSingleSequenceFlow(triggerGatewayId, triggerGatewayEndId, StrUtil.format("${!" +
-                        "{}_trigger_gateway_condition}", nodeId));
-                sequenceFlowList.add(sequenceFlow);
-            }
-
-        } else if (node.getType()==NodeTypeEnum.APPROVAL.getValue().intValue()) {
+        if (node.getType() == NodeTypeEnum.APPROVAL.getValue().intValue()) {
 
 
             String gatewayId = StrUtil.format("approve_gateway_{}", nodeId);
@@ -580,20 +599,7 @@ public class ModelUtil {
             }
 
         }
-//        else if (node instanceof StartNode) {
-//            //子流程
-//
-//
-//            String userTaskId = StrUtil.format("{}_start_user_task", nodeId);
-//
-//
-//            {
-//                SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeId, userTaskId, "${12==12}");
-//                sequenceFlowList.add(sequenceFlow);
-//            }
-//
-//
-//        }
+
 
         return sequenceFlowList;
     }

@@ -55,6 +55,35 @@ public class ExpressionHandler {
     }
 
     /**
+     * 日期时间比较
+     * @param key
+     * @param symbol
+     * @param param
+     * @param execution
+     * @param format 时间格式化模式
+     * @return
+     */
+    public boolean dateTimeCompare(String key, String symbol, Object param, DelegateExecution execution,String format) {
+
+
+        Object value = execution.getVariable(key);
+
+
+        log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
+        log.debug("条件 标识:{} 参数：{} 格式：{}", symbol, JSON.toJSONString(param),format);
+
+        //表单值为空
+        if (value == null) {
+            return false;
+        }
+
+        long valueTime = DateUtil.parse(value.toString(), format).getTime();
+        long paramTime = DateUtil.parse(param.toString(), format).getTime();
+
+
+        return compare(StrUtil.format("${key{}{}}", symbol, paramTime), Dict.create().set("key", valueTime));
+    }
+    /**
      * 数字类型比较
      *
      * @param key       表单key

@@ -54,7 +54,7 @@ public class NodeUtil {
             }
         }
 
-        if(type== NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()){
+        if(type== NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()||type== NodeTypeEnum.PARALLEL_GATEWAY.getValue().intValue()){
 
             //条件分支
             List<Node> branchs = node.getConditionNodes();

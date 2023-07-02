@@ -33,6 +33,12 @@ public class FormItemVO {
     public static class Props{
         private Object value;
         private Object options;
+        private Boolean self;
+        private Boolean multi;
+        private Object oriForm;
+
+        private Object max;
+        private Object min;
     }
 
 }

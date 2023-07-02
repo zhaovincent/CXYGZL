@@ -19,19 +19,27 @@ import java.util.List;
 public class FormGroupVo {
 
     private Long id;
-
+    /**
+     * 流程名字
+     */
     private String name;
 
-    private List<Form> items;
+    /**
+     * 流程
+     */
+    private List<FlowVo> items;
 
     @Data
     @Builder
     @AllArgsConstructor
-    public static class Form{
+    public static class FlowVo {
 
         private String flowId;
 
-
+        /**
+         * 发起范围
+         */
+        private String rangeShow;
         private String name;
 
         private String logo;
