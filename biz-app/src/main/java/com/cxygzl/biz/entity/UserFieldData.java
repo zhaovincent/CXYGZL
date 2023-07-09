@@ -1,60 +1,39 @@
 package com.cxygzl.biz.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serializable;
-import java.util.Date;
+import lombok.experimental.Accessors;
 
 /**
  * <p>
  * 用户字段-数据
  * </p>
  *
- * @author cxygzl
- * @since 2023-05-17
+ * @author Vincent
+ * @since 2023-07-06
  */
 @Getter
 @Setter
-@TableName("user_field_data")
-public class UserFieldData implements Serializable {
+@Accessors(chain = true)
+@TableName("`user_field_data`")
+public class UserFieldData  extends BaseEntity {
 
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * 用户id
-     */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
 
     /**
      * 用户id
      */
+    @TableField("`user_id`")
     private Long userId;
 
 
-    /**
-     * 逻辑删除字段
-     */
-    @TableLogic
-    @TableField( fill = FieldFill.INSERT)
-    private Boolean delFlag;
-    /**
-     * 创建时间
-     */
-    @TableField( fill = FieldFill.INSERT)
-    private Date createTime;
 
-    /**
-     * 更新时间
-     */
-    @TableField( fill = FieldFill.INSERT_UPDATE)
-    private Date updateTime;
 
     /**
      * 数据
      */
+    @TableField("`data`")
     private String data;
 
     /**

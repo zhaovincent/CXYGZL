@@ -16,6 +16,7 @@ import com.cxygzl.biz.entity.RoleMenu;
 import com.cxygzl.biz.mapper.MenuMapper;
 import com.cxygzl.biz.service.IMenuService;
 import com.cxygzl.biz.service.IRoleMenuService;
+import com.cxygzl.biz.utils.DataUtil;
 import com.cxygzl.biz.vo.MenuVO;
 import com.cxygzl.biz.vo.RouteVO;
 import com.cxygzl.common.dto.R;
@@ -228,7 +229,9 @@ public class MenuServiceImpl extends MPJBaseServiceImpl<MenuMapper, Menu> implem
             return R.fail("不能修改上级为自己");
         }
 
-        List<Menu> menuList = this.baseMapper.selectChildrenByMenu(menuVO.getId());
+        List<Menu> menuList = DataUtil.selectChildrenByMenu(menuVO.getId(), this.list());
+
+
         boolean match = menuList.stream().anyMatch(w -> w.getId().longValue() == menuVO.getParentId());
         if(match){
             return R.fail("上级菜单不能为自己的子级菜单");
@@ -279,7 +282,10 @@ public class MenuServiceImpl extends MPJBaseServiceImpl<MenuMapper, Menu> implem
     @Transactional
     @Override
     public R delete(MenuVO menuVO) {
-        List<Menu> menuList = this.baseMapper.selectChildrenByMenu(menuVO.getId());
+
+        List<Menu> menuList = DataUtil.selectChildrenByMenu(menuVO.getId(), this.list());
+
+
         Set<Long> menuIdSet = menuList.stream().map(w -> w.getId()).collect(Collectors.toSet());
         this.removeBatchByIds(menuIdSet);
 

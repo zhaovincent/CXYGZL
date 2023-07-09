@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * <p>
@@ -35,23 +34,12 @@ public class DeptDto implements Serializable {
      */
     private Long parentId;
 
-    /**
-     * 逻辑删除字段
-     */
-    private Boolean delFlag;
 
     /**
      * 主管user_id
      */
     private Long leaderUserId;
 
-    /**
-     * 创建时间
-     */
-    private Date createTime;
 
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
+
 }

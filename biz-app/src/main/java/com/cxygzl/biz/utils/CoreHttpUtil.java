@@ -15,7 +15,7 @@ import java.util.List;
 
 public class CoreHttpUtil {
 
-    private static String getBaseUrl() {
+    public static String getBaseUrl() {
         Environment environment = SpringUtil.getBean(Environment.class);
         String bizUrl = environment.getProperty("core.url");
         return bizUrl;
@@ -77,10 +77,10 @@ public class CoreHttpUtil {
      * @param jsonObject
      * @return
      */
-    public static R<String> createFlow(JSONObject jsonObject, long userId) {
+    public static com.cxygzl.common.dto.R<String> createFlow(JSONObject jsonObject, long userId) {
 
         String post = post(jsonObject, "/flow/create?userId=" + userId);
-        R<String> r = JSON.parseObject(post, R.class);
+        com.cxygzl.common.dto.R<String> r = JSON.parseObject(post, com.cxygzl.common.dto.R.class);
         return r;
 
     }
@@ -104,11 +104,11 @@ public class CoreHttpUtil {
      * @param jsonObject
      * @return
      */
-    public static R<PageResultDto<TaskDto>> queryAssignTask(TaskQueryParamDto jsonObject) {
+    public static com.cxygzl.common.dto.R<PageResultDto<TaskDto>> queryAssignTask(TaskQueryParamDto jsonObject) {
 
         String post = post(jsonObject, "/flow/queryAssignTask");
 
-        R<PageResultDto<TaskDto>> r = JSON.parseObject(post, new TypeReference<R<PageResultDto<TaskDto>>>() {
+        com.cxygzl.common.dto.R<PageResultDto<TaskDto>> r = JSON.parseObject(post, new TypeReference<com.cxygzl.common.dto.R<PageResultDto<TaskDto>>>() {
         });
         return r;
 
@@ -120,10 +120,10 @@ public class CoreHttpUtil {
      * @param jsonObject
      * @return
      */
-    public static  R<PageResultDto<TaskDto>> queryCompletedTask(TaskQueryParamDto jsonObject) {
+    public static  com.cxygzl.common.dto.R<PageResultDto<TaskDto>> queryCompletedTask(TaskQueryParamDto jsonObject) {
 
         String post = post(jsonObject, "/flow/queryCompletedTask");
-        R<PageResultDto<TaskDto>> r = JSON.parseObject(post, new TypeReference<R<PageResultDto<TaskDto>>>() {
+        com.cxygzl.common.dto.R<PageResultDto<TaskDto>> r = JSON.parseObject(post, new TypeReference<com.cxygzl.common.dto.R<PageResultDto<TaskDto>>>() {
         });
         return r;
 
@@ -160,10 +160,10 @@ public class CoreHttpUtil {
      * @param jsonObject
      * @return
      */
-    public static  R stopProcessInstance(TaskParamDto jsonObject) {
+    public static  com.cxygzl.common.dto.R stopProcessInstance(TaskParamDto jsonObject) {
 
         String post = post(jsonObject, "/flow/stopProcessInstance");
-        R r = JSON.parseObject(post, new TypeReference<R>() {
+        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
         });
         return r;
 
@@ -224,10 +224,10 @@ public class CoreHttpUtil {
      * @param userId
      * @return
      */
-    public static  R<TaskResultDto> queryTask(String taskId, long userId) {
+    public static  com.cxygzl.common.dto.R<TaskResultDto> queryTask(String taskId, long userId) {
 
         String s = get(StrUtil.format("/task/queryTask?taskId={}&userId={}", taskId, userId));
-        R<TaskResultDto> r = JSON.parseObject(s, new TypeReference<R<TaskResultDto>>() {
+        com.cxygzl.common.dto.R<TaskResultDto> r = JSON.parseObject(s, new TypeReference<R<TaskResultDto>>() {
         });
         return r;
 

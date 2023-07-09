@@ -4,20 +4,20 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
+import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.mapper.DeptMapper;
 import com.cxygzl.biz.service.*;
+import com.cxygzl.biz.utils.DataUtil;
 import com.cxygzl.common.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -56,10 +56,10 @@ public class RemoteServiceImpl implements IRemoteService {
     @Override
     public R<List<Long>> queryUserIdListByRoleIdList(List<Long> roleIdList) {
 
-        List<UserRole> userRoleList = userRoleService.lambdaQuery().in(UserRole::getRoleId, roleIdList).list();
-        Set<Long> userIdSet = userRoleList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
+        List<Long> userIdList = ApiStrategyFactory.getStrategy().loadUserIdListByRoleIdList(roleIdList);
 
-        return R.success(userIdSet);
+
+        return R.success(userIdList);
     }
 
     /**
@@ -118,7 +118,10 @@ public class RemoteServiceImpl implements IRemoteService {
         Long parentId = checkParentDto.getParentId();
         List<Long> deptIdList = checkParentDto.getDeptIdList();
         //查询子级包括自己
-        List<Dept> childrenDeptList = deptMapper.selectChildrenByDept(parentId);
+        List<Dept> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
+        List<Dept> childrenDeptList = DataUtil.selectChildrenByDept(parentId, allDept);
+
+
         List<Long> childrenDeptIdList = childrenDeptList.stream().map(w -> w.getId()).collect(Collectors.toList());
         childrenDeptIdList.remove(parentId);
 
@@ -135,11 +138,9 @@ public class RemoteServiceImpl implements IRemoteService {
      */
     @Override
     public R<List<Long>> queryUserIdListByDepIdList(List<Long> depIdList) {
-        if (CollUtil.isEmpty(depIdList)) {
-            return R.success(new ArrayList<>());
-        }
-        List<User> userList = userService.lambdaQuery().in(User::getDeptId, depIdList).list();
-        return R.success(userList.stream().map(w -> w.getId()).collect(Collectors.toList()));
+
+        List<Long> userIdList = ApiStrategyFactory.getStrategy().loadUserIdListByDeptIdList(depIdList);
+        return R.success(userIdList);
     }
 
     /**
@@ -153,7 +154,10 @@ public class RemoteServiceImpl implements IRemoteService {
         Long childId = checkChildDto.getChildId();
         List<Long> deptIdList = checkChildDto.getDeptIdList();
         //查询父级包括自己
-        List<Dept> parentDeptList = deptMapper.selectParentByDept(childId);
+
+        List<Dept> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
+        List<Dept> parentDeptList = DataUtil.selectParentByDept(childId, allDept);
+
         List<Long> parentDeptIdList = parentDeptList.stream().map(w -> w.getId()).collect(Collectors.toList());
         parentDeptIdList.remove(childId);
 
@@ -190,10 +194,13 @@ public class RemoteServiceImpl implements IRemoteService {
      */
     @Override
     public R<List<DeptDto>> queryParentDepListByUserId(long userId) {
-        User user = userService.getById(userId);
+        User user = ApiStrategyFactory.getStrategy().getUser(userId);
         Long deptId = user.getDeptId();
 
-        List<Dept> deptList = deptMapper.selectParentByDept(deptId);
+        List<Dept> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
+        List<Dept> deptList = DataUtil.selectParentByDept(deptId, allDept);
+
+
         List<DeptDto> dtoList = BeanUtil.copyToList(deptList, DeptDto.class);
 
         return R.success(dtoList);

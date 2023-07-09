@@ -4,14 +4,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
-import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
-import com.cxygzl.common.dto.DeptDto;
-import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
-import com.cxygzl.common.utils.CommonUtil;
-import com.cxygzl.core.utils.CoreHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.delegate.DelegateExecution;
@@ -22,6 +17,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component("multiInstanceHandler")
@@ -57,137 +53,13 @@ public class MultiInstanceHandler {
         Node node =  nodeDataStoreHandler.getNode(flowId, nodeId);
         if (node != null) {
 
+            Map<String, Object> variables = execution.getVariables();
 
             Integer assignedType = node.getAssignedType();
 
+            List<String> userIdList = AssignUserStrategyFactory.getStrategy(assignedType).handle(node, rootUser, variables);
 
-            if (assignedType == ProcessInstanceConstant.AssignedTypeClass.USER) {
-                //指定人员
-                List<NodeUser> userDtoList = node.getNodeUserList();
-                //用户id
-                List<String> userIdList = userDtoList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.USER.getKey())).map(w -> Convert.toStr(w.getId())).collect(Collectors.toList());
-                //部门id
-                List<String> deptIdList = userDtoList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.DEPT.getKey())).map(w -> Convert.toStr(w.getId())).collect(Collectors.toList());
-
-                if (CollUtil.isNotEmpty(deptIdList)) {
-
-                    R<List<String>> r= CoreHttpUtil.queryUserIdListByDepIdList(deptIdList);
-
-                    List<String> data = r.getData();
-                    if (CollUtil.isNotEmpty(data)) {
-                        for (String datum : data) {
-                            if (!userIdList.contains(datum)) {
-                                userIdList.add(datum);
-                            }
-                        }
-                    }
-                }
-
-                assignList.addAll(userIdList);
-
-            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF) {
-
-                //发起人自己
-
-
-                List<String> userIdList = CollUtil.newArrayList(String.valueOf(rootUser.getId()));
-                assignList.addAll(userIdList);
-
-            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.FORM_USER) {
-
-                //表单值
-
-                Object variable = execution.getVariable(node.getFormUserId());
-                if (variable == null) {
-
-                } else if (StrUtil.isBlankIfStr(variable)) {
-
-                } else {
-
-                    String jsonString = JSON.toJSONString(variable);
-                    List<NodeUser> nodeUserDtoList = CommonUtil.toArray(jsonString, NodeUser.class);
-
-                    List<String> userIdList = nodeUserDtoList.stream().map(w -> String.valueOf(w.getId())).collect(Collectors.toList());
-
-                    assignList.addAll(userIdList);
-
-                }
-
-            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.LEADER) {
-
-                //指定主管审批
-                //第几级主管审批
-                Integer level = node.getDeptLeaderLevel();
-
-                //去获取主管
-
-                R<List<DeptDto>> r = CoreHttpUtil.queryParentDepListByUserId(Long.parseLong(rootUser.getId()));
-
-                List<DeptDto> deptDtoList = r.getData();
-                if (CollUtil.isNotEmpty(deptDtoList)) {
-                    if (deptDtoList.size() >= level) {
-                        DeptDto deptDto = deptDtoList.get(level - 1);
-
-                        assignList.add(String.valueOf(deptDto.getLeaderUserId()));
-                    }
-                }
-
-
-            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.LEADER_TOP) {
-
-
-                //去获取主管
-
-                R<List<DeptDto>> r  = CoreHttpUtil.queryParentDepListByUserId(Long.parseLong(rootUser.getId()));
-
-                List<DeptDto> deptDtoList = r.getData();
-
-                //上级主管依次审批
-
-                //第几级主管审批截止
-                Integer level = node.getDeptLeaderLevel();
-
-
-                if (CollUtil.isNotEmpty(deptDtoList)) {
-                    int index = 1;
-                    for (DeptDto deptDto : deptDtoList) {
-                        if (level != null && level < index) {
-                            break;
-                        }
-                        assignList.add(String.valueOf(deptDto.getLeaderUserId()));
-                        index++;
-                    }
-                }
-
-
-            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF_SELECT) {
-
-                //发起人自选
-                Object variable = execution.getVariable(StrUtil.format("{}_assignee_select", nodeId));
-                log.info("{}-发起人自选参数:{}", node.getName(), variable);
-                List<NodeUser> nodeUserDtos = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class);
-
-                List<String> collect = nodeUserDtos.stream().map(w -> String.valueOf(w.getId())).collect(Collectors.toList());
-
-                assignList.addAll(collect);
-
-            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.ROLE) {
-
-                //角色
-
-                List<NodeUser> nodeUserList = node.getNodeUserList();
-
-                List<String> roleIdList = nodeUserList.stream().map(w -> w.getId()).collect(Collectors.toList());
-
-
-                R<List<String>> r = CoreHttpUtil.queryUserIdListByRoleIdList(roleIdList);
-
-                List<String> data = r.getData();
-
-
-                assignList.addAll(data);
-
-            }
+            assignList.addAll(userIdList);
 
         } else {
             //默认值

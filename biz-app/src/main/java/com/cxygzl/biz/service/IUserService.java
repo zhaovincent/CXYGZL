@@ -17,10 +17,19 @@ import com.github.yulichang.base.MPJBaseService;
 public interface IUserService extends MPJBaseService<User> {
     /**
      * 登录
+     *
      * @param userVO
      * @return
      */
-    Object login(UserVO userVO);
+    R login(UserVO userVO);
+
+    /**
+     * token登录
+     *
+     * @param token
+     * @return
+     */
+    R loginByToken(String token);
 
     /**
      * 退出登录

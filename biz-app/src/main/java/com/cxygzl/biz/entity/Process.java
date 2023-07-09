@@ -1,114 +1,110 @@
 package com.cxygzl.biz.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
-import lombok.*;
-
-import java.io.Serializable;
-import java.util.Date;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 /**
  * <p>
  *
  * </p>
  *
- * @author cxygzl
- * @since 2023-05-25
+ * @author Vincent
+ * @since 2023-07-06
  */
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class Process implements Serializable {
+@Accessors(chain = true)
+@TableName("`process`")
+public class Process  extends BaseEntity {
 
-    private static final long serialVersionUID = 1L;
 
-    /**
-     * 用户id
-     */
-    @TableId(value = "id", type = IdType.AUTO)
-    private Long id;
-
-    /**
-     * 逻辑删除字段
-     */
-    @TableLogic
-    @TableField( fill = FieldFill.INSERT)
-    private Boolean delFlag;
-    /**
-     * 创建时间
-     */
-    @TableField( fill = FieldFill.INSERT)
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    @TableField( fill = FieldFill.INSERT_UPDATE)
-    private Date updateTime;
 
     /**
      * 表单ID
      */
+    @TableField("`flow_id`")
     private String flowId;
 
     /**
      * 表单名称
      */
+    @TableField("`name`")
     private String name;
 
     /**
      * 图标配置
      */
+    @TableField("`logo`")
     private String logo;
 
     /**
      * 设置项
      */
+    @TableField("`settings`")
     private String settings;
 
     /**
      * 分组ID
      */
+    @TableField("`group_id`")
     private Long groupId;
 
     /**
      * 表单设置内容
      */
+    @TableField("`form_items`")
     private String formItems;
 
     /**
      * 流程设置内容
      */
+    @TableField("`process`")
     private String process;
 
     /**
      * 备注
      */
+    @TableField("`remark`")
     private String remark;
-
+    @TableField("`sort`")
     private Integer sort;
 
     /**
-     * 0 正常 1=停用 2=已删除
+     * 0 正常 1=隐藏
      */
-    private Boolean isStop;
+    @TableField("`is_hidden`")
+    private Boolean hidden;
+
     /**
-     * 是否隐藏
+     * 0 正常 1=停用
      */
-    private Boolean isHidden;
+    @TableField("`is_stop`")
+    private Boolean stop;
 
     /**
      * 流程管理员
      */
+    @TableField("`admin_id`")
     private Long adminId;
+
     /**
-     * 唯一id
+     * 唯一性id
      */
+    @TableField("`unique_id`")
     private String uniqueId;
-    private String admin;
+
     /**
-     * 范围显示
+     * 管理员
      */
+    @TableField("`admin`")
+    private String admin;
+
+    /**
+     * 范围描述显示
+     */
+    @TableField("`range_show`")
     private String rangeShow;
 }

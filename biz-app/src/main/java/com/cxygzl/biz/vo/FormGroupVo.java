@@ -44,7 +44,7 @@ public class FormGroupVo {
 
         private String logo;
 
-        private Boolean isStop;
+        private Boolean stop;
 
         private String remark;
 

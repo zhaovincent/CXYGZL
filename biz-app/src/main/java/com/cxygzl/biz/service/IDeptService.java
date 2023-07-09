@@ -1,6 +1,7 @@
 package com.cxygzl.biz.service;
 
 import com.cxygzl.biz.entity.Dept;
+import com.cxygzl.common.dto.R;
 import com.github.yulichang.base.MPJBaseService;
 
 /**
@@ -19,7 +20,7 @@ public interface IDeptService extends MPJBaseService<Dept> {
      * @param dept
      * @return
      */
-    Object create(Dept dept);
+    R create(Dept dept);
 
     /**
      * 修改部门
@@ -27,6 +28,9 @@ public interface IDeptService extends MPJBaseService<Dept> {
      * @param dept
      * @return
      */
-    Object updateDept(Dept dept);
+    R updateDept(Dept dept);
+
+
+
 
 }

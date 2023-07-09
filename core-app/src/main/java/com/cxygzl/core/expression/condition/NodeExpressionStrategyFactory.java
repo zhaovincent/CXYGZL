@@ -11,11 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * @author wuhengzhen
- * @date 2022/11/04 18:00
- **/
-
 public class NodeExpressionStrategyFactory {
 
     private static final Map<String, NodeConditionStrategy> STRATEGY_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();

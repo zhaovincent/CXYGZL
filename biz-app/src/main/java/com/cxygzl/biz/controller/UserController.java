@@ -65,9 +65,22 @@ public class UserController {
      */
     @SneakyThrows
     @PostMapping("login")
-    public Object login(@RequestBody UserVO user) {
+    public R login(@RequestBody UserVO user) {
 
         return userService.login(user);
+
+    }
+    /**
+     * 用户token自动登录
+     *
+     * @param token
+     * @return
+     */
+    @SneakyThrows
+    @GetMapping("loginByToken")
+    public R loginByToken ( String token) {
+
+        return userService.loginByToken(token);
 
     }
 

@@ -2,7 +2,7 @@ spring:
   application:
     name: cyxgjz-core-app
   datasource:
-    url: jdbc:mysql://localhost:3307/simple_flow?allowPublicKeyRetrieval=true&useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3307/simple_flow?allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 123456
@@ -18,3 +18,6 @@ node:
     store: remoteNodeDataStore
 biz:
   url: http://127.0.0.1:26859
+
+api:
+  ori: local

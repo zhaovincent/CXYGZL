@@ -51,18 +51,18 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
      * @return
      */
     @Override
-    public R<Set<String>> queryRoleKeyByUserId(long userId) {
+    public com.cxygzl.common.dto.R<Set<String>> queryRoleKeyByUserId(long userId) {
         List<UserRole> userRoleList = userRoleService.queryListByUserId(userId).getData();
         if(CollUtil.isEmpty(userRoleList)){
-            return R.success(CollUtil.newHashSet());
+            return com.cxygzl.common.dto.R.success(CollUtil.newHashSet());
         }
         Set<Long> roleIdSet = userRoleList.stream().map(w -> w.getRoleId()).collect(Collectors.toSet());
         List<Role> roles = this.listByIds(roleIdSet);
         if(CollUtil.isEmpty(roles)){
-            return R.success(CollUtil.newHashSet());
+            return com.cxygzl.common.dto.R.success(CollUtil.newHashSet());
         }
         Set<String> keySet = roles.stream().map(w -> w.getKey()).collect(Collectors.toSet());
-        return R.success(keySet);
+        return com.cxygzl.common.dto.R.success(keySet);
 
     }
 
@@ -80,7 +80,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
                 .page(new Page<>(pageDto.getPageNum(),
                 pageDto.getPageSize()));
 
-        return R.success(page);
+        return com.cxygzl.common.dto.R.success(page);
     }
 
     /**
@@ -89,8 +89,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
      * @return
      */
     @Override
-    public R queryAll() {
-        return R.success(this.lambdaQuery().list());
+    public com.cxygzl.common.dto.R queryAll() {
+        return com.cxygzl.common.dto.R.success(this.lambdaQuery().list());
     }
 
     /**
@@ -118,7 +118,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
             nodeUserDtoList.add(nodeUserDto);
         }
 
-        return R.success(nodeUserDtoList);
+        return com.cxygzl.common.dto.R.success(nodeUserDtoList);
     }
 
     /**
@@ -158,16 +158,16 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
         String key = role.getKey();
         Long count = this.lambdaQuery().eq(Role::getKey, key).count();
         if(count>0){
-            return R.fail("角色唯一键已存在");
+            return com.cxygzl.common.dto.R.fail("角色唯一键已存在");
         }
         String name = role.getName();
           count = this.lambdaQuery().eq(Role::getName, name).count();
         if(count>0){
-           return  R.fail("角色名字已存在");
+           return  com.cxygzl.common.dto.R.fail("角色名字已存在");
         }
         role.setUserId(StpUtil.getLoginIdAsLong());
         this.save(role);
-        return R.success();
+        return com.cxygzl.common.dto.R.success();
     }
 
     /**
@@ -181,16 +181,16 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
         String key = role.getKey();
         Long count = this.lambdaQuery().ne(Role::getId,role.getId()).eq(Role::getKey, key).count();
         if(count>0){
-            return R.fail("角色唯一键已存在");
+            return com.cxygzl.common.dto.R.fail("角色唯一键已存在");
         }
         String name = role.getName();
         count = this.lambdaQuery().ne(Role::getId,role.getId()).eq(Role::getName, name).count();
         if(count>0){
-            return  R.fail("角色名字已存在");
+            return  com.cxygzl.common.dto.R.fail("角色名字已存在");
         }
         role.setUserId(StpUtil.getLoginIdAsLong());
         this.updateById(role);
-        return R.success();
+        return com.cxygzl.common.dto.R.success();
     }
 
     /**
@@ -206,7 +206,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
         LambdaQueryWrapper<UserRole> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserRole::getRoleId,role.getId());
         userRoleService.remove(queryWrapper);
-        return R.success();
+        return com.cxygzl.common.dto.R.success();
     }
 
     /**
@@ -216,7 +216,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
      * @return 菜单ID集合(包括按钮权限ID)
      */
     @Override
-    public R<List<Long>> getRoleMenuIds(long roleId) {
+    public com.cxygzl.common.dto.R<List<Long>> getRoleMenuIds(long roleId) {
 
         MPJLambdaWrapper<RoleMenu> lambdaWrapper=new MPJLambdaWrapper<>();
         lambdaWrapper.select(RoleMenu::getMenuId)
@@ -224,7 +224,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
                 .eq(RoleMenu::getRoleId,roleId);
         List<Long> longList = roleMenuService.selectJoinList(Long.class, lambdaWrapper);
 
-        return R.success(longList);
+        return com.cxygzl.common.dto.R.success(longList);
     }
 
     /**
@@ -235,16 +235,21 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
      * @return
      */
     @Override
-    public R updateRoleMenus(long roleId, List<Long> menuIds) {
+    public com.cxygzl.common.dto.R updateRoleMenus(long roleId, List<Long> menuIds) {
         // 删除角色菜单
         roleMenuService.remove(new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, roleId));
         // 新增角色菜单
         if (CollectionUtil.isNotEmpty(menuIds)) {
             List<RoleMenu> roleMenus = menuIds.stream()
-                    .map(menuId ->RoleMenu.builder().menuId(menuId).roleId(roleId).build())
+                    .map(menuId ->{
+                        RoleMenu roleMenu = new RoleMenu();
+                        roleMenu.setMenuId(menuId);
+                        roleMenu.setRoleId(roleId);
+                        return roleMenu;
+                    })
                     .collect(Collectors.toList());
             roleMenuService.saveBatch(roleMenus);
         }
-        return R.success();
+        return com.cxygzl.common.dto.R.success();
     }
 }

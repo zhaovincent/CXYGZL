@@ -3,6 +3,7 @@ package com.cxygzl.biz.controller;
 import com.cxygzl.biz.entity.Dept;
 import com.cxygzl.biz.service.IDeptService;
 import com.cxygzl.biz.service.IOrgService;
+import com.cxygzl.common.dto.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,11 +29,11 @@ public class DeptController {
 
     /**
      * 创建部门
-     * @param oaDepartments 部门对象
+     * @param dept 部门对象
      * @return
      */
     @PostMapping("create")
-    public Object create(@RequestBody Dept dept){
+    public R create(@RequestBody Dept dept){
         return deptService.create(dept);
     }
 

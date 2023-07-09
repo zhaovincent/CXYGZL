@@ -49,7 +49,7 @@ public class UserFieldServiceImpl extends ServiceImpl<UserFieldMapper, UserField
                 if(!b){
                     Long count = userFieldDataService.lambdaQuery().eq(UserFieldData::getKey, userField.getKey()).count();
                     if(count>0){
-                        return R.fail(StrUtil.format("字段[{}]已被使用，不能删除",userField.getName()));
+                        return com.cxygzl.common.dto.R.fail(StrUtil.format("字段[{}]已被使用，不能删除",userField.getName()));
                     }
                 }
             }
@@ -64,7 +64,7 @@ public class UserFieldServiceImpl extends ServiceImpl<UserFieldMapper, UserField
             }
             this.save(userField);
         }
-        return R.success();
+        return com.cxygzl.common.dto.R.success();
     }
 
     /**

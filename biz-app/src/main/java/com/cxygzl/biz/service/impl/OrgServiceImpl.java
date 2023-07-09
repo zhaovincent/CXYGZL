@@ -8,11 +8,12 @@ import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeNode;
 import cn.hutool.core.lang.tree.TreeUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.*;
-import com.cxygzl.biz.mapper.DeptMapper;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
+import com.cxygzl.biz.utils.DataUtil;
 import com.cxygzl.biz.utils.DeptUtil;
 import com.cxygzl.biz.vo.OrgTreeVo;
 import com.cxygzl.biz.vo.UserFieldDataVo;
@@ -40,13 +41,11 @@ public class OrgServiceImpl implements IOrgService {
     private IUserService userService;
     @Resource
     private IDeptService deptService;
-    @Resource
-    private IRoleService roleService;
+
     @Resource
     private IUserRoleService userRoleService;
 
-    @Resource
-    private DeptMapper deptMapper;
+
     @Resource
     private IUserFieldDataService userFieldDataService;
     @Resource
@@ -69,12 +68,14 @@ public class OrgServiceImpl implements IOrgService {
         if (StrUtil.equals(type, NodeUserTypeEnum.ROLE.getKey())) {
             //角色
 
-            List<Role> roleList = roleService.lambdaQuery().list();
+            List<Role> roleList = ApiStrategyFactory.getStrategy().loadAllRole();
+
 
             for (Role role : roleList) {
                 OrgTreeVo orgTreeVo = new OrgTreeVo();
                 orgTreeVo.setId(role.getId());
                 orgTreeVo.setName(role.getName());
+                orgTreeVo.setStatus(role.getStatus());
                 orgTreeVo.setType(NodeUserTypeEnum.ROLE.getKey());
                 orgTreeVo.setSelected(false);
                 orgs.add(orgTreeVo);
@@ -85,7 +86,7 @@ public class OrgServiceImpl implements IOrgService {
                     .set("childDepartments",orgs)
                     .set("employees",new ArrayList<>());
 
-            return R.success(dict);
+            return com.cxygzl.common.dto.R.success(dict);
 
         }
 
@@ -94,9 +95,8 @@ public class OrgServiceImpl implements IOrgService {
                 .set("roleList",new ArrayList<>())
                 .set("employees",new ArrayList<>());
 
-        List<Dept> deptList = deptService.lambdaQuery()
-                .eq(deptId != null, Dept::getParentId, deptId)
-                .list();
+
+        List<Dept> deptList = ApiStrategyFactory.getStrategy().loadAllDept(deptId);
 
         //查询所有部门及员工
         {
@@ -116,9 +116,10 @@ public class OrgServiceImpl implements IOrgService {
 
             List userVoList=new ArrayList();
 
-            List<User> userList = userService.lambdaQuery()
-                    .eq(User::getDeptId, deptId)
-                    .list();
+
+
+            List<User> userList = ApiStrategyFactory.getStrategy().loadUserByDept(deptId);
+
             for (User user : userList) {
                 OrgTreeVo orgTreeVo = new OrgTreeVo();
                 orgTreeVo.setId(user.getId());
@@ -134,11 +135,12 @@ public class OrgServiceImpl implements IOrgService {
         }
 
         if(deptId>0){
-            List<Dept> depts = deptMapper.selectParentByDept(deptId);
+            List<Dept> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
+            List<Dept> depts = DataUtil.selectParentByDept(deptId, allDept);
             dict.set("titleDepartments",CollUtil.reverse(depts));
         }
 
-        return R.success(dict);
+        return com.cxygzl.common.dto.R.success(dict);
     }
 
 
@@ -148,7 +150,7 @@ public class OrgServiceImpl implements IOrgService {
      * @return
      */
     @Override
-    public R getOrgTreeDataAll(String keywords, Integer status) {
+    public com.cxygzl.common.dto.R getOrgTreeDataAll(String keywords, Integer status) {
 
         List<Dept> deptList = deptService.lambdaQuery()
                 .eq(status!=null,Dept::getStatus,status)
@@ -171,7 +173,7 @@ public class OrgServiceImpl implements IOrgService {
                         .set("roodIdList", CollUtil.reverse(DeptUtil.queryRootIdList(dept.getId(), deptList)));
                 list.add(set);
             }
-           return  R.success(list);
+           return  com.cxygzl.common.dto.R.success(list);
         }
 
         List<TreeNode<Long>> nodeList = CollUtil.newArrayList();
@@ -198,7 +200,7 @@ public class OrgServiceImpl implements IOrgService {
         // 0表示最顶层的id是0
         List<Tree<Long>> treeList = TreeUtil.build(nodeList, 0L);
 
-        return R.success(treeList);
+        return com.cxygzl.common.dto.R.success(treeList);
     }
 
 
@@ -211,11 +213,7 @@ public class OrgServiceImpl implements IOrgService {
     @Override
     public Object getOrgTreeUser(String userName) {
 
-        List<User> userList = userService.lambdaQuery().and(k ->
-                k.like(User::getPinyin, userName)
-                        .or(w -> w.like(User::getPy, userName))
-                        .or(w -> w.like(User::getName, userName))
-        ).list();
+        List<User> userList = ApiStrategyFactory.getStrategy().searchUser(userName);
 
         List<OrgTreeVo> orgTreeVoList = new ArrayList<>();
 
@@ -231,7 +229,7 @@ public class OrgServiceImpl implements IOrgService {
 
         }
 
-        return R.success(orgTreeVoList);
+        return com.cxygzl.common.dto.R.success(orgTreeVoList);
     }
 
 
@@ -245,15 +243,18 @@ public class OrgServiceImpl implements IOrgService {
     public Object delete(Dept dept) {
         long id = dept.getId();
 
+        List<Dept> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
+        List<Dept> deptList = DataUtil.selectChildrenByDept(id, allDept);
 
-        List<Dept> deptList = deptMapper.selectChildrenByDept(id);
+
+
         Set<Long> depIdSet = deptList.stream().map(w -> w.getId()).collect(Collectors.toSet());
 
         Long count = userService.lambdaQuery().in(User::getDeptId, depIdSet).count();
 
 
         if (count > 0) {
-            return R.fail("当前部门下有用户，不能删除");
+            return com.cxygzl.common.dto.R.fail("当前部门下有用户，不能删除");
         }
 
         deptService.removeById(id);
@@ -304,7 +305,7 @@ public class OrgServiceImpl implements IOrgService {
         List<UserRole> userRoleList = userRoleService.queryListByUserId(userId).getData();
         userVO.setRoleIds(userRoleList.stream().map(w->w.getRoleId()).collect(Collectors.toList()));
 
-        return R.success(userVO);
+        return com.cxygzl.common.dto.R.success(userVO);
     }
 
     /**
@@ -330,22 +331,22 @@ public class OrgServiceImpl implements IOrgService {
 
             Long total = pageResultDto.getTotal();
             if(total>0){
-                return R.fail("当前用户仍有待办任务，不能离职");
+                return com.cxygzl.common.dto.R.fail("当前用户仍有待办任务，不能离职");
             }
 
         }
         //判断是否是流程管理员
         {
-            List<Process> processList = processService.lambdaQuery().eq(Process::getAdminId, user.getId()).list();
+            List<com.cxygzl.biz.entity.Process> processList = processService.lambdaQuery().eq(Process::getAdminId, user.getId()).list();
             if(!processList.isEmpty()){
-                return R.fail(StrUtil.format("当前用户是流程[{}]的管理员，请先修改流程管理员之后才能离职",processList.stream().map(w->w.getName()).collect(Collectors.joining(","))));
+                return com.cxygzl.common.dto.R.fail(StrUtil.format("当前用户是流程[{}]的管理员，请先修改流程管理员之后才能离职",processList.stream().map(w->w.getName()).collect(Collectors.joining(","))));
             }
         }
         //判断是否是部门负责人
         {
             List<Dept> deptList = deptService.lambdaQuery().eq(Dept::getLeaderUserId, user.getId()).list();
             if(!deptList.isEmpty()){
-                return R.fail(StrUtil.format("当前用户是部门[{}]的负责人，请先修改部门负责人之后才能离职",deptList.stream().map(w->w.getName()).collect(Collectors.joining(","))));
+                return com.cxygzl.common.dto.R.fail(StrUtil.format("当前用户是部门[{}]的负责人，请先修改部门负责人之后才能离职",deptList.stream().map(w->w.getName()).collect(Collectors.joining(","))));
             }
         }
 
@@ -353,6 +354,6 @@ public class OrgServiceImpl implements IOrgService {
 
         userService.removeById(user.getId());
 
-        return R.success();
+        return com.cxygzl.common.dto.R.success();
     }
 }
