@@ -20,19 +20,19 @@ public class HttpUtil {
         return post;
     }
 
-    public static <T> com.cxygzl.common.dto.R<T> post(Object object, String url, Class<T> tClass,String baseUrl) {
+    public static <T> R<T> post(Object object, String url, Class<T> tClass,String baseUrl) {
         String post = post(object, url,baseUrl);
 
-        com.cxygzl.common.dto.R<T> r = JSON.parseObject(post, new TypeReference<R<T>>() {
+        R<T> r = JSON.parseObject(post, new TypeReference<R<T>>() {
         });
         return r;
     }
 
-    public static <T> com.cxygzl.common.dto.R<List<T>> postArray(Object object, String url, Class<T> tClass,
+    public static <T> R<List<T>> postArray(Object object, String url, Class<T> tClass,
                                                                  String baseUrl) {
         String post = post(object, url,baseUrl);
 
-        com.cxygzl.common.dto.R<List<T>> r = JSON.parseObject(post, new TypeReference<R<List<T>>>() {
+        R<List<T>> r = JSON.parseObject(post, new TypeReference<R<List<T>>>() {
         });
         return r;
     }
@@ -44,19 +44,19 @@ public class HttpUtil {
     }
 
 
-    public static <T> com.cxygzl.common.dto.R<T> get( String url,String baseUrl, Class<T> tClass) {
+    public static <T> R<T> get( String url,String baseUrl, Class<T> tClass) {
         String post = get(url,baseUrl);
 
-        com.cxygzl.common.dto.R<T> r = JSON.parseObject(post, new TypeReference<R<T>>() {
+        R<T> r = JSON.parseObject(post, new TypeReference<R<T>>() {
         });
         return r;
     }
 
-    public static <T> com.cxygzl.common.dto.R<List<T>> getArray( String url, Class<T> tClass,
+    public static <T> R<List<T>> getArray( String url, Class<T> tClass,
                                                                  String baseUrl) {
         String post = get(url,baseUrl);
 
-        com.cxygzl.common.dto.R<List<T>> r = JSON.parseObject(post, new TypeReference<R<List<T>>>() {
+        R<List<T>> r = JSON.parseObject(post, new TypeReference<R<List<T>>>() {
         });
         return r;
     }

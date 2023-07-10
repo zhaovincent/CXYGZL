@@ -5,7 +5,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import com.cxygzl.biz.config.NotWriteLogAnno;
+import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.dto.R;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;

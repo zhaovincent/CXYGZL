@@ -60,7 +60,7 @@ public class TaskServiceImpl implements ITaskService {
         long userId = StpUtil.getLoginIdAsLong();
 
 
-        com.cxygzl.common.dto.R<TaskResultDto> r = CoreHttpUtil.queryTask(taskId,userId);
+        R<TaskResultDto> r = CoreHttpUtil.queryTask(taskId,userId);
 
         if (!r.isOk()) {
             return R.fail(r.getMsg());
@@ -203,7 +203,7 @@ public class TaskServiceImpl implements ITaskService {
         taskParamDto.setUserId(String.valueOf(userId));
 
 
-        com.cxygzl.common.dto.R r =CoreHttpUtil.completeTask(taskParamDto);
+        R r =CoreHttpUtil.completeTask(taskParamDto);
 
         if (!r.isOk()) {
             return R.fail(r.getMsg());
@@ -227,7 +227,7 @@ public class TaskServiceImpl implements ITaskService {
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
 
         String post =CoreHttpUtil.delegateTask(taskParamDto);
-        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
+        R r = JSON.parseObject(post, new TypeReference<R>() {
         });
         if (!r.isOk()) {
             return  R.fail(r.getMsg());
@@ -246,7 +246,7 @@ public class TaskServiceImpl implements ITaskService {
     @Override
     public Object resolveTask(TaskParamDto taskParamDto) {
         String post = CoreHttpUtil.resolveTask(taskParamDto);
-        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
+        R r = JSON.parseObject(post, new TypeReference<R>() {
         });
         if (!r.isOk()) {
             return  R.fail(r.getMsg());
@@ -266,7 +266,7 @@ public class TaskServiceImpl implements ITaskService {
     public Object setAssignee(TaskParamDto taskParamDto) {
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
         String post = CoreHttpUtil.setAssignee(taskParamDto);
-        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
+        R r = JSON.parseObject(post, new TypeReference<R>() {
         });
         if (!r.isOk()) {
             return  R.fail(r.getMsg());
@@ -293,7 +293,7 @@ public class TaskServiceImpl implements ITaskService {
 
         taskParamDto.setProcessInstanceIdList(allStopProcessInstanceIdList);
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
-        com.cxygzl.common.dto.R r= CoreHttpUtil.stopProcessInstance(taskParamDto);
+        R r= CoreHttpUtil.stopProcessInstance(taskParamDto);
 
         if (!r.isOk()) {
             return R.fail(r.getMsg());
@@ -313,7 +313,7 @@ public class TaskServiceImpl implements ITaskService {
     public Object back(TaskParamDto taskParamDto) {
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
         String post = CoreHttpUtil.back(taskParamDto);
-        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
+        R r = JSON.parseObject(post, new TypeReference<R>() {
         });
         if (!r.isOk()) {
             return  R.fail(r.getMsg());

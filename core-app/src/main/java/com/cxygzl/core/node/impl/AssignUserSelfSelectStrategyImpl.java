@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 /**
  * 发起人自选
+ *
  * @author Huijun Zhao
  * @description
  * @date 2023-07-07 13:42
@@ -28,10 +29,13 @@ public class AssignUserSelfSelectStrategyImpl implements InitializingBean, Assig
     public List<String> handle(Node node, NodeUser rootUser, Map<String, Object> variables) {
 
 
-        List<String> assignList=new ArrayList<>();
+        List<String> assignList = new ArrayList<>();
 
         Object variable = variables.get(StrUtil.format("{}_assignee_select", node.getId()));
         log.info("{}-发起人自选参数:{}", node.getName(), variable);
+        if (variable == null) {
+            return assignList;
+        }
         List<NodeUser> nodeUserDtos = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class);
 
         List<String> collect = nodeUserDtos.stream().map(w -> String.valueOf(w.getId())).collect(Collectors.toList());

@@ -74,7 +74,7 @@ public class CombinationGroupServiceImpl implements ICombinationGroupService {
                         .build());
             });
         });
-        return com.cxygzl.common.dto.R.success(formGroupVos);
+        return R.success(formGroupVos);
     }
 
     /**
@@ -153,6 +153,6 @@ public class CombinationGroupServiceImpl implements ICombinationGroupService {
                         .build());
             });
         });
-        return com.cxygzl.common.dto.R.success(formGroupVos);
+        return R.success(formGroupVos);
     }
 }

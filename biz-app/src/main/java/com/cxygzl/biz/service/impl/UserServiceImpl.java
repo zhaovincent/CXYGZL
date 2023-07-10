@@ -70,11 +70,11 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
         Object cacheVerifyCode =
                 redisTemplate.opsForValue().get(SecurityConstants.VERIFY_CODE_CACHE_PREFIX + userVO.getVerifyCodeKey());
         if (cacheVerifyCode == null) {
-            return com.cxygzl.common.dto.R.fail("验证码错误");
+            return R.fail("验证码错误");
         } else {
             // 验证码比对
             if (!StrUtil.equals(userVO.getVerifyCode(), Convert.toStr(cacheVerifyCode))) {
-                return com.cxygzl.common.dto.R.fail("验证码错误");
+                return R.fail("验证码错误");
 
             }
         }
@@ -97,7 +97,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
 
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
 
-        return com.cxygzl.common.dto.R.success(tokenInfo);
+        return R.success(tokenInfo);
     }
 
     /**
@@ -113,7 +113,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
 
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
 
-        return com.cxygzl.common.dto.R.success(tokenInfo);
+        return R.success(tokenInfo);
     }
 
     /**
@@ -122,9 +122,9 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
      * @return
      */
     @Override
-    public com.cxygzl.common.dto.R logout() {
+    public R logout() {
         StpUtil.logout();
-        return com.cxygzl.common.dto.R.success();
+        return R.success();
     }
 
     /**
@@ -134,11 +134,11 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
      * @return
      */
     @Override
-    public com.cxygzl.common.dto.R password(User user) {
+    public R password(User user) {
 
         this.lambdaUpdate().set(User::getPassword,user.getPassword()).eq(User::getId,user.getId()).update(new User());
 
-        return com.cxygzl.common.dto.R.success();
+        return R.success();
     }
 
     /**
@@ -148,10 +148,10 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
      * @return
      */
     @Override
-    public com.cxygzl.common.dto.R status(User user) {
+    public R status(User user) {
         this.lambdaUpdate().set(User::getStatus,user.getStatus()).eq(User::getId,user.getId()).update(new User());
 
-        return com.cxygzl.common.dto.R.success();
+        return R.success();
     }
 
     /**
@@ -160,7 +160,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
      * @return
      */
     @Override
-    public com.cxygzl.common.dto.R getCurrentUserDetail() {
+    public R getCurrentUserDetail() {
         long userId = StpUtil.getLoginIdAsLong();
 
 //        User user = this.getById(userId);
@@ -184,7 +184,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
         }
 
 
-        return com.cxygzl.common.dto.R.success(userVO);
+        return R.success(userVO);
     }
 
     /**
@@ -199,7 +199,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
         String phone = userVO.getPhone();
         Long count = this.lambdaQuery().eq(User::getPhone, phone).count();
         if (count > 0) {
-            return com.cxygzl.common.dto.R.fail(StrUtil.format("手机号[{}]已注册", phone));
+            return R.fail(StrUtil.format("手机号[{}]已注册", phone));
         }
 
         userVO.setNickName(userVO.getName());
@@ -243,7 +243,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
 
         }
 
-        return com.cxygzl.common.dto.R.success();
+        return R.success();
     }
 
     /**
@@ -260,7 +260,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
         String phone = userVO.getPhone();
         Long count = this.lambdaQuery().eq(User::getPhone, phone).ne(User::getId, userVO.getId()).count();
         if (count > 0) {
-            return com.cxygzl.common.dto.R.fail(StrUtil.format("手机号[{}]已注册", phone));
+            return R.fail(StrUtil.format("手机号[{}]已注册", phone));
         }
 
         userVO.setNickName(userVO.getName());
@@ -312,7 +312,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
         }
 
 
-        return com.cxygzl.common.dto.R.success();
+        return R.success();
     }
 
 
@@ -344,7 +344,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
                 userListQueryVO.getPageSize()), UserVO.class, lambdaQueryWrapper);
 
 
-        return com.cxygzl.common.dto.R.success(objectPage);
+        return R.success(objectPage);
     }
 
 }

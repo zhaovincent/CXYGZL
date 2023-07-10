@@ -1,4 +1,4 @@
-package com.cxygzl.biz.config;
+package com.cxygzl.common.config;
 
 import java.lang.annotation.*;
 

@@ -31,7 +31,7 @@ public class ApprovalCreateListener implements TaskListener {
         String name = delegateTask.getName();
         log.debug("任务{}-执行人:{}", name, assignee);
         String processInstanceId = delegateTask.getProcessInstanceId();
-        org.flowable.task.service.impl.persistence.entity.TaskEntityImpl taskEntity = (TaskEntityImpl) delegateTask;
+        TaskEntityImpl taskEntity = (TaskEntityImpl) delegateTask;
         String nodeId = taskEntity.getTaskDefinitionKey();
         String processDefinitionId = taskEntity.getProcessDefinitionId();
         //流程id

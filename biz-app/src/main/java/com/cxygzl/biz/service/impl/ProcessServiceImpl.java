@@ -122,9 +122,9 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
         String processStr = process.getProcess();
 
-        com.cxygzl.common.dto.R<String> r = CoreHttpUtil.createFlow(JSON.parseObject(processStr), StpUtil.getLoginIdAsLong());
+        R<String> r = CoreHttpUtil.createFlow(JSON.parseObject(processStr), StpUtil.getLoginIdAsLong());
         if (!r.isOk()) {
-            return com.cxygzl.common.dto.R.fail(r.getMsg());
+            return R.fail(r.getMsg());
         }
         String flowId = r.getData();
 
@@ -198,7 +198,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         }
 
 
-        return com.cxygzl.common.dto.R.success();
+        return R.success();
     }
 
     /**
@@ -221,6 +221,6 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
         this.updateByFlowId(process);
 
-        return com.cxygzl.common.dto.R.success();
+        return R.success();
     }
 }

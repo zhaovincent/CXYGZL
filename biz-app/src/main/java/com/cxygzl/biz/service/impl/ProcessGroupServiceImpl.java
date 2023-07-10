@@ -29,7 +29,7 @@ public class ProcessGroupServiceImpl extends ServiceImpl<ProcessGroupMapper, Pro
     public R<List<ProcessGroup>> queryList() {
         List<ProcessGroup> processGroupList = this.lambdaQuery().orderByAsc(ProcessGroup::getSort).list();
 
-        return com.cxygzl.common.dto.R.success(processGroupList);
+        return R.success(processGroupList);
     }
 
     /**
@@ -45,7 +45,7 @@ public class ProcessGroupServiceImpl extends ServiceImpl<ProcessGroupMapper, Pro
         pg.setGroupName(processGroup.getGroupName());
 
         this.save(pg);
-        return com.cxygzl.common.dto.R.success();
+        return R.success();
     }
 
     /**
@@ -57,6 +57,6 @@ public class ProcessGroupServiceImpl extends ServiceImpl<ProcessGroupMapper, Pro
     @Override
     public R delete(long id) {
         this.removeById(id);
-        return com.cxygzl.common.dto.R.success();
+        return R.success();
     }
 }

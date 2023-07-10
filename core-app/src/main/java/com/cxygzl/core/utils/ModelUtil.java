@@ -85,6 +85,9 @@ public class ModelUtil {
      * @param flowId
      */
     public static void buildAllNode(Process process, Node nodeDto, String flowId) {
+        if (!NodeUtil.isNode(nodeDto)) {
+            return;
+        }
         List<FlowElement> flowElementList = buildNode(nodeDto, flowId);
         for (FlowElement flowElement : flowElementList) {
             if (process.getFlowElement(flowElement.getId()) == null) {
@@ -129,7 +132,9 @@ public class ModelUtil {
      * @param flowId
      */
     public static void buildAllNodeInnerSequence(Process process, Node nodeDto, String flowId) {
-
+        if (!NodeUtil.isNode(nodeDto)) {
+            return;
+        }
         //画内部线
         List<SequenceFlow> flowList = buildInnerSequenceFlow(nodeDto, flowId);
         for (SequenceFlow sequenceFlow : flowList) {
@@ -172,7 +177,9 @@ public class ModelUtil {
      * @param nodeDto 节点对象
      */
     public static void buildAllNodeOuterSequence(Process process, Node nodeDto, Node nextNodeDto) {
-
+        if (!NodeUtil.isNode(nodeDto)) {
+            return;
+        }
 
         //子节点
         Node children = nodeDto.getChildren();
@@ -249,6 +256,10 @@ public class ModelUtil {
      */
     private static List<FlowElement> buildNode(Node node, String flowId) {
         List<FlowElement> flowElementList = new ArrayList<>();
+
+        if (!NodeUtil.isNode(node)) {
+            return flowElementList;
+        }
 
         //设置节点的连线头节点
         node.setHeadId(node.getId());
@@ -546,9 +557,11 @@ public class ModelUtil {
      */
     private static List<SequenceFlow> buildInnerSequenceFlow(Node node, String flowId
     ) {
-
-
         List<SequenceFlow> sequenceFlowList = new ArrayList<>();
+
+        if (!NodeUtil.isNode(node)) {
+            return sequenceFlowList;
+        }
 
 
         String nodeId = node.getId();

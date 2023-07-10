@@ -1,4 +1,4 @@
-package com.cxygzl.biz.config;
+package com.cxygzl.core.config;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;

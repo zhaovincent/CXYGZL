@@ -2,18 +2,18 @@ package com.cxygzl.core.utils;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import cn.hutool.http.HttpUtil;
+import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.*;
+import com.yomahub.tlog.hutoolhttp.TLogHutoolhttpInterceptor;
 import org.springframework.core.env.Environment;
 
 import java.util.List;
 
 public class CoreHttpUtil {
 
-
-
+    private static TLogHutoolhttpInterceptor tLogHutoolhttpInterceptor = new TLogHutoolhttpInterceptor();
 
 
     public static String post(Object object, String url) {
@@ -21,15 +21,15 @@ public class CoreHttpUtil {
         String bizUrl = environment.getProperty("biz.url");
 
 
-        String post = HttpUtil.post(StrUtil.format("{}{}", bizUrl, url), JSON.toJSONString(object));
+        String post = HttpRequest.post(StrUtil.format("{}{}", bizUrl, url)).body(JSON.toJSONString(object))
+                .addInterceptor(tLogHutoolhttpInterceptor).execute().body();
 
 
         return post;
     }
 
 
-
-    public static <T> R<List<T>> postArray(Object object, String url, Class<T> tClass) {
+    public static <T> R<List<T>> postArray(Object object, String url) {
         String post = post(object, url);
 
         R<List<T>> r = JSON.parseObject(post, new TypeReference<R<List<T>>>() {
@@ -41,10 +41,10 @@ public class CoreHttpUtil {
         Environment environment = SpringUtil.getBean(Environment.class);
         String bizUrl = environment.getProperty("biz.url");
 
+        return HttpRequest.get(StrUtil.format("{}{}", bizUrl, url)).addInterceptor(tLogHutoolhttpInterceptor).execute().body();
 
-        return HttpUtil.get(StrUtil.format("{}{}", bizUrl, url));
+
     }
-
 
 
     /**
@@ -89,7 +89,7 @@ public class CoreHttpUtil {
      * @param roleIdList
      */
     public static R<List<String>> queryUserIdListByRoleIdList(List<String> roleIdList) {
-        return postArray(roleIdList, "/remote/queryUserIdListByRoleIdList", String.class);
+        return postArray(roleIdList, "/remote/queryUserIdListByRoleIdList");
     }
 
     /**
@@ -97,7 +97,7 @@ public class CoreHttpUtil {
      *
      * @param deptIdList
      */
-    public static  R<List<String>> queryUserIdListByDepIdList(List<String> deptIdList) {
+    public static R<List<String>> queryUserIdListByDepIdList(List<String> deptIdList) {
         String s = post(deptIdList, "/remote/queryUserIdListByDepIdList");
         R<List<String>> r = JSON.parseObject(s, new TypeReference<R<List<String>>>() {
         });
@@ -109,7 +109,7 @@ public class CoreHttpUtil {
      *
      * @param userId 用户id
      */
-    public static  R<List<DeptDto>> queryParentDepListByUserId(long userId) {
+    public static R<List<DeptDto>> queryParentDepListByUserId(long userId) {
         String s = get("/remote/queryParentDepListByUserId?userId=" + userId);
         R<List<DeptDto>> r = JSON.parseObject(s, new TypeReference<R<List<DeptDto>>>() {
         });
@@ -121,7 +121,7 @@ public class CoreHttpUtil {
      *
      * @param flowId 流程id
      */
-    public static  R<Long>  queryProcessAdmin(String flowId) {
+    public static R<Long> queryProcessAdmin(String flowId) {
         String s = get("/remote/queryProcessAdmin?flowId=" + flowId);
         R<Long> longR = JSON.parseObject(s, new TypeReference<R<Long>>() {
         });
@@ -135,7 +135,7 @@ public class CoreHttpUtil {
      * @param nodeId
      * @return
      */
-    public static  R<String> queryNodeOriData(String flowId, String nodeId) {
+    public static R<String> queryNodeOriData(String flowId, String nodeId) {
         String s = get(StrUtil.format("/processNodeData/getNodeData?flowId" +
                 "={}&nodeId={}", flowId, nodeId));
         R<String> r = JSON.parseObject(s, new TypeReference<R<String>>() {
@@ -151,7 +151,7 @@ public class CoreHttpUtil {
      * @return
      */
     public static void startAssignUser(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-          post(processNodeRecordAssignUserParamDto, "/remote/startAssignUser");
+        post(processNodeRecordAssignUserParamDto, "/remote/startAssignUser");
     }
 
     /**
@@ -161,7 +161,7 @@ public class CoreHttpUtil {
      * @return
      */
     public static void taskEndEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-          post(processNodeRecordAssignUserParamDto, "/remote/taskEndEvent");
+        post(processNodeRecordAssignUserParamDto, "/remote/taskEndEvent");
     }
 
     /**
@@ -171,7 +171,7 @@ public class CoreHttpUtil {
      * @return
      */
     public static void saveCC(ProcessCopyDto processCopyDto) {
-          post(processCopyDto, "/remote/savecc");
+        post(processCopyDto, "/remote/savecc");
     }
 
     /**
@@ -181,6 +181,6 @@ public class CoreHttpUtil {
      * @return
      */
     public static void saveNodeOriData(ProcessNodeDataDto processNodeDataDto) {
-          post(processNodeDataDto, "/processNodeData/saveNodeData");
+        post(processNodeDataDto, "/processNodeData/saveNodeData");
     }
 }

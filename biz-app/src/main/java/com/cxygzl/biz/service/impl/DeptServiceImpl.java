@@ -45,11 +45,11 @@ public class DeptServiceImpl extends MPJBaseServiceImpl<DeptMapper, Dept> implem
 
         boolean b = deptList.stream().anyMatch(w -> w.getId().longValue() == dept.getParentId().longValue());
         if(b){
-            return com.cxygzl.common.dto.R.fail("当前部门的父级部门不能是当前部门或者当前部门的子级部门");
+            return R.fail("当前部门的父级部门不能是当前部门或者当前部门的子级部门");
         }
 
         this.updateById(dept);
-        return com.cxygzl.common.dto.R.success("修改成功");
+        return R.success("修改成功");
     }
 
 }

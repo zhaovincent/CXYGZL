@@ -1,12 +1,12 @@
 package com.cxygzl.biz.controller;
 
-import com.cxygzl.biz.config.NotWriteLogAnno;
 import com.cxygzl.biz.entity.User;
 import com.cxygzl.biz.security.captcha.EasyCaptchaService;
 import com.cxygzl.biz.service.IOrgService;
 import com.cxygzl.biz.service.IUserService;
 import com.cxygzl.biz.vo.UserListQueryVO;
 import com.cxygzl.biz.vo.UserVO;
+import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.dto.R;
 import lombok.SneakyThrows;
 import org.springframework.web.bind.annotation.*;

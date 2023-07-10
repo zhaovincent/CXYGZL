@@ -7,6 +7,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.NodeUtil;
@@ -94,6 +95,7 @@ public class FlowController {
     }
 
 
+    @NotWriteLogAnno(all = false,printResultLog = false)
     @GetMapping("/showImg")
     public R showImg(String procInsId) {
 

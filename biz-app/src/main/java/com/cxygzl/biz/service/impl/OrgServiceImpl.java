@@ -86,7 +86,7 @@ public class OrgServiceImpl implements IOrgService {
                     .set("childDepartments",orgs)
                     .set("employees",new ArrayList<>());
 
-            return com.cxygzl.common.dto.R.success(dict);
+            return R.success(dict);
 
         }
 
@@ -140,7 +140,7 @@ public class OrgServiceImpl implements IOrgService {
             dict.set("titleDepartments",CollUtil.reverse(depts));
         }
 
-        return com.cxygzl.common.dto.R.success(dict);
+        return R.success(dict);
     }
 
 
@@ -150,7 +150,7 @@ public class OrgServiceImpl implements IOrgService {
      * @return
      */
     @Override
-    public com.cxygzl.common.dto.R getOrgTreeDataAll(String keywords, Integer status) {
+    public R getOrgTreeDataAll(String keywords, Integer status) {
 
         List<Dept> deptList = deptService.lambdaQuery()
                 .eq(status!=null,Dept::getStatus,status)
@@ -173,7 +173,7 @@ public class OrgServiceImpl implements IOrgService {
                         .set("roodIdList", CollUtil.reverse(DeptUtil.queryRootIdList(dept.getId(), deptList)));
                 list.add(set);
             }
-           return  com.cxygzl.common.dto.R.success(list);
+           return  R.success(list);
         }
 
         List<TreeNode<Long>> nodeList = CollUtil.newArrayList();
@@ -200,7 +200,7 @@ public class OrgServiceImpl implements IOrgService {
         // 0表示最顶层的id是0
         List<Tree<Long>> treeList = TreeUtil.build(nodeList, 0L);
 
-        return com.cxygzl.common.dto.R.success(treeList);
+        return R.success(treeList);
     }
 
 
@@ -229,7 +229,7 @@ public class OrgServiceImpl implements IOrgService {
 
         }
 
-        return com.cxygzl.common.dto.R.success(orgTreeVoList);
+        return R.success(orgTreeVoList);
     }
 
 
@@ -254,7 +254,7 @@ public class OrgServiceImpl implements IOrgService {
 
 
         if (count > 0) {
-            return com.cxygzl.common.dto.R.fail("当前部门下有用户，不能删除");
+            return R.fail("当前部门下有用户，不能删除");
         }
 
         deptService.removeById(id);
@@ -305,7 +305,7 @@ public class OrgServiceImpl implements IOrgService {
         List<UserRole> userRoleList = userRoleService.queryListByUserId(userId).getData();
         userVO.setRoleIds(userRoleList.stream().map(w->w.getRoleId()).collect(Collectors.toList()));
 
-        return com.cxygzl.common.dto.R.success(userVO);
+        return R.success(userVO);
     }
 
     /**
@@ -331,22 +331,22 @@ public class OrgServiceImpl implements IOrgService {
 
             Long total = pageResultDto.getTotal();
             if(total>0){
-                return com.cxygzl.common.dto.R.fail("当前用户仍有待办任务，不能离职");
+                return R.fail("当前用户仍有待办任务，不能离职");
             }
 
         }
         //判断是否是流程管理员
         {
-            List<com.cxygzl.biz.entity.Process> processList = processService.lambdaQuery().eq(Process::getAdminId, user.getId()).list();
+            List<Process> processList = processService.lambdaQuery().eq(Process::getAdminId, user.getId()).list();
             if(!processList.isEmpty()){
-                return com.cxygzl.common.dto.R.fail(StrUtil.format("当前用户是流程[{}]的管理员，请先修改流程管理员之后才能离职",processList.stream().map(w->w.getName()).collect(Collectors.joining(","))));
+                return R.fail(StrUtil.format("当前用户是流程[{}]的管理员，请先修改流程管理员之后才能离职",processList.stream().map(w->w.getName()).collect(Collectors.joining(","))));
             }
         }
         //判断是否是部门负责人
         {
             List<Dept> deptList = deptService.lambdaQuery().eq(Dept::getLeaderUserId, user.getId()).list();
             if(!deptList.isEmpty()){
-                return com.cxygzl.common.dto.R.fail(StrUtil.format("当前用户是部门[{}]的负责人，请先修改部门负责人之后才能离职",deptList.stream().map(w->w.getName()).collect(Collectors.joining(","))));
+                return R.fail(StrUtil.format("当前用户是部门[{}]的负责人，请先修改部门负责人之后才能离职",deptList.stream().map(w->w.getName()).collect(Collectors.joining(","))));
             }
         }
 
@@ -354,6 +354,6 @@ public class OrgServiceImpl implements IOrgService {
 
         userService.removeById(user.getId());
 
-        return com.cxygzl.common.dto.R.success();
+        return R.success();
     }
 }

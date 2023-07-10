@@ -48,7 +48,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
         if (event.getType().toString().equals(FlowableEngineEventType.ACTIVITY_STARTED.toString())) {
             //节点开始执行
             //org.flowable.engine.delegate.event.impl.FlowableActivityEventImpl
-            org.flowable.engine.delegate.event.impl.FlowableActivityEventImpl flowableActivityEvent = (FlowableActivityEventImpl) event;
+            FlowableActivityEventImpl flowableActivityEvent = (FlowableActivityEventImpl) event;
             String activityId = flowableActivityEvent.getActivityId();
             String activityName = flowableActivityEvent.getActivityName();
             log.debug("节点id：{} 名字:{}", activityId, activityName);
@@ -84,7 +84,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
                 event.getType().toString().equals(FlowableEngineEventType.MULTI_INSTANCE_ACTIVITY_COMPLETED.toString())
         ) {
             //多实例任务
-            org.flowable.engine.delegate.event.impl.FlowableMultiInstanceActivityCompletedEventImpl flowableActivityEvent = (FlowableMultiInstanceActivityCompletedEventImpl) event;
+            FlowableMultiInstanceActivityCompletedEventImpl flowableActivityEvent = (FlowableMultiInstanceActivityCompletedEventImpl) event;
             String activityId = flowableActivityEvent.getActivityId();
             String activityName = flowableActivityEvent.getActivityName();
             log.debug("节点id：{} 名字:{}", activityId, activityName);
@@ -109,7 +109,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
         if (event.getType().toString().equals(FlowableEngineEventType.ACTIVITY_COMPLETED.toString())) {
             //节点完成执行
 
-            org.flowable.engine.delegate.event.impl.FlowableActivityEventImpl flowableActivityEvent = (FlowableActivityEventImpl) event;
+            FlowableActivityEventImpl flowableActivityEvent = (FlowableActivityEventImpl) event;
             String activityId = flowableActivityEvent.getActivityId();
             String activityName = flowableActivityEvent.getActivityName();
             log.debug("节点id：{} 名字:{}", activityId, activityName);
@@ -160,7 +160,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
         }
         if (event.getType().toString().equals(FlowableEngineEventType.PROCESS_COMPLETED_WITH_TERMINATE_END_EVENT.toString())) {
             //流程开完成
-            org.flowable.engine.delegate.event.impl.FlowableProcessTerminatedEventImpl e = (FlowableProcessTerminatedEventImpl) event;
+            FlowableProcessTerminatedEventImpl e = (FlowableProcessTerminatedEventImpl) event;
             DelegateExecution execution = e.getExecution();
             String processInstanceId = e.getProcessInstanceId();
             ExecutionEntityImpl entity = (ExecutionEntityImpl) e.getEntity();
@@ -180,7 +180,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
 
             //任务完成
             FlowableEntityEvent flowableEntityEvent = (FlowableEntityEvent) event;
-            org.flowable.task.service.impl.persistence.entity.TaskEntityImpl task = (TaskEntityImpl) flowableEntityEvent.getEntity();
+            TaskEntityImpl task = (TaskEntityImpl) flowableEntityEvent.getEntity();
             //执行人id
             String assignee = task.getAssignee();
 
@@ -212,7 +212,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
         if (event.getType().toString().equals(FlowableEngineEventType.TASK_ASSIGNED.toString())) {
             //任务被指派了人员
             FlowableEntityEvent flowableEntityEvent = (FlowableEntityEvent) event;
-            org.flowable.task.service.impl.persistence.entity.TaskEntityImpl task = (TaskEntityImpl) flowableEntityEvent.getEntity();
+            TaskEntityImpl task = (TaskEntityImpl) flowableEntityEvent.getEntity();
             //执行人id
             String assignee = task.getAssignee();
             //任务拥有者
@@ -249,7 +249,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
 
         if (event.getType().toString().equals(FlowableEngineEventType.PROCESS_STARTED.toString())) {
             //流程开始了
-            org.flowable.engine.delegate.event.impl.FlowableProcessStartedEventImpl flowableProcessStartedEvent = (FlowableProcessStartedEventImpl) event;
+            FlowableProcessStartedEventImpl flowableProcessStartedEvent = (FlowableProcessStartedEventImpl) event;
 
             ExecutionEntityImpl entity = (ExecutionEntityImpl) flowableProcessStartedEvent.getEntity();
             DelegateExecution execution = flowableProcessStartedEvent.getExecution();
