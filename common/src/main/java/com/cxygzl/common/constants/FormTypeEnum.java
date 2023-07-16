@@ -23,6 +23,8 @@ public enum FormTypeEnum {
     SINGLE_SELECT("SingleSelect","单选",new ArrayList<>()),
     SELECT_DEPT("SelectDept","部门",new ArrayList<>()),
     SELECT_USER("SelectUser","用户",new ArrayList<>()),
+    SELECT_MULTI_DEPT("SelectMultiDept","多部门",new ArrayList<>()),
+    SELECT_MULTI_USER("SelectMultiUser","多用户",new ArrayList<>()),
 
 
     ;

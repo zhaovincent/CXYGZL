@@ -55,27 +55,22 @@ public class ModelUtil {
         }
         process.setEventListeners(eventListeners);
 
-        //构建结束节点
+        NodeUtil.addEndNode(nodeDto);
 
-        Node endNodeDto = new Node();
-        endNodeDto.setId(StrUtil.format("end"));
-        endNodeDto.setHeadId(endNodeDto.getId());
-        endNodeDto.setName("endNode");
 
-        //构建节点
-        EndEvent endEvent = buildEndNode(endNodeDto, false);
-        process.addFlowElement(endEvent);
         //创建所有的节点
         buildAllNode(process, nodeDto, flowId);
         //创建所有的内部节点连接线
         buildAllNodeInnerSequence(process, nodeDto, flowId);
         //创建节点间连线
-        buildAllNodeOuterSequence(process, nodeDto, endNodeDto);
+        buildAllNodeOuterSequence(process, nodeDto, null);
+        //处理分支和下级连线
 
 
         bpmnModel.addProcess(process);
         return bpmnModel;
     }
+
 
     /**
      * 先创建所有的节点
@@ -88,6 +83,8 @@ public class ModelUtil {
         if (!NodeUtil.isNode(nodeDto)) {
             return;
         }
+
+
         List<FlowElement> flowElementList = buildNode(nodeDto, flowId);
         for (FlowElement flowElement : flowElementList) {
             if (process.getFlowElement(flowElement.getId()) == null) {
@@ -97,10 +94,8 @@ public class ModelUtil {
 
         //子节点
         Node children = nodeDto.getChildren();
-        if (nodeDto.getType() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue()
-                ||
-                nodeDto.getType() == NodeTypeEnum.PARALLEL_GATEWAY.getValue()
-        ) {
+
+        if (NodeTypeEnum.getByValue(nodeDto.getType()).getBranch()) {
 
             //条件分支
             List<Node> branchs = nodeDto.getConditionNodes();
@@ -135,6 +130,7 @@ public class ModelUtil {
         if (!NodeUtil.isNode(nodeDto)) {
             return;
         }
+
         //画内部线
         List<SequenceFlow> flowList = buildInnerSequenceFlow(nodeDto, flowId);
         for (SequenceFlow sequenceFlow : flowList) {
@@ -143,10 +139,7 @@ public class ModelUtil {
 
         //子节点
         Node children = nodeDto.getChildren();
-        if (nodeDto.getType() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()
-                ||
-                nodeDto.getType() == NodeTypeEnum.PARALLEL_GATEWAY.getValue().intValue()
-        ) {
+        if (NodeTypeEnum.getByValue(nodeDto.getType()).getBranch()  ) {
             //条件分支
             List<Node> branchs = nodeDto.getConditionNodes();
             for (Node branch : branchs) {
@@ -175,30 +168,34 @@ public class ModelUtil {
      *
      * @param process 流程
      * @param nodeDto 节点对象
+     * @param nextId
      */
-    public static void buildAllNodeOuterSequence(Process process, Node nodeDto, Node nextNodeDto) {
+    public static void buildAllNodeOuterSequence(Process process, Node nodeDto, String nextId) {
+
         if (!NodeUtil.isNode(nodeDto)) {
             return;
         }
 
         //子节点
         Node children = nodeDto.getChildren();
-        if (nodeDto.getType() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue() ||
-                nodeDto.getType() == NodeTypeEnum.PARALLEL_GATEWAY.getValue().intValue()
-        ) {
+        if (NodeTypeEnum.getByValue(nodeDto.getType()).getBranch()    ) {
 //            children = children.getChildren();
             //条件分支
             List<Node> branchs = nodeDto.getConditionNodes();
             int ord = 1;
             int size = branchs.size();
             for (Node branch : branchs) {
-                buildAllNodeOuterSequence(process, branch.getChildren(), NodeUtil.isNode(children) ? children : nextNodeDto);
+
+
+                buildAllNodeOuterSequence(process, branch.getChildren(), nodeDto.getTailId());
 
                 String expression = null;
 
-                if (nodeDto.getType() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()) {
+                if (nodeDto.getType() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue() ) {
                     if (ord == size) {
-                        expression = NodeExpressionStrategyFactory.handleDefaultBranch(branchs);
+                        expression = NodeExpressionStrategyFactory.handleDefaultBranch(branchs, ord - 1);
+                    } else if (nodeDto.getType() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue() && ord > 1) {
+                        expression = NodeExpressionStrategyFactory.handleDefaultBranch(branchs, ord - 1);
                     } else {
                         expression = NodeExpressionStrategyFactory.handle(branch);
                     }
@@ -209,38 +206,58 @@ public class ModelUtil {
                 //添加连线
                 if (!NodeUtil.isNode(branch.getChildren())) {
                     //当前分支 没有其他节点了  所有就是网关和网关后面节点直接连线
-                    List<SequenceFlow> sequenceFlowList = buildSequenceFlow(NodeUtil.isNode(children) ? children : nextNodeDto,
-                            nodeDto, expression);
-                    for (SequenceFlow sequenceFlow : sequenceFlowList) {
-                        process.addFlowElement(sequenceFlow);
-                    }
+
+                    SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getId(), nodeDto.getTailId(),
+                            expression,
+                            StrUtil.format("{}->{}", nodeDto.getName(), nodeDto.getName())
+                    );
+                    process.addFlowElement(sequenceFlow);
                 } else {
-                    //当前节点 就是网关和第一个节点（非EMPTY节点）连线
-                    List<SequenceFlow> sequenceFlowList = buildSequenceFlow(branch.getChildren(), nodeDto, expression);
-                    for (SequenceFlow sequenceFlow : sequenceFlowList) {
-                        process.addFlowElement(sequenceFlow);
-                    }
+
+                    SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getId(), branch.getChildren().getHeadId(),
+                            expression,
+                            StrUtil.format("{}->{}", nodeDto.getName(), branch.getChildren().getName())
+                    );
+                    process.addFlowElement(sequenceFlow);
                 }
                 ord++;
 
             }
-            if (NodeUtil.isNode(children)) {
-                buildAllNodeOuterSequence(process, children, nextNodeDto);
+            //分支结尾的合并分支节点-》下一个节点
+            if (children != null && StrUtil.isNotBlank(children.getHeadId()) && StrUtil.isNotBlank(nodeDto.getTailId())) {
+
+                SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getTailId(), children.getHeadId(),
+                        "",
+                        StrUtil.format("{}->{}", nodeDto.getName(), children.getName())
+                );
+                process.addFlowElement(sequenceFlow);
+
+            } else if (StrUtil.isAllNotBlank(nodeDto.getTailId(), nextId)) {
+                SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getTailId(), nextId,
+                        "",
+                        StrUtil.format("{}->{}", nodeDto.getName(), nextId)
+                );
+                process.addFlowElement(sequenceFlow);
             }
+
+
+            buildAllNodeOuterSequence(process, children, nextId);
+
 
         } else {
             //添加连线
-            List<SequenceFlow> sequenceFlowList = buildSequenceFlow(children, nodeDto, "");
-            for (SequenceFlow sequenceFlow : sequenceFlowList) {
-                process.addFlowElement(sequenceFlow);
-            }
             if (NodeUtil.isNode(children)) {
-                buildAllNodeOuterSequence(process, children, nextNodeDto);
-            } else {
-                List<SequenceFlow> sequenceFlowList1 = buildSequenceFlow(nextNodeDto, nodeDto, "");
-                for (SequenceFlow sequenceFlow : sequenceFlowList1) {
+                List<SequenceFlow> sequenceFlowList = buildSequenceFlow(children, nodeDto, "");
+                for (SequenceFlow sequenceFlow : sequenceFlowList) {
                     process.addFlowElement(sequenceFlow);
                 }
+                buildAllNodeOuterSequence(process, children, nextId);
+            } else if (nodeDto.getType() != NodeTypeEnum.END.getValue().intValue()) {
+                SequenceFlow seq = buildSingleSequenceFlow(nodeDto.getTailId(), nextId, "", StrUtil.format("{}->{}",
+                        nodeDto.getName(), nextId));
+
+                process.addFlowElement(seq);
+
             }
         }
 
@@ -256,7 +273,6 @@ public class ModelUtil {
      */
     private static List<FlowElement> buildNode(Node node, String flowId) {
         List<FlowElement> flowElementList = new ArrayList<>();
-
         if (!NodeUtil.isNode(node)) {
             return flowElementList;
         }
@@ -276,6 +292,11 @@ public class ModelUtil {
             flowElementList.addAll(buildStartNode(node));
         }
 
+        //结束
+        if (node.getType() == NodeTypeEnum.END.getValue().intValue()) {
+            flowElementList.add(buildEndNode(node, false));
+        }
+
         //审批
         if (node.getType() == NodeTypeEnum.APPROVAL.getValue().intValue()) {
 
@@ -292,13 +313,14 @@ public class ModelUtil {
         //条件分支
         if (node.getType() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()) {
 
-            flowElementList.add(buildExclusiveGatewayNode(node));
+            flowElementList.addAll(buildInclusiveGatewayNode(node));
         }
         //并行分支
         if (node.getType() == NodeTypeEnum.PARALLEL_GATEWAY.getValue().intValue()) {
 
             flowElementList.addAll(buildParallelGatewayNode(node));
         }
+
         return flowElementList;
     }
 
@@ -311,12 +333,17 @@ public class ModelUtil {
      */
     private static List<FlowElement> buildStartNode(Node node) {
 
+        List<FlowElement> flowElementList = new ArrayList<>();
+
+
         StartEvent startEvent = new StartEvent();
         startEvent.setId(node.getId());
         startEvent.setName(node.getName());
 
-        List<FlowElement> flowElementList = new ArrayList<>();
         flowElementList.add(startEvent);
+
+
+
 
         return flowElementList;
     }
@@ -349,7 +376,7 @@ public class ModelUtil {
         Node exclusiveNode = new Node();
         exclusiveNode.setId(StrUtil.format("approve_gateway_{}", node.getId()));
         exclusiveNode.setName("审批-排他网关");
-        flowElementList.add(buildExclusiveGatewayNode(exclusiveNode));
+        flowElementList.add(buildSimpleExclusiveGatewayNode(exclusiveNode));
         //创建结束节点
 
         Node endNode = new Node();
@@ -402,6 +429,8 @@ public class ModelUtil {
         return flowElementList;
     }
 
+
+
     /**
      * 创建用户任务
      *
@@ -427,18 +456,22 @@ public class ModelUtil {
     }
 
     /**
-     * 构建排他网关
+     * 构建简单的包容网关
      *
      * @param node
      * @return
      */
-    private static FlowElement buildExclusiveGatewayNode(Node node) {
+    private static FlowElement buildSimpleExclusiveGatewayNode(Node node) {
+
+
         ExclusiveGateway exclusiveGateway = new ExclusiveGateway();
         exclusiveGateway.setId(node.getId());
         exclusiveGateway.setName(node.getName());
+
         return exclusiveGateway;
 
     }
+
 
     /**
      * 构建并行网关
@@ -447,8 +480,7 @@ public class ModelUtil {
      * @return
      */
     private static List<FlowElement> buildParallelGatewayNode(Node node) {
-//         node.setTailId(StrUtil.format("{}_merge_gateway", node.getId()));
-
+        node.setTailId(StrUtil.format("{}_merge_gateway", node.getId()));
         List<FlowElement> flowElementList = new ArrayList<>();
 
         ParallelGateway inclusiveGateway = new ParallelGateway();
@@ -461,6 +493,32 @@ public class ModelUtil {
         parallelGateway.setId(StrUtil.format("{}_merge_gateway", node.getId()));
         parallelGateway.setName(StrUtil.format("{}_合并网关", node.getName()));
         flowElementList.add(parallelGateway);
+
+        return flowElementList;
+    }
+
+    /**
+     * 构建包容网关
+     *
+     * @param node
+     * @return
+     */
+    private static List<FlowElement> buildInclusiveGatewayNode(Node node) {
+
+        node.setTailId(StrUtil.format("{}_merge_gateway", node.getId()));
+
+        List<FlowElement> flowElementList = new ArrayList<>();
+
+        InclusiveGateway inclusiveGateway = new InclusiveGateway();
+        inclusiveGateway.setId(node.getId());
+        inclusiveGateway.setName(node.getName());
+        flowElementList.add(inclusiveGateway);
+
+        //合并网关
+        InclusiveGateway gateway = new InclusiveGateway();
+        gateway.setId(StrUtil.format("{}_merge_gateway", node.getId()));
+        gateway.setName(StrUtil.format("{}_合并网关", node.getName()));
+        flowElementList.add(gateway);
 
         return flowElementList;
     }
@@ -510,7 +568,9 @@ public class ModelUtil {
         }
 
 
-        SequenceFlow sequenceFlow = buildSingleSequenceFlow(parentNode.getTailId(), node.getHeadId(), expression);
+        SequenceFlow sequenceFlow = buildSingleSequenceFlow(parentNode.getTailId(), node.getHeadId(), expression,
+                StrUtil.format("{}->{}", parentNode.getName(), node.getName())
+        );
         sequenceFlowList.add(sequenceFlow);
 
 
@@ -543,10 +603,25 @@ public class ModelUtil {
         ServiceTask serviceTask = new ServiceTask();
         serviceTask.setId(node.getId());
         serviceTask.setName(node.getName());
+        serviceTask.setAsynchronous(true);
         serviceTask.setImplementationType("class");
         serviceTask.setImplementation(CopyServiceTask.class.getCanonicalName());
+
+        ExtensionElement e = new ExtensionElement();
+        {
+
+
+            e.setName("flowable:failedJobRetryTimeCycle");
+            //上面的例子会让作业执行器重试5次，并在每次重试前等待1分钟。
+            e.setElementText("R5/PT1M");
+
+        }
+
+        serviceTask.addExtensionElement(e);
         return serviceTask;
     }
+
+
 
     /**
      * 创建连接线
@@ -557,8 +632,9 @@ public class ModelUtil {
      */
     private static List<SequenceFlow> buildInnerSequenceFlow(Node node, String flowId
     ) {
-        List<SequenceFlow> sequenceFlowList = new ArrayList<>();
 
+
+        List<SequenceFlow> sequenceFlowList = new ArrayList<>();
         if (!NodeUtil.isNode(node)) {
             return sequenceFlowList;
         }
@@ -568,31 +644,7 @@ public class ModelUtil {
         if (StrUtil.hasBlank(nodeId)) {
             return sequenceFlowList;
         }
-        boolean parentIsGateway = false;
-        Node prevNode = null;
-        if (StrUtil.isNotBlank(node.getParentId())) {
-            //判断父级是否是包容或者并行网关
-            prevNode = NodeDataStoreFactory.getInstance().getNode(flowId, node.getParentId());
-            if (prevNode != null) {
-                parentIsGateway = (
-                        prevNode.getType() == NodeTypeEnum.PARALLEL_GATEWAY.getValue()
-                );
 
-
-            }
-
-        }
-
-
-        if (parentIsGateway) {
-            String headId = node.getHeadId();
-            node.setHeadId(StrUtil.format("{}_merge_gateway", prevNode.getId()));
-            {
-                SequenceFlow sequenceFlow = buildSingleSequenceFlow(node.getHeadId(), headId, "${12==12}");
-                sequenceFlowList.add(sequenceFlow);
-            }
-
-        }
 
         if (node.getType() == NodeTypeEnum.APPROVAL.getValue().intValue()) {
 
@@ -601,17 +653,19 @@ public class ModelUtil {
             String endId = StrUtil.format("approve_end_{}", nodeId);
 
             {
-                SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeId, gatewayId, "${12==12}");
+                SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeId, gatewayId, "${12==12}", null);
                 sequenceFlowList.add(sequenceFlow);
             }
 
             {
                 SequenceFlow sequenceFlow = buildSingleSequenceFlow(gatewayId, endId, StrUtil.format("${!" +
-                        "{}_approve_condition}", nodeId));
+                        "{}_approve_condition}", nodeId), null);
                 sequenceFlowList.add(sequenceFlow);
             }
 
         }
+
+
 
 
         return sequenceFlowList;
@@ -623,12 +677,20 @@ public class ModelUtil {
      * @param pId        父级id
      * @param childId    子级id
      * @param expression 表达式
+     * @param name
      * @return
      */
-    private static SequenceFlow buildSingleSequenceFlow(String pId, String childId, String expression) {
+    private static SequenceFlow buildSingleSequenceFlow(String pId, String childId, String expression, String name) {
+        if (StrUtil.hasBlank(pId, childId)) {
+            return null;
+        }
         SequenceFlow sequenceFlow = new SequenceFlow(pId, childId);
         sequenceFlow.setConditionExpression(expression);
         sequenceFlow.setName(StrUtil.format("{}|{}", pId, childId));
+        sequenceFlow.setName(StrUtil.format("连线[{}]", RandomUtil.randomString(5)));
+        if (StrUtil.isNotBlank(name)) {
+            sequenceFlow.setName(name);
+        }
         sequenceFlow.setId(StrUtil.format("sq-id-{}-{}", IdUtil.fastSimpleUUID(), RandomUtil.randomInt(1, 10000000)));
         return sequenceFlow;
     }
