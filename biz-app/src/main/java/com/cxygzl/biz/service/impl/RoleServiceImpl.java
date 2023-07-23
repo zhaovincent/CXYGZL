@@ -165,7 +165,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
         if(count>0){
            return  R.fail("角色名字已存在");
         }
-        role.setUserId(StpUtil.getLoginIdAsLong());
+        role.setUserId(Long.valueOf(StpUtil.getLoginIdAsString()));
         this.save(role);
         return R.success();
     }
@@ -188,7 +188,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
         if(count>0){
             return  R.fail("角色名字已存在");
         }
-        role.setUserId(StpUtil.getLoginIdAsLong());
+        role.setUserId(Long.valueOf(StpUtil.getLoginIdAsString()));
         this.updateById(role);
         return R.success();
     }

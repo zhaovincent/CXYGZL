@@ -1,6 +1,7 @@
 package com.cxygzl.biz.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
+import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessGroup;
 import com.cxygzl.biz.entity.ProcessStarter;
@@ -9,6 +10,7 @@ import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.vo.FormGroupVo;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.third.UserDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -86,9 +88,9 @@ public class CombinationGroupServiceImpl implements ICombinationGroupService {
     public R listCurrentUserStartGroup() {
 
 
-        long userId = StpUtil.getLoginIdAsLong();
+        String userId = StpUtil.getLoginIdAsString();
 
-        User user = userService.getById(userId);
+        UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
 
         List<FormGroupVo> formGroupVos = new LinkedList<>();
 
@@ -122,12 +124,14 @@ public class CombinationGroupServiceImpl implements ICombinationGroupService {
                         existMap.put(process.getId(), true);
                         continue;
                     }
-                    boolean match = processStarters.stream().anyMatch(w -> w.getTypeId().longValue() == userId && w.getType().equals(NodeUserTypeEnum.USER.getKey()));
+                    boolean match =
+                            processStarters.stream().anyMatch(w -> w.getTypeId().equals(userId) && w.getType().equals(NodeUserTypeEnum.USER.getKey()));
                     if (match) {
                         existMap.put(process.getId(), true);
                         continue;
                     }
-                    Set<Long> deptIdSet = processStarters.stream().filter(w -> w.getType().equals(NodeUserTypeEnum.DEPT.getKey())).map(w -> w.getTypeId()).collect(Collectors.toSet());
+                    Set<String> deptIdSet =
+                            processStarters.stream().filter(w -> w.getType().equals(NodeUserTypeEnum.DEPT.getKey())).map(w -> w.getTypeId()).collect(Collectors.toSet());
 
                     existMap.put(process.getId(), deptIdSet.contains(user.getDeptId()));
 

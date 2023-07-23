@@ -66,7 +66,7 @@ public class CoreHttpUtil {
      *
      * @return
      */
-    public static R<IndexPageStatistics> querySimpleData(long userId) {
+    public static R<IndexPageStatistics> querySimpleData(String userId) {
 
         String s =get("/process-instance/querySimpleData?userId=" + userId );
         return JSON.parseObject(s, new TypeReference<R<IndexPageStatistics>>() {
@@ -80,7 +80,7 @@ public class CoreHttpUtil {
      * @param jsonObject
      * @return
      */
-    public static R<String> createFlow(JSONObject jsonObject, long userId) {
+    public static R<String> createFlow(JSONObject jsonObject, String userId) {
 
         String post = post(jsonObject, "/flow/create?userId=" + userId);
         R<String> r = JSON.parseObject(post, R.class);
@@ -227,7 +227,7 @@ public class CoreHttpUtil {
      * @param userId
      * @return
      */
-    public static  R<TaskResultDto> queryTask(String taskId, long userId) {
+    public static  R<TaskResultDto> queryTask(String taskId, String userId) {
 
         String s = get(StrUtil.format("/task/queryTask?taskId={}&userId={}", taskId, userId));
         R<TaskResultDto> r = JSON.parseObject(s, new TypeReference<R<TaskResultDto>>() {

@@ -6,6 +6,7 @@ import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.*;
+import com.cxygzl.common.dto.third.DeptDto;
 import com.yomahub.tlog.hutoolhttp.TLogHutoolhttpInterceptor;
 import org.springframework.core.env.Environment;
 
@@ -109,9 +110,9 @@ public class CoreHttpUtil {
      *
      * @param userId 用户id
      */
-    public static R<List<DeptDto>> queryParentDepListByUserId(long userId) {
+    public static R<List<com.cxygzl.common.dto.third.DeptDto>> queryParentDepListByUserId(String userId) {
         String s = get("/remote/queryParentDepListByUserId?userId=" + userId);
-        R<List<DeptDto>> r = JSON.parseObject(s, new TypeReference<R<List<DeptDto>>>() {
+        R<List<com.cxygzl.common.dto.third.DeptDto>> r = JSON.parseObject(s, new TypeReference<R<List<DeptDto>>>() {
         });
         return r;
     }
@@ -121,9 +122,9 @@ public class CoreHttpUtil {
      *
      * @param flowId 流程id
      */
-    public static R<Long> queryProcessAdmin(String flowId) {
+    public static R<String> queryProcessAdmin(String flowId) {
         String s = get("/remote/queryProcessAdmin?flowId=" + flowId);
-        R<Long> longR = JSON.parseObject(s, new TypeReference<R<Long>>() {
+        R<String> longR = JSON.parseObject(s, new TypeReference<R<String>>() {
         });
         return longR;
     }

@@ -2,6 +2,7 @@ package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.service.IRemoteService;
 import com.cxygzl.common.dto.*;
+import com.cxygzl.common.dto.third.DeptDto;
 import lombok.SneakyThrows;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,7 @@ public class RemoteController {
      * @return
      */
     @PostMapping("queryUserIdListByRoleIdList")
-    public R<List<Long>> queryUserIdListByRoleIdList(@RequestBody List<Long> roleIdList) {
+    public R<List<String>> queryUserIdListByRoleIdList(@RequestBody List<String> roleIdList) {
         return remoteService.queryUserIdListByRoleIdList(roleIdList);
     }
     /**
@@ -58,7 +59,7 @@ public class RemoteController {
      * @return
      */
     @PostMapping("queryUserIdListByDepIdList")
-    public R<List<Long>> queryUserIdListByDepIdList(@RequestBody List<Long> depIdList) {
+    public R<List<String>> queryUserIdListByDepIdList(@RequestBody List<String> depIdList) {
         return remoteService.queryUserIdListByDepIdList(depIdList);
     }
 
@@ -80,7 +81,7 @@ public class RemoteController {
      * @return
      */
     @GetMapping("queryUserAllInfo")
-    public R<Map<String, Object>> queryUserAllInfo(long userId) {
+    public R<Map<String, Object>> queryUserAllInfo(String userId) {
         return remoteService.queryUserAllInfo(userId);
     }
 
@@ -92,7 +93,7 @@ public class RemoteController {
      */
     @SneakyThrows
     @GetMapping("queryParentDepListByUserId")
-    public R<List<DeptDto>> queryParentDepListByUserId(long userId) {
+    public R<List<DeptDto>> queryParentDepListByUserId(String userId) {
 
         return remoteService.queryParentDepListByUserId(userId);
     }
@@ -171,7 +172,7 @@ public class RemoteController {
      * @return
      */
     @GetMapping("queryProcessAdmin")
-    public R<Long> queryProcessAdmin(String flowId) {
+    public R<String> queryProcessAdmin(String flowId) {
         return remoteService.queryProcessAdmin(flowId);
     }
 }

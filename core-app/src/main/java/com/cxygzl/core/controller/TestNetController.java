@@ -6,6 +6,9 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson2.JSON;
+import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.RoleDto;
+import com.cxygzl.common.dto.third.UserDto;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +27,9 @@ import java.util.stream.Collectors;
 @RequestMapping("test/net")
 public class TestNetController {
 
-    private List<User> userList = new ArrayList<>();
-    private List<Dept> deptList = new ArrayList<>();
-    private List<Role> roleList = new ArrayList<>();
+    private List<UserDto> userList = new ArrayList<>();
+    private List<DeptDto> deptList = new ArrayList<>();
+    private List<RoleDto> roleList = new ArrayList<>();
     private List<UserRole> userRoleList = new ArrayList<>();
 
     @PostConstruct
@@ -35,15 +38,15 @@ public class TestNetController {
         if (FileUtil.exist("/tmp/user.json")) {
             {
                 String s = FileUtil.readUtf8String("/tmp/user.json");
-                userList.addAll(JSON.parseArray(s, User.class));
+                userList.addAll(JSON.parseArray(s, UserDto.class));
             }
             {
                 String s = FileUtil.readUtf8String("/tmp/dept.json");
-                deptList.addAll(JSON.parseArray(s, Dept.class));
+                deptList.addAll(JSON.parseArray(s, DeptDto.class));
             }
             {
                 String s = FileUtil.readUtf8String("/tmp/role.json");
-                roleList.addAll(JSON.parseArray(s, Role.class));
+                roleList.addAll(JSON.parseArray(s, RoleDto.class));
             }
             {
                 String s = FileUtil.readUtf8String("/tmp/userrole.json");
@@ -54,48 +57,54 @@ public class TestNetController {
         }
 
         {
-            Role d = Role.builder().id(1L).name("角色1").status(1).build();
+            RoleDto d = RoleDto.builder().id("role1").name("角色1").status(1).build();
             roleList.add(d);
         }
         {
-            Role d = Role.builder().id(2L).name("角色2").status(1).build();
+            RoleDto d = RoleDto.builder().id("role2").name("角色2").status(1).build();
             roleList.add(d);
         }
         {
-            Role d = Role.builder().id(3L).name("角色3").status(1).build();
+            RoleDto d = RoleDto.builder().id("role3").name("角色3").status(1).build();
             roleList.add(d);
         }
         {
-            Dept d = Dept.builder().id(1L).name("部门1").parentId(0L).leaderUserId(1L).status(1).build();
+            DeptDto d = DeptDto.builder().id("dept1").name("部门1").parentId("0").leaderUserId("user1").status(1).build();
             deptList.add(d);
         }
         {
-            Dept d = Dept.builder().id(2L).name("部门2").parentId(1L).leaderUserId(11L).status(1).build();
+            DeptDto d =
+                    DeptDto.builder().id("dept2").name("部门2").parentId("dept1").leaderUserId("user11").status(1).build();
             deptList.add(d);
         }
         {
-            Dept d = Dept.builder().id(3L).name("部门3").parentId(1L).leaderUserId(15L).status(1).build();
+            DeptDto d =
+                    DeptDto.builder().id("dept3").name("部门3").parentId("dept1").leaderUserId("user15").status(1).build();
             deptList.add(d);
         }
         {
-            Dept d = Dept.builder().id(4L).name("部门4").parentId(2L).leaderUserId(21L).status(1).build();
+            DeptDto d =
+                    DeptDto.builder().id("dept4").name("部门4").parentId("dept2").leaderUserId("user21").status(1).build();
             deptList.add(d);
         }
         {
-            Dept d = Dept.builder().id(5L).name("部门5").parentId(3L).leaderUserId(45L).status(1).build();
+            DeptDto d =
+                    DeptDto.builder().id("dept5").name("部门5").parentId("dept3").leaderUserId("user45").status(1).build();
             deptList.add(d);
         }
         for (long k = 1; k <= 100; k++) {
             long deptId = RandomUtil.randomLong(0, deptList.size()) + 1;
             long roleId = RandomUtil.randomLong(0, roleList.size()) + 1;
             {
-                User u =
-                        User.builder().id(k).name("用户" + k).token(IdUtil.fastSimpleUUID()).avatarUrl("https://f.ittool.cc/pic/m" +
-                                ".jpg").deptId(deptId).status(1).build();
+                UserDto u =
+                        UserDto.builder().id("user"+k).name("用户" + k).token(IdUtil.fastSimpleUUID()).avatarUrl("https" +
+                                "://f" +
+                                ".ittool.cc/pic/m" +
+                                ".jpg").deptId("dept"+deptId).status(1).build();
                 userList.add(u);
             }
             {
-                UserRole userRole = UserRole.builder().roleId(roleId).userId(k).build();
+                UserRole userRole = UserRole.builder().roleId("role"+roleId).userId("user"+k).build();
                 userRoleList.add(userRole);
             }
         }
@@ -108,129 +117,57 @@ public class TestNetController {
     }
 
     @PostMapping("loadUserIdListByRoleIdList")
-    public List<Long> loadUserIdListByRoleIdList(@RequestBody List<Long> roleIdList) {
+    public List<String> loadUserIdListByRoleIdList(@RequestBody List<String> roleIdList) {
         return userRoleList.stream().filter(w -> roleIdList.contains(w.getRoleId())).map(w -> w.getUserId()).collect(Collectors.toList());
     }
 
     @PostMapping("loadUserIdListByDeptIdList")
-    public List<Long> loadUserIdListByDeptIdList(@RequestBody List<Long> deptIdList) {
+    public List<String> loadUserIdListByDeptIdList(@RequestBody List<String> deptIdList) {
         return userList.stream().filter(w -> deptIdList.contains(w.getDeptId())).map(w -> w.getId()).collect(Collectors.toList());
     }
 
 
     @GetMapping("loadUserByDept")
-    public List<User> loadUserByDept(long deptId) {
-        return userList.stream().filter(w -> deptId==(w.getDeptId())).collect(Collectors.toList());
+    public List<UserDto> loadUserByDept(String deptId) {
+        return userList.stream().filter(w -> deptId.equals(w.getDeptId())).collect(Collectors.toList());
     }
     @GetMapping("searchUser")
-    public List<User> searchUser(String name) {
+    public List<UserDto> searchUser(String name) {
         return userList.stream().filter(w -> w.getName().contains(name)).collect(Collectors.toList());
     }
     @GetMapping("getUser")
-    public User getUser(long userId) {
-        return userList.stream().filter(w -> userId==(w.getId())).findFirst().get();
+    public UserDto getUser(String userId) {
+        return userList.stream().filter(w -> userId.equals(w.getId())).findFirst().get();
     }
 
     @GetMapping("getUserIdByToken")
-    public Long getUserIdByToken(String token) {
+    public String getUserIdByToken(String token) {
         return userList.stream().filter(w -> StrUtil.equals(w.getToken(),token)).findFirst().get().getId();
     }
 
     @GetMapping("loadAllRole")
-    public List<Role> loadAllRole() {
+    public List<RoleDto> loadAllRole() {
         return roleList;
     }
 
     @GetMapping("loadAllDept")
-    public List<Dept> loadAllDept(Long parentDeptId) {
+    public List<DeptDto> loadAllDept(String parentDeptId) {
 
-        if (parentDeptId == null) {
+        if (StrUtil.isBlank(parentDeptId)) {
             return deptList;
         }
 
-        return deptList.stream().filter(w -> w.getParentId().longValue() == parentDeptId).collect(Collectors.toList());
+        return deptList.stream().filter(w -> w.getParentId().equals(parentDeptId)).collect(Collectors.toList());
     }
 
-    @Data
-    @Builder
-    private static class User {
-        /**
-         * 用户id 不能为空
-         */
-        private Long id;
-        /**
-         * 用户姓名 不能为空
-         */
-        private String name;
-        /**
-         * 用户头像 不能为空
-         */
-        private String avatarUrl;
-        /**
-         * 用户所属部门id 不能为空
-         */
-        private Long deptId;
-        /**
-         * 用户状态 0禁用 1启用
-         */
-        private Integer status;
-
-        //用来测试登录用户的
-        private String token;
-    }
 
     @Data
     @Builder
     private static class UserRole {
-        private Long userId;
-        private Long roleId;
+        private String userId;
+        private String roleId;
 
 
     }
 
-    @Data
-    @Builder
-    private static class Role {
-        /**
-         * 角色id 不能为空
-         */
-        private Long id;
-        /**
-         * 角色名字 不能为空
-         */
-        private String name;
-        /**
-         * 角色key  例如admin:edit user:create等 不能为空
-         */
-        private String key;
-        /**
-         * 角色状态 0 禁用 1启用
-         */
-        private Integer status;
-    }
-
-    @Data
-    @Builder
-    private static class Dept {
-        /**
-         * 部门id 不能为空
-         */
-        private Long id;
-        /**
-         * 部门名字 不能为空
-         */
-        private String name;
-        /**
-         * 部门上级id 不能为空 若为顶级 则是0
-         */
-        private Long parentId;
-        /**
-         * 部门主管的userId 不能为空
-         */
-        private Long leaderUserId;
-        /**
-         * 部门状态 0 禁用 1启用
-         */
-        private Integer status;
-    }
 }

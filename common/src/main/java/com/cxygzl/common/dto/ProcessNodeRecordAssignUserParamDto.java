@@ -30,7 +30,7 @@ public class ProcessNodeRecordAssignUserParamDto {
     /**
      * 用户id
      */
-    private Long userId;
+    private String userId;
     private String executionId;
     private String taskId;
     private String approveDesc;

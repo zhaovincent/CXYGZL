@@ -59,7 +59,7 @@ public class TaskDto {
     /**
      * 发起人id
      */
-    private Long rootUserId;
+    private String rootUserId;
     /**
      * 发起人名字
      */

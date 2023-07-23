@@ -40,7 +40,7 @@ public class ProcessCopy  extends BaseEntity {
      * 发起人
      */
     @TableField("`start_user_id`")
-    private Long startUserId;
+    private String startUserId;
 
     /**
      * 流程id
@@ -94,5 +94,5 @@ public class ProcessCopy  extends BaseEntity {
      * 抄送人id
      */
     @TableField("`user_id`")
-    private Long userId;
+    private String userId;
 }

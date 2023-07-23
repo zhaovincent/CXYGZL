@@ -2,10 +2,10 @@ package com.cxygzl.core.node.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
-import com.cxygzl.common.dto.DeptDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.core.node.AssignUserStrategy;
 import com.cxygzl.core.utils.CoreHttpUtil;
 import org.springframework.beans.factory.InitializingBean;
@@ -28,12 +28,11 @@ public class AssignUserLeaderTopStrategyImpl implements InitializingBean, Assign
 
         List<String> userIdList=new ArrayList<>();
 
-
         //去获取主管
 
-        R<List<DeptDto>> r  = CoreHttpUtil.queryParentDepListByUserId(Long.parseLong(rootUser.getId()));
+        R<List<com.cxygzl.common.dto.third.DeptDto>> r  = CoreHttpUtil.queryParentDepListByUserId((rootUser.getId()));
 
-        List<DeptDto> deptDtoList = r.getData();
+        List<com.cxygzl.common.dto.third.DeptDto> deptDtoList = r.getData();
 
         //上级主管依次审批
 
@@ -51,6 +50,7 @@ public class AssignUserLeaderTopStrategyImpl implements InitializingBean, Assign
                 index++;
             }
         }
+
 
 
         return userIdList;

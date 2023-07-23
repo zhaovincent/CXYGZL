@@ -18,7 +18,7 @@ public class ProcessCopyDto {
     /**
      * 发起人
      */
-    private Long startUserId;
+    private String startUserId;
 
     /**
      * 流程id
@@ -49,5 +49,5 @@ public class ProcessCopyDto {
     /**
      * 抄送人id
      */
-    private Long userId;
+    private String userId;
 }

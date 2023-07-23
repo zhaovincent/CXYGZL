@@ -57,7 +57,7 @@ public class TaskServiceImpl implements ITaskService {
     public Object queryTask(String taskId, boolean view) {
 
 
-        long userId = StpUtil.getLoginIdAsLong();
+        String userId = StpUtil.getLoginIdAsString();
 
 
         R<TaskResultDto> r = CoreHttpUtil.queryTask(taskId,userId);
@@ -199,7 +199,7 @@ public class TaskServiceImpl implements ITaskService {
      */
     @Override
     public Object completeTask(TaskParamDto taskParamDto) {
-        long userId = StpUtil.getLoginIdAsLong();
+        String userId = StpUtil.getLoginIdAsString();
         taskParamDto.setUserId(String.valueOf(userId));
 
 

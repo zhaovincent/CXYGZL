@@ -41,7 +41,7 @@ public class ProcessInstanceController {
      * @return
      */
     @GetMapping("querySimpleData")
-    public R<IndexPageStatistics> querySimpleData(long userId){
+    public R<IndexPageStatistics> querySimpleData(String userId){
         TaskQuery taskQuery = taskService.createTaskQuery();
 
         //待办数量

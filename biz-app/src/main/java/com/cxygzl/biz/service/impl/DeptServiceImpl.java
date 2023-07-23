@@ -1,11 +1,13 @@
 package com.cxygzl.biz.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.Dept;
 import com.cxygzl.biz.mapper.DeptMapper;
 import com.cxygzl.biz.service.IDeptService;
 import com.cxygzl.biz.utils.DataUtil;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.third.DeptDto;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import org.springframework.stereotype.Service;
 
@@ -39,11 +41,12 @@ public class DeptServiceImpl extends MPJBaseServiceImpl<DeptMapper, Dept> implem
 
     @Override
     public R updateDept(Dept dept) {
-        List<Dept> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
-        List<Dept> deptList = DataUtil.selectChildrenByDept(dept.getId(), allDept);
+        List<DeptDto> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
+
+        List<DeptDto> deptList = DataUtil.selectChildrenByDept(String.valueOf(dept.getId()), allDept);
 
 
-        boolean b = deptList.stream().anyMatch(w -> w.getId().longValue() == dept.getParentId().longValue());
+        boolean b = deptList.stream().anyMatch(w -> w.getId().equals(dept.getParentId()));
         if(b){
             return R.fail("当前部门的父级部门不能是当前部门或者当前部门的子级部门");
         }

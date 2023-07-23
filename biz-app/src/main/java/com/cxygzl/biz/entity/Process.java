@@ -88,7 +88,7 @@ public class Process  extends BaseEntity {
      * 流程管理员
      */
     @TableField("`admin_id`")
-    private Long adminId;
+    private String adminId;
 
     /**
      * 唯一性id

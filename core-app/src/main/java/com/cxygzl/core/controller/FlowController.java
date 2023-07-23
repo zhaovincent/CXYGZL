@@ -58,9 +58,8 @@ public class FlowController {
 
 
     @PostMapping("create")
-    public R create(@RequestBody Node nodeDto, long userId) {
-        String flowId =
-                "P"+userId + DateUtil.format(new Date(), "yyyyMMddHHmmssSSS") + RandomUtil.randomString(5);
+    public R create(@RequestBody Node nodeDto, String userId) {
+        String flowId ="p"+ RandomUtil.randomString(9)+StrUtil.fillBefore(userId,'0',10);
         log.info("flowId={}", flowId);
         BpmnModel bpmnModel = ModelUtil.buildBpmnModel(nodeDto, "测试1", flowId);
         {

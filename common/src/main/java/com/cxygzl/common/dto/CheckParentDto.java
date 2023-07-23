@@ -11,8 +11,8 @@ import java.util.List;
 @Data
 public class CheckParentDto {
 
-    private Long parentId;
+    private String parentId;
 
-    private List<Long> deptIdList;
+    private List<String> deptIdList;
 
 }

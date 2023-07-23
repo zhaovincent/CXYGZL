@@ -18,6 +18,3 @@ node:
     store: remoteNodeDataStore
 biz:
   url: http://127.0.0.1:26859
-
-api:
-  ori: local

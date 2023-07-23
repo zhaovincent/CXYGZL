@@ -48,10 +48,10 @@ public class ExpressionHandler {
 
     }
 
-    public Long getUserId(String key, DelegateExecution execution) {
+    public String getUserId(String key, DelegateExecution execution) {
         Object variable = execution.getVariable(key);
         NodeUser nodeUserDto = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class).get(0);
-        return Long.valueOf(nodeUserDto.getId());
+        return  (nodeUserDto.getId());
     }
 
     /**
@@ -271,15 +271,15 @@ public class ExpressionHandler {
 
         //参数
         List<NodeUser> paramDeptList = JSON.parseArray(param, NodeUser.class);
-        Long deptId = Long.valueOf(nodeUserDto.getId());
-        List<Long> deptIdList = paramDeptList.stream().map(w -> Long.parseLong(w.getId())).collect(Collectors.toList());
+        String deptId = (nodeUserDto.getId());
+        List<String> deptIdList = paramDeptList.stream().map(w -> (w.getId())).collect(Collectors.toList());
 
 
         return inCompare(symbol, deptId, deptIdList);
 
     }
 
-    private static boolean inCompare(String symbol, Long deptId, List<Long> deptIdList) {
+    private static boolean inCompare(String symbol, String deptId, List<String> deptIdList) {
         if (StrUtil.equals(symbol, "in")) {
             //属于
             return deptIdList.contains(deptId);
@@ -327,22 +327,23 @@ public class ExpressionHandler {
         List<NodeUser> paramDeptList = JSON.parseArray(param, NodeUser.class);
 
         List<String> deptIdList = paramDeptList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.DEPT.getKey())).map(w -> (w.getId())).collect(Collectors.toList());
-        List<Long> userIdList = paramDeptList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.USER.getKey())).map(w -> Long.parseLong(w.getId())).collect(Collectors.toList());
+        List<String> userIdList = paramDeptList.stream().filter(w -> StrUtil.equals(w.getType(),
+                NodeUserTypeEnum.USER.getKey())).map(w -> (w.getId())).collect(Collectors.toList());
 
 
         if(CollUtil.isNotEmpty(deptIdList)) {
             R<List<String>> r = CoreHttpUtil.queryUserIdListByDepIdList(deptIdList);
             List<String> data = r.getData();
             for (String datum : data) {
-                Long aLong = Convert.toLong(datum);
-                if(!userIdList.contains(aLong)){
-                    userIdList.add(aLong);
+
+                if(!userIdList.contains(datum)){
+                    userIdList.add(datum);
                 }
             }
         }
 
 
-        return inCompare(symbol, Convert.toLong(nodeUserDto.getId()),userIdList);
+        return inCompare(symbol, nodeUserDto.getId(),userIdList);
     }
 
 }

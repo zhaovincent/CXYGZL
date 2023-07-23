@@ -199,7 +199,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
             processNodeRecordAssignUserParamDto.setData(JSON.toJSONString(taskService.getVariables(task.getId())));
             processNodeRecordAssignUserParamDto.setLocalData(JSON.toJSONString(taskService.getVariablesLocal(task.getId())));
             processNodeRecordAssignUserParamDto.setNodeId(taskDefinitionKey);
-            processNodeRecordAssignUserParamDto.setUserId(Long.parseLong(assignee));
+            processNodeRecordAssignUserParamDto.setUserId((assignee));
             processNodeRecordAssignUserParamDto.setTaskId(task.getId());
             processNodeRecordAssignUserParamDto.setNodeName(task.getName());
             processNodeRecordAssignUserParamDto.setTaskType("COMPLETE");
@@ -235,7 +235,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
             processNodeRecordAssignUserParamDto.setProcessInstanceId(processInstanceId);
 //        processNodeRecordAssignUserParamDto.setData();
             processNodeRecordAssignUserParamDto.setNodeId(taskDefinitionKey);
-            processNodeRecordAssignUserParamDto.setUserId(Long.parseLong(assignee));
+            processNodeRecordAssignUserParamDto.setUserId((assignee));
             processNodeRecordAssignUserParamDto.setTaskId(task.getId());
             processNodeRecordAssignUserParamDto.setNodeName(task.getName());
             processNodeRecordAssignUserParamDto.setTaskType(StrUtil.equals(DelegationState.PENDING.toString(), delegationStateString) ? "DELEGATION" : (StrUtil.equals(DelegationState.RESOLVED.toString(), delegationStateString) ? "RESOLVED" : ""));
@@ -262,7 +262,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
 
                 Object variable = execution.getVariable(
                         "root");
-                Long startUserId = Long.valueOf(JSON.parseArray(JSON.toJSONString(variable), NodeUser.class).get(0).getId());
+                String startUserId =  (JSON.parseArray(JSON.toJSONString(variable), NodeUser.class).get(0).getId());
                 Map<String, Object> variables = execution.getVariables();
 
                 ProcessInstanceRecordParamDto processInstanceRecordParamDto = new ProcessInstanceRecordParamDto();

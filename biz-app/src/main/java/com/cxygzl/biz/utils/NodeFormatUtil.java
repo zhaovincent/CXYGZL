@@ -6,6 +6,8 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
+import com.cxygzl.biz.api.ApiStrategy;
+import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
@@ -19,10 +21,11 @@ import com.cxygzl.biz.vo.node.UserVo;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
-import com.cxygzl.common.dto.DeptDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.NodeUtil;
 
 import java.util.ArrayList;
@@ -109,7 +112,7 @@ public class NodeFormatUtil {
                 for (Map.Entry<String, List<ProcessNodeRecordAssignUser>> entry : map.entrySet()) {
                     List<ProcessNodeRecordAssignUser> value = entry.getValue();
                     List<UserVo> collect = value.stream().filter(w->!ProcessInstanceConstant.DEFAULT_EMPTY_ASSIGN.equals(w.getUserId())).map(w -> {
-                        UserVo userVo = buildUser(Long.parseLong(w.getUserId()));
+                        UserVo userVo = buildUser((w.getUserId()));
                         userVo.setShowTime(w.getEndTime());
                         userVo.setApproveDesc(w.getApproveDesc());
                         userVo.setStatus(w.getStatus());
@@ -130,8 +133,8 @@ public class NodeFormatUtil {
                         Object variable = paramMap.get(StrUtil.format("{}_assignee_select", node.getId()));
                         List<NodeUser> nodeUserDtos = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class);
 
-                        List<Long> collect = nodeUserDtos.stream().map(w -> Long.valueOf(w.getId())).collect(Collectors.toList());
-                        for (Long aLong : collect) {
+                        List<String> collect = nodeUserDtos.stream().map(w -> (w.getId())).collect(Collectors.toList());
+                        for (String aLong : collect) {
                             UserVo userVo = buildUser(aLong);
                             userVoList.addAll(CollUtil.newArrayList(userVo));
                         }
@@ -156,8 +159,9 @@ public class NodeFormatUtil {
                     String jsonString = JSON.toJSONString(o);
                     if (StrUtil.isNotBlank(jsonString)) {
                         List<NodeUser> nodeUserDtoList = JSON.parseArray(jsonString, NodeUser.class);
-                        List<Long> userIdList = nodeUserDtoList.stream().map(w -> Long.valueOf(w.getId())).collect(Collectors.toList());
-                        for (Long aLong : userIdList) {
+                        List<String> userIdList =
+                                nodeUserDtoList.stream().map(w ->  (w.getId())).collect(Collectors.toList());
+                        for (String aLong : userIdList) {
                             userVoList.addAll(CollUtil.newArrayList(buildUser(aLong)));
                         }
                     }
@@ -166,7 +170,7 @@ public class NodeFormatUtil {
 
             } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF) {
                 //发起人自己
-                userVoList.addAll(CollUtil.newArrayList(buildUser(StpUtil.getLoginIdAsLong())));
+                userVoList.addAll(CollUtil.newArrayList(buildUser(StpUtil.getLoginIdAsString())));
             } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.LEADER) {
                 //制定主管
 
@@ -178,12 +182,12 @@ public class NodeFormatUtil {
 
                 IRemoteService remoteService = SpringUtil.getBean(IRemoteService.class);
 
-                R<List<DeptDto>> r = remoteService.queryParentDepListByUserId(StpUtil.getLoginIdAsLong());
+                R<List<com.cxygzl.common.dto.third.DeptDto>> r = remoteService.queryParentDepListByUserId(StpUtil.getLoginIdAsString());
 
-                List<DeptDto> deptDtoList = r.getData();
+                List<com.cxygzl.common.dto.third.DeptDto> deptDtoList = r.getData();
                 if (CollUtil.isNotEmpty(deptDtoList)) {
                     if (deptDtoList.size() >= level) {
-                        DeptDto deptDto = deptDtoList.get(level - 1);
+                        com.cxygzl.common.dto.third.DeptDto deptDto = deptDtoList.get(level - 1);
 
 
                         userVoList.addAll(CollUtil.newArrayList(buildUser(deptDto.getLeaderUserId())));
@@ -201,9 +205,9 @@ public class NodeFormatUtil {
 
                 IRemoteService remoteService = SpringUtil.getBean(IRemoteService.class);
 
-                R<List<DeptDto>> r = remoteService.queryParentDepListByUserId(StpUtil.getLoginIdAsLong());
+                R<List<com.cxygzl.common.dto.third.DeptDto>> r = remoteService.queryParentDepListByUserId(StpUtil.getLoginIdAsString());
 
-                List<DeptDto> deptDtoList = r.getData();
+                List<com.cxygzl.common.dto.third.DeptDto> deptDtoList = r.getData();
 
 
                 if (CollUtil.isNotEmpty(deptDtoList)) {
@@ -220,10 +224,10 @@ public class NodeFormatUtil {
             }
 
 
-        } else if (node.getType() == NodeTypeEnum.ROOT.getValue()) {
+        } else if (node.getType() == NodeTypeEnum.ROOT.getValue().intValue()) {
             //发起节点
             if (StrUtil.isBlank(processInstanceId)) {
-                UserVo userVo = buildUser(StpUtil.getLoginIdAsLong());
+                UserVo userVo = buildUser(StpUtil.getLoginIdAsString());
 
                 userVoList.addAll(CollUtil.newArrayList(userVo));
 
@@ -239,7 +243,7 @@ public class NodeFormatUtil {
                 userVoList.addAll(CollUtil.newArrayList(userVo));
 
             }
-        } else if (node.getType() == NodeTypeEnum.CC.getValue()) {
+        } else if (node.getType() == NodeTypeEnum.CC.getValue().intValue()) {
             //抄送节点
 
             List<NodeUser> nodeUserList = node.getNodeUserList();
@@ -291,7 +295,7 @@ public class NodeFormatUtil {
 
         IProcessInstanceRecordService processInstanceRecordService = SpringUtil.getBean(IProcessInstanceRecordService.class);
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
-        Long userId = processInstanceRecord.getUserId();
+        String userId = processInstanceRecord.getUserId();
         UserVo userVo = buildUser(userId);
         return userVo;
     }
@@ -302,10 +306,11 @@ public class NodeFormatUtil {
      * @param userId
      * @return
      */
-    private static UserVo buildUser(long userId) {
+    private static UserVo buildUser(String userId) {
 
-        IUserService userService = SpringUtil.getBean(IUserService.class);
-        User user = userService.getById(userId);
+
+
+        UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
         if (user == null) {
             return null;
         }
@@ -319,26 +324,29 @@ public class NodeFormatUtil {
     private static List<UserVo> buildUser(List<NodeUser> nodeUserList) {
         List<UserVo> userVoList = new ArrayList<>();
         //用户id
-        List<Long> userIdList = nodeUserList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.USER.getKey())).map(w -> Convert.toLong(w.getId())).collect(Collectors.toList());
+        List<String> userIdList = nodeUserList.stream().filter(w -> StrUtil.equals(w.getType(),
+                NodeUserTypeEnum.USER.getKey())).map(w ->  (w.getId())).collect(Collectors.toList());
         //部门id
-        List<Long> deptIdList = nodeUserList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.DEPT.getKey())).map(w -> Convert.toLong(w.getId())).collect(Collectors.toList());
+        List<String> deptIdList = nodeUserList.stream().filter(w -> StrUtil.equals(w.getType(),
+                NodeUserTypeEnum.DEPT.getKey())).map(w ->  (w.getId())).collect(Collectors.toList());
 
         if (CollUtil.isNotEmpty(deptIdList)) {
 
             IRemoteService iRemoteService = SpringUtil.getBean(IRemoteService.class);
 
-            List<Long> data = iRemoteService.queryUserIdListByDepIdList(deptIdList).getData();
+            List<String> data =
+                    iRemoteService.queryUserIdListByDepIdList(deptIdList.stream().map(w->String.valueOf(w)).collect(Collectors.toList())).getData();
 
             if (CollUtil.isNotEmpty(data)) {
-                for (long datum : data) {
-                    if (!userIdList.contains(datum)) {
+                for (String datum : data) {
+                    if (!userIdList.contains((datum))) {
                         userIdList.add(datum);
                     }
                 }
             }
         }
         {
-            for (Long aLong : userIdList) {
+            for (String aLong : userIdList) {
                 userVoList.addAll(CollUtil.newArrayList(buildUser(aLong)));
             }
         }

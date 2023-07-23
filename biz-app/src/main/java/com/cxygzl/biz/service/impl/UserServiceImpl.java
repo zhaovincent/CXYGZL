@@ -20,6 +20,7 @@ import com.cxygzl.biz.utils.PinYinUtil;
 import com.cxygzl.biz.vo.UserListQueryVO;
 import com.cxygzl.biz.vo.UserVO;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.third.UserDto;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.context.annotation.Lazy;
@@ -108,7 +109,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
      */
     @Override
     public R loginByToken(String token) {
-        Long userId = ApiStrategyFactory.getStrategy().getUserIdByToken(token);
+        String userId = ApiStrategyFactory.getStrategy().getUserIdByToken(token);
         StpUtil.login(userId);
 
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
@@ -161,14 +162,14 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
      */
     @Override
     public R getCurrentUserDetail() {
-        long userId = StpUtil.getLoginIdAsLong();
+        String userId = StpUtil.getLoginIdAsString();
 
 //        User user = this.getById(userId);
-        User user = ApiStrategyFactory.getStrategy().getUser(userId);
+        UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
 
-        user.setPassword(null);
 
-        UserVO userVO = BeanUtil.copyProperties(user, UserVO.class);
+
+        com.cxygzl.biz.vo.third.UserVO userVO = BeanUtil.copyProperties(user, com.cxygzl.biz.vo.third.UserVO.class);
 
 
 //        Set<String> roleKeySet = roleService.queryRoleKeyByUserId(userId).getData();

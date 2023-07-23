@@ -16,7 +16,7 @@ public class UserVo {
     /**
      * 用户od
      */
-    private Long id;
+    private String id;
     /**
      * 用户名称
      */

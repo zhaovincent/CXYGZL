@@ -1,5 +1,7 @@
 package com.cxygzl.biz.api.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import com.cxygzl.biz.api.ApiStrategy;
 import com.cxygzl.biz.entity.Dept;
@@ -10,6 +12,9 @@ import com.cxygzl.biz.service.IDeptService;
 import com.cxygzl.biz.service.IRoleService;
 import com.cxygzl.biz.service.IUserRoleService;
 import com.cxygzl.biz.service.IUserService;
+import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.RoleDto;
+import com.cxygzl.common.dto.third.UserDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -40,9 +45,9 @@ public class LocalApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public List<Long> loadUserIdListByRoleIdList(List<Long> roleIdList) {
+    public List<String> loadUserIdListByRoleIdList(List<String> roleIdList) {
         List<UserRole> userRoleList = userRoleService.lambdaQuery().in(UserRole::getRoleId, roleIdList).list();
-        Set<Long> userIdSet = userRoleList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
+        Set<String> userIdSet = userRoleList.stream().map(w ->String.valueOf( w.getUserId())).collect(Collectors.toSet());
         return CollUtil.newArrayList(userIdSet);
     }
 
@@ -52,9 +57,10 @@ public class LocalApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public List<Role> loadAllRole() {
+    public List<RoleDto> loadAllRole() {
         List<Role> roleList = roleService.lambdaQuery().list();
-        return roleList;
+        return BeanUtil.copyToList(roleList,RoleDto.class);
+
     }
 
     /**
@@ -65,12 +71,12 @@ public class LocalApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public List<Long> loadUserIdListByDeptIdList(List<Long> deptIdList) {
+    public List<String> loadUserIdListByDeptIdList(List<String> deptIdList) {
         if (CollUtil.isEmpty(deptIdList)) {
            return new ArrayList<>();
         }
         List<User> userList = userService.lambdaQuery().in(User::getDeptId, deptIdList).list();
-        return userList.stream().map(w -> w.getId()).collect(Collectors.toList());
+        return userList.stream().map(w -> String.valueOf(w.getId())).collect(Collectors.toList());
     }
 
     /**
@@ -79,11 +85,12 @@ public class LocalApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public List<Dept> loadAllDept(Long parentDeptId) {
+    public List<DeptDto> loadAllDept(String parentDeptId) {
         List<Dept> deptList = deptService.lambdaQuery()
                 .eq(parentDeptId != null, Dept::getParentId, parentDeptId)
                 .list();
-        return deptList;
+        return BeanUtil.copyToList(deptList,DeptDto.class);
+
     }
 
     /**
@@ -93,11 +100,12 @@ public class LocalApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public List<User> loadUserByDept(long deptId) {
+    public List<UserDto> loadUserByDept(String deptId) {
         List<User> userList = userService.lambdaQuery()
                 .eq(User::getDeptId, deptId)
                 .list();
-        return userList;
+        return BeanUtil.copyToList(userList,UserDto.class);
+
     }
 
     /**
@@ -107,19 +115,21 @@ public class LocalApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public User getUser(long userId) {
-        return userService.getById(userId);
+    public UserDto getUser(String userId) {
+        User user = userService.getById(userId);
+        return BeanUtil.copyProperties(user,UserDto.class);
     }
 
     @Override
-    public List<User> searchUser(String name) {
+    public List<UserDto> searchUser(String name) {
         List<User> userList = userService.lambdaQuery().and(k ->
                 k.like(User::getPinyin, name)
                         .or(w -> w.like(User::getPy, name))
                         .or(w -> w.like(User::getName, name))
         ).list();
 
-        return userList;
+        return BeanUtil.copyToList(userList,UserDto.class);
+
     }
 
     /**
@@ -130,8 +140,9 @@ public class LocalApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public Long getUserIdByToken(String token) {
-        return null;
+    public String getUserIdByToken(String token) {
+        Object loginIdByToken = StpUtil.getLoginIdByToken(token);
+        return loginIdByToken==null?null:loginIdByToken.toString();
     }
 
     @Override

@@ -31,7 +31,7 @@ public class BaseServiceImpl implements IBaseService {
     @Override
     public R index() {
 
-        long userId = StpUtil.getLoginIdAsLong();
+        String userId = StpUtil.getLoginIdAsString();
 
 
         Long coypNum = processCopyService.lambdaQuery().eq(ProcessCopy::getUserId, userId).count();

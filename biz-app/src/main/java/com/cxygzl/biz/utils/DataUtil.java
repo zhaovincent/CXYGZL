@@ -3,6 +3,7 @@ package com.cxygzl.biz.utils;
 import cn.hutool.core.collection.CollUtil;
 import com.cxygzl.biz.entity.Dept;
 import com.cxygzl.biz.entity.Menu;
+import com.cxygzl.common.dto.third.DeptDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,14 +18,14 @@ public class DataUtil {
      * @param allDeptList
      * @return 返回包括自己部门在内的所有父级部门
      */
-    public static List<Dept> selectParentByDept(long deptId, List<Dept> allDeptList) {
-        List<Dept> list=new ArrayList<>();
-        Dept dept = allDeptList.stream().filter(w -> w.getId().longValue() == deptId).findAny().orElse(null);
+    public static List<DeptDto> selectParentByDept(String deptId, List<DeptDto> allDeptList) {
+        List<DeptDto> list=new ArrayList<>();
+        DeptDto dept = allDeptList.stream().filter(w -> w.getId().equals(deptId)).findAny().orElse(null);
         if (dept == null || dept.getParentId() == null) {
             return list;
         }
-        Long parentId = dept.getParentId();
-        List<Dept> depts = selectParentByDept(parentId, allDeptList);
+        String parentId = dept.getParentId();
+        List<DeptDto> depts = selectParentByDept(parentId, allDeptList);
         list.add(dept);
         list.addAll(depts);
         return list;
@@ -38,16 +39,17 @@ public class DataUtil {
      * @param allDeptList
      * @return 返回包括自己部门在内的所有子级部门
      */
-    public static List<Dept> selectChildrenByDept(long deptId, List<Dept> allDeptList) {
-        List<Dept> list=new ArrayList<>();
-        list.add(allDeptList.stream().filter(w->w.getId().longValue()==deptId).findFirst().get());
+    public static List<DeptDto> selectChildrenByDept(String deptId, List<DeptDto> allDeptList) {
+        List<DeptDto> list=new ArrayList<>();
+        list.add(allDeptList.stream().filter(w->w.getId().equals(deptId)).findFirst().get());
 
-        List<Dept> collect = allDeptList.stream().filter(w -> w.getParentId().longValue() == deptId).collect(Collectors.toList());
+        List<DeptDto> collect =
+                allDeptList.stream().filter(w -> w.getParentId().equals(deptId)).collect(Collectors.toList());
         if (CollUtil.isEmpty(collect)) {
             return list;
         }
-        for (Dept dept : collect) {
-            List<Dept> depts = selectChildrenByDept(dept.getId(), allDeptList);
+        for (DeptDto dept : collect) {
+            List<DeptDto> depts = selectChildrenByDept(dept.getId(), allDeptList);
             list.addAll(depts);
         }
         return list;

@@ -20,7 +20,7 @@ public interface IOrgService {
      * @param showLeave 是否显示离职员工
      * @return 组织架构树数据
      */
-    Object getOrgTreeData(Long deptId, String type, Boolean showLeave);
+    Object getOrgTreeData(String deptId, String type, Boolean showLeave);
 
 
     /**

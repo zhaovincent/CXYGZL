@@ -33,7 +33,7 @@ public class OrgController {
      * @return 组织架构树数据
      */
     @GetMapping("tree")
-    public Object getOrgTreeData(@RequestParam(defaultValue ="0") Long deptId,
+    public Object getOrgTreeData(@RequestParam(defaultValue ="0") String deptId,
                                   String type,
                                  @RequestParam(defaultValue = "false") Boolean showLeave){
         return orgService.getOrgTreeData(deptId, type, showLeave);

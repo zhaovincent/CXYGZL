@@ -19,7 +19,7 @@ public class ProcessInstanceRecordParamDto {
     /**
      * 用户id
      */
-    private Long userId;
+    private String userId;
 
 
     /**

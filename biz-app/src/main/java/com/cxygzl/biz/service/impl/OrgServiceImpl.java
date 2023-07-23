@@ -23,6 +23,9 @@ import com.cxygzl.common.dto.PageResultDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskDto;
 import com.cxygzl.common.dto.TaskQueryParamDto;
+import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.RoleDto;
+import com.cxygzl.common.dto.third.UserDto;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.stereotype.Service;
 
@@ -62,16 +65,16 @@ public class OrgServiceImpl implements IOrgService {
      * @return 组织架构树数据
      */
     @Override
-    public Object getOrgTreeData(Long deptId, String type, Boolean showLeave) {
+    public Object getOrgTreeData(String deptId, String type, Boolean showLeave) {
         List<OrgTreeVo> orgs = new LinkedList<>();
 
         if (StrUtil.equals(type, NodeUserTypeEnum.ROLE.getKey())) {
             //角色
 
-            List<Role> roleList = ApiStrategyFactory.getStrategy().loadAllRole();
+            List<RoleDto> roleList = ApiStrategyFactory.getStrategy().loadAllRole();
 
 
-            for (Role role : roleList) {
+            for (RoleDto role : roleList) {
                 OrgTreeVo orgTreeVo = new OrgTreeVo();
                 orgTreeVo.setId(role.getId());
                 orgTreeVo.setName(role.getName());
@@ -96,12 +99,12 @@ public class OrgServiceImpl implements IOrgService {
                 .set("employees",new ArrayList<>());
 
 
-        List<Dept> deptList = ApiStrategyFactory.getStrategy().loadAllDept(deptId);
+        List<DeptDto> deptList = ApiStrategyFactory.getStrategy().loadAllDept(deptId);
 
         //查询所有部门及员工
         {
             List deptVoList=new ArrayList();
-            for (Dept dept : deptList) {
+            for (DeptDto dept : deptList) {
                 OrgTreeVo orgTreeVo = new OrgTreeVo();
                 orgTreeVo.setId(dept.getId());
                 orgTreeVo.setName(dept.getName());
@@ -118,9 +121,9 @@ public class OrgServiceImpl implements IOrgService {
 
 
 
-            List<User> userList = ApiStrategyFactory.getStrategy().loadUserByDept(deptId);
+            List<UserDto> userList = ApiStrategyFactory.getStrategy().loadUserByDept(String.valueOf(deptId));
 
-            for (User user : userList) {
+            for (UserDto user : userList) {
                 OrgTreeVo orgTreeVo = new OrgTreeVo();
                 orgTreeVo.setId(user.getId());
                 orgTreeVo.setName(user.getName());
@@ -134,9 +137,9 @@ public class OrgServiceImpl implements IOrgService {
             dict.set("employees",userVoList);
         }
 
-        if(deptId>0){
-            List<Dept> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
-            List<Dept> depts = DataUtil.selectParentByDept(deptId, allDept);
+        if(StrUtil.isNotBlank(deptId)){
+            List<DeptDto> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
+            List<DeptDto> depts = DataUtil.selectParentByDept(deptId, allDept);
             dict.set("titleDepartments",CollUtil.reverse(depts));
         }
 
@@ -151,56 +154,67 @@ public class OrgServiceImpl implements IOrgService {
      */
     @Override
     public R getOrgTreeDataAll(String keywords, Integer status) {
-
-        List<Dept> deptList = deptService.lambdaQuery()
+        List<Dept> deptListDb = deptService.lambdaQuery()
                 .eq(status!=null,Dept::getStatus,status)
                 .like(StrUtil.isNotBlank(keywords),Dept::getName,keywords)
                 .list();
 
+        List<DeptDto> deptDtoList = ApiStrategyFactory.getStrategy().loadAllDept(null);
+        List<DeptDto> deptList = deptDtoList.stream().filter(w -> status != null ? (w.getStatus().intValue() == status) : true)
+                .filter(w -> StrUtil.isNotBlank(keywords) ? StrUtil.contains(w.getName(), keywords) : true).collect(Collectors.toList());
+
+
         if(StrUtil.isNotBlank(keywords)||status!=null){
             List list=new ArrayList();
-            for (Dept dept : deptList) {
-                Long leader = dept.getLeaderUserId();
+            for (DeptDto dept : deptList) {
+                String leader = dept.getLeaderUserId();
+                UserDto user = ApiStrategyFactory.getStrategy().getUser(leader);
 
-                User user = userService.getById(leader);
+                Dept deptDb =
+                        deptListDb.stream().filter(w -> StrUtil.equals(String.valueOf(w.getId()), dept.getId())).findAny().orElse(null);
+
                 Dict set = Dict.create().set("leaderUserId", leader)
                         .set("leaderName", user.getName())
                         .set("leaderAvatar", user.getAvatarUrl())
                         .set("status", dept.getStatus())
                         .set("id", dept.getId())
                         .set("name", dept.getName())
-                        .set("sort", dept.getSort())
+                        .set("sort",deptDb==null?null: deptDb.getSort())
                         .set("roodIdList", CollUtil.reverse(DeptUtil.queryRootIdList(dept.getId(), deptList)));
                 list.add(set);
             }
-           return  R.success(list);
+            return  com.cxygzl.common.dto.R.success(list);
         }
 
-        List<TreeNode<Long>> nodeList = CollUtil.newArrayList();
+        List<TreeNode<String>> nodeList = CollUtil.newArrayList();
 
-        for (Dept dept : deptList) {
+        for (DeptDto dept : deptList) {
+            Dept deptDb =
+                    deptListDb.stream().filter(w -> StrUtil.equals(String.valueOf(w.getId()), dept.getId())).findAny().orElse(null);
 
-            TreeNode<Long> treeNode = new TreeNode<>(dept.getId(), dept.getParentId(),
+
+            TreeNode<String> treeNode = new TreeNode<>(dept.getId(), dept.getParentId(),
                     dept.getName(), 1);
-            Long leader = dept.getLeaderUserId();
+            String leader = dept.getLeaderUserId();
 
-            User user = userService.getById(leader);
+            UserDto user = ApiStrategyFactory.getStrategy().getUser(leader);
 
             treeNode.setExtra(Dict.create().set("leaderUserId", leader)
                     .set("leaderName", user.getName())
                     .set("leaderAvatar", user.getAvatarUrl())
 
                     .set("status", dept.getStatus())
-                    .set("sort", dept.getSort())
+                    .set("sort",deptDb==null?null: deptDb.getSort())
+
                     .set("roodIdList", CollUtil.reverse(DeptUtil.queryRootIdList(dept.getId(), deptList)))
             );
             nodeList.add(treeNode);
 
         }
         // 0表示最顶层的id是0
-        List<Tree<Long>> treeList = TreeUtil.build(nodeList, 0L);
+        List<Tree<String>> treeList = TreeUtil.build(nodeList, "0");
 
-        return R.success(treeList);
+        return com.cxygzl.common.dto.R.success(treeList);
     }
 
 
@@ -213,11 +227,11 @@ public class OrgServiceImpl implements IOrgService {
     @Override
     public Object getOrgTreeUser(String userName) {
 
-        List<User> userList = ApiStrategyFactory.getStrategy().searchUser(userName);
+        List<UserDto> userList = ApiStrategyFactory.getStrategy().searchUser(userName);
 
         List<OrgTreeVo> orgTreeVoList = new ArrayList<>();
 
-        for (User user : userList) {
+        for (UserDto user : userList) {
             OrgTreeVo orgTreeVo = new OrgTreeVo();
             orgTreeVo.setId(user.getId());
             orgTreeVo.setName(user.getName());
@@ -242,13 +256,13 @@ public class OrgServiceImpl implements IOrgService {
     @Override
     public Object delete(Dept dept) {
         long id = dept.getId();
-
-        List<Dept> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
-        List<Dept> deptList = DataUtil.selectChildrenByDept(id, allDept);
-
+        List<DeptDto> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
+        List<DeptDto> deptList = DataUtil.selectChildrenByDept(String.valueOf(id), allDept);
 
 
-        Set<Long> depIdSet = deptList.stream().map(w -> w.getId()).collect(Collectors.toSet());
+
+        Set<String> depIdSet = deptList.stream().map(w -> w.getId()).collect(Collectors.toSet());
+
 
         Long count = userService.lambdaQuery().in(User::getDeptId, depIdSet).count();
 
@@ -280,28 +294,16 @@ public class OrgServiceImpl implements IOrgService {
                 ;
         UserVO userVO = userService.selectJoinOne(UserVO.class, lambdaQueryWrapper);
         if(userVO!=null){
-            List<Dept> deptList = deptService.lambdaQuery().list();
+            List<DeptDto> deptDtoList = ApiStrategyFactory.getStrategy().loadAllDept(null);
 
-            List<Long> depIdRootList = DeptUtil.queryRootIdList(userVO.getDeptId(), deptList);
+            List<String> depIdRootList = DeptUtil.queryRootIdList(String.valueOf(userVO.getDeptId()), deptDtoList);
 
             userVO.setDepIdList(CollUtil.reverse(depIdRootList));
 
         }
-        //添加扩展字段
-        List<UserFieldData> userFieldDataList = userFieldDataService.lambdaQuery().eq(UserFieldData::getUserId, userId).list();
-        //判断有没有新的扩展字段
-        List<UserField> userFieldList = userFieldService.lambdaQuery().ge(UserField::getId, 0).list();
-        List<UserFieldDataVo> userFieldDataVos = BeanUtil.copyToList(userFieldList, UserFieldDataVo.class);
-        for (UserFieldDataVo userFieldDataVo : userFieldDataVos) {
-            UserFieldData userFieldData = userFieldDataList.stream().filter(w -> StrUtil.equals(w.getKey(), userFieldDataVo.getKey())).findAny().orElse(null);
-            if(userFieldData!=null){
-                userFieldDataVo.setData(userFieldData.getData());
-            }
-        }
 
 
 
-        userVO.setUserFieldDataList(userFieldDataVos);
         List<UserRole> userRoleList = userRoleService.queryListByUserId(userId).getData();
         userVO.setRoleIds(userRoleList.stream().map(w->w.getRoleId()).collect(Collectors.toList()));
 

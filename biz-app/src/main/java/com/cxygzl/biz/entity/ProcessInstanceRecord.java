@@ -40,7 +40,7 @@ public class ProcessInstanceRecord  extends BaseEntity {
      * 用户id
      */
     @TableField("`user_id`")
-    private Long userId;
+    private String userId;
 
 
     /**

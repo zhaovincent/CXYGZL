@@ -25,7 +25,7 @@ public class ProcessStarter  extends BaseEntity {
      * 用户id或者部门id
      */
     @TableField("`type_id`")
-    private Long typeId;
+    private String typeId;
 
     /**
      *  类型 user dept

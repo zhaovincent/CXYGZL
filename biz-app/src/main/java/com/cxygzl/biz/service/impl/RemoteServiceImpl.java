@@ -12,6 +12,8 @@ import com.cxygzl.biz.mapper.DeptMapper;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.DataUtil;
 import com.cxygzl.common.dto.*;
+import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.UserDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -54,9 +56,9 @@ public class RemoteServiceImpl implements IRemoteService {
      * @return
      */
     @Override
-    public R<List<Long>> queryUserIdListByRoleIdList(List<Long> roleIdList) {
+    public R<List<String>> queryUserIdListByRoleIdList(List<String> roleIdList) {
 
-        List<Long> userIdList = ApiStrategyFactory.getStrategy().loadUserIdListByRoleIdList(roleIdList);
+        List<String> userIdList = ApiStrategyFactory.getStrategy().loadUserIdListByRoleIdList(roleIdList);
 
 
         return R.success(userIdList);
@@ -115,17 +117,17 @@ public class RemoteServiceImpl implements IRemoteService {
     @Override
     public R<Boolean> checkIsAllParent(CheckParentDto checkParentDto) {
 
-        Long parentId = checkParentDto.getParentId();
-        List<Long> deptIdList = checkParentDto.getDeptIdList();
+        String parentId = checkParentDto.getParentId();
+        List<String> deptIdList = checkParentDto.getDeptIdList();
         //查询子级包括自己
-        List<Dept> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
-        List<Dept> childrenDeptList = DataUtil.selectChildrenByDept(parentId, allDept);
+        List<com.cxygzl.common.dto.third.DeptDto> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
+        List<com.cxygzl.common.dto.third.DeptDto> childrenDeptList = DataUtil.selectChildrenByDept(parentId,allDept);
 
 
-        List<Long> childrenDeptIdList = childrenDeptList.stream().map(w -> w.getId()).collect(Collectors.toList());
+        List<String> childrenDeptIdList = childrenDeptList.stream().map(w -> w.getId()).collect(Collectors.toList());
         childrenDeptIdList.remove(parentId);
 
-        List<Long> remainIdList = CollUtil.removeAny(deptIdList, ArrayUtil.toArray(childrenDeptIdList, Long.class));
+        List<String> remainIdList = CollUtil.removeAny(deptIdList, ArrayUtil.toArray(childrenDeptIdList, String.class));
 
         return R.success(remainIdList.isEmpty());
     }
@@ -137,9 +139,9 @@ public class RemoteServiceImpl implements IRemoteService {
      * @return
      */
     @Override
-    public R<List<Long>> queryUserIdListByDepIdList(List<Long> depIdList) {
+    public R<List<String>> queryUserIdListByDepIdList(List<String> depIdList) {
 
-        List<Long> userIdList = ApiStrategyFactory.getStrategy().loadUserIdListByDeptIdList(depIdList);
+        List<String> userIdList = ApiStrategyFactory.getStrategy().loadUserIdListByDeptIdList(depIdList);
         return R.success(userIdList);
     }
 
@@ -151,17 +153,17 @@ public class RemoteServiceImpl implements IRemoteService {
      */
     @Override
     public R<Boolean> checkIsAllChild(CheckChildDto checkChildDto) {
-        Long childId = checkChildDto.getChildId();
-        List<Long> deptIdList = checkChildDto.getDeptIdList();
+        String childId = checkChildDto.getChildId();
+        List<String> deptIdList = checkChildDto.getDeptIdList();
         //查询父级包括自己
 
-        List<Dept> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
-        List<Dept> parentDeptList = DataUtil.selectParentByDept(childId, allDept);
+        List<com.cxygzl.common.dto.third.DeptDto> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
+        List<com.cxygzl.common.dto.third.DeptDto> parentDeptList = DataUtil.selectParentByDept(childId, allDept);
 
-        List<Long> parentDeptIdList = parentDeptList.stream().map(w -> w.getId()).collect(Collectors.toList());
+        List<String> parentDeptIdList = parentDeptList.stream().map(w -> w.getId()).collect(Collectors.toList());
         parentDeptIdList.remove(childId);
 
-        List<Long> remainIdList = CollUtil.removeAny(deptIdList, ArrayUtil.toArray(parentDeptIdList, Long.class));
+        List<String> remainIdList = CollUtil.removeAny(deptIdList, ArrayUtil.toArray(parentDeptIdList, String.class));
 
         return R.success(remainIdList.isEmpty());
     }
@@ -173,8 +175,9 @@ public class RemoteServiceImpl implements IRemoteService {
      * @return
      */
     @Override
-    public R<Map<String, Object>> queryUserAllInfo(long userId) {
-        User user = userService.getById(userId);
+    public R<Map<String, Object>> queryUserAllInfo(String userId) {
+
+        UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
 
         Map<String, Object> map = BeanUtil.beanToMap(user, "id", "name", "phone", "gender", "deptId", "entryDate"
                 );
@@ -193,17 +196,14 @@ public class RemoteServiceImpl implements IRemoteService {
      * @return
      */
     @Override
-    public R<List<DeptDto>> queryParentDepListByUserId(long userId) {
-        User user = ApiStrategyFactory.getStrategy().getUser(userId);
-        Long deptId = user.getDeptId();
+    public R<List<DeptDto>> queryParentDepListByUserId(String userId) {
+        UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
+        String deptId = user.getDeptId();
 
-        List<Dept> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
-        List<Dept> deptList = DataUtil.selectParentByDept(deptId, allDept);
+        List<com.cxygzl.common.dto.third.DeptDto> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
+        List<com.cxygzl.common.dto.third.DeptDto> deptList = DataUtil.selectParentByDept(deptId,allDept);
 
-
-        List<DeptDto> dtoList = BeanUtil.copyToList(deptList, DeptDto.class);
-
-        return R.success(dtoList);
+        return R.success(deptList);
     }
 
     /**
@@ -298,7 +298,7 @@ public class RemoteServiceImpl implements IRemoteService {
      * @return
      */
     @Override
-    public R<Long> queryProcessAdmin(String flowId) {
+    public R<String> queryProcessAdmin(String flowId) {
         Process process = processService.getByFlowId(flowId);
         return R.success(process.getAdminId());
     }

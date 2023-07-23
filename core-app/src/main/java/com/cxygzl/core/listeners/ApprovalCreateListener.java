@@ -52,9 +52,9 @@ public class ApprovalCreateListener implements TaskListener {
             if (StrUtil.equals(handler, ProcessInstanceConstant.USER_TASK_NOBODY_HANDLER_TO_ADMIN)) {
                 //指派给管理员
 
-                R<Long> longR  = CoreHttpUtil.queryProcessAdmin(flowId);
+                R<String> longR  = CoreHttpUtil.queryProcessAdmin(flowId);
 
-                Long adminId = longR.getData();
+                String adminId = longR.getData();
 
 
                 taskService.setAssignee(taskEntity.getId(), String.valueOf(adminId));

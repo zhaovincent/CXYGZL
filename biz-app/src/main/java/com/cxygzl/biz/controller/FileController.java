@@ -46,7 +46,6 @@ public class FileController {
     @NotWriteLogAnno(exclude = false,all = true)
     public Object upload(MultipartFile file){
 
-        long loginIdAsLong = StpUtil.getLoginIdAsLong();
 
 
         String originalFilename = file.getOriginalFilename();

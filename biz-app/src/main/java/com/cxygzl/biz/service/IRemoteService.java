@@ -2,6 +2,7 @@
 package com.cxygzl.biz.service;
 
 import com.cxygzl.common.dto.*;
+import com.cxygzl.common.dto.third.DeptDto;
 
 import java.util.List;
 import java.util.Map;
@@ -12,10 +13,11 @@ import java.util.Map;
 public interface IRemoteService {
     /**
      * 根据角色id集合查询用户id集合
+     *
      * @param roleIdList
      * @return
      */
-    R<List<Long>> queryUserIdListByRoleIdList(List<Long> roleIdList);
+    R<List<String>> queryUserIdListByRoleIdList(List<String> roleIdList);
 
     /**
      * 保存抄送
@@ -33,10 +35,11 @@ public interface IRemoteService {
 
     /**
      * 根据部门id集合查询用户id集合
+     *
      * @param depIdList
      * @return
      */
-    R<List<Long>> queryUserIdListByDepIdList(List<Long> depIdList);
+    R<List<String>> queryUserIdListByDepIdList(List<String> depIdList);
 
     /**
      * 检查是否是所有的子级
@@ -50,14 +53,14 @@ public interface IRemoteService {
      * @param userId
      * @return
      */
-    R<Map<String,Object>> queryUserAllInfo(long userId);
+    R<Map<String,Object>> queryUserAllInfo(String userId);
 
     /**
      * 根据当前用户查询包括自己部门在内的上级部门对象
      * @param userId
      * @return
      */
-    R<List<DeptDto>> queryParentDepListByUserId(long userId);
+    R<List<DeptDto>> queryParentDepListByUserId(String userId);
 
     /**
      * 开始节点事件
@@ -105,8 +108,9 @@ public interface IRemoteService {
 
     /**
      * 查询流程管理员
+     *
      * @param flowId
      * @return
      */
-    R<Long> queryProcessAdmin(String flowId);
+    R<String> queryProcessAdmin(String flowId);
 }

@@ -67,13 +67,13 @@ public class CopyServiceTask implements JavaDelegate {
             //发送抄送任务
             ProcessCopyDto processCopyDto = new ProcessCopyDto();
             processCopyDto.setNodeTime(new Date());
-            processCopyDto.setStartUserId(Long.parseLong(rootUser.getId()));
+            processCopyDto.setStartUserId((rootUser.getId()));
             processCopyDto.setFlowId(flowId);
             processCopyDto.setProcessInstanceId(execution.getProcessInstanceId());
             processCopyDto.setNodeId(nodeId);
             processCopyDto.setNodeName(node.getName());
             processCopyDto.setFormData(JSON.toJSONString(variables));
-            processCopyDto.setUserId(Long.parseLong(userIds));
+            processCopyDto.setUserId((userIds));
 
             CoreHttpUtil.saveCC(processCopyDto);
         }

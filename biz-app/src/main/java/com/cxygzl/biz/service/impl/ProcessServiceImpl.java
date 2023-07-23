@@ -122,7 +122,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
         String processStr = process.getProcess();
 
-        R<String> r = CoreHttpUtil.createFlow(JSON.parseObject(processStr), StpUtil.getLoginIdAsLong());
+        R<String> r = CoreHttpUtil.createFlow(JSON.parseObject(processStr), StpUtil.getLoginIdAsString());
         if (!r.isOk()) {
             return R.fail(r.getMsg());
         }
@@ -175,7 +175,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         p.setSort(0);
         p.setHidden(false);
         p.setStop(false);
-        p.setAdminId(Long.valueOf(nodeUser.getId()));
+        p.setAdminId(nodeUser.getId());
         p.setUniqueId(IdUtil.fastSimpleUUID());
         p.setAdmin(process.getAdmin());
         p.setRangeShow(stringBuilder.toString());
@@ -191,7 +191,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
             ProcessStarter processStarter = new ProcessStarter();
 
             processStarter.setProcessId(p.getId());
-            processStarter.setTypeId(Long.valueOf(nodeUserDto.getId()));
+            processStarter.setTypeId((nodeUserDto.getId()));
             processStarter.setType(nodeUserDto.getType());
             processStarterService.save(processStarter);
 

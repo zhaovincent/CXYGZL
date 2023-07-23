@@ -2,14 +2,15 @@ package com.cxygzl.biz.api.impl;
 
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.biz.api.ApiStrategy;
-import com.cxygzl.biz.entity.Dept;
-import com.cxygzl.biz.entity.Role;
 import com.cxygzl.biz.entity.User;
 import com.cxygzl.biz.service.IDeptService;
 import com.cxygzl.biz.service.IRoleService;
 import com.cxygzl.biz.service.IUserRoleService;
 import com.cxygzl.biz.service.IUserService;
 import com.cxygzl.biz.utils.CoreHttpUtil;
+import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.RoleDto;
+import com.cxygzl.common.dto.third.UserDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -37,10 +38,10 @@ public class NetApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public List<Long> loadUserIdListByRoleIdList(List<Long> roleIdList) {
+    public List<String> loadUserIdListByRoleIdList(List<String> roleIdList) {
 
         String post = CoreHttpUtil.post(roleIdList, "/test/net/loadUserIdListByRoleIdList");
-        return JSON.parseArray(post,Long.class);
+        return JSON.parseArray(post,String.class);
 
 
     }
@@ -51,9 +52,9 @@ public class NetApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public List<Role> loadAllRole() {
+    public List<RoleDto> loadAllRole() {
         String post = CoreHttpUtil.get( "/test/net/loadUserIdListByRoleIdList");
-        return JSON.parseArray(post,Role.class);
+        return JSON.parseArray(post,RoleDto.class);
     }
 
     /**
@@ -64,9 +65,9 @@ public class NetApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public List<Long> loadUserIdListByDeptIdList(List<Long> deptIdList) {
+    public List<String> loadUserIdListByDeptIdList(List<String> deptIdList) {
         String post = CoreHttpUtil.post(deptIdList, "/test/net/loadUserIdListByDeptIdList");
-        return JSON.parseArray(post,Long.class);
+        return JSON.parseArray(post,String.class);
     }
 
     /**
@@ -75,9 +76,9 @@ public class NetApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public List<Dept> loadAllDept(Long parentDeptId) {
+    public List<DeptDto> loadAllDept(String parentDeptId) {
         String post = CoreHttpUtil.get( "/test/net/loadAllDept?parentDeptId="+(parentDeptId==null?"":parentDeptId));
-        return JSON.parseArray(post,Dept.class);
+        return JSON.parseArray(post,DeptDto.class);
     }
 
     /**
@@ -87,9 +88,9 @@ public class NetApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public List<User> loadUserByDept(long deptId) {
+    public List<UserDto> loadUserByDept(String deptId) {
         String post = CoreHttpUtil.get( "/test/net/loadUserByDept?deptId="+deptId);
-        return JSON.parseArray(post,User.class);
+        return JSON.parseArray(post,UserDto.class);
     }
 
     /**
@@ -99,15 +100,15 @@ public class NetApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public User getUser(long userId) {
+    public UserDto getUser(String userId) {
         String post = CoreHttpUtil.get( "/test/net/getUser?userId="+userId);
-        return JSON.parseObject(post,User.class);
+        return JSON.parseObject(post,UserDto.class);
     }
 
     @Override
-    public List<User> searchUser(String name) {
+    public List<UserDto> searchUser(String name) {
         String post = CoreHttpUtil.get( "/test/net/searchUser?name="+name);
-        return JSON.parseArray(post,User.class);
+        return JSON.parseArray(post,UserDto.class);
     }
 
     /**
@@ -118,9 +119,9 @@ public class NetApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public Long getUserIdByToken(String token) {
+    public String getUserIdByToken(String token) {
         String post = CoreHttpUtil.get( "/test/net/getUserIdByToken?token="+token);
-        return Long.parseLong(post);
+        return post;
     }
 
     @Override

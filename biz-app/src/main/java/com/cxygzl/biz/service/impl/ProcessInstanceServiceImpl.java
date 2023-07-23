@@ -10,6 +10,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.*;
@@ -25,6 +26,7 @@ import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.dto.third.UserDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -62,9 +64,9 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     @Override
     public Object startProcessInstance(ProcessInstanceParamDto processInstanceParamDto) {
 
-        long userId = StpUtil.getLoginIdAsLong();
+        String userId = StpUtil.getLoginIdAsString();
 
-        User user = userService.getById(userId);
+        UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
 
         processInstanceParamDto.setStartUserId(String.valueOf(userId));
         Map<String, Object> paramMap = processInstanceParamDto.getParamMap();
@@ -113,10 +115,16 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 processInstanceIdSet).list();
 
         //发起人
-        Set<Long> startUserIdSet = processInstanceRecordList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
+        Set<String> startUserIdSet =
+                processInstanceRecordList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
 
-        List<User> startUserList = userService.listByIds(startUserIdSet);
-
+        List<UserDto> startUserList =new ArrayList<>();
+        {
+            for (String userIds : startUserIdSet) {
+                UserDto user = ApiStrategyFactory.getStrategy().getUser(userIds);
+                startUserList.add(user);
+            }
+        }
         for (TaskDto record : records) {
 
             ProcessInstanceRecord processInstanceRecord = processInstanceRecordList.stream().filter(w -> StrUtil.equals(w.getProcessInstanceId(),
@@ -126,8 +134,9 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
                 record.setProcessName(processInstanceRecord.getName());
 
-                User startUser = startUserList.stream().filter(w -> w.getId()
-                        .longValue() == processInstanceRecord.getUserId()).findAny().orElse(null);
+                UserDto startUser = startUserList.stream().filter(w -> w.getId()
+                        .equals( processInstanceRecord.getUserId())).findAny().orElse(null);
+
 
                 record.setRootUserId(processInstanceRecord.getUserId());
                 record.setGroupName(processInstanceRecord.getGroupName());
@@ -170,9 +179,17 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 processInstanceIdSet).list();
 
         //发起人
-        Set<Long> startUserIdSet = processInstanceRecordList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
+        Set<String> startUserIdSet =
+                processInstanceRecordList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
 
-        List<User> startUserList = userService.listByIds(startUserIdSet);
+        List<UserDto> startUserList =new ArrayList<>();
+        {
+            for (String userIds : startUserIdSet) {
+                UserDto user = ApiStrategyFactory.getStrategy().getUser(userIds);
+                startUserList.add(user);
+            }
+        }
+
 
         for (TaskDto record : records) {
 
@@ -183,8 +200,10 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
                 record.setProcessName(processInstanceRecord.getName());
 
-                User startUser = startUserList.stream().filter(w -> w.getId()
-                        .longValue() == processInstanceRecord.getUserId()).findAny().orElse(null);
+
+                UserDto startUser = startUserList.stream().filter(w -> w.getId()
+                        .equals( processInstanceRecord.getUserId())).findAny().orElse(null);
+
 
                 record.setRootUserId(processInstanceRecord.getUserId());
                 record.setGroupName(processInstanceRecord.getGroupName());
@@ -223,7 +242,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     @Override
     public Object queryMineStarted(PageDto pageDto) {
 
-        long userId = StpUtil.getLoginIdAsLong();
+        String userId = StpUtil.getLoginIdAsString();
 
         Page<ProcessInstanceRecord> instanceRecordPage = processInstanceRecordService.lambdaQuery()
                 .eq(ProcessInstanceRecord::getUserId, userId)
@@ -242,7 +261,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     @Override
     public Object queryMineCC(PageDto pageDto) {
 
-        long userId = StpUtil.getLoginIdAsLong();
+        String userId = StpUtil.getLoginIdAsString();
 
         Page<ProcessCopy> page = processCopyService.lambdaQuery()
                 .eq(ProcessCopy::getUserId, userId)
@@ -256,16 +275,19 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         if (CollUtil.isNotEmpty(records)) {
 
             //发起人
-            Set<Long> startUserIdSet = records.stream().map(w -> w.getStartUserId()).collect(Collectors.toSet());
+            Set<String> startUserIdSet = records.stream().map(w -> w.getStartUserId()).collect(Collectors.toSet());
 
-            List<User> startUserList = userService.listByIds(startUserIdSet);
-
+            List<UserDto> startUserList = new ArrayList<>();
+            for (String s : startUserIdSet) {
+                UserDto user = ApiStrategyFactory.getStrategy().getUser(s);
+                startUserList.add(user);
+            }
 
             for (ProcessCopyVo record : processCopyVoList) {
 
 
-                User startUser = startUserList.stream().filter(w -> w.getId()
-                        .longValue() == record.getStartUserId()).findAny().orElse(null);
+                UserDto startUser = startUserList.stream().filter(w -> w.getId()
+                        .equals(record.getStartUserId())).findAny().orElse(null);
                 record.setStartUserName(startUser.getName());
             }
         }
@@ -377,7 +399,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     public Object detail(String processInstanceId) {
 
 
-        long userId = StpUtil.getLoginIdAsLong();
+        String userId = StpUtil.getLoginIdAsString();
 
 
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
