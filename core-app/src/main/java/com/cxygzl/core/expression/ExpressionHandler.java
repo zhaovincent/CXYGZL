@@ -202,7 +202,7 @@ public class ExpressionHandler {
      * @param array 条件值
      * @return
      */
-    public boolean stringContain(String key, DelegateExecution execution, String... array) {
+    public boolean stringArrayContain(String key, DelegateExecution execution, String... array) {
         Object value = execution.getVariable(key);
 
         log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
@@ -229,6 +229,24 @@ public class ExpressionHandler {
             return false;
         }
         return StrUtil.equals(value.toString(), param);
+    }
+
+    /**
+     * 字符串判断包含
+     *
+     * @param key   表单key
+     * @param param 参数
+     * @return
+     */
+    public boolean stringContain(String key, String param, DelegateExecution execution) {
+        Object value = execution.getVariable(key);
+
+        log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
+        log.debug("条件  参数：{}", JSON.toJSONString(param));
+        if (value == null) {
+            return false;
+        }
+        return StrUtil.contains(value.toString(), param);
     }
 
     public boolean deptCompare(String key, String param, String symbol, DelegateExecution execution) {

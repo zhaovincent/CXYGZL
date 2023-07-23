@@ -26,6 +26,12 @@ public class InputNodeConditionStrategy implements NodeConditionStrategy, Initia
         if(StrUtil.equals(compare, "==")){
             return StrUtil.format("(expressionHandler.stringEqual(\"{}\",\"{}\",execution))", id,value);
         }
+        if(StrUtil.equals(compare, "contain")){
+            return StrUtil.format("(expressionHandler.stringContain(\"{}\",\"{}\",execution))", id,value);
+        }
+        if(StrUtil.equals(compare, "notcontain")){
+            return StrUtil.format("(!expressionHandler.stringContain(\"{}\",\"{}\",execution))", id,value);
+        }
         if(StrUtil.equals(compare, "!=")){
             return StrUtil.format("(!expressionHandler.stringEqual(\"{}\",\"{}\",execution))", id,value);
         }

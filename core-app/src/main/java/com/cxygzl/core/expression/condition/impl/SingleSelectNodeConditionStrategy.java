@@ -40,10 +40,10 @@ public class SingleSelectNodeConditionStrategy implements NodeConditionStrategy,
             string = string.substring(1);
         }
         if (compare.equals("in")) {
-            return StrUtil.format("(expressionHandler.stringContain(\"{}\", execution,{}))", id, string);
+            return StrUtil.format("(expressionHandler.stringArrayContain(\"{}\", execution,{}))", id, string);
         }
 
-        return StrUtil.format("(!expressionHandler.stringContain(\"{}\", execution,{}))", id, string);
+        return StrUtil.format("(!expressionHandler.stringArrayContain(\"{}\", execution,{}))", id, string);
 
 
     }

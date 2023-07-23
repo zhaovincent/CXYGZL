@@ -36,7 +36,13 @@ public class FormItemVO {
         private Boolean self;
         private Boolean multi;
         private Object oriForm;
+        private Integer minLength;
+        private Integer maxLength;
+        private Integer maxSize;
+        private String regex;
+        private String regexDesc;
 
+        private Object suffixArray;
         private Object max;
         private Object min;
     }
