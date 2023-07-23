@@ -2,21 +2,27 @@
 ### 概述
 现在开源的工作流引擎，基本都是以BPMN.js为基础的，导致使用门槛过高，非专业人员无法驾驭。本工作流借鉴钉钉/飞书的方式，以低代码方式降低用户使用门槛，即使是普通企业用户也可以几分钟内就能搭建自己的工作流引擎。
 
-项目前端代码是根据`wflow-web`开源前端代码二开完成，在此特别感谢`wflow-wb`的支持。鉴于`wflow-web`的[开源协议](https://gitee.com/willianfu/jw-workflow-engine "开源协议")，所以项目中不提供前端源代码。
 
-### 官网
+前端管理后台框架使用的是 [vue3-element-admin](https://gitee.com/youlaiorg/vue3-element-admin "vue3-element-admin")，流程图使用的是[Workflow-Vue3](https://github.com/StavinLi/Workflow-Vue3 "Workflow-Vue3")。在此特别感谢两个产品的作者无私奉献，让我抄了个近道，特别感谢。
+
+> 前端代码开源地址：[https://gitee.com/junyue/cxygzl-web-vue3](https://gitee.com/junyue/cxygzl-web-vue3 "https://gitee.com/junyue/cxygzl-web-vue3")
+
+### 官网-文档
 
 [https://www.cxygzl.com](https://www.cxygzl.com "https://www.cxygzl.com")
 
+![msedge_mNNAqkgNd9.png](imgs/msedge_mNNAqkgNd9.png)
+
 
 ### 技术架构
-前端：Vue2+ElementUI+Axios
+前端：Vue3+ElementPlus
 
 后端：SpringBoot2.7.6（jdk8）+Mysql8+MybatisPlus+Flowable6.8.0+Hutool+SaToken+Beetl
 
 ### 技术交流群
+![c8b39f7a3379faa9f5db16890a1bf93.jpg](imgs/c8b39f7a3379faa9f5db16890a1bf93.jpg)
 
-添加作者个人微信进群`qdxgzhj`备注：`cxygzl`
+添加作者个人微信进群`cxygzl666`备注：`cxygzl`
 
 ### 关于开源协议以及补充协议
 
@@ -28,38 +34,5 @@
 
 
 ### 功能列表
-
-##### 1、组织管理
-1. 用户管理
-1. 部门管理
-1. `用户属性管理（专业版）`
-
-##### 2、流程管理
-1. 流程组管理
-1. 流程管理
-   1. 基础信息
-   1. 表单信息
-   1. 流程信息
-   1. 其他配置
-1. 我的流程
-   1. 发起流程
-   1. 待办任务
-   1. 我发起的
-   1. 抄送给我的
-   1. 已办任务
-
-![](/imgs/微信图片_20230606104319.png)
-![](/imgs/微信图片_20230606212929.png)
-![](/imgs/微信图片_202306061043192.png)
-![](/imgs/微信图片_202306061043193.png)
-![](/imgs/微信图片_202306061043194.png)
-![](/imgs/微信图片_202306061043195.png)
-![](/imgs/微信图片_202306061043196.png)
-![](/imgs/微信图片_202306061043197.png)
-![](/imgs/微信图片_202306061043198.png)
-![](/imgs/微信图片_202306061043199.png)
-![](/imgs/微信图片_2023060610431910.png)
-![](/imgs/微信图片_2023060610431911.png)
-![](/imgs/微信图片_2023060610431912.png)
-![](/imgs/微信图片_2023060610431913.png)
-![](/imgs/微信图片_2023060610431914.png) 
+详细功能可到官网查看
+![微信图片_20230625223855.png](imgs/微信图片_20230625223855.png)
