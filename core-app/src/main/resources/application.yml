@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: cxygzl-core-app
+  datasource:
+    url: jdbc:mysql://localhost:3307/simple_flow?allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+
+server:
+  port: 26858
+
+logging:
+  config: classpath:logback.xml
+
+node:
+  data:
+    store: remoteNodeDataStore
+biz:
+  url: http://127.0.0.1:26859
+

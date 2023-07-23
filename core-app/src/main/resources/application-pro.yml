@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/cxygzl_core?allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: SD342Jf632JD^123
+
+
+logging:
+  config: classpath:logback-pro.xml
+

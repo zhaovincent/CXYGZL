@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="ENCODER_PATTERN"  value="%d{yyyy-MM-dd  HH:mm:ss.SSS}| %-5level |%10.10thread |%X{X-B3-TraceId}| %logger|%method|%line|%msg%n" />aio
+
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+                          ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder class="com.yomahub.tlog.core.enhance.logback.AspectLogbackEncoder">
+
+        <pattern>${ENCODER_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+
+    <root>
+        <level value="INFO" />
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
+

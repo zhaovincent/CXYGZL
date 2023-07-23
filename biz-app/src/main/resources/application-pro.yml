@@ -1,0 +1,28 @@
+spring:
+  redis:
+    host: myserver
+    port: 6379
+    database: 13
+  datasource:
+    url: jdbc:mysql://localhost:3306/cxygzl_biz_vue3?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: SD342Jf632JD^123
+
+
+logging:
+  config: classpath:logback-pro.xml
+
+
+
+file:
+  dir: /home/cxygzl/static
+  showUrl: https://pro.cxygzl.com/wj/
+
+
+sa-token:
+  # 是否允许同一账号并发登录 (为true时允许一起登录, 为false时新登录挤掉旧登录)
+  is-concurrent: true
+
+
+

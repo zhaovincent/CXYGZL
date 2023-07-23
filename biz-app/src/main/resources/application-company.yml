@@ -1,0 +1,16 @@
+spring:
+  redis:
+    ##redis地址
+    host: localhost
+    ##redis端口
+    port: 6379
+    ##使用的db
+    database: 13
+    password:
+  datasource:
+    url: jdbc:mysql://localhost:3306/simple_flow_biz_vue3?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    ##数据库账号
+    username: root
+    ##数据库密码
+    password: NjIfy:ywd3F8
