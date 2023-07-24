@@ -1,4 +1,16 @@
-# CXYGZL-不只审批
+# <p align="center"><strong> CXYGZL-不只审批 </strong></p>
+
+
+<p align="center">
+    <img src="https://img.shields.io/badge/Flowable-6.8.0-blue" alt="Flowable"/>
+    <img src="https://img.shields.io/badge/Spring%20Boot-2.7.6-blue" alt="SpringBoot"/>
+    <img src="https://img.shields.io/badge/Hutool-5.8.16-blue" alt="Hutool"/>
+    <img src="https://img.shields.io/badge/Mybatis--plus-3.5.3.1-blue" alt="Mybatis-plus"/>
+    <img src="https://img.shields.io/badge/SaToken-1.34.0-blue" alt="SaToken"/>
+    <img src="https://img.shields.io/badge/Vue-3.3.1-orange" alt="Vue3"/>
+    <img src="https://img.shields.io/badge/ElementPlus-2.3.6-orange" alt="Vue3"/>
+</p>
+
 ### 概述
 现在开源的工作流引擎，基本都是以BPMN.js为基础的，导致使用门槛过高，非专业人员无法驾驭。本工作流借鉴钉钉/飞书的方式，以低代码方式降低用户使用门槛，即使是普通企业用户也可以几分钟内就能搭建自己的工作流引擎。
 
@@ -17,7 +29,7 @@
 ### 技术架构
 前端：Vue3+ElementPlus
 
-后端：SpringBoot2.7.6（jdk8）+Mysql8+MybatisPlus+Flowable6.8.0+Hutool+SaToken+Beetl
+后端：SpringBoot2.7.6（jdk8）+Mysql8+MybatisPlus+Flowable6.8.0+Hutool+SaToken
 
 ### 技术交流群
 ![c8b39f7a3379faa9f5db16890a1bf93.jpg](imgs/c8b39f7a3379faa9f5db16890a1bf93.jpg)
