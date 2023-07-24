@@ -12,18 +12,19 @@ import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
-import com.cxygzl.common.dto.third.UserFieldDto;
 import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.dto.third.UserFieldDto;
 import com.cxygzl.core.utils.CoreHttpUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.beetl.core.Configuration;
-import org.beetl.core.GroupTemplate;
-import org.beetl.core.Template;
-import org.beetl.core.resource.StringTemplateResourceLoader;
 import org.flowable.engine.delegate.DelegateExecution;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.common.TemplateParserContext;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,21 +35,6 @@ import java.util.stream.Collectors;
 @Component("expressionHandler")
 @Slf4j
 public class ExpressionHandler {
-
-    private GroupTemplate gt = null;
-
-    @PostConstruct
-    public void init() {
-        StringTemplateResourceLoader resourceLoader = new StringTemplateResourceLoader();
-        Configuration cfg = null;
-        try {
-            cfg = Configuration.defaultConfiguration();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        gt = new GroupTemplate(resourceLoader, cfg);
-
-    }
 
 
 
@@ -86,7 +72,7 @@ public class ExpressionHandler {
         long paramTime = DateUtil.parse(param.toString(), format).getTime();
 
 
-        return compare(StrUtil.format("${key{}{}}", symbol, paramTime), Dict.create().set("key", valueTime));
+        return compare(StrUtil.format("#{#key{}{}}", symbol, paramTime), Dict.create().set("key", valueTime));
     }
 
     /**
@@ -119,22 +105,29 @@ public class ExpressionHandler {
         }
 
 
-        return compare(StrUtil.format("${key{}{}}", symbol, param), Dict.create().set("key", Convert.toNumber(value)));
+        return compare(StrUtil.format("#{#key{}{}}", symbol, param), Dict.create().set("key", Convert.toNumber(value)));
 
     }
 
     private Boolean compare(String symbol, Dict value) {
         //获取模板
-        Template t = gt.getTemplate(symbol);
 
-        t.binding(value);
 
-        //渲染结果
-        String result = t.render();
-        log.debug("验证结果:{}", result);
+        ExpressionParser paser = new SpelExpressionParser();//创建表达式解析器
 
-        return Convert.toBool(result, false);
+        //通过evaluationContext.setVariable可以在上下文中设定变量。
+        EvaluationContext context = new StandardEvaluationContext();
+        for (Map.Entry<String, Object> entry : value.entrySet()) {
+            context.setVariable(entry.getKey(),entry.getValue());
+        }
+
+        //解析表达式，如果表达式是一个模板表达式，需要为解析传入模板解析器上下文。
+        Expression expression = paser.parseExpression(symbol,new TemplateParserContext());
+
+        //使用Expression.getValue()获取表达式的值，这里传入了Evalution上下文，第二个参数是类型参数，表示返回值的类型。
+        return expression.getValue(context, boolean.class);
     }
+
 
 
 

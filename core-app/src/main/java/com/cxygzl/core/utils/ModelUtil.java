@@ -147,7 +147,7 @@ public class ModelUtil {
 
         //子节点
         Node children = nodeDto.getChildren();
-        if (NodeTypeEnum.getByValue(nodeDto.getType()).getBranch()  ) {
+        if (NodeTypeEnum.getByValue(nodeDto.getType()).getBranch()) {
             //条件分支
             List<Node> branchs = nodeDto.getConditionNodes();
             for (Node branch : branchs) {
@@ -186,7 +186,7 @@ public class ModelUtil {
 
         //子节点
         Node children = nodeDto.getChildren();
-        if (NodeTypeEnum.getByValue(nodeDto.getType()).getBranch()    ) {
+        if (NodeTypeEnum.getByValue(nodeDto.getType()).getBranch()) {
 //            children = children.getChildren();
             //条件分支
             List<Node> branchs = nodeDto.getConditionNodes();
@@ -889,12 +889,45 @@ public class ModelUtil {
             List<HttpSettingData> pcFormList = node.getPcFormList();
 
 
+            //主流程向子流程传递变量
             if (CollUtil.isNotEmpty(pcFormList)) {
                 for (HttpSettingData httpSettingData : pcFormList) {
 
 
                     ExtensionElement e = new ExtensionElement();
                     e.setName("flowable:in");
+                    HashMap<String, List<ExtensionAttribute>> attributes = new HashMap<>();
+
+                    ArrayList<ExtensionAttribute> value1 = new ArrayList<>();
+                    {
+                        ExtensionAttribute e1 = new ExtensionAttribute();
+                        e1.setName("target");
+                        e1.setValue(httpSettingData.getValue());
+                        value1.add(e1);
+                    }
+                    {
+                        ExtensionAttribute e1 = new ExtensionAttribute();
+                        e1.setName("sourceExpression");
+                        e1.setValue(StrUtil.format("${expressionHandler.callActivityVariables(\"{}\",execution,3)}",
+                                httpSettingData.getField()));
+                        value1.add(e1);
+                    }
+                    attributes.put(IdUtil.fastSimpleUUID(), value1);
+                    e.setAttributes(attributes);
+                    value.add(e);
+
+                }
+            }
+
+            List<HttpSettingData> cpFormList = node.getCpFormList();
+
+//子流程向主流程传递变量
+            if (CollUtil.isNotEmpty(cpFormList) && !node.getMultiple()) {
+                for (HttpSettingData httpSettingData : cpFormList) {
+
+
+                    ExtensionElement e = new ExtensionElement();
+                    e.setName("flowable:out");
                     HashMap<String, List<ExtensionAttribute>> attributes = new HashMap<>();
 
                     ArrayList<ExtensionAttribute> value1 = new ArrayList<>();
