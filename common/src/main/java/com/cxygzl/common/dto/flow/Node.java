@@ -78,7 +78,7 @@ public class Node {
     private Object value;
 
     private String delayUnit;
-    private String groupRelation;
+    private Object groupRelation;
     private String subFlowId;
     private String subFlowName;
     private Integer starterMode;

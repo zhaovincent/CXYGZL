@@ -1,7 +1,11 @@
 package com.cxygzl.core.expression.condition;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.cxygzl.common.dto.flow.Condition;
 import com.cxygzl.common.dto.flow.GroupCondition;
 import com.cxygzl.common.dto.flow.Node;
@@ -101,22 +105,31 @@ public class NodeExpressionStrategyFactory {
             String join = CollUtil.join(exps, "&&");
             return "${(" + join + ")}";
         }
-        String groupRelation = node.getGroupRelation();
+        Object groupRelation = node.getGroupRelation();
 
-        groupRelation = StrUtil.replace(groupRelation, "$($", "(");
-        groupRelation = StrUtil.replace(groupRelation, "$)$", ")");
-        groupRelation = StrUtil.replace(groupRelation, "$或$", "||");
-        groupRelation = StrUtil.replace(groupRelation, "$且$", "&&");
 
-        int index=0;
+        List<Map> mapList = Convert.toList(Map.class, groupRelation);
+
+        StringBuilder expStr = new StringBuilder();
+        for (Map map : mapList) {
+            String str = MapUtil.getStr(map, "exp");
+
+            expStr.append(str);
+
+        }
+
+
+        String expStrString = expStr.toString();
+
+        int index = 0;
         for (String exp : exps) {
-            groupRelation = StrUtil.replace(groupRelation, "$条件组"+(index+1)+"$", exp);
+            expStrString = StrUtil.replace(expStrString, "c" + (index + 1), exp);
 
             index++;
 
         }
 
-        return "${(" + groupRelation + ")}";
+        return "${(" + expStrString + ")}";
 
 
     }
@@ -128,7 +141,7 @@ public class NodeExpressionStrategyFactory {
      * @param currentIndex
      * @return
      */
-    public static String handleDefaultBranch(List<Node> branchs,int currentIndex) {
+    public static String handleDefaultBranch(List<Node> branchs, int currentIndex) {
 
         List<String> expList = new ArrayList<>();
 
@@ -136,7 +149,7 @@ public class NodeExpressionStrategyFactory {
         int index = 1;
         for (Node branch : branchs) {
 
-            if (index == currentIndex+1) {
+            if (index == currentIndex + 1) {
                 continue;
             }
 
