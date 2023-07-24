@@ -8,8 +8,10 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
+import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
+import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.FormUtil;
@@ -70,6 +72,28 @@ public class TaskServiceImpl implements ITaskService {
 
         //变量
         Map<String, Object> paramMap=taskResultDto.getVariableAll();
+        Boolean currentTask = taskResultDto.getCurrentTask();
+        if(!currentTask){
+            //任务已完成了
+
+            ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
+                    .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
+                    .eq(ProcessNodeRecordAssignUser::getUserId, userId)
+                    .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.YJS.getCode())
+                    .last("limit 1")
+                    .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
+                    .one();
+
+            String data = processNodeRecordAssignUser.getData();
+            if(StrUtil.isNotBlank(data)){
+                Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
+                });
+                paramMap.putAll(collect);
+
+            }
+        }else{
+
+        }
 
 
         //当前节点数据
