@@ -17,7 +17,7 @@
 ### 技术架构
 前端：Vue3+ElementPlus
 
-后端：SpringBoot2.7.6（jdk8）+Mysql8+MybatisPlus+Flowable6.8.0+Hutool+SaToken+Beetl
+后端：SpringBoot2.7.6（jdk8）+Mysql8+MybatisPlus+Flowable6.8.0+Hutool+SaToken
 
 ### 技术交流群
 ![c8b39f7a3379faa9f5db16890a1bf93.jpg](imgs/c8b39f7a3379faa9f5db16890a1bf93.jpg)
