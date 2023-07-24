@@ -10,4 +10,9 @@ public interface IBaseService {
      */
     R index();
 
+    /**
+     * 获取所有地区数据
+     * @return
+     */
+    R areaList();
 }

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 
 @RestController
-@RequestMapping(value = {"base","api/base"})
+@RequestMapping(value = {"base", "api/base"})
 public class BaseController {
 
     @Resource
@@ -17,11 +17,22 @@ public class BaseController {
 
     /**
      * 首页数据
+     *
      * @return
      */
     @GetMapping("index")
-    public R index(){
+    public R index() {
         return baseService.index();
     }
 
+
+    /**
+     * 获取所有地区数据
+     *
+     * @return
+     */
+    @GetMapping("areaList")
+    public R areaList() {
+        return baseService.areaList();
+    }
 }

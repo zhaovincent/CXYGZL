@@ -14,6 +14,7 @@ public enum FormTypeEnum {
 
     INPUT("Input","单行文本",""),
     TEXTAREA("Textarea","多行文本",""),
+    AREA("Area","地区",""),
     NUMBER("Number","数字",null),
     DATE("Date","日期",null),
     DATE_TIME("DateTime","日期时间",null),
