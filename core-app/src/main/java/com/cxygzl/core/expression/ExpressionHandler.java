@@ -14,6 +14,7 @@ import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.third.UserFieldDto;
+import com.cxygzl.common.utils.AreaUtil;
 import com.cxygzl.core.utils.CoreHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.delegate.DelegateExecution;
@@ -37,7 +38,6 @@ import java.util.stream.Collectors;
 public class ExpressionHandler {
 
 
-
     /**
      * 日期时间比较
      *
@@ -58,8 +58,6 @@ public class ExpressionHandler {
     public boolean dateTimeHandler(String key, String symbol, Object param, Object value, String format) {
 
 
-
-
         log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
         log.debug("条件 标识:{} 参数：{} 格式：{}", symbol, JSON.toJSONString(param), format);
 
@@ -73,6 +71,74 @@ public class ExpressionHandler {
 
 
         return compare(StrUtil.format("#{#key{}{}}", symbol, paramTime), Dict.create().set("key", valueTime));
+    }
+
+    /**
+     * 地区处理
+     *
+     * @param key
+     * @param symbol
+     * @param param
+     * @param execution
+     * @return
+     */
+    public boolean areaHandler(String key, String symbol, Object param, DelegateExecution execution) {
+
+        return areaHandler(key, symbol, param, execution.getVariable(key));
+
+
+    }
+
+    public boolean areaHandler(String key, String symbol, Object param, Object value) {
+
+
+        String unescape = EscapeUtil.unescape(param.toString());
+
+
+        log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
+        log.debug("条件 标识:{} 参数：{}", symbol, JSON.toJSONString(param));
+
+        //表单值为空
+        if (value == null) {
+            return false;
+        }
+        String paramCode = JSON.parseObject(unescape).getString("code");
+
+        String valueCode = Convert.toMap(String.class, Object.class, value).get("code").toString();
+
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.EQUAL, symbol)) {
+            return StrUtil.equals(paramCode, valueCode);
+        }
+
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.NOT_EQUAL, symbol)) {
+            return !StrUtil.equals(paramCode, valueCode);
+        }
+
+
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.IN, symbol)) {
+            return AreaUtil.contain(paramCode, valueCode);
+        }
+
+
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.NOT_IN, symbol)) {
+            return !AreaUtil.contain(paramCode, valueCode);
+
+        }
+
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.CONTAIN, symbol)) {
+            return AreaUtil.contain(valueCode, paramCode);
+
+        }
+
+
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.NOT_CONTAIN, symbol)) {
+            return !AreaUtil.contain(valueCode, paramCode);
+
+        }
+
+
+        return false;
+
     }
 
     /**
@@ -92,8 +158,6 @@ public class ExpressionHandler {
     }
 
     public boolean numberHandler(String key, String symbol, Object param, Object value) {
-
-
 
 
         log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
@@ -118,23 +182,21 @@ public class ExpressionHandler {
         //通过evaluationContext.setVariable可以在上下文中设定变量。
         EvaluationContext context = new StandardEvaluationContext();
         for (Map.Entry<String, Object> entry : value.entrySet()) {
-            context.setVariable(entry.getKey(),entry.getValue());
+            context.setVariable(entry.getKey(), entry.getValue());
         }
 
         //解析表达式，如果表达式是一个模板表达式，需要为解析传入模板解析器上下文。
-        Expression expression = paser.parseExpression(symbol,new TemplateParserContext());
+        Expression expression = paser.parseExpression(symbol, new TemplateParserContext());
 
         //使用Expression.getValue()获取表达式的值，这里传入了Evalution上下文，第二个参数是类型参数，表示返回值的类型。
         return expression.getValue(context, boolean.class);
     }
 
 
-
-
     /**
      * 判断字符数组包含
      *
-     * @param key   表单key
+     * @param key 表单key
      * @return
      */
     public boolean selectHandler(String key, DelegateExecution execution, String param, String symbol) {
@@ -142,11 +204,10 @@ public class ExpressionHandler {
         return selectHandler(key, execution.getVariable(key), param, symbol);
     }
 
-    public boolean selectHandler(String key,Object value, String param, String symbol) {
+    public boolean selectHandler(String key, Object value, String param, String symbol) {
 
 
         List<String> list = JSON.parseArray(param, String.class);
-
 
 
         log.debug("表单值：key={} value={} param={} symbol={}", key, JSON.toJSONString(value), param, symbol);
@@ -260,9 +321,9 @@ public class ExpressionHandler {
     /**
      * user判断
      *
-     * @param key      表单key
-     * @param param1    参数
-     * @param userKey  比如年龄age
+     * @param key     表单key
+     * @param param1  参数
+     * @param userKey 比如年龄age
      * @return
      */
     public boolean userCompare(String key, String param1, String symbol, DelegateExecution execution, String userKey) {
@@ -291,7 +352,7 @@ public class ExpressionHandler {
 
         if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.RANGE, userKey)) {
             //参数
-            List<NodeUser> paramDeptList =  JSON.parseArray(JSON.toJSONString(o), NodeUser.class);
+            List<NodeUser> paramDeptList = JSON.parseArray(JSON.toJSONString(o), NodeUser.class);
 
             List<String> deptIdList = paramDeptList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.DEPT.getKey())).map(w -> (w.getId())).collect(Collectors.toList());
             List<String> userIdList = paramDeptList.stream().filter(w -> StrUtil.equals(w.getType(),
@@ -320,25 +381,25 @@ public class ExpressionHandler {
             return stringHandler(userKey, Convert.toStr(o), userInfo.get(userKey), symbol);
         }
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.NUMBER.getType())) {
-            return numberHandler(userKey,symbol, Convert.toStr(o), userInfo.get(userKey));
+            return numberHandler(userKey, symbol, Convert.toStr(o), userInfo.get(userKey));
         }
 
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.DATE.getType())) {
-            return dateTimeHandler(userKey,symbol, Convert.toStr(o), userInfo.get(userKey),"yyyy-MM-dd");
+            return dateTimeHandler(userKey, symbol, Convert.toStr(o), userInfo.get(userKey), "yyyy-MM-dd");
         }
 
 
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.DATE_TIME.getType())) {
-            return dateTimeHandler(userKey,symbol, Convert.toStr(o), userInfo.get(userKey),"yyyy-MM-dd HH:mm:ss");
+            return dateTimeHandler(userKey, symbol, Convert.toStr(o), userInfo.get(userKey), "yyyy-MM-dd HH:mm:ss");
         }
 
 
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.TIME.getType())) {
-            return dateTimeHandler(userKey,symbol, Convert.toStr(o), userInfo.get(userKey),"HH-mm-ss");
+            return dateTimeHandler(userKey, symbol, Convert.toStr(o), userInfo.get(userKey), "HH-mm-ss");
         }
 
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.SINGLE_SELECT.getType())) {
-            return selectHandler(userKey, userInfo.get(userKey),Convert.toStr(o), symbol);
+            return selectHandler(userKey, userInfo.get(userKey), Convert.toStr(o), symbol);
         }
 
 
