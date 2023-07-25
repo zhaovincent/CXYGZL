@@ -21,6 +21,7 @@ public enum FormTypeEnum {
     LAYOUT("Layout","明细",null),
     TIME("Time","时间",null),
     MONEY("Money","金额",null),
+    SCORE("Score","金额",null),
     SINGLE_SELECT("SingleSelect","单选",""),
     MULTI_SELECT("MultiSelect","多选",new ArrayList<>()),
     SELECT_DEPT("SelectDept","单部门",new ArrayList<>()),

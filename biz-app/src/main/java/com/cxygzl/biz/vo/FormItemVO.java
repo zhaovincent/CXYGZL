@@ -41,6 +41,7 @@ public class FormItemVO {
         private Integer maxSize;
         private String regex;
         private String regexDesc;
+        private Boolean halfSelect;
 
         private Object suffixArray;
         private Object max;
