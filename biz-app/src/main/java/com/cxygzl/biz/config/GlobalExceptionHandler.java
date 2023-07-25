@@ -2,6 +2,7 @@ package com.cxygzl.biz.config;
 
 import com.cxygzl.biz.config.exception.BusinessException;
 import com.cxygzl.biz.config.exception.LoginExpiredException;
+import com.cxygzl.common.dto.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,14 +24,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LoginExpiredException.class)
     public Object loginExpiredExceptionHandler(LoginExpiredException e){
         log.error("LoginExpiredException：",e);
-        return com.cxygzl.common.dto.R.fail(e.getMessage());
+        R fail = R.fail(e.getMessage());
+        fail.setCode(e.getCode());
+        return fail;
 
     }
 
     @ExceptionHandler(RuntimeException.class)
     public Object runtimeExceptionHandler(RuntimeException e){
         log.error("RuntimeException：",e);
-        return com.cxygzl.common.dto.R.fail(e.getMessage());
+        R fail = R.fail(e.getMessage());
+        return fail;
 
     }
 }

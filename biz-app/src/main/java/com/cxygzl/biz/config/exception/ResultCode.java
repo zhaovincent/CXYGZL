@@ -14,7 +14,8 @@ public enum ResultCode {
 
     LOGIN_USER_NOTFOUND(400, "用户不存在"),
 
-    LOGIN_USER_FAIL(400, "用户名或密码错误");
+    LOGIN_USER_FAIL(401, "用户名或密码错误"),
+    TOKEN_EXPIRED(402, "登录失效");
 
     @Getter
     private Integer code;

@@ -17,8 +17,8 @@ public class SaTokenConfigure implements WebMvcConfigurer {
         registry.addInterceptor(new SaInterceptor(handle -> {
                     boolean login = StpUtil.isLogin();
                     if(!login){
-                        throw new LoginExpiredException("登录已过期",
-                                ResultCode.LOGIN_USER_FAIL.getCode(),
+                        throw new LoginExpiredException(ResultCode.TOKEN_EXPIRED.getMsg(),
+                                ResultCode.TOKEN_EXPIRED.getCode(),
                                 "");
                     }else{
 
