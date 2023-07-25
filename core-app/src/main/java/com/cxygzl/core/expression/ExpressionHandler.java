@@ -1,5 +1,6 @@
 package com.cxygzl.core.expression;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
@@ -12,6 +13,7 @@ import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.flow.AreaFormValue;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.third.UserFieldDto;
 import com.cxygzl.common.utils.AreaUtil;
@@ -102,9 +104,11 @@ public class ExpressionHandler {
         if (value == null) {
             return false;
         }
-        String paramCode = JSON.parseObject(unescape).getString("code");
+        AreaFormValue areaFormValueParam = JSON.parseObject(unescape, AreaFormValue.class);
+        String paramCode = areaFormValueParam.getCode();
 
-        String valueCode = Convert.toMap(String.class, Object.class, value).get("code").toString();
+        AreaFormValue areaFormValueValue = BeanUtil.copyProperties(value, AreaFormValue.class);
+        String valueCode = areaFormValueValue.getCode();
 
         if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.EQUAL, symbol)) {
             return StrUtil.equals(paramCode, valueCode);
