@@ -194,17 +194,31 @@ public class TaskServiceImpl implements ITaskService {
         }
 
 
+        //是否是子流程发起任务
+
         List<String> selectUserNodeId = NodeUtil.selectUserNodeId(node);
 
         Dict set = Dict.create()
                 .set("processInstanceId", taskResultDto.getProcessInstanceId())
                 .set("node",nodeDataJson)
                 .set("nodeId",nodeId)
+                .set("taskExist",currentTask)
+                .set("processName",oaForms.getName())
+                .set("flowId",taskResultDto.getFlowId())
                 .set("process",oaForms.getProcess())
                 .set("delegateAgain", taskResultDto.getDelegate())
                 .set("delegationTask",StrUtil.equals(taskResultDto.getDelegationState(),"PENDING"))
                 .set("selectUserNodeId",selectUserNodeId)
                 .set("formItems", formItemVOList);
+        {
+            Object subProcessStarterNode =
+                    paramMap.get(ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE);
+            Object rejectStarterNode = paramMap.get(ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE);
+            set.set("subProcessStarterTask",Convert.toBool(subProcessStarterNode,false) && rejectStarterNode == null);
+
+        }
+
+
 
         return R.success(set);
     }

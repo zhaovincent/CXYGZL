@@ -60,7 +60,8 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
             UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
             //待办
             message.setTitle("您有一条待办任务");
-            message.setContent(StrUtil.format("{} 提交的任务[{}]需要您来处理，请及时查看处理",user.getName(),processInstanceRecord.getName()));
+            message.setContent(StrUtil.format("[\uD83D\uDE38{}]提交的任务[\uD83D\uDC8C{}]需要您来处理，请及时查看",user.getName(),
+                    processInstanceRecord.getName()));
         }
         this.save(message);
         return R.success();
