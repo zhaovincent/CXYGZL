@@ -10,18 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NodeUtil {
-    /**
-     * 前加签之后添加节点
-     *
-     * @param node
-     */
-    public static void addUserNodeAfterFrontTask(Node node, long userId, String nodeId) {
-        if (StrUtil.equals(node.getId(), nodeId)) {
-
-        }
-        Integer type = node.getType();
-
-    }
 
 
     /**

@@ -62,7 +62,7 @@ public class TaskServiceImpl implements ITaskService {
         String userId = StpUtil.getLoginIdAsString();
 
 
-        com.cxygzl.common.dto.R<TaskResultDto> r = CoreHttpUtil.queryTask(taskId,userId);
+        com.cxygzl.common.dto.R<TaskResultDto> r = CoreHttpUtil.queryTask(taskId, userId);
 
         if (!r.isOk()) {
             return R.fail(r.getMsg());
@@ -71,9 +71,9 @@ public class TaskServiceImpl implements ITaskService {
         TaskResultDto taskResultDto = r.getData();
 
         //变量
-        Map<String, Object> paramMap=taskResultDto.getVariableAll();
-        Boolean currentTask = taskResultDto.getCurrentTask();
-        if(!currentTask){
+        Map<String, Object> paramMap = taskResultDto.getVariableAll();
+        Boolean taskExist = taskResultDto.getCurrentTask();
+        if (!taskExist) {
             //任务已完成了
 
             ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
@@ -85,21 +85,21 @@ public class TaskServiceImpl implements ITaskService {
                     .one();
 
             String data = processNodeRecordAssignUser.getData();
-            if(StrUtil.isNotBlank(data)){
+            if (StrUtil.isNotBlank(data)) {
                 Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
                 });
                 paramMap.putAll(collect);
 
             }
-        }else{
+        } else {
 
         }
 
 
         //当前节点数据
         String nodeId = taskResultDto.getNodeId();
-        if(StrUtil.startWith(nodeId,ProcessInstanceConstant.VariableKey.STARTER)){
-            nodeId=ProcessInstanceConstant.VariableKey.STARTER;
+        if (StrUtil.startWith(nodeId, ProcessInstanceConstant.VariableKey.STARTER)) {
+            nodeId = ProcessInstanceConstant.VariableKey.STARTER;
         }
         String nodeDataJson =
                 nodeDataService.getNodeData(taskResultDto.getFlowId(), nodeId).getData();
@@ -109,12 +109,11 @@ public class TaskServiceImpl implements ITaskService {
 
         Process oaForms = processService.getByFlowId(taskResultDto.getFlowId());
         if (oaForms == null) {
-            return  R.fail("流程不存在");
+            return R.fail("流程不存在");
         }
 
         List<FormItemVO> formItemVOList = CommonUtil.toArray(oaForms.getFormItems(), FormItemVO.class);
         for (FormItemVO formItemVO : formItemVOList) {
-
 
 
             String id = formItemVO.getId();
@@ -124,13 +123,14 @@ public class TaskServiceImpl implements ITaskService {
 
             if (StrUtil.isNotBlank(perm)) {
 
-                formItemVO.setPerm(view?(ProcessInstanceConstant.FormPermClass.EDIT.equals(perm)?ProcessInstanceConstant.FormPermClass.READ:perm):perm);
+                formItemVO.setPerm((view || !taskExist) ? (ProcessInstanceConstant.FormPermClass.EDIT.equals(perm) ?
+                        ProcessInstanceConstant.FormPermClass.READ : perm) : perm);
 
-            }else{
-              formItemVO.setPerm(ProcessInstanceConstant.FormPermClass.HIDE);
+            } else {
+                formItemVO.setPerm(ProcessInstanceConstant.FormPermClass.HIDE);
             }
 
-            if(formItemVO.getType().equals(FormTypeEnum.LAYOUT.getType())){
+            if (formItemVO.getType().equals(FormTypeEnum.LAYOUT.getType())) {
                 //明细
 
                 List<Map<String, Object>> subParamList = MapUtil.get(paramMap, id, new cn.hutool.core.lang.TypeReference<List<Map<String, Object>>>() {
@@ -138,25 +138,24 @@ public class TaskServiceImpl implements ITaskService {
 
                 Object value = formItemVO.getProps().getValue();
 
-                List<List<FormItemVO>> l=new ArrayList<>();
+                List<List<FormItemVO>> l = new ArrayList<>();
                 for (Map<String, Object> map : subParamList) {
                     List<FormItemVO> subItemList = Convert.toList(FormItemVO.class, value);
                     for (FormItemVO itemVO : subItemList) {
                         Object value1 = map.get(itemVO.getId());
 
-                        FormUtil.handValue(itemVO,value1);
-
-
+                        FormUtil.handValue(itemVO, value1);
 
 
                         String permSub = formPerms.get(itemVO.getId());
                         if (StrUtil.isNotBlank(permSub)) {
-                            itemVO.setPerm(view?(ProcessInstanceConstant.FormPermClass.EDIT.equals(permSub)?ProcessInstanceConstant.FormPermClass.READ:permSub)
-                                    :permSub
-                                    );
+                            itemVO.setPerm((view || !taskExist) ? (ProcessInstanceConstant.FormPermClass.EDIT.equals(permSub) ?
+                                    ProcessInstanceConstant.FormPermClass.READ : permSub)
+                                    : permSub
+                            );
 
 
-                        }else{
+                        } else {
                             itemVO.setPerm(ProcessInstanceConstant.FormPermClass.HIDE);
                         }
 
@@ -174,7 +173,7 @@ public class TaskServiceImpl implements ITaskService {
 
                             itemVO.setPerm(permSub);
 
-                        }else{
+                        } else {
                             itemVO.setPerm(ProcessInstanceConstant.FormPermClass.HIDE);
                         }
 
@@ -183,10 +182,10 @@ public class TaskServiceImpl implements ITaskService {
 
                 }
 
-            }else{
+            } else {
 
                 Object value = paramMap.get(id);
-                FormUtil.handValue(formItemVO,value);
+                FormUtil.handValue(formItemVO, value);
 
 
             }
@@ -200,24 +199,23 @@ public class TaskServiceImpl implements ITaskService {
 
         Dict set = Dict.create()
                 .set("processInstanceId", taskResultDto.getProcessInstanceId())
-                .set("node",nodeDataJson)
-                .set("nodeId",nodeId)
-                .set("taskExist",currentTask)
-                .set("processName",oaForms.getName())
-                .set("flowId",taskResultDto.getFlowId())
-                .set("process",oaForms.getProcess())
+                .set("node", nodeDataJson)
+                .set("nodeId", nodeId)
+                .set("taskExist", taskExist)
+                .set("processName", oaForms.getName())
+                .set("flowId", taskResultDto.getFlowId())
+                .set("process", oaForms.getProcess())
                 .set("delegateAgain", taskResultDto.getDelegate())
-                .set("delegationTask",StrUtil.equals(taskResultDto.getDelegationState(),"PENDING"))
-                .set("selectUserNodeId",selectUserNodeId)
+                .set("delegationTask", StrUtil.equals(taskResultDto.getDelegationState(), "PENDING"))
+                .set("selectUserNodeId", selectUserNodeId)
                 .set("formItems", formItemVOList);
         {
             Object subProcessStarterNode =
                     paramMap.get(ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE);
             Object rejectStarterNode = paramMap.get(ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE);
-            set.set("subProcessStarterTask",Convert.toBool(subProcessStarterNode,false) && rejectStarterNode == null);
+            set.set("subProcessStarterTask", Convert.toBool(subProcessStarterNode, false) && rejectStarterNode == null);
 
         }
-
 
 
         return R.success(set);
@@ -235,7 +233,7 @@ public class TaskServiceImpl implements ITaskService {
         taskParamDto.setUserId(String.valueOf(userId));
 
 
-        com.cxygzl.common.dto.R r =CoreHttpUtil.completeTask(taskParamDto);
+        com.cxygzl.common.dto.R r = CoreHttpUtil.completeTask(taskParamDto);
 
         if (!r.isOk()) {
             return R.fail(r.getMsg());
@@ -258,14 +256,12 @@ public class TaskServiceImpl implements ITaskService {
 
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
 
-        com.cxygzl.common.dto.R r=CoreHttpUtil.delegateTask(taskParamDto);
+        com.cxygzl.common.dto.R r = CoreHttpUtil.delegateTask(taskParamDto);
 
         if (!r.isOk()) {
-            return  R.fail(r.getMsg());
+            return R.fail(r.getMsg());
         }
         //成功了 处理节点
-
-
 
 
         return R.success();
@@ -283,11 +279,11 @@ public class TaskServiceImpl implements ITaskService {
         com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
         });
         if (!r.isOk()) {
-            return  R.fail(r.getMsg());
+            return R.fail(r.getMsg());
         }
 
 
-        return  R.success();
+        return R.success();
     }
 
     /**
@@ -303,11 +299,11 @@ public class TaskServiceImpl implements ITaskService {
         com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
         });
         if (!r.isOk()) {
-            return  R.fail(r.getMsg());
+            return R.fail(r.getMsg());
         }
 
 
-        return  R.success();
+        return R.success();
     }
 
     /**
@@ -327,7 +323,7 @@ public class TaskServiceImpl implements ITaskService {
 
         taskParamDto.setProcessInstanceIdList(allStopProcessInstanceIdList);
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
-        com.cxygzl.common.dto.R r= CoreHttpUtil.stopProcessInstance(taskParamDto);
+        com.cxygzl.common.dto.R r = CoreHttpUtil.stopProcessInstance(taskParamDto);
 
         if (!r.isOk()) {
             return R.fail(r.getMsg());
@@ -350,14 +346,14 @@ public class TaskServiceImpl implements ITaskService {
         com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
         });
         if (!r.isOk()) {
-            return  R.fail(r.getMsg());
+            return R.fail(r.getMsg());
         }
 
 
         return R.success();
     }
 
-    private List<String> getAllStopProcessInstanceIdList(String processInstanceId){
+    private List<String> getAllStopProcessInstanceIdList(String processInstanceId) {
         List<ProcessInstanceRecord> list = processInstanceRecordService.lambdaQuery()
                 .eq(ProcessInstanceRecord::getParentProcessInstanceId, processInstanceId).list();
 
