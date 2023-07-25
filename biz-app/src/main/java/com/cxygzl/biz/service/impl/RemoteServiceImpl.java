@@ -13,6 +13,7 @@ import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.mapper.DeptMapper;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.DataUtil;
+import com.cxygzl.common.constants.MessageTypeEnum;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.UserDto;
@@ -50,7 +51,29 @@ public class RemoteServiceImpl implements IRemoteService {
     @Resource
     private IProcessGroupService processGroupService;
     @Resource
-    private IUserRoleService userRoleService;
+    private IMessageService messageService;
+
+    /**
+     * 保存待办任务
+     *
+     * @param messageDto
+     * @return
+     */
+    @Override
+    public R saveMessage(MessageDto messageDto) {
+        Message message = BeanUtil.copyProperties(messageDto, Message.class);
+        if(StrUtil.equals(message.getType(), MessageTypeEnum.TODO_TASK.getType())){
+            ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, message.getProcessInstanceId()).one();
+
+            String userId = processInstanceRecord.getUserId();
+            UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
+            //待办
+            message.setTitle("您有一条待办任务");
+            message.setContent(StrUtil.format("{} 提交的任务[{}]需要您来处理，请及时查看处理",user.getName(),processInstanceRecord.getName()));
+        }
+        messageService.save(message);
+        return R.success();
+    }
 
     /**
      * 根据角色id集合查询用户id集合

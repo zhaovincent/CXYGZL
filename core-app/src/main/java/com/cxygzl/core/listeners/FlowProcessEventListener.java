@@ -7,6 +7,7 @@ import cn.hutool.http.Header;
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
+import com.cxygzl.common.constants.MessageTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.HttpSetting;
@@ -21,6 +22,7 @@ import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEntityEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
+import org.flowable.common.engine.impl.event.FlowableEntityEventImpl;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.event.impl.FlowableActivityEventImpl;
@@ -29,6 +31,7 @@ import org.flowable.engine.delegate.event.impl.FlowableProcessStartedEventImpl;
 import org.flowable.engine.delegate.event.impl.FlowableProcessTerminatedEventImpl;
 import org.flowable.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.flowable.task.api.DelegationState;
+import org.flowable.task.service.impl.persistence.entity.TaskEntity;
 import org.flowable.task.service.impl.persistence.entity.TaskEntityImpl;
 
 import java.util.HashMap;
@@ -49,6 +52,37 @@ public class FlowProcessEventListener implements FlowableEventListener {
     @Override
     public void onEvent(FlowableEvent event) {
         log.debug("分支监听器 类型={} class={}", event.getType(), event.getClass().getCanonicalName());
+        if (event.getType().toString().equals(FlowableEngineEventType.TASK_CREATED.toString())) {
+
+
+            //任务被创建了
+            FlowableEntityEventImpl flowableEntityEvent = (FlowableEntityEventImpl) event;
+
+            TaskEntity taskEntity = (TaskEntity) flowableEntityEvent.getEntity();
+
+            Object variable = taskEntity.getVariable(
+                    ProcessInstanceConstant.VariableKey.STARTER);
+            NodeUser nodeUser = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class).get(0);
+
+            String processInstanceId = taskEntity.getProcessInstanceId();
+            String processDefinitionId = taskEntity.getProcessDefinitionId();
+
+            String flowId = NodeUtil.getFlowId(processDefinitionId);
+
+            String taskId = taskEntity.getId();
+            String assignee = taskEntity.getAssignee();
+            MessageDto messageDto = MessageDto.builder()
+                    .userId(assignee)
+                    .flowId(flowId)
+                    .processInstanceId(processInstanceId)
+
+                    .uniqueId(taskId)
+                    .param(JSON.toJSONString(taskEntity.getVariables()))
+
+                    .type(MessageTypeEnum.TODO_TASK.getType())
+                    .readed(false).build();
+            CoreHttpUtil.saveMessage(messageDto);
+        }
         if (event.getType().toString().equals(FlowableEngineEventType.ACTIVITY_STARTED.toString())) {
             //节点开始执行
             //org.flowable.engine.delegate.event.impl.FlowableActivityEventImpl

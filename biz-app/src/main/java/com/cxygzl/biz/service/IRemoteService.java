@@ -13,6 +13,13 @@ import java.util.Map;
  */
 public interface IRemoteService {
     /**
+     * 保存待办任务
+     * @param messageDto
+     * @return
+     */
+    R saveMessage(MessageDto messageDto);
+
+    /**
      * 根据角色id集合查询用户id集合
      *
      * @param roleIdList

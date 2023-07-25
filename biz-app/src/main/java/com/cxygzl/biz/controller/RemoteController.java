@@ -21,6 +21,17 @@ public class RemoteController {
     private IRemoteService remoteService;
 
     /**
+     * 保存待办任务
+     *
+     * @param messageDto
+     * @return
+     */
+    @PostMapping("saveMessage")
+    public R saveMessage(@RequestBody MessageDto messageDto) {
+        return remoteService.saveMessage(messageDto);
+    }
+
+    /**
      * 根据角色id集合查询用户id集合
      *
      * @param roleIdList
@@ -86,14 +97,17 @@ public class RemoteController {
     public R<Map<String, Object>> queryUserAllInfo(String userId) {
         return remoteService.queryUserAllInfo(userId);
     }
+
     /**
      * 查询用户属性配置
+     *
      * @return
      */
     @GetMapping("queryUseField")
-    public R<List<UserFieldDto>> queryUseField(){
+    public R<List<UserFieldDto>> queryUseField() {
         return remoteService.queryUseField();
     }
+
     /**
      * 根据用户id查询上级部门列表
      *

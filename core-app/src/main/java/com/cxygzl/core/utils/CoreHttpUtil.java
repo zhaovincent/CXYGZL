@@ -67,6 +67,14 @@ public class CoreHttpUtil {
     public static void endNodeEvent(ProcessNodeRecordParamDto nodeRecordParamDto) {
         post(nodeRecordParamDto, "/remote/endNodeEvent");
     }
+    /**
+     * 保存消息
+     *
+     * @param messageDto
+     */
+    public static void saveMessage(MessageDto messageDto) {
+        post(messageDto, "/remote/saveMessage");
+    }
 
     /**
      * 流程结束事件
