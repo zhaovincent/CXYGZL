@@ -8,10 +8,7 @@ import com.cxygzl.biz.service.IRoleService;
 import com.cxygzl.biz.service.IUserRoleService;
 import com.cxygzl.biz.service.IUserService;
 import com.cxygzl.biz.utils.CoreHttpUtil;
-import com.cxygzl.common.dto.third.DeptDto;
-import com.cxygzl.common.dto.third.RoleDto;
-import com.cxygzl.common.dto.third.UserDto;
-import com.cxygzl.common.dto.third.UserFieldDto;
+import com.cxygzl.common.dto.third.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -135,6 +132,16 @@ public class NetApi implements ApiStrategy, InitializingBean {
         String post = CoreHttpUtil.get( "/test/net/queryUserFieldData?userId="+userId);
         return JSON.parseObject(post, new TypeReference<Map<String, String>>() {
         });
+    }
+
+    /**
+     * 发送消息
+     *
+     * @param messageDto
+     */
+    @Override
+    public void sendMsg(MessageDto messageDto) {
+
     }
 
     /**

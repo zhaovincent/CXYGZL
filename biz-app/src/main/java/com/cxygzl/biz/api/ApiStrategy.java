@@ -1,9 +1,6 @@
 package com.cxygzl.biz.api;
 
-import com.cxygzl.common.dto.third.DeptDto;
-import com.cxygzl.common.dto.third.RoleDto;
-import com.cxygzl.common.dto.third.UserDto;
-import com.cxygzl.common.dto.third.UserFieldDto;
+import com.cxygzl.common.dto.third.*;
 
 import java.util.List;
 import java.util.Map;
@@ -101,4 +98,9 @@ public interface ApiStrategy {
      */
     Map<String,String> queryUserFieldData(String userId);
 
+    /**
+     * 发送消息
+     * @param messageDto
+     */
+    void sendMsg(MessageDto messageDto);
 }

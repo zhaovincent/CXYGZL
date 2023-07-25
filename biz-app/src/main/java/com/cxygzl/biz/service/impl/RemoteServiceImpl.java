@@ -16,6 +16,7 @@ import com.cxygzl.biz.utils.DataUtil;
 import com.cxygzl.common.constants.MessageTypeEnum;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.dto.third.UserFieldDto;
 import lombok.extern.slf4j.Slf4j;
@@ -61,17 +62,8 @@ public class RemoteServiceImpl implements IRemoteService {
      */
     @Override
     public R saveMessage(MessageDto messageDto) {
-        Message message = BeanUtil.copyProperties(messageDto, Message.class);
-        if(StrUtil.equals(message.getType(), MessageTypeEnum.TODO_TASK.getType())){
-            ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, message.getProcessInstanceId()).one();
 
-            String userId = processInstanceRecord.getUserId();
-            UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
-            //待办
-            message.setTitle("您有一条待办任务");
-            message.setContent(StrUtil.format("{} 提交的任务[{}]需要您来处理，请及时查看处理",user.getName(),processInstanceRecord.getName()));
-        }
-        messageService.save(message);
+        ApiStrategyFactory.getStrategy().sendMsg(messageDto);
         return R.success();
     }
 
@@ -85,7 +77,7 @@ public class RemoteServiceImpl implements IRemoteService {
     public R<List<String>> queryUserIdListByRoleIdList(List<String> roleIdList) {
 
         List<String> userIdList =
-                ApiStrategyFactory.getStrategy().loadUserIdListByRoleIdList(roleIdList.stream().map(w->(w)).collect(Collectors.toList()));
+                ApiStrategyFactory.getStrategy().loadUserIdListByRoleIdList(roleIdList.stream().map(w -> (w)).collect(Collectors.toList()));
 
 
         return R.success(userIdList);
@@ -146,7 +138,7 @@ public class RemoteServiceImpl implements IRemoteService {
         List<String> deptIdList = checkParentDto.getDeptIdList();
         //查询子级包括自己
         List<com.cxygzl.common.dto.third.DeptDto> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
-        List<com.cxygzl.common.dto.third.DeptDto> childrenDeptList = DataUtil.selectChildrenByDept(parentId,allDept);
+        List<com.cxygzl.common.dto.third.DeptDto> childrenDeptList = DataUtil.selectChildrenByDept(parentId, allDept);
 
 
         List<String> childrenDeptIdList = childrenDeptList.stream().map(w -> w.getId()).collect(Collectors.toList());
@@ -167,7 +159,7 @@ public class RemoteServiceImpl implements IRemoteService {
     public R<List<String>> queryUserIdListByDepIdList(List<String> depIdList) {
 
         List<String> userIdList =
-                ApiStrategyFactory.getStrategy().loadUserIdListByDeptIdList(depIdList.stream().map(w->String.valueOf(w)).collect(Collectors.toList()));
+                ApiStrategyFactory.getStrategy().loadUserIdListByDeptIdList(depIdList.stream().map(w -> String.valueOf(w)).collect(Collectors.toList()));
         return R.success(userIdList);
     }
 
@@ -236,10 +228,10 @@ public class RemoteServiceImpl implements IRemoteService {
     @Override
     public R<List<DeptDto>> queryParentDepListByUserId(String userId) {
         UserDto user = ApiStrategyFactory.getStrategy().getUser(String.valueOf(userId));
-        String deptId =  (user.getDeptId());
+        String deptId = (user.getDeptId());
 
         List<com.cxygzl.common.dto.third.DeptDto> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
-        List<com.cxygzl.common.dto.third.DeptDto> deptList = DataUtil.selectParentByDept(deptId,allDept);
+        List<com.cxygzl.common.dto.third.DeptDto> deptList = DataUtil.selectParentByDept(deptId, allDept);
 
         return R.success(deptList);
     }

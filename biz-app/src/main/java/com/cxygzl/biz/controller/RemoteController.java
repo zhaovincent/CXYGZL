@@ -3,6 +3,7 @@ package com.cxygzl.biz.controller;
 import com.cxygzl.biz.service.IRemoteService;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.UserFieldDto;
 import lombok.SneakyThrows;
 import org.springframework.web.bind.annotation.*;

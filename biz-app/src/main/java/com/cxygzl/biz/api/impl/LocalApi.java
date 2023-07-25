@@ -6,10 +6,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.cxygzl.biz.api.ApiStrategy;
 import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.service.*;
-import com.cxygzl.common.dto.third.DeptDto;
-import com.cxygzl.common.dto.third.RoleDto;
-import com.cxygzl.common.dto.third.UserDto;
-import com.cxygzl.common.dto.third.UserFieldDto;
+import com.cxygzl.common.dto.third.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -32,6 +29,9 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     private IUserFieldService userFieldService;
     @Resource
     private IUserFieldDataService userFieldDataService;
+
+    @Resource
+    private IMessageService messageService;
 
     @Resource
     private IRoleService roleService;
@@ -164,6 +164,16 @@ public class LocalApi implements ApiStrategy, InitializingBean {
         List<UserFieldData> userFieldDataList = userFieldDataService.lambdaQuery().eq(UserFieldData::getUserId, userId).list();
         Map<String, String> collect = userFieldDataList.stream().collect(Collectors.toMap(w -> w.getKey(), w -> w.getData()));
         return collect;
+    }
+
+    /**
+     * 发送消息
+     *
+     * @param messageDto
+     */
+    @Override
+    public void sendMsg(MessageDto messageDto) {
+        messageService.saveMessage(messageDto);
     }
 
     @Override

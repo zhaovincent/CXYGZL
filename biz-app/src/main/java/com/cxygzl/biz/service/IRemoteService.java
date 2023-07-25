@@ -3,6 +3,7 @@ package com.cxygzl.biz.service;
 
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.UserFieldDto;
 
 import java.util.List;

@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.UserFieldDto;
 import com.yomahub.tlog.hutoolhttp.TLogHutoolhttpInterceptor;
 import org.springframework.core.env.Environment;

@@ -1,4 +1,4 @@
-package com.cxygzl.common.dto;
+package com.cxygzl.common.dto.third;
 
 import lombok.*;
 
