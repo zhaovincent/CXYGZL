@@ -27,4 +27,25 @@ public interface IMessageService extends IService<Message> {
      */
     R saveMessage(MessageDto messageDto);
 
+    /**
+     * 查询列表
+     * @param pageDto
+     * @return
+     */
+    R queryList(com.cxygzl.common.dto.MessageDto pageDto);
+
+    /**
+     * 删除消息
+     * @param messageDto
+     * @return
+     */
+    R delete(com.cxygzl.common.dto.MessageDto messageDto );
+
+    /**
+     * 置为已读
+     * @param messageDto
+     * @return
+     */
+    R read(com.cxygzl.common.dto.MessageDto messageDto );
+
 }

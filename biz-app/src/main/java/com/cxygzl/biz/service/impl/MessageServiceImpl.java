@@ -3,6 +3,7 @@ package com.cxygzl.biz.service.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.Message;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
@@ -39,7 +40,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
     @Override
     public R<Long> queryUnreadNum() {
         String userId = StpUtil.getLoginIdAsString();
-        Long num = this.lambdaQuery().eq(Message::getUserId, userId).count();
+        Long num = this.lambdaQuery().eq(Message::getReaded,false).eq(Message::getUserId, userId).count();
         return R.success(num);
     }
 
@@ -62,6 +63,49 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
             message.setContent(StrUtil.format("{} 提交的任务[{}]需要您来处理，请及时查看处理",user.getName(),processInstanceRecord.getName()));
         }
         this.save(message);
+        return R.success();
+    }
+
+    /**
+     * 查询列表
+     *
+     * @param pageDto
+     * @return
+     */
+    @Override
+    public R queryList(com.cxygzl.common.dto.MessageDto pageDto) {
+        Page<Message> messagePage = this.lambdaQuery()
+                .eq(Message::getUserId, StpUtil.getLoginIdAsString())
+                .eq(pageDto.getReaded()!=null,Message::getReaded,pageDto.getReaded())
+                .orderByDesc(Message::getCreateTime)
+                .page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()));
+        return R.success(messagePage);
+    }
+
+    /**
+     * 删除消息
+     *
+     * @param messageDto
+     * @return
+     */
+    @Override
+    public R delete(com.cxygzl.common.dto.MessageDto messageDto) {
+        this.removeById(messageDto.getId());
+        return R.success();
+    }
+
+    /**
+     * 置为已读
+     *
+     * @param messageDto
+     * @return
+     */
+    @Override
+    public R read(com.cxygzl.common.dto.MessageDto messageDto) {
+        this.lambdaUpdate().set(Message::getReaded,true)
+                .eq(Message::getId,messageDto.getId())
+                .eq(Message::getReaded,false)
+                .update(new Message());
         return R.success();
     }
 }
