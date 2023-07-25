@@ -1,7 +1,6 @@
 package com.cxygzl.core.controller;
 
 import cn.hutool.core.codec.Base64;
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -33,7 +32,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 工作流控制器
@@ -171,25 +173,8 @@ public class FlowController {
 
         String content = Base64.encode(inputStream);
         return R.success(content);
-//        OutputStream out = null;
-//        try {
-//            out = response.getOutputStream();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//        Base64.decodeToStream(content, out, true);
     }
 
-    @PostMapping("/approve")
-    public void approve(String taskId, boolean approved) {
-
-        Map<String, Object> variables = new HashMap<String, Object>();
-        variables.put("approved", approved);
-        variables.put("ko", 10);
-        variables.put("assigneeListSub", CollUtil.newArrayList("aa", "bb"));
-        taskService.complete(taskId, variables);
-
-    }
 
     /**
      * 终止流程

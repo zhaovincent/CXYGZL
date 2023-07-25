@@ -11,6 +11,11 @@ import lombok.Data;
 @Data
 public class R<T> {
     /**
+     * 链路id
+     */
+    private String traceId;
+
+    /**
      * 是否请求成功
      */
     private boolean ok;

@@ -3,6 +3,7 @@ package com.cxygzl.biz.config;
 import com.cxygzl.biz.config.exception.BusinessException;
 import com.cxygzl.biz.config.exception.LoginExpiredException;
 import com.cxygzl.common.dto.R;
+import com.yomahub.tlog.context.TLogContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,13 +20,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public Object businessExceptionHandler(BusinessException e){
         log.error("BusinessException：",e);
-        return com.cxygzl.common.dto.R.fail(e.getMessage());
+        R fail = R.fail(e.getMessage());
+        fail.setTraceId(TLogContext.getTraceId());
+
+        return fail;
     }
     @ExceptionHandler(LoginExpiredException.class)
     public Object loginExpiredExceptionHandler(LoginExpiredException e){
         log.error("LoginExpiredException：",e);
         R fail = R.fail(e.getMessage());
         fail.setCode(e.getCode());
+        fail.setTraceId(TLogContext.getTraceId());
+
         return fail;
 
     }
@@ -34,6 +40,7 @@ public class GlobalExceptionHandler {
     public Object runtimeExceptionHandler(RuntimeException e){
         log.error("RuntimeException：",e);
         R fail = R.fail(e.getMessage());
+        fail.setTraceId(TLogContext.getTraceId());
         return fail;
 
     }

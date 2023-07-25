@@ -2,6 +2,8 @@ package com.cxygzl.biz.config;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
+import com.cxygzl.common.dto.R;
+import com.yomahub.tlog.context.TLogContext;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -83,8 +85,12 @@ public class LogAop {
             }
 
             proceed = point.proceed(args);
-
+            if(proceed instanceof R){
+                R r= (R)proceed;
+                r.setTraceId(TLogContext.getTraceId());
+            }
             if (notWriteLogAnno != null && !notWriteLogAnno.printResultLog()) {
+
                 return proceed;
             }
 

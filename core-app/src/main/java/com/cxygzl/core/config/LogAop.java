@@ -2,6 +2,8 @@ package com.cxygzl.core.config;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
+import com.cxygzl.common.dto.R;
+import com.yomahub.tlog.context.TLogContext;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -47,7 +49,7 @@ public class LogAop {
         MethodSignature methodSignature = (MethodSignature) signature;
 
         Method method = methodSignature.getMethod();
-        com.cxygzl.common.config.NotWriteLogAnno notWriteLogAnno = method.getAnnotation( com.cxygzl.common.config.NotWriteLogAnno.class);
+        com.cxygzl.common.config.NotWriteLogAnno notWriteLogAnno = method.getAnnotation(com.cxygzl.common.config.NotWriteLogAnno.class);
         if (notWriteLogAnno != null && notWriteLogAnno.exclude()) {
 
             return point.proceed(args);
@@ -83,7 +85,10 @@ public class LogAop {
             }
 
             proceed = point.proceed(args);
-
+            if(proceed instanceof R){
+                R r= (R)proceed;
+                r.setTraceId(TLogContext.getTraceId());
+            }
             if (notWriteLogAnno != null && !notWriteLogAnno.printResultLog()) {
                 return proceed;
             }
@@ -96,8 +101,11 @@ public class LogAop {
             return proceed;
         } catch (
                 Throwable throwable) {
-            throw new RuntimeException(throwable);
+            log.error("Error", throwable);
 
+            R fail = R.fail("系统繁忙");
+            fail.setTraceId(TLogContext.getTraceId());
+            return fail;
 
         }
     }
