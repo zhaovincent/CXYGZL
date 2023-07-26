@@ -14,6 +14,7 @@ import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.expression.condition.NodeExpressionStrategyFactory;
 import com.cxygzl.core.listeners.ApprovalCreateListener;
 import com.cxygzl.core.listeners.FlowProcessEventListener;
+import com.cxygzl.core.listeners.RouteMergeGatewayListener;
 import com.cxygzl.core.listeners.StarterUserTaskCreateListener;
 import com.cxygzl.core.node.INodeDataStoreHandler;
 import com.cxygzl.core.node.NodeDataStoreFactory;
@@ -789,6 +790,12 @@ public class ModelUtil {
         InclusiveGateway inclusiveMergeGateway = new InclusiveGateway();
         inclusiveMergeGateway.setId(StrUtil.format("{}_merge_node", node.getId()));
         inclusiveMergeGateway.setName(StrUtil.format("{}_合并网关", node.getName()));
+
+        FlowableListener createListener = new FlowableListener();
+        createListener.setImplementation(RouteMergeGatewayListener.class.getCanonicalName());
+        createListener.setImplementationType("class");
+        createListener.setEvent("create");
+        inclusiveMergeGateway.setExecutionListeners(CollUtil.newArrayList(createListener));
         flowElementList.add(inclusiveMergeGateway);
 
         List<Node> list = node.getList();
@@ -1120,12 +1127,14 @@ public class ModelUtil {
             for (Node n : list) {
 
                 String nid = StrUtil.format("{}_{}", node.getId(), index);
-                String exp = NodeExpressionStrategyFactory.handleDefaultBranch(list, index);
+                String exp ="";
                 if (index == 0) {
                     exp = NodeExpressionStrategyFactory.handle(n);
+                }else{
+                    exp = NodeExpressionStrategyFactory.handleDefaultBranch(list, index);
                 }
 
-                log.info("{}   {}", index, exp);
+                log.info("路由连线 {}   {}", index, exp);
 
                 {
                     SequenceFlow sequenceFlow = buildSingleSequenceFlow(startId, nid, exp, null);

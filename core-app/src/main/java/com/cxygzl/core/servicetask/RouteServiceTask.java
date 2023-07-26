@@ -1,18 +1,10 @@
 package com.cxygzl.core.servicetask;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import cn.hutool.http.Header;
-import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.TypeReference;
-import com.cxygzl.common.dto.flow.HttpSetting;
-import com.cxygzl.common.dto.flow.HttpSettingData;
 import com.cxygzl.common.dto.flow.Node;
-import com.cxygzl.core.expression.condition.NodeConditionStrategy;
-import com.cxygzl.core.expression.condition.NodeExpressionStrategyFactory;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import liquibase.repackaged.org.apache.commons.collections4.MapUtils;
@@ -54,11 +46,12 @@ public class RouteServiceTask implements JavaDelegate {
 
 
         List<Node> list = node.getList();
-        Node routeNode = list.get(index);
+
 
         RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
 
         if (index < list.size()) {
+            Node routeNode = list.get(index);
             //跳转
             runtimeService.createChangeActivityStateBuilder()
                     .processInstanceId(processInstanceId)

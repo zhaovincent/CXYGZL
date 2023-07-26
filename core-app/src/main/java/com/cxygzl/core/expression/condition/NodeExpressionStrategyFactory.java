@@ -4,17 +4,17 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
 import com.cxygzl.common.dto.flow.Condition;
 import com.cxygzl.common.dto.flow.GroupCondition;
 import com.cxygzl.common.dto.flow.Node;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public class NodeExpressionStrategyFactory {
 
     private static final Map<String, NodeConditionStrategy> STRATEGY_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
@@ -150,7 +150,7 @@ public class NodeExpressionStrategyFactory {
         for (Node branch : branchs) {
 
             if (index == currentIndex + 1) {
-                continue;
+                break;
             }
 
             String exp = handle(branch);
@@ -159,8 +159,14 @@ public class NodeExpressionStrategyFactory {
 
             index++;
         }
-        String join = StrUtil.format("!({})", CollUtil.join(expList, "||"));
-        return "${" + join + "}";
+
+//        String join = StrUtil.format("!({})", CollUtil.join(expList, "||"));
+
+        String finalExp = (currentIndex+1==branchs.size())?"1==1":StrUtil.subBetween(handle(branchs.get(currentIndex)), "${", "}");
+
+        String exp = StrUtil.format("${!({})&&({})}", CollUtil.join(expList, "||"), finalExp);
+        log.info(" 参数索引：{}  表达式：{}",currentIndex,exp);
+        return  exp;
     }
 
 }
