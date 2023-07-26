@@ -22,6 +22,7 @@ public enum NodeTypeEnum {
     TRIGGER( "触发器",6,false),
     DELAY( "延时器",7,false),
     SUB_PROCESS( "子流程",9,false),
+    ROUTE( "路由",10,false),
 
     ;
 

@@ -61,6 +61,10 @@ public class Node {
     private String formUserName;
     private List<NodeUser> nodeUserList;
     private List<Node> conditionNodes;
+    private List<Node> list;
+
+    private String nodeId;
+
 
     private Map<String,String> formPerms;
 

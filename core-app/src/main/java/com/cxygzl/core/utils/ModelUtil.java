@@ -18,6 +18,7 @@ import com.cxygzl.core.listeners.StarterUserTaskCreateListener;
 import com.cxygzl.core.node.INodeDataStoreHandler;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.servicetask.CopyServiceTask;
+import com.cxygzl.core.servicetask.RouteServiceTask;
 import com.cxygzl.core.servicetask.TriggerServiceTask;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.Process;
@@ -323,6 +324,12 @@ public class ModelUtil {
 
 
             flowElementList.add(buildTriggerNode(node));
+        }
+        //路由
+        if (node.getType() == NodeTypeEnum.ROUTE.getValue().intValue()) {
+
+
+            flowElementList.addAll(buildRouteNode(node));
         }
         //延时器
         if (node.getType() == NodeTypeEnum.DELAY.getValue().intValue()) {
@@ -763,6 +770,60 @@ public class ModelUtil {
     }
 
     /**
+     * 创建路由节点
+     *
+     * @param node
+     * @return
+     */
+    private static List<FlowElement> buildRouteNode(Node node) {
+        node.setHeadId(StrUtil.format("{}_route_start", node.getId()));
+        node.setTailId(StrUtil.format("{}_merge_node", node.getId()));
+
+        List<FlowElement> flowElementList = new ArrayList<>();
+
+        InclusiveGateway inclusiveGateway = new InclusiveGateway();
+        inclusiveGateway.setId(StrUtil.format("{}_route_start", node.getId()));
+        inclusiveGateway.setName(StrUtil.format("{}_网关", node.getName()));
+        flowElementList.add(inclusiveGateway);
+
+        InclusiveGateway inclusiveMergeGateway = new InclusiveGateway();
+        inclusiveMergeGateway.setId(StrUtil.format("{}_merge_node", node.getId()));
+        inclusiveMergeGateway.setName(StrUtil.format("{}_合并网关", node.getName()));
+        flowElementList.add(inclusiveMergeGateway);
+
+        List<Node> list = node.getList();
+
+
+        int index = 0;
+        for (Node n : list) {
+
+
+            ServiceTask serviceTask = new ServiceTask();
+            serviceTask.setId(StrUtil.format("{}_{}", node.getId(), index));
+            serviceTask.setName(StrUtil.format("{}_{}", node.getName(), index));
+            serviceTask.setImplementationType("class");
+            serviceTask.setImplementation(RouteServiceTask.class.getCanonicalName());
+
+            flowElementList.add(serviceTask);
+
+            index++;
+        }
+        {
+            ServiceTask serviceTask = new ServiceTask();
+            serviceTask.setId(StrUtil.format("{}_{}", node.getId(), list.size()));
+            serviceTask.setName(StrUtil.format("{}_{}", node.getName(), list.size()));
+            serviceTask.setImplementationType("class");
+            serviceTask.setImplementation(RouteServiceTask.class.getCanonicalName());
+
+            flowElementList.add(serviceTask);
+
+        }
+
+
+        return flowElementList;
+    }
+
+    /**
      * 构建子流程节点
      *
      * @param node
@@ -1045,6 +1106,38 @@ public class ModelUtil {
             SequenceFlow sequenceFlow = buildSingleSequenceFlow(node.getId(), StrUtil.format("{}_user_task",
                     node.getId()), "${12==12}", null);
             sequenceFlowList.add(sequenceFlow);
+
+
+        }
+
+        if (node.getType() == NodeTypeEnum.ROUTE.getValue().intValue()) {
+            //路由
+            String startId = StrUtil.format("{}_route_start", node.getId());
+            String endId = StrUtil.format("{}_merge_node", node.getId());
+            List<Node> list = node.getList();
+            int index = 0;
+            list.add(new Node());
+            for (Node n : list) {
+
+                String nid = StrUtil.format("{}_{}", node.getId(), index);
+                String exp = NodeExpressionStrategyFactory.handleDefaultBranch(list, index);
+                if (index == 0) {
+                    exp = NodeExpressionStrategyFactory.handle(n);
+                }
+
+                log.info("{}   {}", index, exp);
+
+                {
+                    SequenceFlow sequenceFlow = buildSingleSequenceFlow(startId, nid, exp, null);
+                    sequenceFlowList.add(sequenceFlow);
+                }
+                {
+                    SequenceFlow sequenceFlow = buildSingleSequenceFlow(nid, endId, "", null);
+                    sequenceFlowList.add(sequenceFlow);
+                }
+
+                index++;
+            }
 
 
         }
