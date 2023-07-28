@@ -4,12 +4,15 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
+import com.cxygzl.common.constants.MessageTypeEnum;
+import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.ProcessInstanceParamDto;
 import com.cxygzl.common.dto.ProcessInstanceRecordParamDto;
 import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
 import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.CoreHttpUtil;
@@ -18,6 +21,7 @@ import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEntityEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
+import org.flowable.common.engine.impl.event.FlowableEntityEventImpl;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.event.impl.FlowableActivityEventImpl;
@@ -26,6 +30,7 @@ import org.flowable.engine.delegate.event.impl.FlowableProcessStartedEventImpl;
 import org.flowable.engine.delegate.event.impl.FlowableProcessTerminatedEventImpl;
 import org.flowable.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.flowable.task.api.DelegationState;
+import org.flowable.task.service.impl.persistence.entity.TaskEntity;
 import org.flowable.task.service.impl.persistence.entity.TaskEntityImpl;
 import org.flowable.variable.api.event.FlowableVariableEvent;
 
@@ -45,6 +50,35 @@ public class FlowProcessEventListener implements FlowableEventListener {
     @Override
     public void onEvent(FlowableEvent event) {
         log.debug("分支监听器 类型={} class={}", event.getType(), event.getClass().getCanonicalName());
+
+        if (event.getType().toString().equals(FlowableEngineEventType.TASK_CREATED.toString())) {
+
+
+            //任务被创建了
+            FlowableEntityEventImpl flowableEntityEvent = (FlowableEntityEventImpl) event;
+
+            TaskEntity taskEntity = (TaskEntity) flowableEntityEvent.getEntity();
+
+
+            String processInstanceId = taskEntity.getProcessInstanceId();
+            String processDefinitionId = taskEntity.getProcessDefinitionId();
+
+            String flowId = NodeUtil.getFlowId(processDefinitionId);
+
+            String taskId = taskEntity.getId();
+            String assignee = taskEntity.getAssignee();
+            MessageDto messageDto = MessageDto.builder()
+                    .userId(assignee)
+                    .flowId(flowId)
+                    .processInstanceId(processInstanceId)
+
+                    .uniqueId(taskId)
+                    .param(JSON.toJSONString(taskEntity.getVariables()))
+
+                    .type(MessageTypeEnum.TODO_TASK.getType())
+                    .readed(false).build();
+            CoreHttpUtil.saveMessage(messageDto);
+        }
         if (event.getType().toString().equals(FlowableEngineEventType.ACTIVITY_STARTED.toString())) {
             //节点开始执行
             //org.flowable.engine.delegate.event.impl.FlowableActivityEventImpl

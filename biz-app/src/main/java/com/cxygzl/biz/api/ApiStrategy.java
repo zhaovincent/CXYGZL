@@ -1,6 +1,7 @@
 package com.cxygzl.biz.api;
 
 import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.RoleDto;
 import com.cxygzl.common.dto.third.UserDto;
 
@@ -85,4 +86,9 @@ public interface ApiStrategy {
      */
     String getUserIdByToken(String token);
 
+    /**
+     * 发送消息
+     * @param messageDto
+     */
+    void sendMsg(MessageDto messageDto);
 }

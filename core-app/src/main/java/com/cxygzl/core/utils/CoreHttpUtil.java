@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.MessageDto;
 import com.yomahub.tlog.hutoolhttp.TLogHutoolhttpInterceptor;
 import org.springframework.core.env.Environment;
 
@@ -73,6 +74,15 @@ public class CoreHttpUtil {
      */
     public static void endProcessEvent(ProcessInstanceParamDto processInstanceParamDto) {
         post(processInstanceParamDto, "/remote/endProcess");
+    }
+
+    /**
+     * 保存消息
+     *
+     * @param messageDto
+     */
+    public static void saveMessage(MessageDto messageDto) {
+        post(messageDto, "/remote/saveMessage");
     }
 
     /**

@@ -9,6 +9,7 @@ import com.cxygzl.biz.service.IUserRoleService;
 import com.cxygzl.biz.service.IUserService;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.RoleDto;
 import com.cxygzl.common.dto.third.UserDto;
 import lombok.extern.slf4j.Slf4j;
@@ -122,6 +123,16 @@ public class NetApi implements ApiStrategy, InitializingBean {
     public String getUserIdByToken(String token) {
         String post = CoreHttpUtil.get( "/test/net/getUserIdByToken?token="+token);
         return post;
+    }
+
+    /**
+     * 发送消息
+     *
+     * @param messageDto
+     */
+    @Override
+    public void sendMsg(MessageDto messageDto) {
+
     }
 
     @Override

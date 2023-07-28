@@ -8,11 +8,9 @@ import com.cxygzl.biz.entity.Dept;
 import com.cxygzl.biz.entity.Role;
 import com.cxygzl.biz.entity.User;
 import com.cxygzl.biz.entity.UserRole;
-import com.cxygzl.biz.service.IDeptService;
-import com.cxygzl.biz.service.IRoleService;
-import com.cxygzl.biz.service.IUserRoleService;
-import com.cxygzl.biz.service.IUserService;
+import com.cxygzl.biz.service.*;
 import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.RoleDto;
 import com.cxygzl.common.dto.third.UserDto;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +36,9 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     private IDeptService deptService;
     @Resource
     private IUserService userService;
+
+    @Resource
+    private IMessageService messageService;
     /**
      * 根据角色id集合获取拥有该角色的用户id集合
      *
@@ -143,6 +144,17 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     public String getUserIdByToken(String token) {
         Object loginIdByToken = StpUtil.getLoginIdByToken(token);
         return loginIdByToken==null?null:loginIdByToken.toString();
+    }
+
+    /**
+     * 发送消息
+     *
+     * @param messageDto
+     */
+    @Override
+    public void sendMsg(MessageDto messageDto) {
+        messageService.saveMessage(messageDto);
+
     }
 
     @Override

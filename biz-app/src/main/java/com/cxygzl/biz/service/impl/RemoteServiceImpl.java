@@ -13,6 +13,7 @@ import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.DataUtil;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.UserDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,18 @@ public class RemoteServiceImpl implements IRemoteService {
     @Resource
     private IUserRoleService userRoleService;
 
+    /**
+     * 保存待办任务
+     *
+     * @param messageDto
+     * @return
+     */
+    @Override
+    public R saveMessage(MessageDto messageDto) {
+
+        ApiStrategyFactory.getStrategy().sendMsg(messageDto);
+        return R.success();
+    }
     /**
      * 根据角色id集合查询用户id集合
      *

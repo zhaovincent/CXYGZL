@@ -3,6 +3,7 @@ package com.cxygzl.biz.controller;
 import com.cxygzl.biz.service.IRemoteService;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.MessageDto;
 import lombok.SneakyThrows;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,16 @@ import java.util.Map;
 public class RemoteController {
     @Resource
     private IRemoteService remoteService;
-
+    /**
+     * 保存待办任务
+     *
+     * @param messageDto
+     * @return
+     */
+    @PostMapping("saveMessage")
+    public R saveMessage(@RequestBody MessageDto messageDto) {
+        return remoteService.saveMessage(messageDto);
+    }
     /**
      * 根据角色id集合查询用户id集合
      *

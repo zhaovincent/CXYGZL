@@ -61,6 +61,14 @@ public class ProcessInstanceConstant {
     }
 
     /**
+     * 变量key
+     */
+    public static class VariableKey{
+        //发起人
+        public static final String STARTER="root";
+
+    }
+    /**
      * 表单权限
      */
     public static class FormPermClass{

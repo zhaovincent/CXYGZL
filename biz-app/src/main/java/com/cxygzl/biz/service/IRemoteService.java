@@ -3,6 +3,7 @@ package com.cxygzl.biz.service;
 
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.MessageDto;
 
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,12 @@ import java.util.Map;
  * 远程调用的接口
  */
 public interface IRemoteService {
+    /**
+     * 保存待办任务
+     * @param messageDto
+     * @return
+     */
+    R saveMessage(MessageDto messageDto);
     /**
      * 根据角色id集合查询用户id集合
      *
