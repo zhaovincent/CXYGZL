@@ -61,9 +61,6 @@ public class FlowProcessEventListener implements FlowableEventListener {
 
             TaskEntity taskEntity = (TaskEntity) flowableEntityEvent.getEntity();
 
-            Object variable = taskEntity.getVariable(
-                    ProcessInstanceConstant.VariableKey.STARTER);
-            NodeUser nodeUser = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class).get(0);
 
             String processInstanceId = taskEntity.getProcessInstanceId();
             String processDefinitionId = taskEntity.getProcessDefinitionId();
