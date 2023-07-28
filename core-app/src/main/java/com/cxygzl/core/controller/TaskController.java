@@ -97,6 +97,7 @@ public class TaskController {
 
         //nodeid
         String taskDefinitionKey =null;
+        String executionId =null;
 
         boolean taskExist=true;
 
@@ -112,12 +113,14 @@ public class TaskController {
                 taskExist=false;
                 taskDefinitionKey=historicTaskInstance.getTaskDefinitionKey();
                 processInstanceId=historicTaskInstance.getProcessInstanceId();
+                executionId=historicTaskInstance.getExecutionId();
                 processDefinitionId = historicTaskInstance.getProcessDefinitionId();
             }  else{
                 processDefinitionId = task.getProcessDefinitionId();
                 taskDefinitionKey = task.getTaskDefinitionKey();
                 delegationState = task.getDelegationState();
                 processInstanceId = task.getProcessInstanceId();
+                executionId = task.getExecutionId();
                 delegateVariable = taskService.getVariableLocal(taskId, "delegate");
 
 
@@ -150,6 +153,7 @@ public class TaskController {
         taskResultDto.setFlowId(flowId);
         taskResultDto.setNodeId(taskDefinitionKey);
         taskResultDto.setCurrentTask(taskExist);
+        taskResultDto.setExecutionId(executionId);
         taskResultDto.setDelegate(Convert.toBool(delegateVariable,false));
         taskResultDto.setVariableAll(variableAll);
         taskResultDto.setProcessInstanceId(processInstanceId);

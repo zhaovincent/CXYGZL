@@ -14,7 +14,7 @@ import javax.annotation.Resource;
  * 流程实例
  */
 @RestController
-@RequestMapping(value = {"process-instance","api/process-instance"})
+@RequestMapping(value = {"process-instance", "api/process-instance"})
 public class ProcessInstanceController {
 
     @Resource
@@ -56,7 +56,7 @@ public class ProcessInstanceController {
      */
     @SneakyThrows
     @PostMapping("queryMineEndTask")
-    public Object queryMineEndTask(@RequestBody PageDto pageDto) {
+    public R queryMineEndTask(@RequestBody PageDto pageDto) {
 
         return processInstanceService.queryMineEndTask(pageDto);
 
@@ -70,7 +70,7 @@ public class ProcessInstanceController {
      */
     @SneakyThrows
     @PostMapping("queryMineStarted")
-    public Object queryMineStarted(@RequestBody PageDto pageDto) {
+    public R queryMineStarted(@RequestBody PageDto pageDto) {
         return processInstanceService.queryMineStarted(pageDto);
     }
 
@@ -82,7 +82,7 @@ public class ProcessInstanceController {
      */
     @SneakyThrows
     @PostMapping("queryMineCC")
-    public Object queryMineCC(@RequestBody PageDto pageDto) {
+    public R queryMineCC(@RequestBody PageDto pageDto) {
         return processInstanceService.queryMineCC(pageDto);
     }
 
@@ -95,7 +95,7 @@ public class ProcessInstanceController {
 
     @SneakyThrows
     @GetMapping("showImg")
-    public Object showImg(String procInsId) {
+    public R showImg(String procInsId) {
         return processInstanceService.showImg(procInsId);
     }
 
@@ -106,9 +106,10 @@ public class ProcessInstanceController {
      * @return
      */
     @PostMapping("formatStartNodeShow")
-    public Object formatStartNodeShow(@RequestBody NodeFormatParamVo nodeFormatParamVo) {
+    public R formatStartNodeShow(@RequestBody NodeFormatParamVo nodeFormatParamVo) {
         return processInstanceService.formatStartNodeShow(nodeFormatParamVo);
     }
+
     /**
      * 流程详情
      *
@@ -116,7 +117,7 @@ public class ProcessInstanceController {
      * @return
      */
     @GetMapping("detail")
-    public Object detail( String processInstanceId) {
+    public R detail(String processInstanceId) {
         return processInstanceService.detail(processInstanceId);
     }
 }

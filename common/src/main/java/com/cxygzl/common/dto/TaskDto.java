@@ -1,5 +1,6 @@
 package com.cxygzl.common.dto;
 
+import cn.hutool.core.lang.Dict;
 import lombok.Data;
 
 import java.util.Date;
@@ -19,6 +20,10 @@ public class TaskDto {
      * 参数集合
      */
     private Map<String,Object> paramMap;
+    /**
+     *  表单值显示
+     */
+    private List<Dict> formValueShowList;
 
     /**
      * 实例id

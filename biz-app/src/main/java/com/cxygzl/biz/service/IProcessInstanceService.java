@@ -29,7 +29,7 @@ public interface IProcessInstanceService  {
      * @param pageVO
      * @return
      */
-    Object queryMineEndTask(PageDto pageVO);
+    R queryMineEndTask(PageDto pageVO);
 
     /**
      * 流程结束
@@ -43,33 +43,36 @@ public interface IProcessInstanceService  {
      * @param pageDto
      * @return
      */
-    Object queryMineStarted(PageDto pageDto);
+    R queryMineStarted(PageDto pageDto);
 
     /**
      * 查询抄送给我的
      * @param pageDto
      * @return
      */
-    Object queryMineCC(PageDto pageDto);
+    R queryMineCC(PageDto pageDto);
 
     /**
      * 显示流程实例图片
+     *
      * @param procInsId
      * @return
      */
-    Object showImg(String procInsId);
+    R showImg(String procInsId);
 
     /**
      * 格式化流程显示
+     *
      * @param nodeFormatParamVo
      * @return
      */
-    Object formatStartNodeShow(NodeFormatParamVo nodeFormatParamVo);
+    R formatStartNodeShow(NodeFormatParamVo nodeFormatParamVo);
 
     /**
      * 流程详情
+     *
      * @param processInstanceId
      * @return
      */
-    Object detail(String processInstanceId);
+    R detail(String processInstanceId);
 }

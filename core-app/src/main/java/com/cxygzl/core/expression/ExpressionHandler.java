@@ -15,6 +15,7 @@ import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.AreaFormValue;
 import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.dto.flow.SelectValue;
 import com.cxygzl.common.dto.third.UserFieldDto;
 import com.cxygzl.common.utils.AreaUtil;
 import com.cxygzl.core.utils.CoreHttpUtil;
@@ -403,7 +404,9 @@ public class ExpressionHandler {
         }
 
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.SINGLE_SELECT.getType())) {
-            return selectHandler(userKey, userInfo.get(userKey), Convert.toStr(o), symbol);
+            List<SelectValue> selectValueList = BeanUtil.copyToList(Convert.toList(o), SelectValue.class);
+
+            return selectHandler(userKey, userInfo.get(userKey),CollUtil.isEmpty(selectValueList)?null:selectValueList.get(0).getValue(), symbol);
         }
 
 

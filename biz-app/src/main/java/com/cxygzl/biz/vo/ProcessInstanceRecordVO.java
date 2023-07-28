@@ -1,15 +1,19 @@
 package com.cxygzl.biz.vo;
 
 import cn.hutool.core.lang.Dict;
-import com.cxygzl.biz.entity.ProcessCopy;
+import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import lombok.Data;
 
 import java.util.List;
 
+/**
+ * @author Huijun Zhao
+ * @description
+ * @date 2023-07-28 15:23
+ */
 @Data
-public class ProcessCopyVo extends ProcessCopy {
+public class ProcessInstanceRecordVO extends ProcessInstanceRecord {
 
-    private String startUserName;
     /**
      *  表单值显示
      */

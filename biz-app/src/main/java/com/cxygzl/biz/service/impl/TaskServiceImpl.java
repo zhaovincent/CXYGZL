@@ -79,6 +79,7 @@ public class TaskServiceImpl implements ITaskService {
             ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
                     .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
                     .eq(ProcessNodeRecordAssignUser::getUserId, userId)
+                    .eq(ProcessNodeRecordAssignUser::getExecutionId, taskResultDto.getExecutionId())
                     .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.YJS.getCode())
                     .last("limit 1")
                     .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)

@@ -21,12 +21,13 @@ import com.cxygzl.biz.utils.NodeFormatUtil;
 import com.cxygzl.biz.vo.FormItemVO;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.ProcessCopyVo;
+import com.cxygzl.biz.vo.ProcessInstanceRecordVO;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
-import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.dto.flow.*;
 import com.cxygzl.common.dto.third.UserDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -124,13 +125,17 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         Set<String> startUserIdSet =
                 processInstanceRecordList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
 
-        List<UserDto> startUserList =new ArrayList<>();
+        List<UserDto> startUserList = new ArrayList<>();
         {
             for (String userIds : startUserIdSet) {
                 UserDto user = ApiStrategyFactory.getStrategy().getUser(userIds);
                 startUserList.add(user);
             }
         }
+        //流程配置
+        Set<String> flowIdSet = processInstanceRecordList.stream().map(w -> w.getFlowId()).collect(Collectors.toSet());
+        List<Process> processList = processService.lambdaQuery().in(Process::getFlowId, flowIdSet).list();
+
 
         for (TaskDto record : records) {
 
@@ -142,7 +147,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 record.setProcessName(processInstanceRecord.getName());
 
                 UserDto startUser = startUserList.stream().filter(w -> w.getId()
-                        .equals( processInstanceRecord.getUserId())).findAny().orElse(null);
+                        .equals(processInstanceRecord.getUserId())).findAny().orElse(null);
 
                 record.setRootUserId(processInstanceRecord.getUserId());
                 record.setGroupName(processInstanceRecord.getGroupName());
@@ -158,16 +163,85 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 Object subProcessStarterNode =
                         paramMap.get(ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE);
                 Object rejectStarterNode = paramMap.get(ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE);
-                record.setSubProcessStarterTask(Convert.toBool(subProcessStarterNode,false) && rejectStarterNode == null);
+                record.setSubProcessStarterTask(Convert.toBool(subProcessStarterNode, false) && rejectStarterNode == null);
 
 
             }
+            //处理表单数据
+            Process process = processList.stream().filter(w -> StrUtil.equals(w.getFlowId(), record.getFlowId())).findFirst().get();
+            List<Dict> formValueShowList = getFormValueShowList(process, record.getFlowId(), record.getNodeId(), paramMap);
 
+            record.setFormValueShowList(formValueShowList);
 
         }
 
 
         return com.cxygzl.common.dto.R.success(pageResultDto);
+    }
+
+    private static void buildFormValueShow(Map<String, Object> paramMap, List<FormItemVO> formItemVOList,
+                                           Map<String, String> formPermMap, List<Dict> formValueShowList) {
+        for (FormItemVO formItemVO : formItemVOList) {
+//            if (formValueMap.size() >= 3) {
+//                break;
+//            }
+            String id = formItemVO.getId();
+            String formItemVOName = formItemVO.getName();
+
+            String perm = formPermMap.get(id);
+            if (StrUtil.isBlank(perm) || ProcessInstanceConstant.FormPermClass.HIDE.equals(perm)) {
+                continue;
+            }
+            Object o = paramMap.get(id);
+            if (o == null || StrUtil.isBlankIfStr(o)) {
+                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label",""));
+                continue;
+            }
+            //表单类型
+            String type = formItemVO.getType();
+            if (StrUtil.equals(type, FormTypeEnum.AREA.getType())) {
+                AreaFormValue areaFormValue = BeanUtil.copyProperties(o, AreaFormValue.class);
+                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label",areaFormValue.getName()));
+
+            } else if (StrUtil.equalsAny(type, FormTypeEnum.SINGLE_SELECT.getType(), FormTypeEnum.MULTI_SELECT.getType())) {
+                List<SelectValue> selectValueList = BeanUtil.copyToList(Convert.toList(o), SelectValue.class);
+                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label",selectValueList.stream().map(w -> w.getValue()).collect(Collectors.joining(","))));
+
+            } else if (StrUtil.equalsAny(type,
+                    FormTypeEnum.SELECT_USER.getType(),
+                    FormTypeEnum.SELECT_MULTI_USER.getType(),
+                    FormTypeEnum.SELECT_MULTI_DEPT.getType(),
+                    FormTypeEnum.SELECT_DEPT.getType()
+            )) {
+                List<NodeUser> nodeUserList = BeanUtil.copyToList(Convert.toList(o), NodeUser.class);
+                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label",nodeUserList.stream().map(w -> w.getName()).collect(Collectors.joining(","))));
+
+            }  else if (StrUtil.equalsAny(type,
+                    FormTypeEnum.UPLOAD_FILE.getType(),
+                    FormTypeEnum.UPLOAD_IMAGE.getType()
+            )) {
+                List<UploadValue> uploadValueList = BeanUtil.copyToList(Convert.toList(o), UploadValue.class);
+                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", uploadValueList.stream().map(w -> w.getName()).collect(Collectors.joining(","))));
+
+            }  else if (StrUtil.equalsAny(type,
+                    FormTypeEnum.LAYOUT.getType()
+            )) {
+                //明细列表
+                Object formItemListSub = formItemVO.getProps().getValue();
+
+                List<Object> valueList = Convert.toList(Object.class, o);
+                for (Object o1 : valueList) {
+                    buildFormValueShow(Convert.toMap(String.class,Object.class,o1),Convert.toList(FormItemVO.class,formItemListSub),formPermMap,formValueShowList);
+
+                }
+
+            } else {
+                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", Convert.toStr(o)));
+
+
+            }
+
+        }
     }
 
     /**
@@ -177,7 +251,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      * @return
      */
     @Override
-    public Object queryMineEndTask(PageDto pageVO) {
+    public R queryMineEndTask(PageDto pageVO) {
         TaskQueryParamDto taskQueryParamDto = BeanUtil.copyProperties(pageVO, TaskQueryParamDto.class);
         taskQueryParamDto.setAssign(StpUtil.getLoginIdAsString());
 
@@ -202,13 +276,16 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         Set<String> startUserIdSet =
                 processInstanceRecordList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
 
-        List<UserDto> startUserList =new ArrayList<>();
+        List<UserDto> startUserList = new ArrayList<>();
         {
             for (String userIds : startUserIdSet) {
                 UserDto user = ApiStrategyFactory.getStrategy().getUser(userIds);
                 startUserList.add(user);
             }
         }
+        //流程配置
+        Set<String> flowIdSet = processInstanceRecordList.stream().map(w -> w.getFlowId()).collect(Collectors.toSet());
+        List<Process> processList = processService.lambdaQuery().in(Process::getFlowId, flowIdSet).list();
 
         for (TaskDto record : records) {
 
@@ -221,13 +298,39 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
 
                 UserDto startUser = startUserList.stream().filter(w -> w.getId()
-                        .equals( processInstanceRecord.getUserId())).findAny().orElse(null);
+                        .equals(processInstanceRecord.getUserId())).findAny().orElse(null);
                 record.setRootUserId(processInstanceRecord.getUserId());
                 record.setGroupName(processInstanceRecord.getGroupName());
                 record.setRootUserName(startUser.getName());
                 record.setRootUserAvatarUrl(startUser.getAvatarUrl());
                 record.setStartTime(processInstanceRecord.getCreateTime());
             }
+            Map<String, Object> paramMap = new LinkedHashMap<>();
+            {
+
+                ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
+                        .eq(ProcessNodeRecordAssignUser::getTaskId, record.getTaskId())
+                        .eq(ProcessNodeRecordAssignUser::getUserId, StpUtil.getLoginIdAsString())
+                        .eq(ProcessNodeRecordAssignUser::getExecutionId, record.getExecutionId())
+                        .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.YJS.getCode())
+                        .last("limit 1")
+                        .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
+                        .one();
+
+                String data = processNodeRecordAssignUser.getData();
+                if (StrUtil.isNotBlank(data)) {
+                    Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
+                    });
+                    paramMap.putAll(collect);
+
+                }
+            }
+
+            //处理表单数据
+            Process process = processList.stream().filter(w -> StrUtil.equals(w.getFlowId(), record.getFlowId())).findFirst().get();
+            List<Dict> formValueShowList = getFormValueShowList(process, record.getFlowId(), record.getNodeId(), paramMap);
+
+            record.setFormValueShowList(formValueShowList);
         }
 
 
@@ -257,7 +360,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      * @return
      */
     @Override
-    public Object queryMineStarted(PageDto pageDto) {
+    public R queryMineStarted(PageDto pageDto) {
 
         String userId = StpUtil.getLoginIdAsString();
 
@@ -266,7 +369,43 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 .orderByDesc(ProcessInstanceRecord::getCreateTime)
                 .page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()));
 
-        return com.cxygzl.common.dto.R.success(instanceRecordPage);
+        List<ProcessInstanceRecord> records = instanceRecordPage.getRecords();
+        if(CollUtil.isEmpty(records)){
+            return com.cxygzl.common.dto.R.success(instanceRecordPage);
+        }
+
+
+        Set<String> processInstanceIdSet = records.stream().map(w -> w.getProcessInstanceId()).collect(Collectors.toSet());
+
+        //流程实例记录
+        List<ProcessInstanceRecord> processInstanceRecordList = processInstanceRecordService.lambdaQuery().in(ProcessInstanceRecord::getProcessInstanceId,
+                processInstanceIdSet).list();
+
+
+        //流程配置
+        Set<String> flowIdSet = processInstanceRecordList.stream().map(w -> w.getFlowId()).collect(Collectors.toSet());
+        List<Process> processList = processService.lambdaQuery().in(Process::getFlowId, flowIdSet).list();
+
+        List<ProcessInstanceRecordVO> processInstanceRecordVOList = BeanUtil.copyToList(records, ProcessInstanceRecordVO.class);
+
+        for (ProcessInstanceRecordVO record : processInstanceRecordVOList) {
+            String formData = record.getFormData();
+
+
+            //处理表单数据
+            Process process = processList.stream().filter(w -> StrUtil.equals(w.getFlowId(), record.getFlowId())).findFirst().get();
+            List<Dict> formValueShowList = getFormValueShowList(process, record.getFlowId(), ProcessInstanceConstant.VariableKey.STARTER, JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
+            }));
+
+            record.setFormValueShowList(formValueShowList);
+            record.setFormData(null);
+            record.setProcess(null);
+        }
+        Page page = BeanUtil.copyProperties(instanceRecordPage, Page.class);
+        page.setRecords(processInstanceRecordVOList);
+
+
+        return com.cxygzl.common.dto.R.success(page);
     }
 
     /**
@@ -276,7 +415,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      * @return
      */
     @Override
-    public Object queryMineCC(PageDto pageDto) {
+    public R queryMineCC(PageDto pageDto) {
 
         String userId = StpUtil.getLoginIdAsString();
 
@@ -299,6 +438,15 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 UserDto user = ApiStrategyFactory.getStrategy().getUser(s);
                 startUserList.add(user);
             }
+            Set<String> processInstanceIdSet = records.stream().map(w -> w.getProcessInstanceId()).collect(Collectors.toSet());
+
+            //流程实例记录
+            List<ProcessInstanceRecord> processInstanceRecordList = processInstanceRecordService.lambdaQuery().in(ProcessInstanceRecord::getProcessInstanceId,
+                    processInstanceIdSet).list();
+
+            //流程配置
+            Set<String> flowIdSet = processInstanceRecordList.stream().map(w -> w.getFlowId()).collect(Collectors.toSet());
+            List<Process> processList = processService.lambdaQuery().in(Process::getFlowId, flowIdSet).list();
 
 
             for (ProcessCopyVo record : processCopyVoList) {
@@ -307,6 +455,16 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 UserDto startUser = startUserList.stream().filter(w -> w.getId()
                         .equals(record.getStartUserId())).findAny().orElse(null);
                 record.setStartUserName(startUser.getName());
+
+
+                Process process = processList.stream().filter(w -> StrUtil.equals(w.getFlowId(), record.getFlowId())).findFirst().get();
+
+                List<Dict> formValueShowList = getFormValueShowList(process, record.getFlowId(), ProcessInstanceConstant.VariableKey.STARTER, JSON.parseObject(record.getFormData(), new TypeReference<Map<String, Object>>() {
+                }));
+
+                record.setFormValueShowList(formValueShowList);
+                record.setFormData(null);
+
             }
         }
 
@@ -318,13 +476,37 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     }
 
     /**
+     * 获取列表 显示的表单数据 姓名：张三 格式
+     * @param process
+     * @param flowId
+     * @param nodeId
+     * @param paramMap
+     * @return
+     */
+    private List<Dict> getFormValueShowList(Process process, String flowId, String nodeId, Map<String, Object> paramMap) {
+        String formItems = process.getFormItems();
+        List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
+        String data = processNodeDataService.getNodeData(flowId, nodeId).getData();
+        Node node = JSON.parseObject(data, Node.class);
+        Map<String, String> map = node.getFormPerms();
+
+        List<Dict> formValueShowList = new ArrayList<>();
+
+
+        buildFormValueShow(paramMap, formItemVOList, map, formValueShowList);
+
+        List<Dict> list = formValueShowList.size() > 3 ? (formValueShowList.subList(0, 3)) : formValueShowList;
+        return list;
+    }
+
+    /**
      * 显示流程实例图片
      *
      * @param procInsId
      * @return
      */
     @Override
-    public Object showImg(String procInsId) {
+    public R showImg(String procInsId) {
         String s = CoreHttpUtil.showImg(procInsId);
         com.cxygzl.common.dto.R<String> stringR = JSON.parseObject(s, new TypeReference<com.cxygzl.common.dto.R<String>>() {
         });
@@ -343,7 +525,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      * @return
      */
     @Override
-    public Object formatStartNodeShow(NodeFormatParamVo nodeFormatParamVo) {
+    public R formatStartNodeShow(NodeFormatParamVo nodeFormatParamVo) {
         String flowId = nodeFormatParamVo.getFlowId();
         String processInstanceId = nodeFormatParamVo.getProcessInstanceId();
         if (StrUtil.isAllBlank(flowId, processInstanceId)) {
@@ -414,7 +596,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      * @return
      */
     @Override
-    public Object detail(String processInstanceId) {
+    public R detail(String processInstanceId) {
 
 
         String userId = StpUtil.getLoginIdAsString();
