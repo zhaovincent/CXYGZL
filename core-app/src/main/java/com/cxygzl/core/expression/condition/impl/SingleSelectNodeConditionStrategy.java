@@ -1,5 +1,6 @@
 package com.cxygzl.core.expression.condition.impl;
 
+import cn.hutool.core.util.EscapeUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.FormTypeEnum;
@@ -26,7 +27,7 @@ public class SingleSelectNodeConditionStrategy implements NodeConditionStrategy,
 
 
         return StrUtil.format("(expressionHandler.selectHandler(\"{}\", execution,\"{}\",\"{}\"))", id,
-                JSON.toJSONString(value), compare);
+                EscapeUtil.escape(JSON.toJSONString(value)), compare);
 
 
     }

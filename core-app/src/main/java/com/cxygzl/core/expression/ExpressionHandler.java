@@ -205,26 +205,33 @@ public class ExpressionHandler {
      * @return
      */
     public boolean selectHandler(String key, DelegateExecution execution, String param, String symbol) {
-
-        return selectHandler(key, execution.getVariable(key), param, symbol);
+        List<SelectValue> paramObjList = JSON.parseArray(EscapeUtil.unescape(param), SelectValue.class);
+        List<String> paramList = paramObjList.stream().map(w -> w.getKey()).collect(Collectors.toList());
+        Object variable = execution.getVariable(key);
+        if(variable==null){
+            return false;
+        }
+        List<SelectValue> list = Convert.toList(SelectValue.class, variable);
+        return selectHandler(key, list.get(0).getKey(), paramList, symbol);
     }
 
-    public boolean selectHandler(String key, Object value, String param, String symbol) {
+    public boolean selectHandler(String key, Object value, List<String> paramList, String symbol) {
 
 
-        List<String> list = JSON.parseArray(param, String.class);
 
 
-        log.debug("表单值：key={} value={} param={} symbol={}", key, JSON.toJSONString(value), param, symbol);
-        log.debug("条件  参数：{}", JSON.toJSONString(list));
+
+        log.debug("表单值：key={} value={}  symbol={}", key, JSON.toJSONString(value), symbol);
+        log.debug("条件  参数：{}", JSON.toJSONString(paramList));
         if (value == null) {
             return false;
         }
+
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.IN)) {
-            return list.contains(value.toString());
+            return paramList.contains(value.toString());
         }
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_IN)) {
-            return !list.contains(value.toString());
+            return !paramList.contains(value.toString());
         }
         return false;
     }
@@ -406,7 +413,8 @@ public class ExpressionHandler {
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.SINGLE_SELECT.getType())) {
             List<SelectValue> selectValueList = BeanUtil.copyToList(Convert.toList(o), SelectValue.class);
 
-            return selectHandler(userKey, userInfo.get(userKey),CollUtil.isEmpty(selectValueList)?null:selectValueList.get(0).getValue(), symbol);
+            return selectHandler(userKey, userInfo.get(userKey), CollUtil.isEmpty(selectValueList) ? null :
+                    selectValueList.stream().map(w->w.getKey()).collect(Collectors.toList()), symbol);
         }
 
 
