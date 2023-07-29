@@ -32,8 +32,6 @@ public class SaTokenConfigure implements WebMvcConfigurer {
                         "/api/user/login",
                         "/api/user/captcha",
                         "/user/captcha",
-
-
                         "/remote/*",
                         "/test/*",
                         "/web/*",

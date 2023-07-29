@@ -24,7 +24,7 @@ public class NodeUtil {
             addEndNode(children);
         } else {
             Node end = new Node();
-            end.setId("end");
+            end.setId(ProcessInstanceConstant.VariableKey.END);
             end.setType(NodeTypeEnum.END.getValue());
             end.setName("结束节点");
             end.setParentId(node.getId());

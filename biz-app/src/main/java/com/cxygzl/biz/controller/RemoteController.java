@@ -186,7 +186,7 @@ public class RemoteController {
      */
     @PostMapping("endProcess")
     public R endProcess(@RequestBody ProcessInstanceParamDto processInstanceParamDto) {
-        return remoteService.endProcess(processInstanceParamDto.getProcessInstanceId());
+        return remoteService.endProcess(processInstanceParamDto);
     }
 
     /**

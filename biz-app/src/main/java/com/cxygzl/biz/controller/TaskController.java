@@ -99,7 +99,7 @@ public class TaskController {
      */
     @SneakyThrows
     @PostMapping("stopProcessInstance")
-    public Object stopProcessInstance(@RequestBody TaskParamDto completeParamDto) {
+    public R stopProcessInstance(@RequestBody TaskParamDto completeParamDto) {
 
         return taskService.stopProcessInstance(completeParamDto);
 

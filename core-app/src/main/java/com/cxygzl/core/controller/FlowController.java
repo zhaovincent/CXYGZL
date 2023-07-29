@@ -6,6 +6,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.cxygzl.common.config.NotWriteLogAnno;
+import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.NodeUtil;
@@ -60,7 +61,7 @@ public class FlowController {
 
     @PostMapping("create")
     public R create(@RequestBody Node nodeDto, String userId) {
-        String flowId ="p"+ RandomUtil.randomString(9)+StrUtil.fillBefore(userId,'0',10);
+        String flowId = "p" + RandomUtil.randomString(9) + StrUtil.fillBefore(userId, '0', 10);
 
 
         log.info("flowId={}", flowId);
@@ -97,7 +98,7 @@ public class FlowController {
     }
 
 
-    @NotWriteLogAnno(all = false,printResultLog = false)
+    @NotWriteLogAnno(all = false, printResultLog = false)
     @GetMapping("/showImg")
     public R showImg(String procInsId) {
 
@@ -189,17 +190,19 @@ public class FlowController {
         for (String processInstanceId : processInstanceIdList) {
             ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
             if (processInstance != null) {
+                runtimeService.setVariable(processInstanceId, ProcessInstanceConstant.VariableKey.CANCEL, true);
                 List<Execution> executions = runtimeService.createExecutionQuery().parentId(processInstanceId).list();
                 List<String> executionIds = new ArrayList<>();
                 executions.forEach(execution -> executionIds.add(execution.getId()));
                 runtimeService.createChangeActivityStateBuilder().moveExecutionsToSingleActivityId(executionIds,
-                        "end").changeState();
+                        ProcessInstanceConstant.VariableKey.END).changeState();
             }
         }
 
 
         return R.success();
     }
+
     /**
      * 查询用户已办任务
      *
@@ -255,6 +258,7 @@ public class FlowController {
 
         return R.success(pageResultDto);
     }
+
     /**
      * 查询用户待办任务
      *

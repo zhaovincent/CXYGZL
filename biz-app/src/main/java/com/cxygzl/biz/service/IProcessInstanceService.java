@@ -33,10 +33,11 @@ public interface IProcessInstanceService  {
 
     /**
      * 流程结束
-     * @param processsInstanceId
+     *
+     * @param processInstanceParamDto
      * @return
      */
-    R end(String processsInstanceId);
+    R end(ProcessInstanceParamDto processInstanceParamDto);
 
     /**
      * 查询我发起的

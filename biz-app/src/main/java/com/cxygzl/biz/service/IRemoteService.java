@@ -117,10 +117,11 @@ public interface IRemoteService {
 
     /**
      * 实例结束
-     * @param processInstanceId
+     *
+     * @param processInstanceParamDto
      * @return
      */
-    R endProcess(String processInstanceId);
+    R endProcess(ProcessInstanceParamDto processInstanceParamDto);
 
     /**
      * 查询流程管理员

@@ -1,10 +1,12 @@
 package com.cxygzl.biz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cxygzl.biz.entity.ProcessNodeData;
 import com.cxygzl.biz.mapper.ProcessNodeDataMapper;
 import com.cxygzl.biz.service.IProcessNodeDataService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.ProcessNodeDataDto;
 import com.cxygzl.common.dto.R;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,11 @@ public class ProcessNodeDataServiceImpl extends ServiceImpl<ProcessNodeDataMappe
      */
     @Override
     public R<String> getNodeData(String flowId, String nodeId) {
+        //发起人用户任务
+        if(StrUtil.startWith(nodeId, ProcessInstanceConstant.VariableKey.STARTER)){
+            nodeId= ProcessInstanceConstant.VariableKey.STARTER;
+        }
+
         ProcessNodeData processNodeData = this.lambdaQuery().eq(ProcessNodeData::getFlowId, flowId).eq(ProcessNodeData::getNodeId, nodeId).one();
         return R.success(processNodeData==null?null:processNodeData.getData());
     }

@@ -14,7 +14,7 @@ import java.util.List;
 public class TestController {
 
     @PostMapping("notify")
-    public Object notify(@RequestBody String s,@RequestHeader String b){
+    public Object notify(@RequestBody String s,@RequestHeader(required = false) String b){
         log.info("收到通知：{} {}",s,b);
         return Dict.create().set("a","123");
     }

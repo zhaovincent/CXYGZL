@@ -56,10 +56,6 @@ public class RemoteNodeDataStoreHandler implements INodeDataStoreHandler {
     @Override
     public String get(String flowId, String nodeId) {
 
-        //发起人用户任务
-        if(StrUtil.startWith(nodeId, ProcessInstanceConstant.VariableKey.STARTER)){
-            nodeId= ProcessInstanceConstant.VariableKey.STARTER;
-        }
 
 
         String o = cache.get(StrUtil.format("{}||{}", flowId, nodeId));

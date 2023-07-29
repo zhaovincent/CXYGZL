@@ -13,7 +13,6 @@ import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.mapper.DeptMapper;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.DataUtil;
-import com.cxygzl.common.constants.MessageTypeEnum;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.MessageDto;
@@ -314,12 +313,12 @@ public class RemoteServiceImpl implements IRemoteService {
     /**
      * 实例结束
      *
-     * @param processInstanceId
+     * @param processInstanceParamDto
      * @return
      */
     @Override
-    public R endProcess(String processInstanceId) {
-        return processInstanceService.end(processInstanceId);
+    public R endProcess(ProcessInstanceParamDto processInstanceParamDto) {
+        return processInstanceService.end(processInstanceParamDto);
     }
 
     /**

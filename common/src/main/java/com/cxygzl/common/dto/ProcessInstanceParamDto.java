@@ -26,4 +26,8 @@ public class ProcessInstanceParamDto {
      * 实例id
      */
     private String processInstanceId;
+    /**
+     * 是否撤销
+     */
+    private Boolean cancel;
 }

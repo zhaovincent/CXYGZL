@@ -1,6 +1,7 @@
 package com.cxygzl.core.listeners;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.Header;
@@ -176,14 +177,17 @@ public class FlowProcessEventListener implements FlowableEventListener {
             DelegateExecution execution = e.getExecution();
             String processInstanceId = e.getProcessInstanceId();
             ExecutionEntityImpl entity = (ExecutionEntityImpl) e.getEntity();
+            Map<String, Object> variables = execution.getVariables();
 
 
             ProcessInstanceParamDto processInstanceParamDto = new ProcessInstanceParamDto();
             processInstanceParamDto.setProcessInstanceId(processInstanceId);
+            processInstanceParamDto.setCancel( MapUtil.getBool(variables,
+                    ProcessInstanceConstant.VariableKey.CANCEL
+                    ,false));
             CoreHttpUtil.endProcessEvent(processInstanceParamDto);
             {
                 String flowId = entity.getProcessDefinitionKey();
-                Map<String, Object> variables = execution.getVariables();
 
                 {
                     //判断后置事件
@@ -214,6 +218,9 @@ public class FlowProcessEventListener implements FlowableEventListener {
                             {
                                 //存入默认值
                                 bodyMap.put("flowId", flowId);
+                                bodyMap.put("cancel", MapUtil.getBool(variables,
+                                        ProcessInstanceConstant.VariableKey.CANCEL
+                                        ,false));
                                 bodyMap.put("processInstanceId", processInstanceId);
                                 List<HttpSettingData> bodySetting = backNotify.getBody();
                                 for (HttpSettingData httpSettingData : bodySetting) {

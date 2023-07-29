@@ -59,6 +59,10 @@ public class ProcessInstanceConstant {
     public static class VariableKey{
         //发起人
         public static final String STARTER="root";
+        //结束
+        public static final String END="end";
+        //是否撤回
+        public static final String CANCEL="cancel";
         //是否是被驳回到发起人节点
         public static final String REJECT_TO_STARTER_NODE ="rootReject";
         //是否子流程发起人处理发起人数据
