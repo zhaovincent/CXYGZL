@@ -1,24 +1,13 @@
 package com.cxygzl.biz.controller;
 
-import cn.dev33.satoken.stp.StpUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
 import com.cxygzl.biz.service.IMessageService;
 import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.dto.MessageDto;
-import com.cxygzl.common.dto.PageDto;
 import com.cxygzl.common.dto.R;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 
 /**
  * 消息控制器
@@ -34,6 +23,7 @@ public class MessageController {
     /**
      * 未读数量
      */
+    @NotWriteLogAnno(printResultLog = false)
     @SneakyThrows
     @GetMapping("/unreadNum")
     public R<Long> queryUnreadNum() {
