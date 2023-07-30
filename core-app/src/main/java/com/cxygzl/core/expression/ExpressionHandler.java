@@ -64,6 +64,16 @@ public class ExpressionHandler {
         log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
         log.debug("条件 标识:{} 参数：{} 格式：{}", symbol, JSON.toJSONString(param), format);
 
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
+
+            return value == null || StrUtil.isBlankIfStr(value);
+
+        }
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_EMPTY)) {
+
+            return value != null && !StrUtil.isBlankIfStr(value);
+
+        }
         //表单值为空
         if (value == null) {
             return false;
@@ -100,9 +110,20 @@ public class ExpressionHandler {
 
         log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
         log.debug("条件 标识:{} 参数：{}", symbol, JSON.toJSONString(param));
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
+
+            return value == null || StrUtil.isBlankIfStr(value) || Convert.toMap(Object.class, Object.class, value).size() == 0;
+
+        }
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_EMPTY)) {
+
+            return value != null && !StrUtil.isBlankIfStr(value) && Convert.toMap(Object.class, Object.class, value).size() > 0;
+
+        }
+
 
         //表单值为空
-        if (value == null) {
+        if (value == null || Convert.toMap(Object.class, Object.class, value).size() == 0) {
             return false;
         }
         AreaFormValue areaFormValueParam = JSON.parseObject(unescape, AreaFormValue.class);
@@ -168,6 +189,17 @@ public class ExpressionHandler {
         log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
         log.debug("条件 标识:{} 参数：{}", symbol, JSON.toJSONString(param));
 
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
+
+            return value == null || StrUtil.isBlankIfStr(value);
+
+        }
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_EMPTY)) {
+
+            return value != null && !StrUtil.isBlankIfStr(value);
+
+        }
+
         //表单值为空
         if (value == null) {
             return false;
@@ -207,23 +239,45 @@ public class ExpressionHandler {
     public boolean selectHandler(String key, DelegateExecution execution, String param, String symbol) {
         List<SelectValue> paramObjList = JSON.parseArray(EscapeUtil.unescape(param), SelectValue.class);
         List<String> paramList = paramObjList.stream().map(w -> w.getKey()).collect(Collectors.toList());
-        Object variable = execution.getVariable(key);
-        if(variable==null){
+        Object value = execution.getVariable(key);
+
+
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
+
+            return value == null || StrUtil.isBlankIfStr(value) || Convert.toList(value).size() == 0;
+
+        }
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_EMPTY)) {
+
+            return value != null && !StrUtil.isBlankIfStr(value) && Convert.toList(value).size() > 0;
+
+        }
+
+        if (value == null) {
             return false;
         }
-        List<SelectValue> list = Convert.toList(SelectValue.class, variable);
+        List<SelectValue> list = Convert.toList(SelectValue.class, value);
         return selectHandler(key, list.get(0).getKey(), paramList, symbol);
     }
 
     public boolean selectHandler(String key, Object value, List<String> paramList, String symbol) {
 
 
-
-
-
         log.debug("表单值：key={} value={}  symbol={}", key, JSON.toJSONString(value), symbol);
         log.debug("条件  参数：{}", JSON.toJSONString(paramList));
-        if (value == null) {
+
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
+
+            return value == null || StrUtil.isBlankIfStr(value) || Convert.toList(value).size() == 0;
+
+        }
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_EMPTY)) {
+
+            return value != null && !StrUtil.isBlankIfStr(value) && Convert.toList(value).size() > 0;
+
+        }
+
+        if (value == null || Convert.toList(value).size() == 0) {
             return false;
         }
 
@@ -253,6 +307,17 @@ public class ExpressionHandler {
 
         log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
         log.debug("条件  参数：{}", JSON.toJSONString(param));
+
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
+
+            return value == null || StrUtil.isBlankIfStr(value);
+
+        }
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_EMPTY)) {
+
+            return value != null && !StrUtil.isBlankIfStr(value);
+
+        }
         if (value == null) {
             return false;
         }
@@ -296,7 +361,19 @@ public class ExpressionHandler {
         String jsonString = JSON.toJSONString(value);
         log.debug("表单值：key={} value={} symbol={}", key, jsonString, symbol);
         log.debug("条件  参数：{}", param);
-        if (value == null) {
+
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
+
+            return value == null || StrUtil.isBlankIfStr(value) || Convert.toList(value).size() == 0;
+
+        }
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_EMPTY)) {
+
+            return value != null && !StrUtil.isBlankIfStr(value) && Convert.toList(value).size() > 0;
+
+        }
+
+        if (value == null || Convert.toList(value).size() == 0) {
             return false;
         }
 
@@ -349,6 +426,22 @@ public class ExpressionHandler {
         String jsonString = JSON.toJSONString(value);
         log.debug("表单值：key={} value={}   symbol={} userKey={} ", key, jsonString, symbol, userKey);
         log.debug("条件  参数：{}", o);
+
+
+        if (StrUtil.equals(userKey, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
+
+            return value == null || StrUtil.isBlankIfStr(value) || Convert.toList(value).size() == 0;
+
+        }
+        if (StrUtil.equals(userKey, ProcessInstanceConstant.ConditionSymbol.NOT_EMPTY)) {
+
+            return value != null && !StrUtil.isBlankIfStr(value) && Convert.toList(value).size() > 0;
+
+        }
+
+        if (value == null || Convert.toList(value).size() == 0) {
+            return false;
+        }
         if (value == null) {
             return false;
         }
@@ -414,7 +507,7 @@ public class ExpressionHandler {
             List<SelectValue> selectValueList = BeanUtil.copyToList(Convert.toList(o), SelectValue.class);
 
             return selectHandler(userKey, userInfo.get(userKey), CollUtil.isEmpty(selectValueList) ? null :
-                    selectValueList.stream().map(w->w.getKey()).collect(Collectors.toList()), symbol);
+                    selectValueList.stream().map(w -> w.getKey()).collect(Collectors.toList()), symbol);
         }
 
 

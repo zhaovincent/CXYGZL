@@ -127,6 +127,10 @@ public class ProcessInstanceConstant {
         public static final String NOT_IN="notin";
         //范围
         public static final String RANGE="range";
+        //不为空
+        public static final String NOT_EMPTY="notempty";
+        //空
+        public static final String EMPTY="empty";
 
     }
 }
