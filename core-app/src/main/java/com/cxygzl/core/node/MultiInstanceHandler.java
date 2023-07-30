@@ -183,7 +183,7 @@ public class MultiInstanceHandler {
         log.debug("当前节点完成实例数：{}  总实例数:{} 需要完成比例:{}", nrOfCompletedInstances, nrOfInstances, modePercentage);
 
 
-        Object result = execution.getVariable(StrUtil.format("{}_approve_condition", nodeId));
+        Object result = execution.getVariable(StrUtil.format("{}_approve_condition", node.getId()));
         entity.setVariableLocal("approveResult", result);
         log.debug("当前节点审批结果：{}", result);
         Boolean approve = Convert.toBool(result);
@@ -243,13 +243,15 @@ public class MultiInstanceHandler {
             } else {
                 //如果剩余的数量不可能达到比例 也结束了
                 if (Convert.toBigDecimal((nrOfInstances - nrOfCompletedInstances + anInt) * 100).compareTo(Convert.toBigDecimal(nrOfInstances).multiply(modePercentage)) < 0) {
-                    ((ExecutionEntityImpl) execution).setVariable(StrUtil.format("{}_approve_condition", nodeId), false);
+                    ((ExecutionEntityImpl) execution).setVariable(StrUtil.format("{}_approve_condition", node.getId()),
+                            false);
                     return true;
                 }
 
                 if (nrOfCompletedInstances == nrOfInstances) {
                     //未满足条件
-                    ((ExecutionEntityImpl) execution).setVariable(StrUtil.format("{}_approve_condition", nodeId), false);
+                    ((ExecutionEntityImpl) execution).setVariable(StrUtil.format("{}_approve_condition", node.getId()),
+                            false);
                     return true;
                 }
 

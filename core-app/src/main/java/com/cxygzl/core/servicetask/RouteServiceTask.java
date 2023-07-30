@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -52,10 +53,20 @@ public class RouteServiceTask implements JavaDelegate {
 
         if (index < list.size()) {
             Node routeNode = list.get(index);
+
+
+            //判断发起人
+            String targetKey = routeNode.getNodeId();
+            if(StrUtil.equals(targetKey, ProcessInstanceConstant.VariableKey.STARTER)){
+                targetKey=StrUtil.format("{}_user_task", targetKey);
+                runtimeService.setVariable(execution.getId(),
+                        ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE,true);
+            }
+
             //跳转
             runtimeService.createChangeActivityStateBuilder()
                     .processInstanceId(processInstanceId)
-                    .moveActivityIdTo(nodeIdO, routeNode.getNodeId())
+                    .moveActivityIdTo(nodeIdO, targetKey)
                     .changeState();
         }
 
