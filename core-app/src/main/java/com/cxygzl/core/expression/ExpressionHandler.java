@@ -12,6 +12,7 @@ import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.dto.flow.SelectValue;
 import com.cxygzl.core.utils.CoreHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.core.Configuration;
@@ -196,13 +197,13 @@ public class ExpressionHandler {
     }
 
     /**
-     * 判断字符数组包含
+     * 单选处理
      *
      * @param key   表单key
      * @param array 条件值
      * @return
      */
-    public boolean stringArrayContain(String key, DelegateExecution execution, String... array) {
+    public boolean singleSelectHandler(String key, DelegateExecution execution, String... array) {
         Object value = execution.getVariable(key);
 
         log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
@@ -210,7 +211,11 @@ public class ExpressionHandler {
         if (value == null) {
             return false;
         }
-        return ArrayUtil.contains(array, value.toString());
+        List<SelectValue> list = Convert.toList(SelectValue.class, value);
+        if(CollUtil.isEmpty(list)){
+            return false;
+        }
+        return ArrayUtil.contains(array, list.get(0).getKey());
     }
 
     /**

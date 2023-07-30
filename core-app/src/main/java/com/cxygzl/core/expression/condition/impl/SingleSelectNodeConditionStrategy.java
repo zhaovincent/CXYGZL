@@ -5,6 +5,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.flow.Condition;
+import com.cxygzl.common.dto.flow.SelectValue;
 import com.cxygzl.core.expression.condition.NodeConditionStrategy;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
@@ -27,23 +28,23 @@ public class SingleSelectNodeConditionStrategy implements NodeConditionStrategy,
         String id = condition.getKey();
         Object value = condition.getValue();
 
-        List<?> list = Convert.toList(value);
+        List<SelectValue> list = Convert.toList(SelectValue.class,value);
 
 
         StringBuilder sb = new StringBuilder();
 
-        for (Object o : list) {
-            sb.append(",\"").append(o.toString()).append("\"");
+        for (SelectValue o : list) {
+            sb.append(",\"").append(o.getKey()).append("\"");
         }
         String string = sb.toString();
         if (CollUtil.isNotEmpty(list)) {
             string = string.substring(1);
         }
         if (compare.equals("in")) {
-            return StrUtil.format("(expressionHandler.stringArrayContain(\"{}\", execution,{}))", id, string);
+            return StrUtil.format("(expressionHandler.singleSelectHandler(\"{}\", execution,{}))", id, string);
         }
 
-        return StrUtil.format("(!expressionHandler.stringArrayContain(\"{}\", execution,{}))", id, string);
+        return StrUtil.format("(!expressionHandler.singleSelectHandler(\"{}\", execution,{}))", id, string);
 
 
     }

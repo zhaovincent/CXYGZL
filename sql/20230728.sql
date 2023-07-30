@@ -17,3 +17,40 @@ CREATE TABLE `message` (
                            PRIMARY KEY (`id`) USING BTREE,
                            KEY `idx_id` (`id`) USING BTREE
 ) ENGINE=InnoDB   DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='通知消息';
+
+
+-- 添加消息列表菜单
+INSERT INTO  `menu` (
+    `parent_id`,
+    `tree_path`,
+    `name`,
+    `type`,
+    `path`,
+    `component`,
+    `perm`,
+    `visible`,
+    `sort`,
+    `icon`,
+    `redirect`,
+    `create_time`,
+    `update_time`,
+    `del_flag`
+)
+VALUES
+    (
+        '1',
+        '0,1',
+        '消息列表',
+        '1',
+        'message',
+        'system/message/index',
+        NULL,
+        '1',
+        '1',
+        'message',
+        NULL,
+        '2023-07-25 20:37:35',
+        '2023-07-25 20:37:35',
+        '0'
+    );
+
