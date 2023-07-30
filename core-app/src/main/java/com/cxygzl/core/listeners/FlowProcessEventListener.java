@@ -275,7 +275,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
             String assignee = task.getAssignee();
 
             //nodeid
-            String taskDefinitionKey = task.getTaskDefinitionKey();
+            String nodeId = task.getTaskDefinitionKey();
 
             //实例id
             String processInstanceId = task.getProcessInstanceId();
@@ -288,12 +288,19 @@ public class FlowProcessEventListener implements FlowableEventListener {
             processNodeRecordAssignUserParamDto.setProcessInstanceId(processInstanceId);
             processNodeRecordAssignUserParamDto.setData(JSON.toJSONString(taskService.getVariables(task.getId())));
             processNodeRecordAssignUserParamDto.setLocalData(JSON.toJSONString(taskService.getVariablesLocal(task.getId())));
-            processNodeRecordAssignUserParamDto.setNodeId(taskDefinitionKey);
+            processNodeRecordAssignUserParamDto.setNodeId(nodeId);
             processNodeRecordAssignUserParamDto.setUserId((assignee));
             processNodeRecordAssignUserParamDto.setTaskId(task.getId());
             processNodeRecordAssignUserParamDto.setNodeName(task.getName());
-            processNodeRecordAssignUserParamDto.setTaskType("COMPLETE");
-            processNodeRecordAssignUserParamDto.setApproveDesc(Convert.toStr(task.getVariableLocal("approveDesc")));
+            processNodeRecordAssignUserParamDto.setTaskType(ProcessInstanceConstant.TaskType.PASS);
+
+            Object approveCondition = taskService.getVariable(task.getId(), StrUtil.format("{}_approve_condition",
+                    nodeId));
+            if(approveCondition!=null&&!Convert.toBool(approveCondition)){
+                processNodeRecordAssignUserParamDto.setTaskType(ProcessInstanceConstant.TaskType.REFUSE);
+            }
+
+            processNodeRecordAssignUserParamDto.setApproveDesc(Convert.toStr(task.getVariableLocal(ProcessInstanceConstant.VariableKey.APPROVE_DESC)));
             processNodeRecordAssignUserParamDto.setExecutionId(task.getExecutionId());
 
             CoreHttpUtil.taskEndEvent(processNodeRecordAssignUserParamDto);
@@ -329,7 +336,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
             processNodeRecordAssignUserParamDto.setTaskId(task.getId());
             processNodeRecordAssignUserParamDto.setNodeName(task.getName());
             processNodeRecordAssignUserParamDto.setTaskType(StrUtil.equals(DelegationState.PENDING.toString(), delegationStateString) ? "DELEGATION" : (StrUtil.equals(DelegationState.RESOLVED.toString(), delegationStateString) ? "RESOLVED" : ""));
-            processNodeRecordAssignUserParamDto.setApproveDesc(Convert.toStr(task.getVariableLocal("approveDesc")));
+            processNodeRecordAssignUserParamDto.setApproveDesc(Convert.toStr(task.getVariableLocal(ProcessInstanceConstant.VariableKey.APPROVE_DESC)));
             processNodeRecordAssignUserParamDto.setExecutionId(task.getExecutionId());
 
             CoreHttpUtil.startAssignUser(processNodeRecordAssignUserParamDto);

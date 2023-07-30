@@ -7,10 +7,12 @@ import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
 import com.cxygzl.biz.mapper.ProcessNodeRecordAssignUserMapper;
 import com.cxygzl.biz.service.IProcessNodeRecordAssignUserService;
+import com.cxygzl.biz.service.IProcessOperRecordService;
 import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
 import com.cxygzl.common.dto.R;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Date;
 
 /**
@@ -23,6 +25,11 @@ import java.util.Date;
  */
 @Service
 public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessNodeRecordAssignUserMapper, ProcessNodeRecordAssignUser> implements IProcessNodeRecordAssignUserService {
+
+
+    @Resource
+    private IProcessOperRecordService processOperRecordService;
+
     /**
      * 设置执行人
      *
@@ -76,8 +83,12 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
         processNodeRecordAssignUser.setEndTime(new Date());
         processNodeRecordAssignUser.setData(processNodeRecordAssignUserParamDto.getData());
         processNodeRecordAssignUser.setLocalData(processNodeRecordAssignUserParamDto.getLocalData());
-        processNodeRecordAssignUser.setTaskType("COMPLETE");
+        processNodeRecordAssignUser.setTaskType(processNodeRecordAssignUserParamDto.getTaskType());
         this.updateById(processNodeRecordAssignUser);
+
+
+        //记录日志
+        processOperRecordService.completeTask(processNodeRecordAssignUserParamDto);
         return R.success();
     }
 }

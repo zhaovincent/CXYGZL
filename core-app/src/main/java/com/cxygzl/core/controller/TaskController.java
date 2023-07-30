@@ -46,21 +46,21 @@ public class TaskController {
     private RuntimeService runtimeService;
 
 
-
     /**
      * 查询任务变量
+     *
      * @param paramDto
      * @return
      */
     @PostMapping("queryTaskVariables")
-    public R queryTaskVariables(@RequestBody VariableQueryParamDto paramDto){
+    public R queryTaskVariables(@RequestBody VariableQueryParamDto paramDto) {
 
         List<String> keyList = paramDto.getKeyList();
-        if(CollUtil.isEmpty(keyList)){
+        if (CollUtil.isEmpty(keyList)) {
             TaskQuery taskQuery = taskService.createTaskQuery();
 
             Task task = taskQuery.taskId(paramDto.getTaskId()).singleResult();
-            if(task==null){
+            if (task == null) {
                 return R.fail("任务不存在");
             }
 
@@ -75,7 +75,6 @@ public class TaskController {
     }
 
 
-
     /**
      * 查询任务
      *
@@ -85,21 +84,21 @@ public class TaskController {
     @GetMapping("queryTask")
     public R queryTask(String taskId, String userId) {
 
-        DelegationState delegationState =null;
+        DelegationState delegationState = null;
 
 
         //实例id
-        String processInstanceId =null;
+        String processInstanceId = null;
         Object delegateVariable = false;
 
 
         String processDefinitionId = null;
 
         //nodeid
-        String taskDefinitionKey =null;
-        String executionId =null;
+        String taskDefinitionKey = null;
+        String executionId = null;
 
-        boolean taskExist=true;
+        boolean taskExist = true;
 
         {
             TaskQuery taskQuery = taskService.createTaskQuery();
@@ -107,15 +106,15 @@ public class TaskController {
             Task task = taskQuery.taskId(taskId).taskAssignee(userId).singleResult();
             if (task == null) {
                 HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().taskId(taskId).taskAssignee(userId).singleResult();
-                if(historicTaskInstance==null){
+                if (historicTaskInstance == null) {
                     return R.fail("任务不存在");
                 }
-                taskExist=false;
-                taskDefinitionKey=historicTaskInstance.getTaskDefinitionKey();
-                processInstanceId=historicTaskInstance.getProcessInstanceId();
-                executionId=historicTaskInstance.getExecutionId();
+                taskExist = false;
+                taskDefinitionKey = historicTaskInstance.getTaskDefinitionKey();
+                processInstanceId = historicTaskInstance.getProcessInstanceId();
+                executionId = historicTaskInstance.getExecutionId();
                 processDefinitionId = historicTaskInstance.getProcessDefinitionId();
-            }  else{
+            } else {
                 processDefinitionId = task.getProcessDefinitionId();
                 taskDefinitionKey = task.getTaskDefinitionKey();
                 delegationState = task.getDelegationState();
@@ -128,25 +127,23 @@ public class TaskController {
         }
 
 
-
         //流程id
         String flowId = NodeUtil.getFlowId(processDefinitionId);
 
-        Map<String, Object> variableAll=new HashMap<>();
+        Map<String, Object> variableAll = new HashMap<>();
 
         //表单处理
 
 
-            if(taskExist){
+        if (taskExist) {
 
 
-                Map<String, Object> variables = taskService.getVariables(taskId);
-                variableAll.putAll(variables);
+            Map<String, Object> variables = taskService.getVariables(taskId);
+            variableAll.putAll(variables);
 
-            }else{
+        } else {
 
-            }
-
+        }
 
 
         TaskResultDto taskResultDto = new TaskResultDto();
@@ -154,10 +151,10 @@ public class TaskController {
         taskResultDto.setNodeId(taskDefinitionKey);
         taskResultDto.setCurrentTask(taskExist);
         taskResultDto.setExecutionId(executionId);
-        taskResultDto.setDelegate(Convert.toBool(delegateVariable,false));
+        taskResultDto.setDelegate(Convert.toBool(delegateVariable, false));
         taskResultDto.setVariableAll(variableAll);
         taskResultDto.setProcessInstanceId(processInstanceId);
-        taskResultDto.setDelegationState(delegationState==null?null:delegationState.toString());
+        taskResultDto.setDelegationState(delegationState == null ? null : delegationState.toString());
 
 
         return R.success(taskResultDto);
@@ -173,8 +170,10 @@ public class TaskController {
     @PostMapping("/complete")
     public R complete(@RequestBody TaskParamDto taskParamDto) {
         Map<String, Object> taskLocalParamMap = taskParamDto.getTaskLocalParamMap();
-        if(CollUtil.isNotEmpty(taskLocalParamMap)) {
+        if (CollUtil.isNotEmpty(taskLocalParamMap)) {
             taskService.setVariablesLocal(taskParamDto.getTaskId(), taskLocalParamMap);
+//            taskService.addComment(taskParamDto.getTaskId(),taskParamDto.getProcessInstanceId(),
+//                    ProcessInstanceConstant.VariableKey.APPROVE_DESC, MapUtil.getStr(taskLocalParamMap,"approveDesc"));
         }
 
         taskService.complete(taskParamDto.getTaskId(), taskParamDto.getParamMap());
@@ -184,15 +183,16 @@ public class TaskController {
 
     /**
      * 前加签
+     *
      * @param taskId
      * @param userId
      * @return
      */
     @PostMapping("delegateTask")
-    public R delegateTask(@RequestBody TaskParamDto taskParamDto){
+    public R delegateTask(@RequestBody TaskParamDto taskParamDto) {
 
         Map<String, Object> taskLocalParamMap = taskParamDto.getTaskLocalParamMap();
-        if(CollUtil.isNotEmpty(taskLocalParamMap)) {
+        if (CollUtil.isNotEmpty(taskLocalParamMap)) {
             taskService.setVariablesLocal(taskParamDto.getTaskId(), taskLocalParamMap);
         }
 //        taskService.setOwner(taskParamDto.getTaskId(), taskParamDto.getUserId());
@@ -203,13 +203,14 @@ public class TaskController {
 
     /**
      * 加签任务完成
+     *
      * @param taskParamDto
      * @return
      */
     @PostMapping("resolveTask")
-    public R resolveTask(@RequestBody TaskParamDto taskParamDto){
+    public R resolveTask(@RequestBody TaskParamDto taskParamDto) {
         Map<String, Object> taskLocalParamMap = taskParamDto.getTaskLocalParamMap();
-        if(CollUtil.isNotEmpty(taskLocalParamMap)) {
+        if (CollUtil.isNotEmpty(taskLocalParamMap)) {
             taskService.setVariablesLocal(taskParamDto.getTaskId(), taskLocalParamMap);
         }
 
@@ -219,13 +220,14 @@ public class TaskController {
 
     /**
      * 设置执行人 后加签
+     *
      * @param taskParamDto
      * @return
      */
     @PostMapping("setAssignee")
-    public R setAssignee(@RequestBody TaskParamDto taskParamDto){
+    public R setAssignee(@RequestBody TaskParamDto taskParamDto) {
         Map<String, Object> taskLocalParamMap = taskParamDto.getTaskLocalParamMap();
-        if(CollUtil.isNotEmpty(taskLocalParamMap)) {
+        if (CollUtil.isNotEmpty(taskLocalParamMap)) {
             taskService.setVariablesLocal(taskParamDto.getTaskId(), taskLocalParamMap);
         }
 
@@ -237,14 +239,14 @@ public class TaskController {
 
     /**
      * 退回
+     *
      * @param taskParamDto
      * @return
      */
     @PostMapping("back")
-    public R back(@RequestBody TaskParamDto taskParamDto){
+    public R back(@RequestBody TaskParamDto taskParamDto) {
         String taskId = taskParamDto.getTaskId();
         String targetKey = taskParamDto.getTargetNodeId();
-
 
 
         if (taskService.createTaskQuery().taskId(taskId).singleResult().isSuspended()) {
@@ -252,14 +254,13 @@ public class TaskController {
         }
 
 
-
         // 当前任务 task
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
 
-        if(StrUtil.equals(targetKey, ProcessInstanceConstant.VariableKey.STARTER)){
-            targetKey=StrUtil.format("{}_user_task", targetKey);
+        if (StrUtil.equals(targetKey, ProcessInstanceConstant.VariableKey.STARTER)) {
+            targetKey = StrUtil.format("{}_user_task", targetKey);
             runtimeService.setVariable(task.getExecutionId(),
-                    ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE,true);
+                    ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE, true);
         }
 
         runtimeService.createChangeActivityStateBuilder()
@@ -268,7 +269,6 @@ public class TaskController {
                 .changeState();
         return R.success();
     }
-
 
 
 }

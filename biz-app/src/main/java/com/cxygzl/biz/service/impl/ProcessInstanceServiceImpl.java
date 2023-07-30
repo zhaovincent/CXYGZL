@@ -194,18 +194,18 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
             }
             Object o = paramMap.get(id);
             if (o == null || StrUtil.isBlankIfStr(o)) {
-                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label",""));
+                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", ""));
                 continue;
             }
             //表单类型
             String type = formItemVO.getType();
             if (StrUtil.equals(type, FormTypeEnum.AREA.getType())) {
                 AreaFormValue areaFormValue = BeanUtil.copyProperties(o, AreaFormValue.class);
-                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label",areaFormValue.getName()));
+                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", areaFormValue.getName()));
 
             } else if (StrUtil.equalsAny(type, FormTypeEnum.SINGLE_SELECT.getType(), FormTypeEnum.MULTI_SELECT.getType())) {
                 List<SelectValue> selectValueList = BeanUtil.copyToList(Convert.toList(o), SelectValue.class);
-                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label",selectValueList.stream().map(w -> w.getValue()).collect(Collectors.joining(","))));
+                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", selectValueList.stream().map(w -> w.getValue()).collect(Collectors.joining(","))));
 
             } else if (StrUtil.equalsAny(type,
                     FormTypeEnum.SELECT_USER.getType(),
@@ -214,16 +214,16 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                     FormTypeEnum.SELECT_DEPT.getType()
             )) {
                 List<NodeUser> nodeUserList = BeanUtil.copyToList(Convert.toList(o), NodeUser.class);
-                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label",nodeUserList.stream().map(w -> w.getName()).collect(Collectors.joining(","))));
+                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", nodeUserList.stream().map(w -> w.getName()).collect(Collectors.joining(","))));
 
-            }  else if (StrUtil.equalsAny(type,
+            } else if (StrUtil.equalsAny(type,
                     FormTypeEnum.UPLOAD_FILE.getType(),
                     FormTypeEnum.UPLOAD_IMAGE.getType()
             )) {
                 List<UploadValue> uploadValueList = BeanUtil.copyToList(Convert.toList(o), UploadValue.class);
                 formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", uploadValueList.stream().map(w -> w.getName()).collect(Collectors.joining(","))));
 
-            }  else if (StrUtil.equalsAny(type,
+            } else if (StrUtil.equalsAny(type,
                     FormTypeEnum.LAYOUT.getType()
             )) {
                 //明细列表
@@ -231,7 +231,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
                 List<Object> valueList = Convert.toList(Object.class, o);
                 for (Object o1 : valueList) {
-                    buildFormValueShow(Convert.toMap(String.class,Object.class,o1),Convert.toList(FormItemVO.class,formItemListSub),formPermMap,formValueShowList);
+                    buildFormValueShow(Convert.toMap(String.class, Object.class, o1), Convert.toList(FormItemVO.class, formItemListSub), formPermMap, formValueShowList);
 
                 }
 
@@ -347,9 +347,9 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     public com.cxygzl.common.dto.R end(ProcessInstanceParamDto processInstanceParamDto) {
         processInstanceRecordService.lambdaUpdate()
                 .set(ProcessInstanceRecord::getEndTime, new Date())
-                .set(!processInstanceParamDto.getCancel(),ProcessInstanceRecord::getStatus,
+                .set(!processInstanceParamDto.getCancel(), ProcessInstanceRecord::getStatus,
                         NodeStatusEnum.YJS.getCode())
-                .set(processInstanceParamDto.getCancel(),ProcessInstanceRecord::getStatus, NodeStatusEnum.YCX.getCode())
+                .set(processInstanceParamDto.getCancel(), ProcessInstanceRecord::getStatus, NodeStatusEnum.YCX.getCode())
                 .eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceParamDto.getProcessInstanceId())
                 .update(new ProcessInstanceRecord());
         return com.cxygzl.common.dto.R.success();
@@ -372,7 +372,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 .page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()));
 
         List<ProcessInstanceRecord> records = instanceRecordPage.getRecords();
-        if(CollUtil.isEmpty(records)){
+        if (CollUtil.isEmpty(records)) {
             return com.cxygzl.common.dto.R.success(instanceRecordPage);
         }
 
@@ -479,6 +479,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
     /**
      * 获取列表 显示的表单数据 姓名：张三 格式
+     *
      * @param process
      * @param flowId
      * @param nodeId
@@ -551,7 +552,6 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
                 ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
                         .eq(ProcessNodeRecordAssignUser::getTaskId, nodeFormatParamVo.getTaskId())
-                        .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.YJS.getCode())
                         .last("limit 1")
                         .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
                         .one();
@@ -559,6 +559,9 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 String data = processNodeRecordAssignUser.getData();
                 Map<String, Object> variableMap = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
                 });
+                if (variableMap == null) {
+                    variableMap = new HashMap<>();
+                }
                 variableMap.putAll(paramMap);
                 paramMap.putAll(variableMap);
             } else {

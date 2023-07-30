@@ -9,7 +9,9 @@ import com.alibaba.fastjson2.JSON;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
-import com.cxygzl.biz.entity.*;
+import com.cxygzl.biz.entity.ProcessCopy;
+import com.cxygzl.biz.entity.ProcessGroup;
+import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.mapper.DeptMapper;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.DataUtil;
@@ -52,6 +54,8 @@ public class RemoteServiceImpl implements IRemoteService {
     private IProcessGroupService processGroupService;
     @Resource
     private IMessageService messageService;
+    @Resource
+    private IProcessOperRecordService processOperRecordService;
 
     /**
      * 保存待办任务
@@ -274,6 +278,10 @@ public class RemoteServiceImpl implements IRemoteService {
 
         processInstanceRecordService.save(entity);
 
+
+        //记录日志
+        processOperRecordService.startProcessInstance(processInstanceRecordParamDto);
+
         return R.success();
     }
 
@@ -285,7 +293,7 @@ public class RemoteServiceImpl implements IRemoteService {
      */
     @Override
     public R endNodeEvent(ProcessNodeRecordParamDto recordParamDto) {
-        return processNodeRecordService.complete(recordParamDto);
+        return processNodeRecordService.endNodeEvent(recordParamDto);
     }
 
     /**

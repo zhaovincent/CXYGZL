@@ -26,7 +26,7 @@ public interface IProcessNodeRecordService extends IService<ProcessNodeRecord> {
      * @param processNodeRecordParamDto
      * @return
      */
-    R complete(ProcessNodeRecordParamDto processNodeRecordParamDto);
+    R endNodeEvent(ProcessNodeRecordParamDto processNodeRecordParamDto);
 
 
 }

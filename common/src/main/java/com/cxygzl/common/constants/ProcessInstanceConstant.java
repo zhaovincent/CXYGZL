@@ -67,7 +67,19 @@ public class ProcessInstanceConstant {
         public static final String REJECT_TO_STARTER_NODE ="rootReject";
         //是否子流程发起人处理发起人数据
         public static final String SUB_PROCESS_STARTER_NODE ="subProcessStartHandle";
+        //审批描述
+        public static final String APPROVE_DESC ="approveDesc";
 
+    }
+
+    /**
+     * 任务类型
+     */
+    public static class TaskType{
+        //通过
+        public static final String PASS ="pass";
+        //拒绝
+        public static final String REFUSE="refuse";
     }
 
     /**

@@ -8,7 +8,6 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
-import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
@@ -80,7 +79,6 @@ public class TaskServiceImpl implements ITaskService {
                     .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
                     .eq(ProcessNodeRecordAssignUser::getUserId, userId)
                     .eq(ProcessNodeRecordAssignUser::getExecutionId, taskResultDto.getExecutionId())
-                    .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.YJS.getCode())
                     .last("limit 1")
                     .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
                     .one();
@@ -204,6 +202,7 @@ public class TaskServiceImpl implements ITaskService {
                 .set("nodeId", nodeId)
                 .set("taskExist", taskExist)
                 .set("processName", oaForms.getName())
+                .set("nodeName", node.getName())
                 .set("flowId", taskResultDto.getFlowId())
                 .set("process", oaForms.getProcess())
                 .set("delegateAgain", taskResultDto.getDelegate())

@@ -394,7 +394,7 @@ public class ModelUtil {
 
             Node rootUserTask = new Node();
             rootUserTask.setId(StrUtil.format("{}_user_task", node.getId()));
-            rootUserTask.setName("发起人用户任务");
+            rootUserTask.setName("发起人");
 
 
             UserTask userTask = buildUserTask(rootUserTask, createListener);
