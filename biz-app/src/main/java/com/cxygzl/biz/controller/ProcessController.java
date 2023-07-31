@@ -29,12 +29,12 @@ public class ProcessController {
     /**
      * 创建流程
      *
-     * @param process
+     * @param processVO
      * @return
      */
     @PostMapping("create")
-    public R create(@RequestBody Process process) {
-        return processService.create(process);
+    public R create(@RequestBody ProcessVO processVO) {
+        return processService.create(processVO);
     }
 
 

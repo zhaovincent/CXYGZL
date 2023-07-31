@@ -30,10 +30,11 @@ public interface IProcessService extends IService<Process> {
 
     /**
      * 创建流程
-     * @param process
+     *
+     * @param processVO
      * @return
      */
-    R create(Process process);
+    R create(ProcessVO processVO);
 
 
 

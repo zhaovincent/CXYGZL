@@ -30,6 +30,7 @@ import com.cxygzl.common.utils.NodeUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -97,6 +98,15 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         ProcessVO processVO = BeanUtil.copyProperties(oaForms, ProcessVO.class);
         processVO.setSelectUserNodeId(selectUserNodeId);
 
+        //发起人范围
+        List<ProcessStarter> processStarterList = processStarterService.lambdaQuery().eq(ProcessStarter::getProcessId, oaForms.getId()).list();
+        List<NodeUser> rangeList=new ArrayList<>();
+        for (ProcessStarter processStarter : processStarterList) {
+            NodeUser nodeUser= JSON.parseObject(processStarter.getData(),NodeUser.class);
+            rangeList.add(nodeUser);
+        }
+        processVO.setRangeList(rangeList);
+
         return processVO;
     }
 
@@ -119,18 +129,18 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
     /**
      * 创建流程
      *
-     * @param process
+     * @param processVO
      * @return
      */
     @Override
-    public R create(Process process) {
+    public R create(ProcessVO processVO) {
 
-        String processStr = process.getProcess();
+        String processStr = processVO.getProcess();
 
         Node node = JSON.parseObject(processStr, Node.class);
         NodeUtil.handleParentId(node,null);
-        NodeFormatUtil.handleStarterNode(node,JSON.parseArray(process.getFormItems(),FormItemVO.class));
-        NodeFormatUtil.handleApproveForm(node,JSON.parseArray(process.getFormItems(),FormItemVO.class));
+        NodeFormatUtil.handleStarterNode(node,JSON.parseArray(processVO.getFormItems(),FormItemVO.class));
+        NodeFormatUtil.handleApproveForm(node,JSON.parseArray(processVO.getFormItems(),FormItemVO.class));
 
         com.cxygzl.common.dto.R<String> r = CoreHttpUtil.createFlow(node, StpUtil.getLoginIdAsString());
         if (!r.isOk()) {
@@ -149,12 +159,12 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
 
 
-        NodeUser nodeUser = CommonUtil.toArray(process.getAdmin(), NodeUser.class).get(0);
+        NodeUser nodeUser = CommonUtil.toArray(processVO.getAdmin(), NodeUser.class).get(0);
 
-        if (StrUtil.isNotBlank(process.getFlowId())) {
+        if (StrUtil.isNotBlank(processVO.getFlowId())) {
 
-            Process oldProcess = this.getByFlowId(process.getFlowId());
-            this.hide(process.getFlowId());
+            Process oldProcess = this.getByFlowId(processVO.getFlowId());
+            this.hide(processVO.getFlowId());
             //修改所有的管理员
             this.lambdaUpdate().set(Process::getAdminId, nodeUser.getId()).eq(Process::getUniqueId,
                     oldProcess.getUniqueId()).update(new Process());
@@ -163,7 +173,8 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
 
 
-        List<NodeUser> nodeUserList = node.getNodeUserList();
+        //发起人范围
+        List<NodeUser> nodeUserList = processVO.getRangeList();
 
         StringBuilder stringBuilder=new StringBuilder("");
         if(CollUtil.isNotEmpty(nodeUserList)){
@@ -184,19 +195,19 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
         Process p = new Process();
         p.setFlowId(flowId);
-        p.setName(process.getName());
-        p.setLogo(process.getLogo());
-        p.setSettings(process.getSettings());
-        p.setGroupId(process.getGroupId());
-        p.setFormItems(process.getFormItems());
+        p.setName(processVO.getName());
+        p.setLogo(processVO.getLogo());
+        p.setSettings(processVO.getSettings());
+        p.setGroupId(processVO.getGroupId());
+        p.setFormItems(processVO.getFormItems());
         p.setProcess(JSON.toJSONString(node));
-        p.setRemark(process.getRemark());
+        p.setRemark(processVO.getRemark());
         p.setSort(0);
         p.setHidden(false);
         p.setStop(false);
         p.setAdminId(nodeUser.getId());
         p.setUniqueId(IdUtil.fastSimpleUUID());
-        p.setAdmin(process.getAdmin());
+        p.setAdmin(processVO.getAdmin());
         p.setRangeShow(stringBuilder.toString());
 
 
@@ -206,14 +217,17 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
         //保存范围
 
-        for (NodeUser nodeUserDto : nodeUserList) {
-            ProcessStarter processStarter = new ProcessStarter();
+        if(CollUtil.isNotEmpty(nodeUserList)) {
+            for (NodeUser nodeUserDto : nodeUserList) {
+                ProcessStarter processStarter = new ProcessStarter();
 
-            processStarter.setProcessId(p.getId());
-            processStarter.setTypeId((nodeUserDto.getId()));
-            processStarter.setType(nodeUserDto.getType());
-            processStarterService.save(processStarter);
+                processStarter.setProcessId(p.getId());
+                processStarter.setTypeId((nodeUserDto.getId()));
+                processStarter.setType(nodeUserDto.getType());
+                processStarter.setData(JSON.toJSONString(nodeUserDto));
+                processStarterService.save(processStarter);
 
+            }
         }
 
 

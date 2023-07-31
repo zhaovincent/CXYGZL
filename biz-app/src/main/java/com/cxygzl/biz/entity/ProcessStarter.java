@@ -38,4 +38,10 @@ public class ProcessStarter  extends BaseEntity {
      */
     @TableField("`process_id`")
     private Long processId;
+
+    /**
+     * 数据
+     */
+    @TableField("`data`")
+    private String data;
 }

@@ -1,6 +1,7 @@
 package com.cxygzl.core.node.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
@@ -17,6 +18,7 @@ import java.util.Map;
 
 /**
  * 连续多级主管
+ *
  * @author Huijun Zhao
  * @description
  * @date 2023-07-07 13:42
@@ -26,12 +28,12 @@ public class AssignUserLeaderTopStrategyImpl implements InitializingBean, Assign
     @Override
     public List<String> handle(Node node, NodeUser rootUser, Map<String, Object> variables) {
 
-        List<String> userIdList=new ArrayList<>();
+        List<String> userIdList = new ArrayList<>();
 
 
         //去获取主管
 
-        R<List<com.cxygzl.common.dto.third.DeptDto>> r  = CoreHttpUtil.queryParentDepListByUserId((rootUser.getId()));
+        R<List<com.cxygzl.common.dto.third.DeptDto>> r = CoreHttpUtil.queryParentDepListByUserId((rootUser.getId()));
 
         List<com.cxygzl.common.dto.third.DeptDto> deptDtoList = r.getData();
 
@@ -47,7 +49,10 @@ public class AssignUserLeaderTopStrategyImpl implements InitializingBean, Assign
                 if (level != null && level < index) {
                     break;
                 }
-                userIdList.add(String.valueOf(deptDto.getLeaderUserId()));
+                String leaderUserId = deptDto.getLeaderUserId();
+                if (StrUtil.isNotBlank(leaderUserId)) {
+                    userIdList.add(String.valueOf(leaderUserId));
+                }
                 index++;
             }
         }
