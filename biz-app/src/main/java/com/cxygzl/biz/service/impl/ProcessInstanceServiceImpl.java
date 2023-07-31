@@ -317,13 +317,16 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                         .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
                         .one();
 
-                String data = processNodeRecordAssignUser.getData();
-                if (StrUtil.isNotBlank(data)) {
-                    Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
-                    });
-                    paramMap.putAll(collect);
+                if(processNodeRecordAssignUser!=null){
+                    String data = processNodeRecordAssignUser.getData();
+                    if (StrUtil.isNotBlank(data)) {
+                        Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
+                        });
+                        paramMap.putAll(collect);
 
+                    }
                 }
+
             }
 
             //处理表单数据

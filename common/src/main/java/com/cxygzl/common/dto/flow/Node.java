@@ -70,6 +70,8 @@ public class Node {
 
     private Nobody nobody;
 
+    private SameAsStarter sameAsStarter;
+
     private Boolean mode;
     private Boolean groupRelationMode;
 

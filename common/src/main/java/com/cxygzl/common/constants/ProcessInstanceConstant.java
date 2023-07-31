@@ -83,6 +83,19 @@ public class ProcessInstanceConstant {
         //拒绝
         public static final String REFUSE="refuse";
     }
+    /**
+     * 用户任务---处理人和发起人一致
+     */
+    public static class UserTaskSameAsStarterHandler{
+        //通过
+        public static final String TO_PASS ="TO_PASS";
+        //继续处理
+        public static final String TO_CONTINUE ="TO_CONTINUE";
+        //部门负责人
+        public static final String TO_DEPT_LEADER="TO_DEPT_LEADER";
+        //流程管理员
+        public static final String TO_ADMIN="TO_ADMIN";
+    }
 
     /**
      * 表单权限

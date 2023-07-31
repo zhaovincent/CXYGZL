@@ -5,8 +5,12 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.dto.flow.SameAsStarter;
+import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.core.utils.CoreHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.delegate.DelegateExecution;
@@ -48,6 +52,7 @@ public class MultiInstanceHandler {
         //发起人
         Object rootUserObj = execution.getVariable(ProcessInstanceConstant.VariableKey.STARTER);
         NodeUser rootUser = JSON.parseArray(JSON.toJSONString(rootUserObj), NodeUser.class).get(0);
+        String rootUserId = rootUser.getId();
 
         //节点数据
         Node node = nodeDataStoreHandler.getNode(flowId, nodeId);
@@ -58,6 +63,43 @@ public class MultiInstanceHandler {
             Integer assignedType = node.getAssignedType();
 
             List<String> userIdList = AssignUserStrategyFactory.getStrategy(assignedType).handle(node, rootUser, variables);
+
+            //处理发起人和审批人一致的问题
+            SameAsStarter sameAsStarter = node.getSameAsStarter();
+            if (sameAsStarter != null && userIdList.contains(rootUserId)) {
+                String handler = sameAsStarter.getHandler();
+                if (StrUtil.equals(ProcessInstanceConstant.UserTaskSameAsStarterHandler.TO_PASS, handler)) {
+                    userIdList.remove(rootUserId);
+                } else if (StrUtil.equals(ProcessInstanceConstant.UserTaskSameAsStarterHandler.TO_ADMIN, handler)) {
+                    R<String> longR = CoreHttpUtil.queryProcessAdmin(flowId);
+                    String adminId = longR.getData();
+                    int index = userIdList.indexOf(rootUserId);
+                    userIdList.remove(rootUserId);
+                    userIdList.add(index, adminId);
+                } else if (StrUtil.equals(ProcessInstanceConstant.UserTaskSameAsStarterHandler.TO_DEPT_LEADER, handler)) {
+                    int index = userIdList.indexOf(rootUserId);
+                    userIdList.remove(rootUserId);
+
+
+                    {
+                        //去获取主管
+
+                        R<List<com.cxygzl.common.dto.third.DeptDto>> r = CoreHttpUtil.queryParentDepListByUserId(rootUserId);
+
+                        List<com.cxygzl.common.dto.third.DeptDto> deptDtoList = r.getData();
+                        if (CollUtil.isNotEmpty(deptDtoList)) {
+                            if (deptDtoList.size() >= 1) {
+                                DeptDto deptDto = deptDtoList.get(0);
+                                String leaderUserId = deptDto.getLeaderUserId();
+                                if (StrUtil.isNotBlank(leaderUserId)) {
+                                    userIdList.add(index, leaderUserId);
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
 
             assignList.addAll(userIdList);
 
