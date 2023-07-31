@@ -50,7 +50,7 @@ public class AssignUserLeaderTopStrategyImpl implements InitializingBean, Assign
                     break;
                 }
                 String leaderUserId = deptDto.getLeaderUserId();
-                if (StrUtil.isNotBlank(leaderUserId)) {
+                if (StrUtil.isNotBlank(leaderUserId) && !userIdList.contains(leaderUserId)) {
                     userIdList.add(String.valueOf(leaderUserId));
                 }
                 index++;
