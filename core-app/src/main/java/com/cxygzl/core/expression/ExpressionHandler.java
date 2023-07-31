@@ -29,6 +29,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -257,7 +258,7 @@ public class ExpressionHandler {
             return false;
         }
         List<SelectValue> list = Convert.toList(SelectValue.class, value);
-        return selectHandler(key, list.get(0).getKey(), paramList, symbol);
+        return selectHandler(key, list.stream().map(w -> w.getKey()).collect(Collectors.toList()), paramList, symbol);
     }
 
     public boolean selectHandler(String key, Object value, List<String> paramList, String symbol) {
@@ -281,11 +282,37 @@ public class ExpressionHandler {
             return false;
         }
 
+        List<String> valueList = Convert.toList(String.class, value);
+
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.IN)) {
-            return paramList.contains(value.toString());
+
+            List<String> intersection = valueList.stream().filter(item -> paramList.contains(item)).collect(Collectors.toList());
+
+
+            return intersection.size()==valueList.size();
         }
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_IN)) {
-            return !paramList.contains(value.toString());
+            List<String> intersection = valueList.stream().filter(item -> paramList.contains(item)).collect(Collectors.toList());
+            return intersection.size()<valueList.size();
+        }
+
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.CONTAIN)) {
+
+            List<String> intersection =
+                    paramList.stream().filter(item -> valueList.contains(item)).collect(Collectors.toList());
+
+
+            return intersection.size()==paramList.size();
+        }
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_IN)) {
+            List<String> intersection =
+                    paramList.stream().filter(item -> valueList.contains(item)).collect(Collectors.toList());
+            return intersection.size()<paramList.size();
+        }
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.INTERSECTION)) {
+            List<String> intersection =
+                    paramList.stream().filter(item -> valueList.contains(item)).collect(Collectors.toList());
+            return intersection.size()>0;
         }
         return false;
     }
@@ -482,32 +509,35 @@ public class ExpressionHandler {
         //查询变量属性
         List<UserFieldDto> userFieldDtoList = CoreHttpUtil.queryUseField().getData();
         UserFieldDto userFieldDto = userFieldDtoList.stream().filter(w -> StrUtil.equals(w.getKey(), userKey)).findFirst().get();
+        Object userValue = userInfo.get(userKey);
         if (StrUtil.equalsAny(userFieldDto.getType(), FormTypeEnum.INPUT.getType(), FormTypeEnum.TEXTAREA.getType())) {
-            return stringHandler(userKey, Convert.toStr(o), userInfo.get(userKey), symbol);
+            return stringHandler(userKey, Convert.toStr(o), userValue, symbol);
         }
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.NUMBER.getType())) {
-            return numberHandler(userKey, symbol, Convert.toStr(o), userInfo.get(userKey));
+            return numberHandler(userKey, symbol, Convert.toStr(o), userValue);
         }
 
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.DATE.getType())) {
-            return dateTimeHandler(userKey, symbol, Convert.toStr(o), userInfo.get(userKey), "yyyy-MM-dd");
+            return dateTimeHandler(userKey, symbol, Convert.toStr(o), userValue, "yyyy-MM-dd");
         }
 
 
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.DATE_TIME.getType())) {
-            return dateTimeHandler(userKey, symbol, Convert.toStr(o), userInfo.get(userKey), "yyyy-MM-dd HH:mm:ss");
+            return dateTimeHandler(userKey, symbol, Convert.toStr(o), userValue, "yyyy-MM-dd HH:mm:ss");
         }
 
 
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.TIME.getType())) {
-            return dateTimeHandler(userKey, symbol, Convert.toStr(o), userInfo.get(userKey), "HH-mm-ss");
+            return dateTimeHandler(userKey, symbol, Convert.toStr(o), userValue, "HH-mm-ss");
         }
 
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.SINGLE_SELECT.getType())) {
             List<SelectValue> selectValueList = BeanUtil.copyToList(Convert.toList(o), SelectValue.class);
 
-            return selectHandler(userKey, userInfo.get(userKey), CollUtil.isEmpty(selectValueList) ? null :
-                    selectValueList.stream().map(w -> w.getKey()).collect(Collectors.toList()), symbol);
+            return selectHandler(userKey, (userValue == null ||StrUtil.isBlankIfStr(userValue))? new ArrayList<>() :
+                            CollUtil.newArrayList(userValue),
+                    CollUtil.isEmpty(selectValueList) ? null :
+                            selectValueList.stream().map(w -> w.getKey()).collect(Collectors.toList()), symbol);
         }
 
 

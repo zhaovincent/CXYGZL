@@ -152,6 +152,8 @@ public class ProcessInstanceConstant {
         public static final String IN="in";
         //不存在于
         public static final String NOT_IN="notin";
+        //重合
+        public static final String INTERSECTION="intersection";
         //范围
         public static final String RANGE="range";
         //不为空
