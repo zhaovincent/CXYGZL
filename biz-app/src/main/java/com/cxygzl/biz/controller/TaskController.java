@@ -40,7 +40,7 @@ public class TaskController {
      */
     @SneakyThrows
     @PostMapping("completeTask")
-    public Object completeTask(@RequestBody TaskParamDto completeParamDto) {
+    public R completeTask(@RequestBody TaskParamDto completeParamDto) {
 
         return taskService.completeTask(completeParamDto);
 

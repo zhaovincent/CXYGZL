@@ -18,10 +18,11 @@ public interface ITaskService {
 
     /**
      * 完成任务
+     *
      * @param taskParamDto
      * @return
      */
-    Object completeTask(TaskParamDto taskParamDto);
+    R completeTask(TaskParamDto taskParamDto);
 
     /**
      * 前加签

@@ -1,5 +1,6 @@
 package com.cxygzl.core.listeners;
 
+import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
@@ -11,11 +12,12 @@ import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.CoreHttpUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.task.service.delegate.DelegateTask;
 import org.flowable.task.service.delegate.TaskListener;
 import org.flowable.task.service.impl.persistence.entity.TaskEntityImpl;
+
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_NODE_RESULT;
 
 /**
  * 审批节点
@@ -67,15 +69,13 @@ public class ApprovalCreateListener implements TaskListener {
 
                 taskService.setAssignee(taskEntity.getId(), nodeUser.getId());
             }
-            if (StrUtil.equals(handler, ProcessInstanceConstant.USER_TASK_NOBODY_HANDLER_TO_END)) {
-                //结束
+            if (StrUtil.equals(handler, ProcessInstanceConstant.USER_TASK_NOBODY_HANDLER_TO_REFUSE)) {
+                //自动拒绝
 
-                RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
+                Dict dict = Dict.create().set(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
+                        ProcessInstanceConstant.ApproveNodeResult.REFUSE);
+                taskService.complete(taskEntity.getId(),dict);
 
-                runtimeService.createChangeActivityStateBuilder()
-                        .processInstanceId(processInstanceId)
-                        .moveActivityIdTo(nodeId, ProcessInstanceConstant.VariableKey.END)
-                        .changeState();
 
             }
 

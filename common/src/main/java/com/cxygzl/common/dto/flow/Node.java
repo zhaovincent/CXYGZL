@@ -71,6 +71,7 @@ public class Node {
     private Nobody nobody;
 
     private SameAsStarter sameAsStarter;
+    private Refuse refuse;
 
     private Boolean mode;
     private Boolean groupRelationMode;

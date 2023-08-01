@@ -19,9 +19,9 @@ public class ProcessInstanceConstant {
      */
     public static final String USER_TASK_NOBODY_HANDLER_TO_USER ="TO_USER";
     /**
-     * 结束流程
+     * 自动拒绝
      */
-    public static final String USER_TASK_NOBODY_HANDLER_TO_END ="TO_END";
+    public static final String USER_TASK_NOBODY_HANDLER_TO_REFUSE ="TO_REFUSE";
 
     /**
      * 会签
@@ -73,8 +73,17 @@ public class ProcessInstanceConstant {
         public static final String APPROVE_DESC ="approveDesc";
         //审批结果 boolean
         public static final String APPROVE_RESULT ="approveResult";
-        public static final String APPROVE_OK_NUM ="approveOkNum";
 
+        public static final String APPROVE_NODE_RESULT ="approveNodeResult";
+
+    }
+
+    /**
+     * 节点审批结果
+     */
+    public static class ApproveNodeResult{
+        public static final int OK=1;
+        public static final int REFUSE=2;
     }
 
     /**
@@ -98,6 +107,16 @@ public class ProcessInstanceConstant {
         public static final String TO_DEPT_LEADER="TO_DEPT_LEADER";
         //流程管理员
         public static final String TO_ADMIN="TO_ADMIN";
+    }
+    /**
+     * 用户任务---用户拒绝
+     */
+    public static class UserTaskRefuseHandler{
+        //结束
+        public static final String TO_END ="TO_END";
+        //驳回节点
+        public static final String TO_NODE ="TO_NODE";
+
     }
 
     /**

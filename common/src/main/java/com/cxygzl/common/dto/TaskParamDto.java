@@ -14,6 +14,8 @@ public class TaskParamDto {
 
 
     private String processInstanceId;
+    private Boolean approveResult;
+    private String approveDesc;
     private List<String> processInstanceIdList;
 
     /**

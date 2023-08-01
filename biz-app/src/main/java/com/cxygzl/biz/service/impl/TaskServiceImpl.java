@@ -228,7 +228,7 @@ public class TaskServiceImpl implements ITaskService {
      * @return
      */
     @Override
-    public Object completeTask(TaskParamDto taskParamDto) {
+    public R completeTask(TaskParamDto taskParamDto) {
         String userId = StpUtil.getLoginIdAsString();
         taskParamDto.setUserId(String.valueOf(userId));
 

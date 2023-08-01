@@ -142,6 +142,8 @@ public class FlowProcessEventListener implements FlowableEventListener {
             processNodeRecordParamDto.setNodeName(activityName);
 
             CoreHttpUtil.endNodeEvent(processNodeRecordParamDto);
+
+
         }
         if (event.getType().toString().equals(FlowableEngineEventType.ACTIVITY_COMPLETED.toString())) {
             //节点完成执行
@@ -150,7 +152,6 @@ public class FlowProcessEventListener implements FlowableEventListener {
             String activityId = flowableActivityEvent.getActivityId();
             String activityName = flowableActivityEvent.getActivityName();
             log.debug("节点id：{} 名字:{}", activityId, activityName);
-
 
             String processInstanceId = flowableActivityEvent.getProcessInstanceId();
 
