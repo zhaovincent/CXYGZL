@@ -71,6 +71,9 @@ public class ProcessInstanceConstant {
         public static final String SUB_PROCESS_STARTER_NODE ="subProcessStartHandle";
         //审批描述
         public static final String APPROVE_DESC ="approveDesc";
+        //审批结果 boolean
+        public static final String APPROVE_RESULT ="approveResult";
+        public static final String APPROVE_OK_NUM ="approveOkNum";
 
     }
 

@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_OK_NUM;
+
 @Component("multiInstanceHandler")
 @Slf4j
 public class MultiInstanceHandler {
@@ -205,6 +207,7 @@ public class MultiInstanceHandler {
         String processDefinitionKey = entity.getProcessDefinitionKey();
 
 
+
         String nodeId = execution.getCurrentActivityId();
 
         Node node = NodeDataStoreFactory.getInstance().getNode(processDefinitionKey, nodeId);
@@ -225,18 +228,18 @@ public class MultiInstanceHandler {
         log.debug("当前节点完成实例数：{}  总实例数:{} 需要完成比例:{}", nrOfCompletedInstances, nrOfInstances, modePercentage);
 
 
-        Object result = execution.getVariable(StrUtil.format("{}_approve_condition", node.getId()));
-        entity.setVariableLocal("approveResult", result);
+        Object result = execution.getVariable(ProcessInstanceConstant.VariableKey.APPROVE_RESULT);
+
         log.debug("当前节点审批结果：{}", result);
-        Boolean approve = Convert.toBool(result);
+        Boolean approve = Convert.toBool(result,true);
         if (approve) {
 
-            Object okNum = execution.getVariableLocal("okNum");
+            Object okNum = execution.getVariableLocal(APPROVE_OK_NUM);
             Integer num = Convert.toInt(okNum, 0);
             num++;
 
             if (num <= nrOfCompletedInstances) {
-                ((ExecutionEntityImpl) execution).setVariableLocal("okNum", num);
+                ((ExecutionEntityImpl) execution).setVariableLocal(APPROVE_OK_NUM, num);
 
             }
 
@@ -275,7 +278,7 @@ public class MultiInstanceHandler {
 
         ) {
 
-            Object okNum = execution.getVariableLocal("okNum");
+            Object okNum = execution.getVariableLocal(APPROVE_OK_NUM);
             Integer anInt = Convert.toInt(okNum, 0);
             log.info("节点:{}  成功的数量:{}", execution.getId(), anInt);
 
@@ -285,15 +288,15 @@ public class MultiInstanceHandler {
             } else {
                 //如果剩余的数量不可能达到比例 也结束了
                 if (Convert.toBigDecimal((nrOfInstances - nrOfCompletedInstances + anInt) * 100).compareTo(Convert.toBigDecimal(nrOfInstances).multiply(modePercentage)) < 0) {
-                    ((ExecutionEntityImpl) execution).setVariable(StrUtil.format("{}_approve_condition", node.getId()),
-                            false);
+
+
+
                     return true;
                 }
 
                 if (nrOfCompletedInstances == nrOfInstances) {
                     //未满足条件
-                    ((ExecutionEntityImpl) execution).setVariable(StrUtil.format("{}_approve_condition", node.getId()),
-                            false);
+
                     return true;
                 }
 

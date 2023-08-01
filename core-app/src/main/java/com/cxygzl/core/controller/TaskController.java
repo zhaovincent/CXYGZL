@@ -170,8 +170,10 @@ public class TaskController {
     @PostMapping("/complete")
     public R complete(@RequestBody TaskParamDto taskParamDto) {
         Map<String, Object> taskLocalParamMap = taskParamDto.getTaskLocalParamMap();
+        taskLocalParamMap.put(ProcessInstanceConstant.VariableKey.APPROVE_RESULT,taskParamDto.getParamMap().get(ProcessInstanceConstant.VariableKey.APPROVE_RESULT));
         if (CollUtil.isNotEmpty(taskLocalParamMap)) {
             taskService.setVariablesLocal(taskParamDto.getTaskId(), taskLocalParamMap);
+//            taskService.setVariablesLocal(ProcessInstanceConstant.VariableKey.APPROVE_RESULT, taskLocalParamMap);
 //            taskService.addComment(taskParamDto.getTaskId(),taskParamDto.getProcessInstanceId(),
 //                    ProcessInstanceConstant.VariableKey.APPROVE_DESC, MapUtil.getStr(taskLocalParamMap,"approveDesc"));
         }

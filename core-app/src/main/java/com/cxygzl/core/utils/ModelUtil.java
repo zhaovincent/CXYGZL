@@ -12,10 +12,7 @@ import com.cxygzl.common.dto.flow.HttpSettingData;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.expression.condition.NodeExpressionStrategyFactory;
-import com.cxygzl.core.listeners.ApprovalCreateListener;
-import com.cxygzl.core.listeners.FlowProcessEventListener;
-import com.cxygzl.core.listeners.RouteMergeGatewayListener;
-import com.cxygzl.core.listeners.StarterUserTaskCreateListener;
+import com.cxygzl.core.listeners.*;
 import com.cxygzl.core.node.INodeDataStoreHandler;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.servicetask.CopyServiceTask;
@@ -445,7 +442,7 @@ public class ModelUtil {
         List<FlowElement> flowElementList = new ArrayList<>();
 
 
-        node.setTailId(StrUtil.format("approve_gateway_{}", node.getId()));
+       // node.setTailId(StrUtil.format("approve_gateway_{}", node.getId()));
 
 
         //创建了任务执行监听器
@@ -456,21 +453,15 @@ public class ModelUtil {
         createListener.setImplementationType("class");
         createListener.setEvent("create");
 
+        FlowableListener endListener = new FlowableListener();
+        endListener.setImplementation(ApprovalEndListener.class.getCanonicalName());
+        endListener.setImplementationType("class");
+        endListener.setEvent("end");
 
-        UserTask userTask = buildUserTask(node, createListener);
+
+        UserTask userTask = buildUserTask(node, createListener,endListener);
         flowElementList.add(userTask);
 
-        Node exclusiveNode = new Node();
-        exclusiveNode.setId(StrUtil.format("approve_gateway_{}", node.getId()));
-        exclusiveNode.setName("审批-排他网关");
-        flowElementList.add(buildSimpleExclusiveGatewayNode(exclusiveNode));
-        //创建结束节点
-
-        Node endNode = new Node();
-        endNode.setId(StrUtil.format("approve_end_{}", node.getId()));
-        endNode.setName("审批-结束节点");
-        EndEvent endEvent = buildEndNode(endNode, false);
-        flowElementList.add(endEvent);
 
 
         {
@@ -1088,24 +1079,7 @@ public class ModelUtil {
         }
 
 
-        if (node.getType() == NodeTypeEnum.APPROVAL.getValue().intValue()) {
 
-
-            String gatewayId = StrUtil.format("approve_gateway_{}", nodeId);
-            String endId = StrUtil.format("approve_end_{}", nodeId);
-
-            {
-                SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeId, gatewayId, "${12==12}", null);
-                sequenceFlowList.add(sequenceFlow);
-            }
-
-            {
-                SequenceFlow sequenceFlow = buildSingleSequenceFlow(gatewayId, endId, StrUtil.format("${!" +
-                        "{}_approve_condition}", nodeId), null);
-                sequenceFlowList.add(sequenceFlow);
-            }
-
-        }
 
         if (node.getType() == NodeTypeEnum.ROOT.getValue().intValue()) {
 

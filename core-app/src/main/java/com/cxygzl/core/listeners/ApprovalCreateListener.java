@@ -1,6 +1,5 @@
 package com.cxygzl.core.listeners;
 
-import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
@@ -12,6 +11,7 @@ import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.CoreHttpUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.task.service.delegate.DelegateTask;
 import org.flowable.task.service.delegate.TaskListener;
@@ -46,8 +46,8 @@ public class ApprovalCreateListener implements TaskListener {
             String handler = nobody.getHandler();
             if (StrUtil.equals(handler, ProcessInstanceConstant.USER_TASK_NOBODY_HANDLER_TO_PASS)) {
                 //直接通过
-                Dict param = Dict.create().set(StrUtil.format("{}_approve_condition", nodeId), true);
-                taskService.complete(taskEntity.getId(), param);
+
+                taskService.complete(taskEntity.getId());
             }
             if (StrUtil.equals(handler, ProcessInstanceConstant.USER_TASK_NOBODY_HANDLER_TO_ADMIN)) {
                 //指派给管理员
@@ -69,8 +69,13 @@ public class ApprovalCreateListener implements TaskListener {
             }
             if (StrUtil.equals(handler, ProcessInstanceConstant.USER_TASK_NOBODY_HANDLER_TO_END)) {
                 //结束
-                Dict param = Dict.create().set(StrUtil.format("{}_approve_condition", nodeId), false);
-                taskService.complete(taskEntity.getId(), param);
+
+                RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
+
+                runtimeService.createChangeActivityStateBuilder()
+                        .processInstanceId(processInstanceId)
+                        .moveActivityIdTo(nodeId, ProcessInstanceConstant.VariableKey.END)
+                        .changeState();
 
             }
 

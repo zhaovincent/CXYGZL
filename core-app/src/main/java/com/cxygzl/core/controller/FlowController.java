@@ -286,11 +286,8 @@ public class FlowController {
                     processInstanceId, task.getExecutionId());
 
             Map<String, Object> taskServiceVariables = taskService.getVariables(task.getId());
-            Map<String, Object> runtimeServiceVariables = runtimeService.getVariables(task.getProcessInstanceId());
-            Map<String, Object> variables = runtimeService.getVariables(task.getExecutionId());
             log.debug("任务变量:{}", JSONUtil.toJsonStr(taskServiceVariables));
-            log.debug("流程节点:{}", JSONUtil.toJsonStr(runtimeServiceVariables));
-            log.debug("执行节点变量:{}", JSONUtil.toJsonStr(variables));
+
 
             //nodeid
             String taskDefinitionKey = task.getTaskDefinitionKey();

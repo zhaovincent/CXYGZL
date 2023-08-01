@@ -182,9 +182,9 @@ public class FlowProcessEventListener implements FlowableEventListener {
 
             ProcessInstanceParamDto processInstanceParamDto = new ProcessInstanceParamDto();
             processInstanceParamDto.setProcessInstanceId(processInstanceId);
-            processInstanceParamDto.setCancel( MapUtil.getBool(variables,
+            processInstanceParamDto.setCancel(MapUtil.getBool(variables,
                     ProcessInstanceConstant.VariableKey.CANCEL
-                    ,false));
+                    , false));
             CoreHttpUtil.endProcessEvent(processInstanceParamDto);
             {
                 String flowId = entity.getProcessDefinitionKey();
@@ -206,7 +206,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
                                         Object object = variables.get(httpSettingData.getValue());
 
 
-                                        headerParamMap.put(httpSettingData.getField(),object==null?null:( object instanceof String ? Convert.toStr(object) : JSON.toJSONString(object)));
+                                        headerParamMap.put(httpSettingData.getField(), object == null ? null : (object instanceof String ? Convert.toStr(object) : JSON.toJSONString(object)));
 
                                     }
                                 }
@@ -220,7 +220,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
                                 bodyMap.put("flowId", flowId);
                                 bodyMap.put("cancel", MapUtil.getBool(variables,
                                         ProcessInstanceConstant.VariableKey.CANCEL
-                                        ,false));
+                                        , false));
                                 bodyMap.put("processInstanceId", processInstanceId);
                                 List<HttpSettingData> bodySetting = backNotify.getBody();
                                 for (HttpSettingData httpSettingData : bodySetting) {
@@ -243,9 +243,9 @@ public class FlowProcessEventListener implements FlowableEventListener {
                                         .body(JSON.toJSONString(bodyMap))
                                         .timeout(10000)//超时，毫秒
                                         .execute().body();
-                                log.info(" 返回值:{}",  result);
+                                log.info(" 返回值:{}", result);
                             } catch (Exception ex) {
-                                log.error("后置事件异常",e);
+                                log.error("后置事件异常", e);
                             }
 
                             if (StrUtil.isNotBlank(result)) {
@@ -294,9 +294,8 @@ public class FlowProcessEventListener implements FlowableEventListener {
             processNodeRecordAssignUserParamDto.setNodeName(task.getName());
             processNodeRecordAssignUserParamDto.setTaskType(ProcessInstanceConstant.TaskType.PASS);
 
-            Object approveCondition = taskService.getVariable(task.getId(), StrUtil.format("{}_approve_condition",
-                    nodeId));
-            if(approveCondition!=null&&!Convert.toBool(approveCondition)){
+            Object approveResult = task.getVariableLocal(ProcessInstanceConstant.VariableKey.APPROVE_RESULT);
+            if (approveResult != null && !Convert.toBool(approveResult)) {
                 processNodeRecordAssignUserParamDto.setTaskType(ProcessInstanceConstant.TaskType.REFUSE);
             }
 
@@ -387,7 +386,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
                                     headerParamMap.put(httpSettingData.getField(), httpSettingData.getValue());
                                 } else {
                                     Object object = variables.get(httpSettingData.getValue());
-                                    headerParamMap.put(httpSettingData.getField(),object==null?null:( object instanceof String ? Convert.toStr(object) : JSON.toJSONString(object)));
+                                    headerParamMap.put(httpSettingData.getField(), object == null ? null : (object instanceof String ? Convert.toStr(object) : JSON.toJSONString(object)));
                                 }
                             }
 
@@ -420,9 +419,9 @@ public class FlowProcessEventListener implements FlowableEventListener {
                                     .body(JSON.toJSONString(bodyMap))
                                     .timeout(10000)//超时，毫秒
                                     .execute().body();
-                            log.info("  返回值:{}",   result);
+                            log.info("  返回值:{}", result);
                         } catch (Exception e) {
-                           log.error("前置事件异常",e);
+                            log.error("前置事件异常", e);
                         }
 
                         if (StrUtil.isNotBlank(result)) {
