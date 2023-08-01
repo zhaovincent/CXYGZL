@@ -7,6 +7,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.EscapeUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.FormTypeEnum;
@@ -18,15 +19,11 @@ import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.flow.SelectValue;
 import com.cxygzl.common.dto.third.UserFieldDto;
 import com.cxygzl.common.utils.AreaUtil;
+import com.cxygzl.core.cmd.ExpressCmd;
 import com.cxygzl.core.utils.CoreHttpUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.flowable.engine.ManagementService;
 import org.flowable.engine.delegate.DelegateExecution;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.common.TemplateParserContext;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -84,7 +81,7 @@ public class ExpressionHandler {
         long paramTime = DateUtil.parse(param.toString(), format).getTime();
 
 
-        return compare(StrUtil.format("#{#key{}{}}", symbol, paramTime), Dict.create().set("key", valueTime));
+        return compare(StrUtil.format("${key{}{}}", symbol, paramTime), Dict.create().set("key", valueTime));
     }
 
     /**
@@ -207,27 +204,18 @@ public class ExpressionHandler {
         }
 
 
-        return compare(StrUtil.format("#{#key{}{}}", symbol, param), Dict.create().set("key", Convert.toNumber(value)));
+        return compare(StrUtil.format("${key{}{}}", symbol, param), Dict.create().set("key", Convert.toNumber(value)));
 
     }
 
+
     private Boolean compare(String symbol, Dict value) {
-        //获取模板
+        ManagementService managementService = SpringUtil.getBean(ManagementService.class);
 
 
-        ExpressionParser paser = new SpelExpressionParser();//创建表达式解析器
+        Object result = managementService.executeCommand(new ExpressCmd(symbol, value));
 
-        //通过evaluationContext.setVariable可以在上下文中设定变量。
-        EvaluationContext context = new StandardEvaluationContext();
-        for (Map.Entry<String, Object> entry : value.entrySet()) {
-            context.setVariable(entry.getKey(), entry.getValue());
-        }
-
-        //解析表达式，如果表达式是一个模板表达式，需要为解析传入模板解析器上下文。
-        Expression expression = paser.parseExpression(symbol, new TemplateParserContext());
-
-        //使用Expression.getValue()获取表达式的值，这里传入了Evalution上下文，第二个参数是类型参数，表示返回值的类型。
-        return expression.getValue(context, boolean.class);
+        return Convert.toBool(result);
     }
 
 
