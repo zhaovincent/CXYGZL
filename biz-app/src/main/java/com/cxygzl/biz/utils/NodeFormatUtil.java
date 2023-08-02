@@ -8,11 +8,9 @@ import com.alibaba.fastjson2.JSON;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
+import com.cxygzl.biz.entity.ProcessNodeRecordApproveDesc;
 import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
-import com.cxygzl.biz.service.IProcessInstanceRecordService;
-import com.cxygzl.biz.service.IProcessNodeRecordAssignUserService;
-import com.cxygzl.biz.service.IRemoteService;
-import com.cxygzl.biz.service.IUserService;
+import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.vo.FormItemVO;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.biz.vo.node.UserVo;
@@ -136,6 +134,7 @@ public class NodeFormatUtil {
 
         }
 
+        IProcessNodeRecordApproveDescService processNodeRecordApproveDescService = SpringUtil.getBean(IProcessNodeRecordApproveDescService.class);
 
         List<UserVo> userVoList = new ArrayList<>();
         if (type == NodeTypeEnum.APPROVAL.getValue().intValue()) {
@@ -162,9 +161,14 @@ public class NodeFormatUtil {
                 for (Map.Entry<String, List<ProcessNodeRecordAssignUser>> entry : map.entrySet()) {
                     List<ProcessNodeRecordAssignUser> value = entry.getValue();
                     List<UserVo> collect = value.stream().filter(w->!ProcessInstanceConstant.DEFAULT_EMPTY_ASSIGN.equals(w.getUserId())).map(w -> {
+
+                        List<ProcessNodeRecordApproveDesc> approveDescList = processNodeRecordApproveDescService.lambdaQuery()
+                                .eq(ProcessNodeRecordApproveDesc::getExecutionId, w.getExecutionId())
+                                .eq(ProcessNodeRecordApproveDesc::getUserId, w.getUserId()).list();
+
                         UserVo userVo = buildUser((w.getUserId()));
                         userVo.setShowTime(w.getEndTime());
-                        userVo.setApproveDesc(w.getApproveDesc());
+                        userVo.setApproveDesc(approveDescList.isEmpty()?"":approveDescList.get(0).getApproveDesc());
                         userVo.setStatus(w.getStatus());
                         userVo.setOperType(w.getTaskType());
                         return userVo;
