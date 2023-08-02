@@ -179,12 +179,6 @@ public class MultiInstanceHandler {
         List<String> assignList = new ArrayList<>();
 
 
-        Object reject = execution.getVariable(ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE);
-        Object subProcess = execution.getVariable(ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE);
-        if (reject == null && subProcess == null) {
-            return assignList;
-        }
-
 
         //发起人
         Object rootUserObj = execution.getVariable(ProcessInstanceConstant.VariableKey.STARTER);

@@ -38,6 +38,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.ENABLE_SKIP_EXPRESSION;
+
 /**
  * 工作流控制器
  * 负责流程创建编辑发起等功能
@@ -89,8 +91,11 @@ public class FlowController {
     @PostMapping("/start")
     public R start(@RequestBody ProcessInstanceParamDto processInstanceParamDto) {
         Authentication.setAuthenticatedUserId(processInstanceParamDto.getStartUserId());
+        Map<String, Object> paramMap = processInstanceParamDto.getParamMap();
+        //支持自动跳过
+        paramMap.put(ENABLE_SKIP_EXPRESSION,true);
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(processInstanceParamDto.getFlowId(),
-                processInstanceParamDto.getParamMap());
+                paramMap);
 
         String processInstanceId = processInstance.getProcessInstanceId();
         return R.success(processInstanceId);

@@ -69,6 +69,8 @@ public class ProcessInstanceConstant {
         public static final String REJECT_TO_STARTER_NODE ="rootReject";
         //是否子流程发起人处理发起人数据
         public static final String SUB_PROCESS_STARTER_NODE ="subProcessStartHandle";
+        // 支持自动跳过
+        public static final String ENABLE_SKIP_EXPRESSION ="_ACTIVITI_SKIP_EXPRESSION_ENABLED";
         //审批描述
         public static final String APPROVE_DESC ="approveDesc";
         //审批结果 boolean

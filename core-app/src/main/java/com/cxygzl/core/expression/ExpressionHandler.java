@@ -2,6 +2,7 @@ package com.cxygzl.core.expression;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
@@ -277,11 +278,11 @@ public class ExpressionHandler {
             List<String> intersection = valueList.stream().filter(item -> paramList.contains(item)).collect(Collectors.toList());
 
 
-            return intersection.size()==valueList.size();
+            return intersection.size() == valueList.size();
         }
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_IN)) {
             List<String> intersection = valueList.stream().filter(item -> paramList.contains(item)).collect(Collectors.toList());
-            return intersection.size()<valueList.size();
+            return intersection.size() < valueList.size();
         }
 
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.CONTAIN)) {
@@ -290,17 +291,17 @@ public class ExpressionHandler {
                     paramList.stream().filter(item -> valueList.contains(item)).collect(Collectors.toList());
 
 
-            return intersection.size()==paramList.size();
+            return intersection.size() == paramList.size();
         }
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_IN)) {
             List<String> intersection =
                     paramList.stream().filter(item -> valueList.contains(item)).collect(Collectors.toList());
-            return intersection.size()<paramList.size();
+            return intersection.size() < paramList.size();
         }
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.INTERSECTION)) {
             List<String> intersection =
                     paramList.stream().filter(item -> valueList.contains(item)).collect(Collectors.toList());
-            return intersection.size()>0;
+            return intersection.size() > 0;
         }
         return false;
     }
@@ -316,6 +317,24 @@ public class ExpressionHandler {
 
         return stringHandler(key, param, execution.getVariable(key), symbol);
 
+    }
+
+    /**
+     * 判断所有的变量是否为null
+     *
+     * @param execution
+     * @param keyArr
+     * @return
+     */
+    public boolean isAllNull(DelegateExecution execution, String... keyArr) {
+        Map<String, Object> variables = execution.getVariables(ListUtil.of(keyArr));
+        for (String s : keyArr) {
+            Object o = variables.get(s);
+            if (o != null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean stringHandler(String key, String param, Object value, String symbol) {
@@ -522,7 +541,7 @@ public class ExpressionHandler {
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.SINGLE_SELECT.getType())) {
             List<SelectValue> selectValueList = BeanUtil.copyToList(Convert.toList(o), SelectValue.class);
 
-            return selectHandler(userKey, (userValue == null ||StrUtil.isBlankIfStr(userValue))? new ArrayList<>() :
+            return selectHandler(userKey, (userValue == null || StrUtil.isBlankIfStr(userValue)) ? new ArrayList<>() :
                             CollUtil.newArrayList(userValue),
                     CollUtil.isEmpty(selectValueList) ? null :
                             selectValueList.stream().map(w -> w.getKey()).collect(Collectors.toList()), symbol);
