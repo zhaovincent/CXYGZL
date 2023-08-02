@@ -11,7 +11,9 @@ import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.flow.SameAsStarter;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.FlowableUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.impl.persistence.entity.ExecutionEntityImpl;
@@ -200,8 +202,10 @@ public class MultiInstanceHandler {
         ExecutionEntityImpl entity = (ExecutionEntityImpl) execution;
         String processDefinitionKey = entity.getProcessDefinitionKey();
 
+        UserTask flowNode = (UserTask) FlowableUtils.getFlowNode(execution.getProcessInstanceId(), ((ExecutionEntityImpl) execution).getActivityId());
 
-        String nodeId = execution.getCurrentActivityId();
+
+        String nodeId = flowNode.getExtensionId();
 
         Node node = NodeDataStoreFactory.getInstance().getNode(processDefinitionKey, nodeId);
 

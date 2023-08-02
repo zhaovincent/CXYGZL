@@ -178,8 +178,10 @@ public class TaskController {
         runtimeService.setVariableLocal(task.getExecutionId(), ProcessInstanceConstant.VariableKey.APPROVE_RESULT,
                 taskParamDto.getApproveResult());
 
-        taskService.addComment(task.getId(), task.getProcessInstanceId(),
-                ProcessInstanceConstant.VariableKey.APPROVE_DESC, taskParamDto.getApproveDesc());
+        if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
+            taskService.addComment(task.getId(), task.getProcessInstanceId(),
+                    ProcessInstanceConstant.VariableKey.APPROVE_DESC, taskParamDto.getApproveDesc());
+        }
         Map<String, Object> paramMap = taskParamDto.getParamMap();
         taskService.complete(task.getId(), paramMap);
 
@@ -231,13 +233,19 @@ public class TaskController {
      */
     @PostMapping("setAssignee")
     public R setAssignee(@RequestBody TaskParamDto taskParamDto) {
-        Map<String, Object> taskLocalParamMap = taskParamDto.getTaskLocalParamMap();
-        if (CollUtil.isNotEmpty(taskLocalParamMap)) {
-            taskService.setVariablesLocal(taskParamDto.getTaskId(), taskLocalParamMap);
+
+        Task task = taskService.createTaskQuery().taskId(taskParamDto.getTaskId()).singleResult();
+        if (task == null) {
+            return R.fail("任务不存在");
         }
 
-//        taskService.setOwner(taskParamDto.getTaskId(), taskParamDto.getUserId());
+
+        if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
+            taskService.addComment(task.getId(), task.getProcessInstanceId(),
+                    ProcessInstanceConstant.VariableKey.BACK_JOIN_DESC, taskParamDto.getApproveDesc());
+        }
         taskService.setAssignee(taskParamDto.getTaskId(), taskParamDto.getTargetUserId());
+
         return R.success();
     }
 

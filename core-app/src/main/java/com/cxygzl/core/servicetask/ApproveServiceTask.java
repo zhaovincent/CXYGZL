@@ -11,6 +11,7 @@ import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import liquibase.repackaged.org.apache.commons.collections4.MapUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.flowable.bpmn.model.ServiceTask;
 import org.flowable.common.engine.impl.de.odysseus.el.ExpressionFactoryImpl;
 import org.flowable.common.engine.impl.de.odysseus.el.util.SimpleContext;
 import org.flowable.common.engine.impl.javax.el.ExpressionFactory;
@@ -39,7 +40,9 @@ public class ApproveServiceTask implements JavaDelegate {
         String flowId = entity.getProcessDefinitionKey();
         String processInstanceId = entity.getProcessInstanceId();
 
-        String nodeId = StrUtil.subAfter(nodeIdO, "approve_service_task_", true);
+        ServiceTask currentFlowElement = (ServiceTask) entity.getCurrentFlowElement();
+
+        String nodeId = currentFlowElement.getExtensionId();
 
         Integer approve = execution.getVariable(StrUtil.format("{}_{}", nodeId, APPROVE_NODE_RESULT), Integer.class);
 

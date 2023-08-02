@@ -23,13 +23,12 @@ import com.cxygzl.core.servicetask.CopyServiceTask;
 import com.cxygzl.core.servicetask.RouteServiceTask;
 import com.cxygzl.core.servicetask.TriggerServiceTask;
 import lombok.extern.slf4j.Slf4j;
+import org.flowable.bpmn.model.EventListener;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE;
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE;
@@ -401,7 +400,7 @@ public class ModelUtil {
             rootUserTask.setName("发起人");
 
 
-            UserTask userTask = buildUserTask(rootUserTask, createListener);
+            UserTask userTask = buildUserTask(rootUserTask, node.getId(), createListener);
 //            userTask.setSkipExpression("${expressionHandler.isAllNull(rootReject)}");
             String exp = StrUtil.format("expressionHandler.isAllNull(execution,\"{}\",\"{}\")", REJECT_TO_STARTER_NODE,
                     SUB_PROCESS_STARTER_NODE);
@@ -443,7 +442,14 @@ public class ModelUtil {
 
         return flowElementList;
     }
-
+    public static ExtensionAttribute generate(String key, String val) {
+        ExtensionAttribute ea = new ExtensionAttribute();
+        ea.setNamespace("flowable");
+        ea.setName(key);
+        ea.setNamespacePrefix("custom");
+        ea.setValue(val);
+        return ea;
+    }
     /**
      * 构建审批节点
      *
@@ -467,7 +473,7 @@ public class ModelUtil {
         createListener.setEvent("create");
 
 
-        UserTask userTask = buildUserTask(node, createListener);
+        UserTask userTask = buildUserTask(node, node.getId(), createListener);
         flowElementList.add(userTask);
 
 
@@ -477,19 +483,9 @@ public class ModelUtil {
         serviceTask.setImplementationType("class");
         serviceTask.setImplementation(ApproveServiceTask.class.getCanonicalName());
         serviceTask.setAsynchronous(false);
+        serviceTask.setExtensionId(node.getId());
         flowElementList.add(serviceTask);
 
-//        Node exclusiveNode = new Node();
-//        exclusiveNode.setId(StrUtil.format("approve_gateway_{}", node.getId()));
-//        exclusiveNode.setName("审批-排他网关");
-//        flowElementList.add(buildSimpleExclusiveGatewayNode(exclusiveNode));
-        //创建结束节点
-
-//        Node endNode = new Node();
-//        endNode.setId(StrUtil.format("approve_end_{}", node.getId()));
-//        endNode.setName("审批-结束节点");
-//        EndEvent endEvent = buildEndNode(endNode, false);
-//        flowElementList.add(endEvent);
 
 
         {
@@ -574,10 +570,11 @@ public class ModelUtil {
     /**
      * 创建用户任务
      *
-     * @param node 前端传输节点
+     * @param node      前端传输节点
+     * @param oriNodeId
      * @return
      */
-    private static UserTask buildUserTask(Node node, FlowableListener... flowableListeners) {
+    private static UserTask buildUserTask(Node node,String oriNodeId, FlowableListener... flowableListeners) {
         UserTask userTask = new UserTask();
         userTask.setId(node.getId());
         userTask.setName(node.getName());
@@ -590,6 +587,10 @@ public class ModelUtil {
 
             }
             userTask.setTaskListeners(taskListeners);
+        }
+
+        if(StrUtil.isNotBlank(oriNodeId)){
+            userTask.setExtensionId(oriNodeId);
         }
 
         return userTask;

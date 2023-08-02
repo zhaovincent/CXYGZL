@@ -168,10 +168,13 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
             }
             //处理表单数据
-            Process process = processList.stream().filter(w -> StrUtil.equals(w.getFlowId(), record.getFlowId())).findFirst().get();
-            List<Dict> formValueShowList = getFormValueShowList(process, record.getFlowId(), record.getNodeId(), paramMap);
+            Process process = processList.stream().filter(w -> StrUtil.equals(w.getFlowId(), record.getFlowId())).findAny().orElse(null);
+            if(process!=null){
+                List<Dict> formValueShowList = getFormValueShowList(process, record.getFlowId(), record.getNodeId(), paramMap);
 
-            record.setFormValueShowList(formValueShowList);
+                record.setFormValueShowList(formValueShowList);
+            }
+
 
         }
 
