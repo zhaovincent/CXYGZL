@@ -8,6 +8,7 @@ import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.Refuse;
 import com.cxygzl.core.node.NodeDataStoreFactory;
+import com.cxygzl.core.utils.FlowableUtils;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import liquibase.repackaged.org.apache.commons.collections4.MapUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,9 @@ public class ApproveServiceTask implements JavaDelegate {
 
         ServiceTask currentFlowElement = (ServiceTask) entity.getCurrentFlowElement();
 
-        String nodeId = currentFlowElement.getExtensionId();
+
+
+        String nodeId = FlowableUtils.getNodeIdFromExtension(currentFlowElement);
 
         Integer approve = execution.getVariable(StrUtil.format("{}_{}", nodeId, APPROVE_NODE_RESULT), Integer.class);
 

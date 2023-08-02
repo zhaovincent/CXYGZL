@@ -32,13 +32,12 @@ import org.flowable.engine.delegate.event.impl.FlowableMultiInstanceActivityComp
 import org.flowable.engine.delegate.event.impl.FlowableProcessStartedEventImpl;
 import org.flowable.engine.delegate.event.impl.FlowableProcessTerminatedEventImpl;
 import org.flowable.engine.impl.persistence.entity.ExecutionEntityImpl;
+import org.flowable.engine.task.Comment;
 import org.flowable.task.api.DelegationState;
 import org.flowable.task.service.impl.persistence.entity.TaskEntity;
 import org.flowable.task.service.impl.persistence.entity.TaskEntityImpl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 流程监听器
@@ -53,7 +52,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
      */
     @Override
     public void onEvent(FlowableEvent event) {
-        log.debug("分支监听器 类型={} class={}", event.getType(), event.getClass().getCanonicalName());
+        log.info("分支监听器 类型={} class={}", event.getType(), event.getClass().getCanonicalName());
         if (event.getType().toString().equals(FlowableEngineEventType.TASK_CREATED.toString())) {
 
 
@@ -300,7 +299,9 @@ public class FlowProcessEventListener implements FlowableEventListener {
                 processNodeRecordAssignUserParamDto.setTaskType(ProcessInstanceConstant.TaskType.REFUSE);
             }
 
-            processNodeRecordAssignUserParamDto.setApproveDesc(Convert.toStr(task.getVariableLocal(ProcessInstanceConstant.VariableKey.APPROVE_DESC)));
+            List<SimpleApproveDescDto> simpleApproveDescDtoList = getSimpleApproveDescDtoList(task);
+
+            processNodeRecordAssignUserParamDto.setSimpleApproveDescDtoList(simpleApproveDescDtoList);
             processNodeRecordAssignUserParamDto.setExecutionId(task.getExecutionId());
 
             CoreHttpUtil.taskEndEvent(processNodeRecordAssignUserParamDto);
@@ -336,8 +337,12 @@ public class FlowProcessEventListener implements FlowableEventListener {
             processNodeRecordAssignUserParamDto.setTaskId(task.getId());
             processNodeRecordAssignUserParamDto.setNodeName(task.getName());
             processNodeRecordAssignUserParamDto.setTaskType(StrUtil.equals(DelegationState.PENDING.toString(), delegationStateString) ? "DELEGATION" : (StrUtil.equals(DelegationState.RESOLVED.toString(), delegationStateString) ? "RESOLVED" : ""));
-            processNodeRecordAssignUserParamDto.setApproveDesc(Convert.toStr(task.getVariableLocal(ProcessInstanceConstant.VariableKey.APPROVE_DESC)));
             processNodeRecordAssignUserParamDto.setExecutionId(task.getExecutionId());
+
+
+            List<SimpleApproveDescDto> simpleApproveDescDtoList = getSimpleApproveDescDtoList(task);
+
+            processNodeRecordAssignUserParamDto.setSimpleApproveDescDtoList(simpleApproveDescDtoList);
 
             CoreHttpUtil.startAssignUser(processNodeRecordAssignUserParamDto);
 
@@ -440,6 +445,37 @@ public class FlowProcessEventListener implements FlowableEventListener {
 
 
         }
+    }
+
+    private static List<SimpleApproveDescDto> getSimpleApproveDescDtoList(TaskEntityImpl task) {
+        TaskService taskService = SpringUtil.getBean(TaskService.class);
+
+
+        List<Comment> approveDescList = taskService.getTaskComments(task.getId(),
+                ProcessInstanceConstant.VariableKey.APPROVE_DESC);
+
+        List<Comment> approveDescList1 = taskService.getTaskComments(task.getId(),
+                ProcessInstanceConstant.VariableKey.BACK_JOIN_DESC);
+
+        List<Comment> approveDescList2 = taskService.getTaskComments(task.getId(),
+                ProcessInstanceConstant.VariableKey.FRONT_JOIN_DESC);
+
+        approveDescList.addAll(approveDescList1);
+        approveDescList.addAll(approveDescList2);
+        List<SimpleApproveDescDto> simpleApproveDescDtoList=new ArrayList<>();
+        for (Comment comment : approveDescList) {
+            String id = comment.getId();
+            Date time = comment.getTime();
+            String fullMessage = comment.getFullMessage();
+
+            SimpleApproveDescDto simpleApproveDescDto=new SimpleApproveDescDto();
+            simpleApproveDescDto.setDate(time);
+            simpleApproveDescDto.setMsgId(id);
+            simpleApproveDescDto.setType(comment.getType());
+            simpleApproveDescDto.setMessage(fullMessage);
+            simpleApproveDescDtoList.add(simpleApproveDescDto);
+        }
+        return simpleApproveDescDtoList;
     }
 
     /**

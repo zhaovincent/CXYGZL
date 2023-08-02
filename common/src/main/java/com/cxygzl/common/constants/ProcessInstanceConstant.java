@@ -59,6 +59,8 @@ public class ProcessInstanceConstant {
      * 变量key
      */
     public static class VariableKey{
+        //系统编码
+        public static final String SYS_CODE="cxygzl";
         //发起人
         public static final String STARTER="root";
         //结束
@@ -75,6 +77,8 @@ public class ProcessInstanceConstant {
         public static final String APPROVE_DESC ="approveDesc";
         //后加签描述
         public static final String BACK_JOIN_DESC ="backJoinDesc";
+        //前加签描述
+        public static final String FRONT_JOIN_DESC ="frontJoinDesc";
         //审批结果 boolean
         public static final String APPROVE_RESULT ="approveResult";
 

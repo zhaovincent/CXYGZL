@@ -23,12 +23,14 @@ import com.cxygzl.core.servicetask.CopyServiceTask;
 import com.cxygzl.core.servicetask.RouteServiceTask;
 import com.cxygzl.core.servicetask.TriggerServiceTask;
 import lombok.extern.slf4j.Slf4j;
-import org.flowable.bpmn.model.EventListener;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
 
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE;
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE;
@@ -442,14 +444,7 @@ public class ModelUtil {
 
         return flowElementList;
     }
-    public static ExtensionAttribute generate(String key, String val) {
-        ExtensionAttribute ea = new ExtensionAttribute();
-        ea.setNamespace("flowable");
-        ea.setName(key);
-        ea.setNamespacePrefix("custom");
-        ea.setValue(val);
-        return ea;
-    }
+
     /**
      * 构建审批节点
      *
@@ -460,7 +455,6 @@ public class ModelUtil {
         List<FlowElement> flowElementList = new ArrayList<>();
 
 
-//        node.setTailId(StrUtil.format("approve_gateway_{}", node.getId()));
         node.setTailId(StrUtil.format("approve_service_task_{}",node.getId()));
 
 
@@ -483,7 +477,18 @@ public class ModelUtil {
         serviceTask.setImplementationType("class");
         serviceTask.setImplementation(ApproveServiceTask.class.getCanonicalName());
         serviceTask.setAsynchronous(false);
-        serviceTask.setExtensionId(node.getId());
+
+
+
+        Map<String, List<ExtensionElement>> extensionElements=new HashMap<>();
+
+
+        ExtensionElement extensionElement = FlowableUtils.generateFlowNodeIdExtension(node.getId());
+
+        extensionElements.put(ProcessInstanceConstant.VariableKey.SYS_CODE,CollUtil.newArrayList(extensionElement));
+
+        serviceTask.setExtensionElements(extensionElements);
+
         flowElementList.add(serviceTask);
 
 
@@ -590,27 +595,17 @@ public class ModelUtil {
         }
 
         if(StrUtil.isNotBlank(oriNodeId)){
-            userTask.setExtensionId(oriNodeId);
+
+
+
+            Map<String, List<ExtensionElement>> extensionElements=new HashMap<>();
+            ExtensionElement extensionElement = FlowableUtils.generateFlowNodeIdExtension(oriNodeId);
+            extensionElements.put(ProcessInstanceConstant.VariableKey.SYS_CODE,CollUtil.newArrayList(extensionElement));
+            userTask.setExtensionElements(extensionElements);
+
         }
 
         return userTask;
-    }
-
-    /**
-     * 构建简单的包容网关
-     *
-     * @param node
-     * @return
-     */
-    private static FlowElement buildSimpleExclusiveGatewayNode(Node node) {
-
-
-        ExclusiveGateway exclusiveGateway = new ExclusiveGateway();
-        exclusiveGateway.setId(node.getId());
-        exclusiveGateway.setName(node.getName());
-
-        return exclusiveGateway;
-
     }
 
 
@@ -920,7 +915,7 @@ public class ModelUtil {
 
 
                 //来自表单
-                if (node.getStarterMode() == ProcessInstanceConstant.SubProcessStarterMode.FORM) {
+                if (node.getStarterMode() == ProcessInstanceConstant.SubProcessStarterMode.FORM.intValue()) {
                     ExtensionAttribute e1 = new ExtensionAttribute();
                     e1.setName("source");
                     e1.setValue(node.getStarterValue());

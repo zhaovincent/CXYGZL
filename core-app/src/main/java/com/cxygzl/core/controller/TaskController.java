@@ -198,12 +198,15 @@ public class TaskController {
     @PostMapping("delegateTask")
     public R delegateTask(@RequestBody TaskParamDto taskParamDto) {
 
-        Map<String, Object> taskLocalParamMap = taskParamDto.getTaskLocalParamMap();
-        if (CollUtil.isNotEmpty(taskLocalParamMap)) {
-            taskService.setVariablesLocal(taskParamDto.getTaskId(), taskLocalParamMap);
+        Task task = taskService.createTaskQuery().taskId(taskParamDto.getTaskId()).singleResult();
+        if (task == null) {
+            return R.fail("任务不存在");
         }
-//        taskService.setOwner(taskParamDto.getTaskId(), taskParamDto.getUserId());
 
+        if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
+            taskService.addComment(task.getId(), task.getProcessInstanceId(),
+                    ProcessInstanceConstant.VariableKey.FRONT_JOIN_DESC, taskParamDto.getApproveDesc());
+        }
         taskService.delegateTask(taskParamDto.getTaskId(), taskParamDto.getTargetUserId());
         return R.success();
     }
@@ -216,9 +219,16 @@ public class TaskController {
      */
     @PostMapping("resolveTask")
     public R resolveTask(@RequestBody TaskParamDto taskParamDto) {
-        Map<String, Object> taskLocalParamMap = taskParamDto.getTaskLocalParamMap();
-        if (CollUtil.isNotEmpty(taskLocalParamMap)) {
-            taskService.setVariablesLocal(taskParamDto.getTaskId(), taskLocalParamMap);
+        Task task = taskService.createTaskQuery().taskId(taskParamDto.getTaskId()).singleResult();
+        if (task == null) {
+            return R.fail("任务不存在");
+        }
+
+
+
+        if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
+            taskService.addComment(task.getId(), task.getProcessInstanceId(),
+                    ProcessInstanceConstant.VariableKey.APPROVE_DESC, taskParamDto.getApproveDesc());
         }
 
         taskService.resolveTask(taskParamDto.getTaskId(), taskParamDto.getParamMap());

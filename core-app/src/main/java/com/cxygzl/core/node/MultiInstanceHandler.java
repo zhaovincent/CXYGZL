@@ -203,9 +203,9 @@ public class MultiInstanceHandler {
         String processDefinitionKey = entity.getProcessDefinitionKey();
 
         UserTask flowNode = (UserTask) FlowableUtils.getFlowNode(execution.getProcessInstanceId(), ((ExecutionEntityImpl) execution).getActivityId());
+        String nodeId = FlowableUtils.getNodeIdFromExtension(flowNode);
 
 
-        String nodeId = flowNode.getExtensionId();
 
         Node node = NodeDataStoreFactory.getInstance().getNode(processDefinitionKey, nodeId);
 
