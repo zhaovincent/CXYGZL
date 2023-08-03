@@ -2,10 +2,10 @@ spring:
   application:
     name: cxygzl-core-app
   datasource:
-    url: jdbc:mysql://localhost:3306/simple_flow?allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3307/cxygzl_core?allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true&useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: NjIfy:ywd3F8
+    password: 123456
 
 server:
   port: 26858

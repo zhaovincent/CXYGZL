@@ -6,14 +6,14 @@ spring:
     port: 6379
     ##使用的db
     database: 13
-    password: 123456
+    password:
   datasource:
     ##数据库地址
-    url: jdbc:mysql://localhost:3307/simple_flow_biz?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/cxygzl_biz?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     ##数据库账号
     username: root
     ##数据库密码
-    password: 123456
+    password: NjIfy:ywd3F8
 
 
