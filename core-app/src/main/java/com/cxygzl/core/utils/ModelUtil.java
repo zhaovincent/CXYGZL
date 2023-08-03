@@ -12,10 +12,7 @@ import com.cxygzl.common.dto.flow.HttpSettingData;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.expression.condition.NodeExpressionStrategyFactory;
-import com.cxygzl.core.listeners.ApprovalCreateListener;
-import com.cxygzl.core.listeners.FlowProcessEventListener;
-import com.cxygzl.core.listeners.RouteMergeGatewayListener;
-import com.cxygzl.core.listeners.StarterUserTaskCreateListener;
+import com.cxygzl.core.listeners.*;
 import com.cxygzl.core.node.INodeDataStoreHandler;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.servicetask.ApproveServiceTask;
@@ -58,14 +55,95 @@ public class ModelUtil {
         ArrayList<EventListener> eventListeners = new ArrayList<>();
 
         {
-            //流程实例监听器
-            EventListener eventListener = new EventListener();
+            {
+                //流程实例监听器
+                EventListener eventListener = new EventListener();
 
-            eventListener.setImplementationType("class");
-            eventListener.setImplementation(FlowProcessEventListener.class.getCanonicalName());
+                eventListener.setImplementationType("class");
+                eventListener.setImplementation(FlowProcessEventListener.class.getCanonicalName());
 
 
-            eventListeners.add(eventListener);
+                eventListeners.add(eventListener);
+            }
+            {
+                //流程开始
+                EventListener eventListener = new EventListener();
+
+                eventListener.setImplementationType("class");
+                eventListener.setImplementation(ProcessStartEventListener.class.getCanonicalName());
+
+
+                eventListeners.add(eventListener);
+            }
+            {
+                //流程结束
+                EventListener eventListener = new EventListener();
+
+                eventListener.setImplementationType("class");
+                eventListener.setImplementation(ProcessEndEventListener.class.getCanonicalName());
+
+
+                eventListeners.add(eventListener);
+            }
+
+            {
+                //节点结束
+                EventListener eventListener = new EventListener();
+
+                eventListener.setImplementationType("class");
+                eventListener.setImplementation(NodeEndEventListener.class.getCanonicalName());
+//                eventListener.setEvents(StrUtil.format("{},{},{}",FlowableEngineEventType.MULTI_INSTANCE_ACTIVITY_COMPLETED_WITH_CONDITION.name(),
+//                        FlowableEngineEventType.MULTI_INSTANCE_ACTIVITY_COMPLETED.name(),
+//                        FlowableEngineEventType.ACTIVITY_COMPLETED.name()
+//                        ));
+
+
+                eventListeners.add(eventListener);
+            }
+            {
+                //节点开始
+                EventListener eventListener = new EventListener();
+
+                eventListener.setImplementationType("class");
+                eventListener.setImplementation(NodeStartEventListener.class.getCanonicalName());
+//                eventListener.setEvents(FlowableEngineEventType.ACTIVITY_STARTED.name());
+
+
+                eventListeners.add(eventListener);
+            }
+            {
+                //任务被设置执行人
+                EventListener eventListener = new EventListener();
+
+                eventListener.setImplementationType("class");
+                eventListener.setImplementation(TaskAssignedEventListener.class.getCanonicalName());
+
+//                eventListener.setEvents(FlowableEngineEventType.TASK_ASSIGNED.name());
+
+                eventListeners.add(eventListener);
+            }
+            {
+                //任务完成
+                EventListener eventListener = new EventListener();
+
+                eventListener.setImplementationType("class");
+                eventListener.setImplementation(TaskCompleteEventListener.class.getCanonicalName());
+//                eventListener.setEvents(FlowableEngineEventType.TASK_COMPLETED.name());
+
+
+                eventListeners.add(eventListener);
+            }
+
+            {
+                //任务创建
+                EventListener eventListener = new EventListener();
+
+                eventListener.setImplementationType("class");
+                eventListener.setImplementation(TaskCreatedEventListener.class.getCanonicalName());
+//                eventListener.setEvents(FlowableEngineEventType.TASK_CREATED.name());
+
+                eventListeners.add(eventListener);
+            }
 
         }
         process.setEventListeners(eventListeners);
@@ -407,7 +485,7 @@ public class ModelUtil {
             String exp = StrUtil.format("expressionHandler.isAllNull(execution,\"{}\",\"{}\")", REJECT_TO_STARTER_NODE,
                     SUB_PROCESS_STARTER_NODE);
 
-            userTask.setSkipExpression(StrUtil.format("${{}}",exp));
+            userTask.setSkipExpression(StrUtil.format("${{}}", exp));
 
 
             {
@@ -455,7 +533,7 @@ public class ModelUtil {
         List<FlowElement> flowElementList = new ArrayList<>();
 
 
-        node.setTailId(StrUtil.format("approve_service_task_{}",node.getId()));
+        node.setTailId(StrUtil.format("approve_service_task_{}", node.getId()));
 
 
         //创建了任务执行监听器
@@ -472,25 +550,23 @@ public class ModelUtil {
 
 
         ServiceTask serviceTask = new ServiceTask();
-        serviceTask.setId(StrUtil.format("approve_service_task_{}",node.getId()));
-        serviceTask.setName(StrUtil.format("{}_服务任务",node.getName()));
+        serviceTask.setId(StrUtil.format("approve_service_task_{}", node.getId()));
+        serviceTask.setName(StrUtil.format("{}_服务任务", node.getName()));
         serviceTask.setImplementationType("class");
         serviceTask.setImplementation(ApproveServiceTask.class.getCanonicalName());
         serviceTask.setAsynchronous(false);
 
 
-
-        Map<String, List<ExtensionElement>> extensionElements=new HashMap<>();
+        Map<String, List<ExtensionElement>> extensionElements = new HashMap<>();
 
 
         ExtensionElement extensionElement = FlowableUtils.generateFlowNodeIdExtension(node.getId());
 
-        extensionElements.put(ProcessInstanceConstant.VariableKey.SYS_CODE,CollUtil.newArrayList(extensionElement));
+        extensionElements.put(ProcessInstanceConstant.VariableKey.SYS_CODE, CollUtil.newArrayList(extensionElement));
 
         serviceTask.setExtensionElements(extensionElements);
 
         flowElementList.add(serviceTask);
-
 
 
         {
@@ -579,7 +655,7 @@ public class ModelUtil {
      * @param oriNodeId
      * @return
      */
-    private static UserTask buildUserTask(Node node,String oriNodeId, FlowableListener... flowableListeners) {
+    private static UserTask buildUserTask(Node node, String oriNodeId, FlowableListener... flowableListeners) {
         UserTask userTask = new UserTask();
         userTask.setId(node.getId());
         userTask.setName(node.getName());
@@ -594,13 +670,12 @@ public class ModelUtil {
             userTask.setTaskListeners(taskListeners);
         }
 
-        if(StrUtil.isNotBlank(oriNodeId)){
+        if (StrUtil.isNotBlank(oriNodeId)) {
 
 
-
-            Map<String, List<ExtensionElement>> extensionElements=new HashMap<>();
+            Map<String, List<ExtensionElement>> extensionElements = new HashMap<>();
             ExtensionElement extensionElement = FlowableUtils.generateFlowNodeIdExtension(oriNodeId);
-            extensionElements.put(ProcessInstanceConstant.VariableKey.SYS_CODE,CollUtil.newArrayList(extensionElement));
+            extensionElements.put(ProcessInstanceConstant.VariableKey.SYS_CODE, CollUtil.newArrayList(extensionElement));
             userTask.setExtensionElements(extensionElements);
 
         }
@@ -1131,7 +1206,6 @@ public class ModelUtil {
             }
 
 
-
         }
 
         if (node.getType() == NodeTypeEnum.ROOT.getValue().intValue()) {
@@ -1154,10 +1228,10 @@ public class ModelUtil {
             for (Node n : list) {
 
                 String nid = StrUtil.format("{}_{}", node.getId(), index);
-                String exp ="";
+                String exp = "";
                 if (index == 0) {
                     exp = NodeExpressionStrategyFactory.handle(n);
-                }else{
+                } else {
                     exp = NodeExpressionStrategyFactory.handleDefaultBranch(list, index);
                 }
 

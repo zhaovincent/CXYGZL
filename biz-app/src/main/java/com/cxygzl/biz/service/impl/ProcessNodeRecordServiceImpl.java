@@ -56,7 +56,7 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
                 .set(ProcessNodeRecord::getEndTime,new Date())
                 .eq(ProcessNodeRecord::getProcessInstanceId, processNodeRecordParamDto.getProcessInstanceId())
                 .eq(ProcessNodeRecord::getNodeId, processNodeRecordParamDto.getNodeId())
-                .eq(ProcessNodeRecord::getExecutionId, processNodeRecordParamDto.getExecutionId())
+//                .eq(ProcessNodeRecord::getExecutionId, processNodeRecordParamDto.getExecutionId())
                 .update(new ProcessNodeRecord());
         return R.success();
     }

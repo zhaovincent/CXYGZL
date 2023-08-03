@@ -8,7 +8,7 @@ import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
  * 流程监听器
  */
 @Slf4j
-public class FlowProcessEventListener implements FlowableEventListener {
+public class TaskCreatedEventListener implements FlowableEventListener {
 
     /**
      * Called when an event has been fired
@@ -17,7 +17,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
      */
     @Override
     public void onEvent(FlowableEvent event) {
-        log.info("分支监听器 类型={} class={}", event.getType(), event.getClass().getCanonicalName());
+
 
 
     }
