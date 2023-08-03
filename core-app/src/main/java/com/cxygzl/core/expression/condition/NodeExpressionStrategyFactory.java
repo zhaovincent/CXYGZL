@@ -128,8 +128,13 @@ public class NodeExpressionStrategyFactory {
 
             index++;
         }
-        String join = StrUtil.format("!({})", CollUtil.join(expList, "||"));
-        return "${" + join + "}";
+
+//        String join = StrUtil.format("!({})", CollUtil.join(expList, "||"));
+
+        String finalExp = (currentIndex+1==branchs.size())?"1==1":StrUtil.subBetween(handle(branchs.get(currentIndex)), "${", "}");
+
+        String exp = StrUtil.format("${!({})&&({})}", CollUtil.join(expList, "||"), finalExp);
+        return  exp;
     }
 
 }
