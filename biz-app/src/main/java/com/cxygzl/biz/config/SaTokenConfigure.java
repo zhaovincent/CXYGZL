@@ -20,9 +20,8 @@ public class SaTokenConfigure implements WebMvcConfigurer {
                         throw new LoginExpiredException(ResultCode.TOKEN_EXPIRED.getMsg(),
                                 ResultCode.TOKEN_EXPIRED.getCode(),
                                 "");
-                    }else{
-
                     }
+
                 }))
                 .addPathPatterns("/**")
                 .excludePathPatterns(

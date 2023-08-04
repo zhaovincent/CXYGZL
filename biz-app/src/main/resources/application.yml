@@ -74,3 +74,6 @@ core:
 ##流程的数据api开关
 api:
   ori: local
+
+version:
+  admin: V2.0.7
