@@ -15,6 +15,7 @@ public class Node {
     private String tailId;
     private String placeHolder;
 
+    private Refuse refuse;
 
     private Integer type;
 

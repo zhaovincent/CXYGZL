@@ -99,7 +99,6 @@ public class MultiInstanceHandler {
 
         Integer multipleMode = node.getMultipleMode();
 
-        BigDecimal modePercentage=BigDecimal.valueOf(100);
 
 
         Object variable = execution.getVariable(StrUtil.format("{}_approve_condition", nodeId));
@@ -131,17 +130,7 @@ public class MultiInstanceHandler {
         int nrOfInstances = (int) execution.getVariable("nrOfInstances");
         //完成的实例数
         int nrOfCompletedInstances = (int) execution.getVariable("nrOfCompletedInstances");
-        log.debug("当前节点完成实例数：{}  总实例数:{} 需要完成比例:{}", nrOfCompletedInstances, nrOfInstances, modePercentage);
-        if ( multipleMode.intValue()==ProcessInstanceConstant.MULTIPLE_MODE_AL_SAME) {
-            //会签判断完成比例
-            if (modePercentage != null) {
-                if (Convert.toBigDecimal(nrOfCompletedInstances * 100).compareTo(Convert.toBigDecimal(nrOfCompletedInstances).multiply(modePercentage)) > 0) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        }
+
         if (nrOfCompletedInstances == nrOfInstances) {
             return true;
         }
