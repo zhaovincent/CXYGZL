@@ -21,6 +21,12 @@ biz:
 
 #  不需要表单引擎 idm引擎
 flowable:
+  common:
+    app:
+      idm-url: /a.html
+      idm-admin:
+        user: a
+        password: a
   form:
     enabled: false
   idm:

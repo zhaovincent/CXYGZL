@@ -179,6 +179,17 @@ public class RemoteController {
     }
 
     /**
+     * 任务取消事件
+     *
+     * @param processNodeRecordAssignUserParamDto
+     * @return
+     */
+    @PostMapping("taskCancelEvent")
+    public R taskCancelEvent(@RequestBody ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
+        return remoteService.taskCancelEvent(processNodeRecordAssignUserParamDto);
+    }
+
+    /**
      * 实例结束
      *
      * @param processInstanceParamDto

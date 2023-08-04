@@ -214,6 +214,16 @@ public class CoreHttpUtil {
     }
 
     /**
+     * 任务取消事件
+     *
+     * @param processNodeRecordAssignUserParamDto
+     * @return
+     */
+    public static void taskCancelEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
+        post(processNodeRecordAssignUserParamDto, "/remote/taskCancelEvent");
+    }
+
+    /**
      * 保存抄送数据
      *
      * @param processCopyDto

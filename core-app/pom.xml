@@ -15,6 +15,7 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <flowable-version>6.8.0</flowable-version>
     </properties>
 
     <dependencies>
@@ -43,15 +44,33 @@
         </dependency>
 
 
+<!--        <dependency>-->
+<!--            <groupId>org.flowable</groupId>-->
+<!--            <artifactId>flowable-ui-modeler-conf</artifactId>-->
+<!--            <version>${flowable-version}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.flowable</groupId>-->
+<!--            <artifactId>flowable-ui-modeler-rest</artifactId>-->
+<!--            <version>${flowable-version}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.flowable</groupId>-->
+<!--            <artifactId>flowable-ui-modeler-logic</artifactId>-->
+<!--            <version>${flowable-version}</version>-->
+<!--        </dependency>-->
+
         <dependency>
             <groupId>org.flowable</groupId>
             <artifactId>flowable-bpmn-layout</artifactId>
-            <version>6.8.0</version>
+            <version>${flowable-version}</version>
+
         </dependency>
         <dependency>
             <groupId>org.flowable</groupId>
             <artifactId>flowable-spring-boot-starter-process</artifactId>
-            <version>6.8.0</version>
+            <version>${flowable-version}</version>
+
         </dependency>
 
         <dependency>

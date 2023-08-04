@@ -81,10 +81,15 @@ public class ProcessInstanceConstant {
         public static final String FRONT_JOIN_DESC ="frontJoinDesc";
         //审批结果 boolean
         public static final String APPROVE_RESULT ="approveResult";
+        //任务类型
+        public static final String TASK_TYPE ="taskType";
 
         public static final String APPROVE_NODE_RESULT ="approveNodeResult";
 
     }
+
+
+
 
     /**
      * 节点审批结果
@@ -100,8 +105,17 @@ public class ProcessInstanceConstant {
     public static class TaskType{
         //通过
         public static final String PASS ="pass";
+        //委派之后完成
+        public static final String RESOLVE ="resolve";
         //拒绝
         public static final String REFUSE="refuse";
+        //驳回
+        public static final String REJECT="reject";
+        //委派
+        public static final String FRONT_JOIN="frontJoin";
+        //转办
+        public static final String BACK_JOIN="backJoin";
+
     }
     /**
      * 用户任务---处理人和发起人一致

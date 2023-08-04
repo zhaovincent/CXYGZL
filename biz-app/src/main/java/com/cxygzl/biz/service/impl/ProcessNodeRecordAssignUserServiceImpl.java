@@ -111,6 +111,40 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
         return R.success();
     }
 
+    /**
+     * 驳回任务
+     *
+     * @param processNodeRecordAssignUserParamDto
+     * @return
+     */
+    @Override
+    public R rejectTaskEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
+        ProcessNodeRecordAssignUser processNodeRecordAssignUser = this.lambdaQuery()
+                .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processNodeRecordAssignUserParamDto.getProcessInstanceId())
+                .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
+                .eq(ProcessNodeRecordAssignUser::getExecutionId, processNodeRecordAssignUserParamDto.getExecutionId())
+                .orderByDesc(ProcessNodeRecordAssignUser::getId)
+                .one();
+        if (processNodeRecordAssignUser == null) {
+            return R.success();
+        }
+        processNodeRecordAssignUser.setStatus(NodeStatusEnum.YJS.getCode());
+        processNodeRecordAssignUser.setEndTime(new Date());
+        processNodeRecordAssignUser.setData(processNodeRecordAssignUserParamDto.getData());
+        processNodeRecordAssignUser.setLocalData(processNodeRecordAssignUserParamDto.getLocalData());
+        processNodeRecordAssignUser.setTaskType(processNodeRecordAssignUserParamDto.getTaskType());
+        this.updateById(processNodeRecordAssignUser);
+
+        List<SimpleApproveDescDto> simpleApproveDescDtoList = processNodeRecordAssignUserParamDto.getSimpleApproveDescDtoList();
+
+        saveApproveDescList(processNodeRecordAssignUser, simpleApproveDescDtoList);
+
+
+        //记录日志
+        processOperRecordService.completeTask(processNodeRecordAssignUserParamDto);
+        return R.success();
+    }
+
     private void saveApproveDescList(ProcessNodeRecordAssignUser processNodeRecordAssignUser, List<SimpleApproveDescDto> simpleApproveDescDtoList) {
         if (CollUtil.isNotEmpty(simpleApproveDescDtoList)) {
             for (SimpleApproveDescDto simpleApproveDescDto : simpleApproveDescDtoList) {

@@ -62,6 +62,8 @@ public class ProcessOperRecordServiceImpl extends ServiceImpl<ProcessOperRecordM
     public void completeTask(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
         UserDto user = ApiStrategyFactory.getStrategy().getUser(processNodeRecordAssignUserParamDto.getUserId());
 
+        String taskType = processNodeRecordAssignUserParamDto.getTaskType();
+
         ProcessOperRecord processOperRecord = new ProcessOperRecord();
         processOperRecord.setFlowId(processNodeRecordAssignUserParamDto.getFlowId());
         processOperRecord.setProcessInstanceId(processNodeRecordAssignUserParamDto.getProcessInstanceId());
@@ -74,13 +76,10 @@ public class ProcessOperRecordServiceImpl extends ServiceImpl<ProcessOperRecordM
         processOperRecord.setEndTime(new Date());
         processOperRecord.setExecutionId(processNodeRecordAssignUserParamDto.getExecutionId());
         processOperRecord.setUserId(processNodeRecordAssignUserParamDto.getUserId());
-        processOperRecord.setRemark(StrUtil.format("[{}]通过了任务[{}]", user.getName(),
+        processOperRecord.setRemark(StrUtil.format("[{}]提交了任务[{}]", user.getName(),
                 processNodeRecordAssignUserParamDto.getNodeName()));
 
-        if(StrUtil.equals(processNodeRecordAssignUserParamDto.getTaskType(), ProcessInstanceConstant.TaskType.REFUSE)){
-            processOperRecord.setRemark(StrUtil.format("[{}]拒绝了任务[{}]", user.getName(),
-                    processNodeRecordAssignUserParamDto.getNodeName()));
-        }
+
 
 
         this.save(processOperRecord);

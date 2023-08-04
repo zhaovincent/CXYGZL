@@ -1,6 +1,5 @@
 package com.cxygzl.core.listeners;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
@@ -63,12 +62,11 @@ public class TaskCompleteEventListener implements FlowableEventListener {
             processNodeRecordAssignUserParamDto.setUserId((assignee));
             processNodeRecordAssignUserParamDto.setTaskId(task.getId());
             processNodeRecordAssignUserParamDto.setNodeName(task.getName());
-            processNodeRecordAssignUserParamDto.setTaskType(ProcessInstanceConstant.TaskType.PASS);
+            String taskType = task.getVariableLocal(ProcessInstanceConstant.VariableKey.TASK_TYPE, String.class);
+            //RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
+            processNodeRecordAssignUserParamDto.setTaskType(taskType);
 
-            Object approveResult = task.getVariableLocal(ProcessInstanceConstant.VariableKey.APPROVE_RESULT);
-            if (approveResult != null && !Convert.toBool(approveResult)) {
-                processNodeRecordAssignUserParamDto.setTaskType(ProcessInstanceConstant.TaskType.REFUSE);
-            }
+
 
             List<SimpleApproveDescDto> simpleApproveDescDtoList = getSimpleApproveDescDtoList(task);
 

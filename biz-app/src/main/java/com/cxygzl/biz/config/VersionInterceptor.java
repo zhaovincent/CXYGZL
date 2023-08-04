@@ -32,7 +32,7 @@ public class VersionInterceptor implements WebMvcConfigurer {
            @Override
            public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
                String cxygzlVersion = request.getHeader("CxygzlVersion");
-               log.info("请求版本号：{}",cxygzlVersion);
+               log.debug("请求版本号：{}",cxygzlVersion);
                if(StrUtil.isBlank(cxygzlVersion)){
                    return true;
                }

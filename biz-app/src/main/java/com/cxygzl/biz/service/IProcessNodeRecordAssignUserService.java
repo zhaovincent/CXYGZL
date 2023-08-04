@@ -28,5 +28,13 @@ public interface IProcessNodeRecordAssignUserService extends IService<ProcessNod
      */
     R completeTaskEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto);
 
+    /**
+     * 驳回任务
+     * @param processNodeRecordAssignUserParamDto
+     * @return
+     */
+    R rejectTaskEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto);
+
+
 
 }

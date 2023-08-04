@@ -76,6 +76,16 @@ public class ModelUtil {
                 eventListeners.add(eventListener);
             }
             {
+                //节点取消
+                EventListener eventListener = new EventListener();
+
+                eventListener.setImplementationType("class");
+                eventListener.setImplementation(NodeCanceledEventListener.class.getCanonicalName());
+
+
+                eventListeners.add(eventListener);
+            }
+            {
                 //流程结束
                 EventListener eventListener = new EventListener();
 

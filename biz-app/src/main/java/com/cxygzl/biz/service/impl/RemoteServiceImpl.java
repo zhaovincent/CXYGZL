@@ -319,6 +319,17 @@ public class RemoteServiceImpl implements IRemoteService {
     }
 
     /**
+     * 任务取消了--驳回
+     *
+     * @param processNodeRecordAssignUserParamDto
+     * @return
+     */
+    @Override
+    public R taskCancelEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
+        return processNodeRecordAssignUserService.rejectTaskEvent(processNodeRecordAssignUserParamDto);
+    }
+
+    /**
      * 实例结束
      *
      * @param processInstanceParamDto

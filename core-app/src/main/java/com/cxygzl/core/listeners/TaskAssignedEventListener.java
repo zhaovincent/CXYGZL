@@ -1,6 +1,5 @@
 package com.cxygzl.core.listeners;
 
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.MessageTypeEnum;
@@ -17,7 +16,6 @@ import org.flowable.common.engine.api.delegate.event.FlowableEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.task.Comment;
-import org.flowable.task.api.DelegationState;
 import org.flowable.task.service.impl.persistence.entity.TaskEntity;
 import org.flowable.task.service.impl.persistence.entity.TaskEntityImpl;
 
@@ -70,7 +68,10 @@ public class TaskAssignedEventListener implements FlowableEventListener {
                 processNodeRecordAssignUserParamDto.setUserId((assignee));
                 processNodeRecordAssignUserParamDto.setTaskId(task.getId());
                 processNodeRecordAssignUserParamDto.setNodeName(task.getName());
-                processNodeRecordAssignUserParamDto.setTaskType(StrUtil.equals(DelegationState.PENDING.toString(), delegationStateString) ? "DELEGATION" : (StrUtil.equals(DelegationState.RESOLVED.toString(), delegationStateString) ? "RESOLVED" : ""));
+
+                String taskType = task.getVariableLocal(ProcessInstanceConstant.VariableKey.TASK_TYPE, String.class);
+
+                processNodeRecordAssignUserParamDto.setTaskType(taskType);
                 processNodeRecordAssignUserParamDto.setExecutionId(task.getExecutionId());
 
 

@@ -8,6 +8,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
+import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
@@ -21,6 +22,7 @@ import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.TaskResultDto;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -196,10 +198,18 @@ public class TaskServiceImpl implements ITaskService {
 
         List<String> selectUserNodeId = NodeUtil.selectUserNodeId(node);
 
+        //发起人
+        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, taskResultDto.getProcessInstanceId()).one();
+        String starterUserId = processInstanceRecord.getUserId();
+
+        UserDto starterUser = ApiStrategyFactory.getStrategy().getUser(starterUserId);
+
         Dict set = Dict.create()
                 .set("processInstanceId", taskResultDto.getProcessInstanceId())
                 .set("node", nodeDataJson)
                 .set("nodeId", nodeId)
+                .set("starterAvatarUrl", starterUser.getAvatarUrl())
+                .set("startTime", processInstanceRecord.getCreateTime())
                 .set("taskExist", taskExist)
                 .set("processName", oaForms.getName())
                 .set("nodeName", node.getName())

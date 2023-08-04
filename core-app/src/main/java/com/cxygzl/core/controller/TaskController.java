@@ -175,8 +175,16 @@ public class TaskController {
             return R.fail("任务不存在");
         }
 
+        Boolean approveResult = taskParamDto.getApproveResult();
         runtimeService.setVariableLocal(task.getExecutionId(), ProcessInstanceConstant.VariableKey.APPROVE_RESULT,
-                taskParamDto.getApproveResult());
+                approveResult);
+        //保存任务类型
+        if (approveResult != null) {
+
+
+            taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
+                    approveResult ? ProcessInstanceConstant.TaskType.PASS : ProcessInstanceConstant.TaskType.REFUSE);
+        }
 
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
             taskService.addComment(task.getId(), task.getProcessInstanceId(),
@@ -207,6 +215,11 @@ public class TaskController {
             taskService.addComment(task.getId(), task.getProcessInstanceId(),
                     ProcessInstanceConstant.VariableKey.FRONT_JOIN_DESC, taskParamDto.getApproveDesc());
         }
+
+        taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
+                 ProcessInstanceConstant.TaskType.FRONT_JOIN
+        );
+
         taskService.delegateTask(taskParamDto.getTaskId(), taskParamDto.getTargetUserId());
         return R.success();
     }
@@ -225,11 +238,14 @@ public class TaskController {
         }
 
 
-
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
             taskService.addComment(task.getId(), task.getProcessInstanceId(),
                     ProcessInstanceConstant.VariableKey.APPROVE_DESC, taskParamDto.getApproveDesc());
         }
+
+        taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
+                ProcessInstanceConstant.TaskType.RESOLVE
+        );
 
         taskService.resolveTask(taskParamDto.getTaskId(), taskParamDto.getParamMap());
         return R.success();
@@ -249,7 +265,9 @@ public class TaskController {
             return R.fail("任务不存在");
         }
 
-
+        taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
+                ProcessInstanceConstant.TaskType.BACK_JOIN
+        );
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
             taskService.addComment(task.getId(), task.getProcessInstanceId(),
                     ProcessInstanceConstant.VariableKey.BACK_JOIN_DESC, taskParamDto.getApproveDesc());
@@ -271,20 +289,28 @@ public class TaskController {
         String taskId = taskParamDto.getTaskId();
         String targetKey = taskParamDto.getTargetNodeId();
 
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
 
-        if (taskService.createTaskQuery().taskId(taskId).singleResult().isSuspended()) {
+        if(task==null){
+            return R.fail("任务不存在");
+        }
+
+        if (task.isSuspended()) {
             return R.fail("任务处于挂起状态");
         }
 
 
         // 当前任务 task
-        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
 
         if (StrUtil.equals(targetKey, ProcessInstanceConstant.VariableKey.STARTER)) {
             targetKey = StrUtil.format("{}_user_task", targetKey);
             runtimeService.setVariable(task.getExecutionId(),
                     ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE, true);
         }
+
+        taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
+                ProcessInstanceConstant.TaskType.REJECT
+        );
 
         runtimeService.createChangeActivityStateBuilder()
                 .processInstanceId(taskParamDto.getProcessInstanceId())
