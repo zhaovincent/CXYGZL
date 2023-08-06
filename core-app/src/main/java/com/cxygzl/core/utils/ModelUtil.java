@@ -144,16 +144,7 @@ public class ModelUtil {
                 eventListeners.add(eventListener);
             }
 
-            {
-                //任务创建
-                EventListener eventListener = new EventListener();
 
-                eventListener.setImplementationType("class");
-                eventListener.setImplementation(TaskCreatedEventListener.class.getCanonicalName());
-//                eventListener.setEvents(FlowableEngineEventType.TASK_CREATED.name());
-
-                eventListeners.add(eventListener);
-            }
 
         }
         process.setEventListeners(eventListeners);
@@ -733,6 +724,7 @@ public class ModelUtil {
         InclusiveGateway inclusiveGateway = new InclusiveGateway();
         inclusiveGateway.setId(node.getId());
         inclusiveGateway.setName(node.getName());
+
         flowElementList.add(inclusiveGateway);
 
         //合并网关
@@ -891,11 +883,7 @@ public class ModelUtil {
         inclusiveMergeGateway.setId(StrUtil.format("{}_merge_node", node.getId()));
         inclusiveMergeGateway.setName(StrUtil.format("{}_合并网关", node.getName()));
 
-        FlowableListener createListener = new FlowableListener();
-        createListener.setImplementation(RouteMergeGatewayListener.class.getCanonicalName());
-        createListener.setImplementationType("class");
-        createListener.setEvent("create");
-        inclusiveMergeGateway.setExecutionListeners(CollUtil.newArrayList(createListener));
+
         flowElementList.add(inclusiveMergeGateway);
 
         List<Node> list = node.getList();

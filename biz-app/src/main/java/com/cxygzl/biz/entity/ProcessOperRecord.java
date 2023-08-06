@@ -90,4 +90,16 @@ public class ProcessOperRecord  extends BaseEntity {
      */
     @TableField("`remark`")
     private String remark;
+
+    /**
+     * 上级id
+     */
+    @TableField("`parent_id`")
+    private String parentId;
+
+    /**
+     * 任务类型
+     */
+    @TableField("`task_type`")
+    private String taskType;
 }

@@ -40,6 +40,8 @@ public class NodeCanceledEventListener implements FlowableEventListener {
             processNodeRecordAssignUserParamDto.setProcessInstanceId(processInstanceId);
 
             processNodeRecordAssignUserParamDto.setExecutionId(executionId);
+            processNodeRecordAssignUserParamDto.setNodeId(activityId);
+            processNodeRecordAssignUserParamDto.setNodeName(activityName);
 
             processNodeRecordAssignUserParamDto.setTaskType(ProcessInstanceConstant.TaskType.REJECT);
 

@@ -48,6 +48,8 @@ public class ProcessOperRecordServiceImpl extends ServiceImpl<ProcessOperRecordM
 //        processOperRecord.setExecutionId();
         processOperRecord.setUserId(processInstanceRecordParamDto.getUserId());
         processOperRecord.setRemark(StrUtil.format("[{}]发起了流程", user.getName()));
+        processOperRecord.setParentId(processInstanceRecordParamDto.getFlowId());
+        processOperRecord.setTaskType(ProcessInstanceConstant.TaskType.PASS);
 
 
         this.save(processOperRecord);
@@ -62,6 +64,32 @@ public class ProcessOperRecordServiceImpl extends ServiceImpl<ProcessOperRecordM
     public void completeTask(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
         UserDto user = ApiStrategyFactory.getStrategy().getUser(processNodeRecordAssignUserParamDto.getUserId());
 
+
+
+        this.lambdaUpdate()
+                .set(ProcessOperRecord::getStatus,NodeStatusEnum.YJS.getCode())
+                .set(ProcessOperRecord::getEndTime,new Date())
+                .set(ProcessOperRecord::getTaskType,processNodeRecordAssignUserParamDto.getTaskType())
+                .set(ProcessOperRecord::getRemark,StrUtil.format("[{}]完成了任务[{}]", user.getName(),
+                        processNodeRecordAssignUserParamDto.getNodeName()))
+                .eq(ProcessOperRecord::getUserId,user.getId())
+                .eq(ProcessOperRecord::getProcessInstanceId,processNodeRecordAssignUserParamDto.getProcessInstanceId())
+                .eq(ProcessOperRecord::getTaskId,processNodeRecordAssignUserParamDto.getTaskId())
+                .eq(ProcessOperRecord::getStatus,NodeStatusEnum.JXZ.getCode())
+                .update(new ProcessOperRecord());
+
+
+    }
+
+    /**
+     * 任务指派人了
+     *
+     * @param processNodeRecordAssignUserParamDto
+     */
+    @Override
+    public void taskSetAssignee(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
+        UserDto user = ApiStrategyFactory.getStrategy().getUser(processNodeRecordAssignUserParamDto.getUserId());
+
         String taskType = processNodeRecordAssignUserParamDto.getTaskType();
 
         ProcessOperRecord processOperRecord = new ProcessOperRecord();
@@ -71,17 +99,39 @@ public class ProcessOperRecordServiceImpl extends ServiceImpl<ProcessOperRecordM
         processOperRecord.setNodeId(processNodeRecordAssignUserParamDto.getNodeId());
         processOperRecord.setTaskId(processNodeRecordAssignUserParamDto.getTaskId());
         processOperRecord.setNodeName(processNodeRecordAssignUserParamDto.getNodeName());
-        processOperRecord.setStatus(NodeStatusEnum.YJS.getCode());
+        processOperRecord.setStatus(NodeStatusEnum.JXZ.getCode());
         processOperRecord.setStartTime(new Date());
-        processOperRecord.setEndTime(new Date());
+//        processOperRecord.setEndTime(new Date());
         processOperRecord.setExecutionId(processNodeRecordAssignUserParamDto.getExecutionId());
         processOperRecord.setUserId(processNodeRecordAssignUserParamDto.getUserId());
-        processOperRecord.setRemark(StrUtil.format("[{}]提交了任务[{}]", user.getName(),
+        processOperRecord.setRemark(StrUtil.format("[{}]开启了任务[{}]", user.getName(),
                 processNodeRecordAssignUserParamDto.getNodeName()));
 
 
 
 
         this.save(processOperRecord);
+    }
+
+    /**
+     * 节点移动驳回了
+     *
+     * @param processNodeRecordAssignUserParamDto
+     */
+    @Override
+    public void nodeCancel(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
+        UserDto user = ApiStrategyFactory.getStrategy().getUser(processNodeRecordAssignUserParamDto.getUserId());
+
+
+        this.lambdaUpdate()
+                .set(ProcessOperRecord::getStatus,NodeStatusEnum.YJS.getCode())
+                .set(ProcessOperRecord::getEndTime,new Date())
+                .set(ProcessOperRecord::getTaskType,processNodeRecordAssignUserParamDto.getTaskType())
+                .set(ProcessOperRecord::getRemark,StrUtil.format("[{}]驳回了任务[{}]", user.getName(),
+                        processNodeRecordAssignUserParamDto.getNodeName()))
+                .eq(ProcessOperRecord::getProcessInstanceId,processNodeRecordAssignUserParamDto.getProcessInstanceId())
+                .eq(ProcessOperRecord::getNodeId,processNodeRecordAssignUserParamDto.getNodeId())
+                .eq(ProcessOperRecord::getStatus,NodeStatusEnum.JXZ.getCode())
+                .update(new ProcessOperRecord());
     }
 }

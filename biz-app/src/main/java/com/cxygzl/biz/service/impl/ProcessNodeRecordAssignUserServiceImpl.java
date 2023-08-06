@@ -63,6 +63,15 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
 
 
                 saveApproveDescList(processNodeRecordAssignUser, simpleApproveDescDtoList);
+
+
+                //修改任务
+                ProcessNodeRecordAssignUserParamDto p = BeanUtil.copyProperties(processNodeRecordAssignUserParamDto,
+                        ProcessNodeRecordAssignUserParamDto.class);
+                p.setUserId(processNodeRecordAssignUser.getUserId());
+                processOperRecordService.completeTask(p);
+
+
             }
 
 
@@ -75,6 +84,10 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
 //        processNodeRecordAssignUser.setApproveDesc("");
         processNodeRecordAssignUser.setTaskType("");
         this.save(processNodeRecordAssignUser);
+
+
+        //记录日志
+        processOperRecordService.taskSetAssignee(processNodeRecordAssignUserParamDto);
 
         return R.success();
     }
@@ -105,9 +118,10 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
 
         saveApproveDescList(processNodeRecordAssignUser, simpleApproveDescDtoList);
 
-
         //记录日志
+
         processOperRecordService.completeTask(processNodeRecordAssignUserParamDto);
+
         return R.success();
     }
 
@@ -139,9 +153,11 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
 
         saveApproveDescList(processNodeRecordAssignUser, simpleApproveDescDtoList);
 
-
         //记录日志
-        processOperRecordService.completeTask(processNodeRecordAssignUserParamDto);
+        processNodeRecordAssignUserParamDto.setUserId(processNodeRecordAssignUser.getUserId());
+        processOperRecordService.nodeCancel(processNodeRecordAssignUserParamDto);
+
+
         return R.success();
     }
 

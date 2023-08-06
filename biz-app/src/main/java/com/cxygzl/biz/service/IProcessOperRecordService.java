@@ -25,4 +25,17 @@ public interface IProcessOperRecordService extends IService<ProcessOperRecord> {
      */
     void completeTask(ProcessNodeRecordAssignUserParamDto processInstanceRecordParamDto);
 
+    /**
+     * 任务指派人了
+     * @param processInstanceRecordParamDto
+     */
+
+    void taskSetAssignee(ProcessNodeRecordAssignUserParamDto processInstanceRecordParamDto);
+
+    /**
+     * 节点移动驳回了
+     * @param processNodeRecordAssignUserParamDto
+     */
+    void nodeCancel(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto);
+
 }
