@@ -542,7 +542,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         }
 
         String process = null;
-        if (StrUtil.isBlankIfStr(flowId) && StrUtil.isNotBlank(processInstanceId)) {
+        if ( StrUtil.isNotBlank(processInstanceId)) {
             ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
                     processInstanceId).one();
             flowId = processInstanceRecord.getFlowId();
