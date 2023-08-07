@@ -1,10 +1,5 @@
 package com.cxygzl.biz.utils;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson2.JSON;
-import com.cxygzl.biz.entity.ProcessInstanceRecord;
-import com.cxygzl.biz.service.IProcessInstanceRecordService;
 import com.cxygzl.biz.vo.FormItemVO;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
@@ -18,24 +13,7 @@ import java.util.Map;
  */
 public class NodeUtil {
 
-    public static void handleNodeLine(String processInstanceId, String nodeId) {
-        IProcessInstanceRecordService service = SpringUtil.getBean(IProcessInstanceRecordService.class);
-        ProcessInstanceRecord processInstanceRecord = service.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
-        String process = processInstanceRecord.getProcess();
-        Node node = JSON.parseObject(process, Node.class);
 
-        //找出所有的路由节点id
-        List<String> routeNodeIdList = com.cxygzl.common.utils.NodeUtil.selectRouteId(node);
-
-        boolean match = routeNodeIdList.stream().anyMatch(w -> StrUtil.startWith(nodeId, w));
-        if (!match) {
-            return;
-        }
-
-        //
-
-
-    }
 
     /**
      * 处理发起人节点
@@ -80,13 +58,13 @@ public class NodeUtil {
             List<Node> branchs = node.getConditionNodes();
             for (Node branch : branchs) {
                 branch.setParentId(node.getId());
-                Node children = branch.getChildren();
+                Node children = branch.getChildNode();
                 handleApproveForm(children, formItemVOList);
             }
 
         }
 
-        handleApproveForm(node.getChildren(), formItemVOList);
+        handleApproveForm(node.getChildNode(), formItemVOList);
 
     }
 

@@ -61,9 +61,11 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
             String data = processNodeDataService.getNodeData(processNodeRecordParamDto.getFlowId(), nodeId).getData();
 
             Node node = JSON.parseObject(processInstanceRecord.getProcess(), Node.class);
-            NodeUtil.handleChildrenAfterJump(node,parentNodeId, JSON.parseObject(data, Node.class));
+            Node n = NodeUtil.handleChildrenAfterJump(node, parentNodeId, JSON.parseObject(data, Node.class));
 
             log.info("node={}", com.alibaba.fastjson2.JSON.toJSONString(node));
+            processInstanceRecord.setProcess(JSON.toJSONString(node));
+            processInstanceRecordService.updateById(processInstanceRecord);
 
         }
 

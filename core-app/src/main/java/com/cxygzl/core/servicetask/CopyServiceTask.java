@@ -72,7 +72,7 @@ public class CopyServiceTask implements JavaDelegate {
             processCopyDto.setFlowId(flowId);
             processCopyDto.setProcessInstanceId(execution.getProcessInstanceId());
             processCopyDto.setNodeId(nodeId);
-            processCopyDto.setNodeName(node.getName());
+            processCopyDto.setNodeName(node.getNodeName());
             processCopyDto.setFormData(JSON.toJSONString(variables));
             processCopyDto.setUserId((userIds));
 

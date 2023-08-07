@@ -212,7 +212,7 @@ public class TaskServiceImpl implements ITaskService {
                 .set("startTime", processInstanceRecord.getCreateTime())
                 .set("taskExist", taskExist)
                 .set("processName", oaForms.getName())
-                .set("nodeName", node.getName())
+                .set("nodeName", node.getNodeName())
                 .set("flowId", taskResultDto.getFlowId())
                 .set("process", oaForms.getProcess())
                 .set("delegateAgain", taskResultDto.getDelegate())

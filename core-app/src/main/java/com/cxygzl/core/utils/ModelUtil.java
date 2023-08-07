@@ -186,14 +186,14 @@ public class ModelUtil {
         }
 
         //子节点
-        Node children = nodeDto.getChildren();
+        Node children = nodeDto.getChildNode();
 
         if (NodeTypeEnum.getByValue(nodeDto.getType()).getBranch()) {
 
             //条件分支
             List<Node> branchs = nodeDto.getConditionNodes();
             for (Node branch : branchs) {
-                buildAllNode(process, branch.getChildren(),
+                buildAllNode(process, branch.getChildNode(),
                         flowId);
 
 
@@ -231,12 +231,12 @@ public class ModelUtil {
         }
 
         //子节点
-        Node children = nodeDto.getChildren();
+        Node children = nodeDto.getChildNode();
         if (NodeTypeEnum.getByValue(nodeDto.getType()).getBranch()) {
             //条件分支
             List<Node> branchs = nodeDto.getConditionNodes();
             for (Node branch : branchs) {
-                buildAllNodeInnerSequence(process, branch.getChildren(),
+                buildAllNodeInnerSequence(process, branch.getChildNode(),
                         flowId);
 
 
@@ -270,7 +270,7 @@ public class ModelUtil {
         }
 
         //子节点
-        Node children = nodeDto.getChildren();
+        Node children = nodeDto.getChildNode();
         if (NodeTypeEnum.getByValue(nodeDto.getType()).getBranch()) {
 //            children = children.getChildren();
             //条件分支
@@ -280,7 +280,7 @@ public class ModelUtil {
             for (Node branch : branchs) {
 
 
-                buildAllNodeOuterSequence(process, branch.getChildren(), nodeDto.getTailId());
+                buildAllNodeOuterSequence(process, branch.getChildNode(), nodeDto.getTailId());
 
                 String expression = null;
 
@@ -297,19 +297,19 @@ public class ModelUtil {
 
 
                 //添加连线
-                if (!NodeUtil.isNode(branch.getChildren())) {
+                if (!NodeUtil.isNode(branch.getChildNode())) {
                     //当前分支 没有其他节点了  所有就是网关和网关后面节点直接连线
 
                     SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getId(), nodeDto.getTailId(),
                             expression,
-                            StrUtil.format("{}->{}", nodeDto.getName(), nodeDto.getName())
+                            StrUtil.format("{}->{}", nodeDto.getNodeName(), nodeDto.getNodeName())
                     );
                     process.addFlowElement(sequenceFlow);
                 } else {
 
-                    SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getId(), branch.getChildren().getHeadId(),
+                    SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getId(), branch.getChildNode().getHeadId(),
                             expression,
-                            StrUtil.format("{}->{}", nodeDto.getName(), branch.getChildren().getName())
+                            StrUtil.format("{}->{}", nodeDto.getNodeName(), branch.getChildNode().getNodeName())
                     );
                     process.addFlowElement(sequenceFlow);
                 }
@@ -321,14 +321,14 @@ public class ModelUtil {
 
                 SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getTailId(), children.getHeadId(),
                         "",
-                        StrUtil.format("{}->{}", nodeDto.getName(), children.getName())
+                        StrUtil.format("{}->{}", nodeDto.getNodeName(), children.getNodeName())
                 );
                 process.addFlowElement(sequenceFlow);
 
             } else if (StrUtil.isAllNotBlank(nodeDto.getTailId(), nextId)) {
                 SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getTailId(), nextId,
                         "",
-                        StrUtil.format("{}->{}", nodeDto.getName(), nextId)
+                        StrUtil.format("{}->{}", nodeDto.getNodeName(), nextId)
                 );
                 process.addFlowElement(sequenceFlow);
             }
@@ -347,7 +347,7 @@ public class ModelUtil {
                 buildAllNodeOuterSequence(process, children, nextId);
             } else if (nodeDto.getType() != NodeTypeEnum.END.getValue().intValue()) {
                 SequenceFlow seq = buildSingleSequenceFlow(nodeDto.getTailId(), nextId, "", StrUtil.format("{}->{}",
-                        nodeDto.getName(), nextId));
+                        nodeDto.getNodeName(), nextId));
 
                 process.addFlowElement(seq);
 
@@ -374,7 +374,7 @@ public class ModelUtil {
         node.setHeadId(node.getId());
         //设置节点的连线尾节点
         node.setTailId(node.getId());
-        node.setName(StrUtil.format("{}[{}]", node.getName(), RandomUtil.randomNumbers(5)));
+        node.setNodeName(StrUtil.format("{}[{}]", node.getNodeName(), RandomUtil.randomNumbers(5)));
 
         //存储节点数据
         INodeDataStoreHandler nodeDataStoreHandler = NodeDataStoreFactory.getInstance();
@@ -462,7 +462,7 @@ public class ModelUtil {
 
         StartEvent startEvent = new StartEvent();
         startEvent.setId(node.getId());
-        startEvent.setName(node.getName());
+        startEvent.setName(node.getNodeName());
 
         flowElementList.add(startEvent);
 
@@ -477,7 +477,7 @@ public class ModelUtil {
 
             Node rootUserTask = new Node();
             rootUserTask.setId(StrUtil.format("{}_user_task", node.getId()));
-            rootUserTask.setName("发起人");
+            rootUserTask.setNodeName("发起人");
 
 
             UserTask userTask = buildUserTask(rootUserTask, node.getId(), createListener);
@@ -551,7 +551,7 @@ public class ModelUtil {
 
         ServiceTask serviceTask = new ServiceTask();
         serviceTask.setId(StrUtil.format("approve_service_task_{}", node.getId()));
-        serviceTask.setName(StrUtil.format("{}_服务任务", node.getName()));
+        serviceTask.setName(StrUtil.format("{}_服务任务", node.getNodeName()));
         serviceTask.setImplementationType("class");
         serviceTask.setImplementation(ApproveServiceTask.class.getCanonicalName());
         serviceTask.setAsynchronous(false);
@@ -636,7 +636,7 @@ public class ModelUtil {
 
         IntermediateCatchEvent catchEvent = new IntermediateCatchEvent();
         catchEvent.setId(node.getId());
-        catchEvent.setName(node.getName());
+        catchEvent.setName(node.getNodeName());
         catchEvent.addEventDefinition(timerEventDefinition);
 
         return catchEvent;
@@ -652,7 +652,7 @@ public class ModelUtil {
     private static UserTask buildUserTask(Node node, String oriNodeId, FlowableListener... flowableListeners) {
         UserTask userTask = new UserTask();
         userTask.setId(node.getId());
-        userTask.setName(node.getName());
+        userTask.setName(node.getNodeName());
 
         if (flowableListeners != null) {
             List<FlowableListener> taskListeners = new ArrayList<>();
@@ -688,13 +688,13 @@ public class ModelUtil {
 
         ParallelGateway inclusiveGateway = new ParallelGateway();
         inclusiveGateway.setId(node.getId());
-        inclusiveGateway.setName(node.getName());
+        inclusiveGateway.setName(node.getNodeName());
         flowElementList.add(inclusiveGateway);
 
         //合并网关
         ParallelGateway parallelGateway = new ParallelGateway();
         parallelGateway.setId(StrUtil.format("{}_merge_gateway", node.getId()));
-        parallelGateway.setName(StrUtil.format("{}_合并网关", node.getName()));
+        parallelGateway.setName(StrUtil.format("{}_合并网关", node.getNodeName()));
         flowElementList.add(parallelGateway);
 
         return flowElementList;
@@ -714,14 +714,14 @@ public class ModelUtil {
 
         InclusiveGateway inclusiveGateway = new InclusiveGateway();
         inclusiveGateway.setId(node.getId());
-        inclusiveGateway.setName(node.getName());
+        inclusiveGateway.setName(node.getNodeName());
 
         flowElementList.add(inclusiveGateway);
 
         //合并网关
         InclusiveGateway gateway = new InclusiveGateway();
         gateway.setId(StrUtil.format("{}_merge_gateway", node.getId()));
-        gateway.setName(StrUtil.format("{}_合并网关", node.getName()));
+        gateway.setName(StrUtil.format("{}_合并网关", node.getNodeName()));
         flowElementList.add(gateway);
 
         return flowElementList;
@@ -737,7 +737,7 @@ public class ModelUtil {
     private static EndEvent buildEndNode(Node node, boolean terminateAll) {
         EndEvent endEvent = new EndEvent();
         endEvent.setId(node.getId());
-        endEvent.setName(node.getName());
+        endEvent.setName(node.getNodeName());
 
 
         List<EventDefinition> definitionList = new ArrayList<>();
@@ -773,7 +773,7 @@ public class ModelUtil {
 
 
         SequenceFlow sequenceFlow = buildSingleSequenceFlow(parentNode.getTailId(), node.getHeadId(), expression,
-                StrUtil.format("{}->{}", parentNode.getName(), node.getName())
+                StrUtil.format("{}->{}", parentNode.getNodeName(), node.getNodeName())
         );
         sequenceFlowList.add(sequenceFlow);
 
@@ -792,7 +792,7 @@ public class ModelUtil {
 
         ServiceTask serviceTask = new ServiceTask();
         serviceTask.setId(node.getId());
-        serviceTask.setName(node.getName());
+        serviceTask.setName(node.getNodeName());
         serviceTask.setAsynchronous(true);
         serviceTask.setImplementationType("class");
         serviceTask.setImplementation(CopyServiceTask.class.getCanonicalName());
@@ -821,7 +821,7 @@ public class ModelUtil {
 
         ServiceTask serviceTask = new ServiceTask();
         serviceTask.setId(node.getId());
-        serviceTask.setName(node.getName());
+        serviceTask.setName(node.getNodeName());
         serviceTask.setImplementationType("class");
         serviceTask.setImplementation(TriggerServiceTask.class.getCanonicalName());
         serviceTask.setAsynchronous(true);
@@ -853,13 +853,13 @@ public class ModelUtil {
 
         InclusiveGateway inclusiveGateway = new InclusiveGateway();
         inclusiveGateway.setId(StrUtil.format("{}_route_start", node.getId()));
-        inclusiveGateway.setName(StrUtil.format("{}_网关", node.getName()));
+        inclusiveGateway.setName(StrUtil.format("{}_网关", node.getNodeName()));
         inclusiveGateway.setExtensionElements(FlowableUtils.generateFlowNodeIdExtensionMap(node.getId()));
         flowElementList.add(inclusiveGateway);
 
         InclusiveGateway inclusiveMergeGateway = new InclusiveGateway();
         inclusiveMergeGateway.setId(StrUtil.format("{}_merge_node", node.getId()));
-        inclusiveMergeGateway.setName(StrUtil.format("{}_合并网关", node.getName()));
+        inclusiveMergeGateway.setName(StrUtil.format("{}_合并网关", node.getNodeName()));
 
         inclusiveMergeGateway.setExtensionElements(FlowableUtils.generateFlowNodeIdExtensionMap(node.getId()));
 
@@ -874,7 +874,7 @@ public class ModelUtil {
 
             ServiceTask serviceTask = new ServiceTask();
             serviceTask.setId(StrUtil.format("{}_{}", node.getId(), index));
-            serviceTask.setName(StrUtil.format("{}_{}", node.getName(), index));
+            serviceTask.setName(StrUtil.format("{}_{}", node.getNodeName(), index));
             serviceTask.setImplementationType("class");
             serviceTask.setImplementation(RouteServiceTask.class.getCanonicalName());
             serviceTask.setExtensionElements(FlowableUtils.generateFlowNodeIdExtensionMap(node.getId()));
@@ -886,7 +886,7 @@ public class ModelUtil {
         {
             ServiceTask serviceTask = new ServiceTask();
             serviceTask.setId(StrUtil.format("{}_{}", node.getId(), list.size()));
-            serviceTask.setName(StrUtil.format("{}_{}", node.getName(), list.size()));
+            serviceTask.setName(StrUtil.format("{}_{}", node.getNodeName(), list.size()));
             serviceTask.setImplementationType("class");
             serviceTask.setImplementation(RouteServiceTask.class.getCanonicalName());
             serviceTask.setExtensionElements(FlowableUtils.generateFlowNodeIdExtensionMap(node.getId()));
@@ -912,7 +912,7 @@ public class ModelUtil {
 
         CallActivity callActivity = new CallActivity();
         callActivity.setId(node.getId());
-        callActivity.setName(node.getName());
+        callActivity.setName(node.getNodeName());
         callActivity.setCalledElement(node.getSubFlowId());
         if (node.getMultiple()) {
 

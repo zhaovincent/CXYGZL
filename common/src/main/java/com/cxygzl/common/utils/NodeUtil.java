@@ -19,16 +19,16 @@ public class NodeUtil {
      */
     public static void addEndNode(Node node) {
 
-        Node children = node.getChildren();
+        Node children = node.getChildNode();
         if (isNode(children)) {
             addEndNode(children);
         } else {
             Node end = new Node();
             end.setId(ProcessInstanceConstant.VariableKey.END);
             end.setType(NodeTypeEnum.END.getValue());
-            end.setName("结束节点");
+            end.setNodeName("结束节点");
             end.setParentId(node.getId());
-            node.setChildren(end);
+            node.setChildNode(end);
         }
 
     }
@@ -66,13 +66,13 @@ public class NodeUtil {
             List<Node> branchs = node.getConditionNodes();
             for (Node branch : branchs) {
                 branch.setParentId(node.getId());
-                Node children = branch.getChildren();
+                Node children = branch.getChildNode();
                 handleParentId(children, branch.getId());
             }
 
         }
 
-        handleParentId(node.getChildren(), node.getId());
+        handleParentId(node.getChildNode(), node.getId());
 
     }
 
@@ -81,14 +81,14 @@ public class NodeUtil {
      *
      * @param node
      */
-    public static void handleChildrenAfterJump(Node node, String parentId, Node c) {
+    public static Node handleChildrenAfterJump(Node node, String parentId, Node c) {
         if (!isNode(node)) {
-            return;
+            return null;
         }
 
         if (node.getId().equals(parentId)) {
-            node.setChildren(c);
-            return;
+            node.setChildNode(c);
+            return node;
         }
 
         Integer type = node.getType();
@@ -100,14 +100,21 @@ public class NodeUtil {
             List<Node> branchs = node.getConditionNodes();
             for (Node branch : branchs) {
 
-                Node children = branch.getChildren();
-                handleChildrenAfterJump(children, parentId, c);
+                Node children = branch.getChildNode();
+                Node n = handleChildrenAfterJump(children, parentId, c);
+                if(n!=null){
+                    //branch.setChildNode(n);
+                }
             }
 
         }
 
-        handleChildrenAfterJump(node.getChildren(), parentId, c);
+        Node n = handleChildrenAfterJump(node.getChildNode(), parentId, c);
+        if(n!=null){
+            //node.setChildNode(n);
+        }
 
+        return  node;
     }
 
     /**
@@ -140,13 +147,13 @@ public class NodeUtil {
             //条件分支
             List<Node> branchs = node.getConditionNodes();
             for (Node branch : branchs) {
-                Node children = branch.getChildren();
+                Node children = branch.getChildNode();
                 List<String> strings = selectSubProcessId(children);
                 list.addAll(strings);
             }
         }
 
-        List<String> next = selectSubProcessId(node.getChildren());
+        List<String> next = selectSubProcessId(node.getChildNode());
         list.addAll(next);
         return list;
     }
@@ -204,13 +211,13 @@ public class NodeUtil {
             //条件分支
             List<Node> branchs = node.getConditionNodes();
             for (Node branch : branchs) {
-                Node children = branch.getChildren();
+                Node children = branch.getChildNode();
                 List<String> strings = selectUserNodeId(children);
                 list.addAll(strings);
             }
         }
 
-        List<String> next = selectUserNodeId(node.getChildren());
+        List<String> next = selectUserNodeId(node.getChildNode());
         list.addAll(next);
         return list;
     }

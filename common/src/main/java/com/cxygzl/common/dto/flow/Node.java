@@ -1,6 +1,5 @@
 package com.cxygzl.common.dto.flow;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -21,13 +20,13 @@ public class Node {
 
     private Integer type;
 
-    @JsonProperty(value = "nodeName")
-    private String name;
+
+    private String nodeName;
 
     private Boolean error;
 
-    @JsonProperty("childNode")
-    private Node children;
+
+    private Node childNode;
     /**
      * 人员指定类型
      */
