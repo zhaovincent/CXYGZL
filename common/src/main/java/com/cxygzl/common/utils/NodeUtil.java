@@ -56,7 +56,7 @@ public class NodeUtil {
             return;
         }
         node.setParentId(parentId);
-        node.setTempId(StrUtil.format("{}|{}",node.getId(), IdUtil.fastSimpleUUID()));
+        node.setTempId(StrUtil.format("{}|{}", node.getId(), IdUtil.fastSimpleUUID()));
         Integer type = node.getType();
 
 
@@ -77,12 +77,46 @@ public class NodeUtil {
     }
 
     /**
-     * 查找子流程id
+     * 节点跳转之后处理子级
+     *
+     * @param node
+     */
+    public static void handleChildrenAfterJump(Node node, String parentId, Node c) {
+        if (!isNode(node)) {
+            return;
+        }
+
+        if (node.getId().equals(parentId)) {
+            node.setChildren(c);
+            return;
+        }
+
+        Integer type = node.getType();
+
+
+        if (NodeTypeEnum.getByValue(type).getBranch()) {
+
+            //分支
+            List<Node> branchs = node.getConditionNodes();
+            for (Node branch : branchs) {
+
+                Node children = branch.getChildren();
+                handleChildrenAfterJump(children, parentId, c);
+            }
+
+        }
+
+        handleChildrenAfterJump(node.getChildren(), parentId, c);
+
+    }
+
+    /**
+     * 查找指定类型节点id
      *
      * @param node
      * @return
      */
-    public static List<String> selectSubProcessId(Node node) {
+    public static List<String> selectId(Node node, int tp) {
 
         List<String> list = new ArrayList();
 
@@ -93,7 +127,7 @@ public class NodeUtil {
         Integer type = node.getType();
 
 
-        if (type == NodeTypeEnum.SUB_PROCESS.getValue().intValue()) {
+        if (type == tp) {
 
             list.add(node.getSubFlowId());
         }
@@ -115,6 +149,26 @@ public class NodeUtil {
         List<String> next = selectSubProcessId(node.getChildren());
         list.addAll(next);
         return list;
+    }
+
+    /**
+     * 查找动态路由节点id
+     *
+     * @param node
+     * @return
+     */
+    public static List<String> selectRouteId(Node node) {
+        return selectId(node, NodeTypeEnum.ROUTE.getValue().intValue());
+    }
+
+    /**
+     * 查找子流程id
+     *
+     * @param node
+     * @return
+     */
+    public static List<String> selectSubProcessId(Node node) {
+        return selectId(node, NodeTypeEnum.SUB_PROCESS.getValue().intValue());
     }
 
     /**

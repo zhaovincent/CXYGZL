@@ -25,6 +25,7 @@ public class ProcessNodeRecordParamDto {
     private String data;
 
     private String nodeId;
+    private String parentNodeId;
 
     /**
      * 节点类型

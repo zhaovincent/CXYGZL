@@ -27,7 +27,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE;
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE;
@@ -558,14 +557,8 @@ public class ModelUtil {
         serviceTask.setAsynchronous(false);
 
 
-        Map<String, List<ExtensionElement>> extensionElements = new HashMap<>();
 
-
-        ExtensionElement extensionElement = FlowableUtils.generateFlowNodeIdExtension(node.getId());
-
-        extensionElements.put(ProcessInstanceConstant.VariableKey.SYS_CODE, CollUtil.newArrayList(extensionElement));
-
-        serviceTask.setExtensionElements(extensionElements);
+        serviceTask.setExtensionElements(FlowableUtils.generateFlowNodeIdExtensionMap(node.getId()));
 
         flowElementList.add(serviceTask);
 
@@ -674,10 +667,8 @@ public class ModelUtil {
         if (StrUtil.isNotBlank(oriNodeId)) {
 
 
-            Map<String, List<ExtensionElement>> extensionElements = new HashMap<>();
-            ExtensionElement extensionElement = FlowableUtils.generateFlowNodeIdExtension(oriNodeId);
-            extensionElements.put(ProcessInstanceConstant.VariableKey.SYS_CODE, CollUtil.newArrayList(extensionElement));
-            userTask.setExtensionElements(extensionElements);
+
+            userTask.setExtensionElements(FlowableUtils.generateFlowNodeIdExtensionMap(oriNodeId));
 
         }
 
@@ -790,20 +781,6 @@ public class ModelUtil {
         return sequenceFlowList;
     }
 
-    /**
-     * 生成扩展数据
-     *
-     * @param key
-     * @param val
-     * @return
-     */
-    public static ExtensionAttribute generateExtensionAttribute(String key, String val) {
-        ExtensionAttribute ea = new ExtensionAttribute();
-
-        ea.setName(key);
-        ea.setValue(val);
-        return ea;
-    }
 
     /**
      * 创建抄送节点
@@ -877,12 +854,14 @@ public class ModelUtil {
         InclusiveGateway inclusiveGateway = new InclusiveGateway();
         inclusiveGateway.setId(StrUtil.format("{}_route_start", node.getId()));
         inclusiveGateway.setName(StrUtil.format("{}_网关", node.getName()));
+        inclusiveGateway.setExtensionElements(FlowableUtils.generateFlowNodeIdExtensionMap(node.getId()));
         flowElementList.add(inclusiveGateway);
 
         InclusiveGateway inclusiveMergeGateway = new InclusiveGateway();
         inclusiveMergeGateway.setId(StrUtil.format("{}_merge_node", node.getId()));
         inclusiveMergeGateway.setName(StrUtil.format("{}_合并网关", node.getName()));
 
+        inclusiveMergeGateway.setExtensionElements(FlowableUtils.generateFlowNodeIdExtensionMap(node.getId()));
 
         flowElementList.add(inclusiveMergeGateway);
 
@@ -898,6 +877,7 @@ public class ModelUtil {
             serviceTask.setName(StrUtil.format("{}_{}", node.getName(), index));
             serviceTask.setImplementationType("class");
             serviceTask.setImplementation(RouteServiceTask.class.getCanonicalName());
+            serviceTask.setExtensionElements(FlowableUtils.generateFlowNodeIdExtensionMap(node.getId()));
 
             flowElementList.add(serviceTask);
 
@@ -909,6 +889,7 @@ public class ModelUtil {
             serviceTask.setName(StrUtil.format("{}_{}", node.getName(), list.size()));
             serviceTask.setImplementationType("class");
             serviceTask.setImplementation(RouteServiceTask.class.getCanonicalName());
+            serviceTask.setExtensionElements(FlowableUtils.generateFlowNodeIdExtensionMap(node.getId()));
 
             flowElementList.add(serviceTask);
 

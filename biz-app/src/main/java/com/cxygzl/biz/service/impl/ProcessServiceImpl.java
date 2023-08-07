@@ -17,7 +17,6 @@ import com.cxygzl.biz.service.IProcessService;
 import com.cxygzl.biz.service.IProcessStarterService;
 import com.cxygzl.biz.service.IProcessSubProcessService;
 import com.cxygzl.biz.utils.CoreHttpUtil;
-import com.cxygzl.biz.utils.NodeFormatUtil;
 import com.cxygzl.biz.vo.FormItemVO;
 import com.cxygzl.biz.vo.ProcessVO;
 import com.cxygzl.common.constants.FormTypeEnum;
@@ -139,8 +138,8 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
         Node node = JSON.parseObject(processStr, Node.class);
         NodeUtil.handleParentId(node,null);
-        NodeFormatUtil.handleStarterNode(node,JSON.parseArray(processVO.getFormItems(),FormItemVO.class));
-        NodeFormatUtil.handleApproveForm(node,JSON.parseArray(processVO.getFormItems(),FormItemVO.class));
+        com.cxygzl.biz.utils.NodeUtil.handleStarterNode(node,JSON.parseArray(processVO.getFormItems(),FormItemVO.class));
+        com.cxygzl.biz.utils.NodeUtil.handleApproveForm(node,JSON.parseArray(processVO.getFormItems(),FormItemVO.class));
 
         com.cxygzl.common.dto.R<String> r = CoreHttpUtil.createFlow(node, StpUtil.getLoginIdAsString());
         if (!r.isOk()) {

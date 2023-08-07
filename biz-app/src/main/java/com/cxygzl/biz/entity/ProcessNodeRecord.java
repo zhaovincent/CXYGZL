@@ -78,4 +78,10 @@ public class ProcessNodeRecord  extends BaseEntity {
      */
     @TableField("`execution_id`")
     private String executionId;
+
+    /**
+     * 上一层级id
+     */
+    @TableField("`parent_node_id`")
+    private String parentNodeId;
 }

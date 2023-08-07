@@ -1,5 +1,7 @@
 package com.cxygzl.core.listeners;
 
+import cn.hutool.extra.spring.SpringUtil;
+import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
 import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.utils.CoreHttpUtil;
@@ -7,8 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
+import org.flowable.engine.RuntimeService;
 import org.flowable.engine.delegate.event.impl.FlowableActivityEventImpl;
 import org.flowable.engine.delegate.event.impl.FlowableMultiInstanceActivityCompletedEventImpl;
+
+import java.util.Map;
 
 /**
  * 流程监听器
@@ -24,6 +29,8 @@ public class NodeEndEventListener implements FlowableEventListener {
     @Override
     public void onEvent(FlowableEvent event) {
 
+        RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
+
         if (
                 event.getType().toString().equals(FlowableEngineEventType.MULTI_INSTANCE_ACTIVITY_COMPLETED_WITH_CONDITION.toString())
                         ||
@@ -36,6 +43,7 @@ public class NodeEndEventListener implements FlowableEventListener {
 
             log.info("实例完成1 节点id：{} 名字:{}", activityId, activityName);
 
+            Map<String, Object> variables = runtimeService.getVariables(flowableActivityEvent.getExecutionId());
 
             String processInstanceId = flowableActivityEvent.getProcessInstanceId();
 
@@ -46,7 +54,7 @@ public class NodeEndEventListener implements FlowableEventListener {
             processNodeRecordParamDto.setFlowId(flowId);
             processNodeRecordParamDto.setExecutionId(flowableActivityEvent.getExecutionId());
             processNodeRecordParamDto.setProcessInstanceId(processInstanceId);
-//            processNodeRecordParamDto.setData(JSON.toJSONString(processVariables));
+            processNodeRecordParamDto.setData(JSON.toJSONString(variables));
             processNodeRecordParamDto.setNodeId(activityId);
 //            processNodeRecordParamDto.setNodeType(nodeDto.getType());
             processNodeRecordParamDto.setNodeName(activityName);
@@ -62,6 +70,7 @@ public class NodeEndEventListener implements FlowableEventListener {
             String activityId = flowableActivityEvent.getActivityId();
             String activityName = flowableActivityEvent.getActivityName();
             log.info("实例完成2 节点id：{} 名字:{}", activityId, activityName);
+            Map<String, Object> variables = runtimeService.getVariables(flowableActivityEvent.getExecutionId());
 
             String processInstanceId = flowableActivityEvent.getProcessInstanceId();
 
@@ -72,7 +81,7 @@ public class NodeEndEventListener implements FlowableEventListener {
             processNodeRecordParamDto.setFlowId(flowId);
             processNodeRecordParamDto.setExecutionId(flowableActivityEvent.getExecutionId());
             processNodeRecordParamDto.setProcessInstanceId(processInstanceId);
-//            processNodeRecordParamDto.setData(JSON.toJSONString(processVariables));
+            processNodeRecordParamDto.setData(JSON.toJSONString(variables));
             processNodeRecordParamDto.setNodeId(activityId);
 //            processNodeRecordParamDto.setNodeType(nodeDto.getType());
             processNodeRecordParamDto.setNodeName(activityName);

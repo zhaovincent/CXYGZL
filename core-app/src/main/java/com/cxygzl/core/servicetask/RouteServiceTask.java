@@ -57,11 +57,13 @@ public class RouteServiceTask implements JavaDelegate {
 
             //判断发起人
             String targetKey = routeNode.getNodeId();
-            if(StrUtil.equals(targetKey, ProcessInstanceConstant.VariableKey.STARTER)){
-                targetKey=StrUtil.format("{}_user_task", targetKey);
+            if (StrUtil.equals(targetKey, ProcessInstanceConstant.VariableKey.STARTER)) {
+                targetKey = StrUtil.format("{}_user_task", targetKey);
                 runtimeService.setVariable(execution.getId(),
-                        ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE,true);
+                        ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE, true);
             }
+
+            runtimeService.setVariable(execution.getId(), StrUtil.format("{}_parent_id", targetKey), nodeId);
 
             //跳转
             runtimeService.createChangeActivityStateBuilder()

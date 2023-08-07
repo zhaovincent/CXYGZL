@@ -1,17 +1,28 @@
 package com.cxygzl.core.utils;
 
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import com.cxygzl.common.constants.ProcessInstanceConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.*;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
 public class FlowableUtils {
+
+    public static Map<String, List<ExtensionElement>> generateFlowNodeIdExtensionMap(String nodeId) {
+        Map<String, List<ExtensionElement>> extensionElements = new HashMap<>();
+        ExtensionElement extensionElement = generateFlowNodeIdExtension(nodeId);
+        extensionElements.put(ProcessInstanceConstant.VariableKey.SYS_CODE, CollUtil.newArrayList(extensionElement));
+        return extensionElements;
+    }
+
 
     public static ExtensionElement generateFlowNodeIdExtension(String nodeId) {
         ExtensionElement extensionElement=new ExtensionElement();

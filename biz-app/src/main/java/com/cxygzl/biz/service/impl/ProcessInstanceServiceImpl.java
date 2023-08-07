@@ -169,7 +169,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
             }
             //处理表单数据
             Process process = processList.stream().filter(w -> StrUtil.equals(w.getFlowId(), record.getFlowId())).findAny().orElse(null);
-            if(process!=null){
+            if (process != null) {
                 List<Dict> formValueShowList = getFormValueShowList(process, record.getFlowId(), record.getNodeId(), paramMap);
 
                 record.setFormValueShowList(formValueShowList);
@@ -320,7 +320,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                         .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
                         .one();
 
-                if(processNodeRecordAssignUser!=null){
+                if (processNodeRecordAssignUser != null) {
                     String data = processNodeRecordAssignUser.getData();
                     if (StrUtil.isNotBlank(data)) {
                         Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
@@ -541,11 +541,12 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
             return com.cxygzl.common.dto.R.success(new ArrayList<>());
         }
 
+        String process = null;
         if (StrUtil.isBlankIfStr(flowId) && StrUtil.isNotBlank(processInstanceId)) {
             ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
                     processInstanceId).one();
             flowId = processInstanceRecord.getFlowId();
-
+            process = processInstanceRecord.getProcess();
 
         }
         Map<String, Object> paramMap = nodeFormatParamVo.getParamMap();
@@ -584,21 +585,23 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         if (StrUtil.isNotBlank(processInstanceId)) {
             List<ProcessNodeRecord> processNodeRecordList = processNodeRecordService.lambdaQuery()
                     .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId)
-                    .in(ProcessNodeRecord::getStatus,CollUtil.newArrayList( NodeStatusEnum.YJS.getCode(), NodeStatusEnum.JXZ.getCode()))
+                    .in(ProcessNodeRecord::getStatus, CollUtil.newArrayList(NodeStatusEnum.YJS.getCode(), NodeStatusEnum.JXZ.getCode()))
                     .list();
             {
-                Set<String> collect = processNodeRecordList.stream().filter(w->w.getStatus().intValue()==NodeStatusEnum.YJS.getCode()).map(w -> w.getNodeId()).collect(Collectors.toSet());
+                Set<String> collect = processNodeRecordList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.YJS.getCode()).map(w -> w.getNodeId()).collect(Collectors.toSet());
                 completeNodeSet.addAll(collect);
             }
             {
-                Set<String> collect = processNodeRecordList.stream().filter(w->w.getStatus().intValue()==NodeStatusEnum.JXZ.getCode()).map(w -> w.getNodeId()).collect(Collectors.toSet());
+                Set<String> collect = processNodeRecordList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.JXZ.getCode()).map(w -> w.getNodeId()).collect(Collectors.toSet());
                 beingNodeSet.addAll(collect);
             }
         }
 
 
-        Process oaForms = processService.getByFlowId(flowId);
-        String process = oaForms.getProcess();
+        if (StrUtil.isBlank(process)) {
+            Process oaForms = processService.getByFlowId(flowId);
+            process = oaForms.getProcess();
+        }
         Node nodeDto = JSON.parseObject(process, Node.class);
 
         List<NodeVo> processNodeShowDtos = NodeFormatUtil.formatProcessNodeShow(nodeDto, completeNodeSet,
