@@ -846,13 +846,12 @@ public class ModelUtil {
      * @return
      */
     private static List<FlowElement> buildRouteNode(Node node) {
-        node.setHeadId(StrUtil.format("{}_route_start", node.getId()));
         node.setTailId(StrUtil.format("{}_merge_node", node.getId()));
 
         List<FlowElement> flowElementList = new ArrayList<>();
 
         InclusiveGateway inclusiveGateway = new InclusiveGateway();
-        inclusiveGateway.setId(StrUtil.format("{}_route_start", node.getId()));
+        inclusiveGateway.setId(node.getId());
         inclusiveGateway.setName(StrUtil.format("{}_网关", node.getNodeName()));
         inclusiveGateway.setExtensionElements(FlowableUtils.generateFlowNodeIdExtensionMap(node.getId()));
         flowElementList.add(inclusiveGateway);
@@ -1199,7 +1198,7 @@ public class ModelUtil {
 
         if (node.getType() == NodeTypeEnum.ROUTE.getValue().intValue()) {
             //路由
-            String startId = StrUtil.format("{}_route_start", node.getId());
+            String startId = node.getId();
             String endId = StrUtil.format("{}_merge_node", node.getId());
             List<Node> list = node.getList();
             int index = 0;
