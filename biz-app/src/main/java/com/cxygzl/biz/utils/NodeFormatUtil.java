@@ -7,6 +7,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
+import com.cxygzl.biz.entity.ProcessExecution;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.entity.ProcessNodeRecordApproveDesc;
 import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
@@ -40,14 +41,14 @@ public class NodeFormatUtil {
      * 格式化流程节点显示
      *
      * @param node
-     * @param completeNodeSet
-     * @param continueNodeSet
+     * @param completeExecutionIdSet
+     * @param continueExecutionIdSet
      * @param processInstanceId
      * @param paramMap
      */
     public static List<NodeVo> formatProcessNodeShow(Node node,
-                                                     Set<String> completeNodeSet,
-                                                     Set<String> continueNodeSet,
+                                                     Set<String> completeExecutionIdSet,
+                                                     Set<String> continueExecutionIdSet,
                                                      String processInstanceId,
                                                      Map<String, Object> paramMap) {
         List<NodeVo> list = new ArrayList();
@@ -68,13 +69,16 @@ public class NodeFormatUtil {
         nodeVo.setName(name);
         nodeVo.setType(type);
         nodeVo.setStatus(NodeStatusEnum.WKS.getCode());
-        if (completeNodeSet.contains(node.getId())) {
-            nodeVo.setStatus(NodeStatusEnum.YJS.getCode());
+        String executionId = node.getExecutionId();
+        if(StrUtil.isNotBlank(executionId)) {
+            if (completeExecutionIdSet.contains(executionId)) {
+                nodeVo.setStatus(NodeStatusEnum.YJS.getCode());
 
-        }
-        if (continueNodeSet.contains(node.getId())) {
-            nodeVo.setStatus(NodeStatusEnum.JXZ.getCode());
+            }
+            if (continueExecutionIdSet.contains(executionId)) {
+                nodeVo.setStatus(NodeStatusEnum.JXZ.getCode());
 
+            }
         }
 
         {
@@ -97,11 +101,17 @@ public class NodeFormatUtil {
             }
 
             // 用户列表
-            if (StrUtil.isNotBlank(processInstanceId)) {
+            if (StrUtil.isNotBlank(processInstanceId)&&StrUtil.isNotBlank(node.getExecutionId())) {
+
+                IProcessExecutionService processExecutionService = SpringUtil.getBean(IProcessExecutionService.class);
+                List<ProcessExecution> processExecutionList = processExecutionService.lambdaQuery().eq(ProcessExecution::getExecutionId, node.getExecutionId()).list();
+                List<String> childExecutionIdList = processExecutionList.stream().map(w -> w.getChildExecutionId()).collect(Collectors.toList());
+
                 IProcessNodeRecordAssignUserService processNodeRecordAssignUserService = SpringUtil.getBean(IProcessNodeRecordAssignUserService.class);
                 List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = processNodeRecordAssignUserService
                         .lambdaQuery().
                         eq(ProcessNodeRecordAssignUser::getNodeId, node.getId())
+                        .in(ProcessNodeRecordAssignUser::getExecutionId, childExecutionIdList)
                         .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processInstanceId)
                         .orderByAsc(ProcessNodeRecordAssignUser::getCreateTime)
                         .list();
@@ -274,7 +284,7 @@ public class NodeFormatUtil {
 
             for (Node branch : branchs) {
                 Node children = branch.getChildNode();
-                List<NodeVo> processNodeShowDtos = formatProcessNodeShow(children, completeNodeSet, continueNodeSet, processInstanceId, paramMap);
+                List<NodeVo> processNodeShowDtos = formatProcessNodeShow(children, completeExecutionIdSet, continueExecutionIdSet, processInstanceId, paramMap);
 
                 NodeVo p = new NodeVo();
                 p.setChildren(processNodeShowDtos);
@@ -288,7 +298,7 @@ public class NodeFormatUtil {
 
         list.add(nodeVo);
 
-        List<NodeVo> next = formatProcessNodeShow(node.getChildNode(), completeNodeSet, continueNodeSet, processInstanceId, paramMap);
+        List<NodeVo> next = formatProcessNodeShow(node.getChildNode(), completeExecutionIdSet, continueExecutionIdSet, processInstanceId, paramMap);
         list.addAll(next);
 
 

@@ -20,7 +20,7 @@ public class NodeUtil {
             return;
         }
 
-        if (StrUtil.equals(node.getId(), nodeId) && StrUtil.isBlank(node.getExecutionId())) {
+        if (StrUtil.contains(nodeId, node.getId()) && StrUtil.isBlank(node.getExecutionId())) {
             node.setExecutionId(executionId);
             return;
         }
@@ -28,7 +28,7 @@ public class NodeUtil {
 
         Integer type = node.getType();
 
-        if (NodeTypeEnum.getByValue(type).getBranch()) {
+        if (NodeTypeEnum.getByValue(type).getBranch()&&CollUtil.isNotEmpty(node.getConditionNodes())) {
 
             //条件分支
             List<Node> branchs = node.getConditionNodes();
@@ -449,7 +449,7 @@ public class NodeUtil {
         Node childNode = node.getChildNode();
 
 
-        if (node.getId().equals(parentId)&&(!isNode(childNode)||StrUtil.isBlank(childNode.getExecutionId()))) {
+        if (StrUtil.contains(parentId,node.getId())&&(!isNode(childNode)||StrUtil.isBlank(childNode.getExecutionId()))) {
             node.setChildNode(c);
             Node finalChildrenNode = getFinalChildrenNode(c);
             if (finalChildrenNode.getType().intValue() != NodeTypeEnum.END.getValue()) {

@@ -307,6 +307,7 @@ public class TaskController {
             runtimeService.setVariable(task.getExecutionId(),
                     ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE, true);
         }
+        runtimeService.setVariable(task.getExecutionId(), StrUtil.format("{}_parent_id", targetKey), task.getTaskDefinitionKey());
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 ProcessInstanceConstant.TaskType.REJECT

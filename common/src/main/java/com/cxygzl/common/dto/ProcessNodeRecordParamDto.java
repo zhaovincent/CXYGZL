@@ -2,6 +2,8 @@ package com.cxygzl.common.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 流程节点记录
  */
@@ -25,6 +27,8 @@ public class ProcessNodeRecordParamDto {
     private String data;
 
     private String nodeId;
+
+
     private String parentNodeId;
 
     /**
@@ -38,6 +42,7 @@ public class ProcessNodeRecordParamDto {
     private String nodeName;
 
     private String executionId;
+    private List<String> childExecutionId;
 
 
 

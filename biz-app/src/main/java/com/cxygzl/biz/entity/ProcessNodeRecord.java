@@ -84,4 +84,6 @@ public class ProcessNodeRecord  extends BaseEntity {
      */
     @TableField("`parent_node_id`")
     private String parentNodeId;
+
+
 }

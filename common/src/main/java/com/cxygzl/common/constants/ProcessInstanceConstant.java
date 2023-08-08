@@ -158,11 +158,11 @@ public class ProcessInstanceConstant {
      */
     public static class SubProcessStarterMode{
         //同主流程发起人
-        public static final Integer MAIN=1;
+        public static final int MAIN=1;
         //表单内人员
-        public static final Integer FORM=2;
+        public static final int FORM=2;
         //多实例表单单项
-        public static final Integer MULTIPLE_FORM_SINGLE=3;
+        public static final int MULTIPLE_FORM_SINGLE=3;
     }
 
     /**

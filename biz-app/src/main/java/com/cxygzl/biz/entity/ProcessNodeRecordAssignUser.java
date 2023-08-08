@@ -23,6 +23,7 @@ import java.util.Date;
 public class ProcessNodeRecordAssignUser  extends BaseEntity {
 
 
+
     /**
      * 流程id
      */
@@ -42,6 +43,7 @@ public class ProcessNodeRecordAssignUser  extends BaseEntity {
     private String data;
     @TableField("`node_id`")
     private String nodeId;
+
 
     /**
      *  用户id

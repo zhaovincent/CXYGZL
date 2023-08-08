@@ -56,6 +56,7 @@ public class TaskCompleteEventListener implements FlowableEventListener {
             ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto = new ProcessNodeRecordAssignUserParamDto();
             processNodeRecordAssignUserParamDto.setFlowId(flowId);
             processNodeRecordAssignUserParamDto.setProcessInstanceId(processInstanceId);
+         //   processNodeRecordAssignUserParamDto.setParentExecutionId();
             processNodeRecordAssignUserParamDto.setData(JSON.toJSONString(taskService.getVariables(task.getId())));
             processNodeRecordAssignUserParamDto.setLocalData(JSON.toJSONString(taskService.getVariablesLocal(task.getId())));
             processNodeRecordAssignUserParamDto.setNodeId(nodeId);

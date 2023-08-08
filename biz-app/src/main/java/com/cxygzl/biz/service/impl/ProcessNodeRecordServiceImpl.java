@@ -1,18 +1,17 @@
 package com.cxygzl.biz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
+import com.cxygzl.biz.entity.ProcessExecution;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.entity.ProcessNodeRecord;
 import com.cxygzl.biz.mapper.ProcessNodeRecordMapper;
-import com.cxygzl.biz.service.IProcessInstanceRecordService;
-import com.cxygzl.biz.service.IProcessNodeDataService;
-import com.cxygzl.biz.service.IProcessNodeRecordService;
-import com.cxygzl.biz.service.IProcessService;
+import com.cxygzl.biz.service.*;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
 import com.cxygzl.common.dto.R;
@@ -23,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -42,6 +42,8 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
     private IProcessNodeDataService processNodeDataService;
     @Resource
     private IProcessService processService;
+    @Resource
+    private IProcessExecutionService processExecutionService;
 
     /**
      * 节点开始
@@ -51,6 +53,22 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
      */
     @Override
     public R start(ProcessNodeRecordParamDto processNodeRecordParamDto) {
+
+        Long count = this.lambdaQuery().eq(ProcessNodeRecord::getExecutionId, processNodeRecordParamDto.getExecutionId()).count();
+        if (count > 0) {
+            return R.success();
+        }
+        List<String> childExecutionId = processNodeRecordParamDto.getChildExecutionId();
+        if (CollUtil.isNotEmpty(childExecutionId)) {
+            //子级
+
+            for (String s : childExecutionId) {
+                ProcessExecution entity = new ProcessExecution();
+                entity.setChildExecutionId(s);
+                entity.setExecutionId(processNodeRecordParamDto.getExecutionId());
+                processExecutionService.save(entity);
+            }
+        }
 
         ProcessNodeRecord processNodeRecord = BeanUtil.copyProperties(processNodeRecordParamDto, ProcessNodeRecord.class);
         processNodeRecord.setStartTime(new Date());
@@ -72,7 +90,7 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
         Node currentProcessRootNode = JSON.parseObject(processInstanceRecord.getProcess(), Node.class);
 
         //设置executionId
-        NodeUtil.handleNodeAddExecutionId(currentProcessRootNode,nodeId,processNodeRecordParamDto.getExecutionId());
+        NodeUtil.handleNodeAddExecutionId(currentProcessRootNode, nodeId, processNodeRecordParamDto.getExecutionId());
         processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
 
         if (parentNode != null) {
@@ -84,6 +102,7 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
             }
         }
 
+        log.info("{}-{}上级跳转过来的id:{}", nodeId, processNodeRecordParamDto.getNodeName(), parentNodeId);
 
         if (StrUtil.isNotBlank(parentNodeId)) {
             //说明是跳转过来的 要重新构建流程树

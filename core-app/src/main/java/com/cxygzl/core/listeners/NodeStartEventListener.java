@@ -14,15 +14,20 @@ import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
 import org.flowable.engine.RuntimeService;
+import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.event.impl.FlowableActivityEventImpl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 流程监听器
  */
 @Slf4j
 public class NodeStartEventListener implements FlowableEventListener {
+
 
     /**
      * Called when an event has been fired
@@ -31,14 +36,35 @@ public class NodeStartEventListener implements FlowableEventListener {
      */
     @Override
     public void onEvent(FlowableEvent event) {
+
+
+
         if (event.getType().toString().equals(FlowableEngineEventType.ACTIVITY_STARTED.toString())) {
             //节点开始执行
             //org.flowable.engine.delegate.event.impl.FlowableActivityEventImpl
             FlowableActivityEventImpl flowableActivityEvent = (FlowableActivityEventImpl) event;
             String activityId = flowableActivityEvent.getActivityId();
             String activityName = flowableActivityEvent.getActivityName();
-            log.debug("节点id：{} 名字:{}", activityId, activityName);
+            String parentId = "";
+            List<String> childExecutionIdList=new ArrayList<>();
+            {
+                DelegateExecution execution = flowableActivityEvent.getExecution();
+                parentId=execution.getId();
 
+
+                DelegateExecution parent = execution.getParent();
+                if(parent.isMultiInstanceRoot()){
+                    parentId=parent.getId();
+                    List<? extends DelegateExecution> executions = parent.getExecutions();
+                    List<String> collect = executions.stream().map(w -> w.getId()).collect(Collectors.toList());
+                    childExecutionIdList.addAll(collect);
+                }
+
+
+                log.info("节点开始  节点id：{} 名字:{} executionId:{}, 上级id:{}", activityId, activityName,
+                        flowableActivityEvent.getExecutionId(), parentId);
+
+            }
 
 
             String processInstanceId = flowableActivityEvent.getProcessInstanceId();
@@ -55,6 +81,7 @@ public class NodeStartEventListener implements FlowableEventListener {
             ProcessNodeRecordParamDto processNodeRecordParamDto = new ProcessNodeRecordParamDto();
             processNodeRecordParamDto.setFlowId(flowId);
             processNodeRecordParamDto.setProcessInstanceId(processInstanceId);
+            processNodeRecordParamDto.setChildExecutionId(childExecutionIdList);
             processNodeRecordParamDto.setData(JSON.toJSONString(processVariables));
             processNodeRecordParamDto.setNodeId(activityId);
             processNodeRecordParamDto.setParentNodeId(MapUtil.getStr(processVariables, StrUtil.format("{}_parent_id", activityId)));
@@ -64,9 +91,11 @@ public class NodeStartEventListener implements FlowableEventListener {
 
             }
             processNodeRecordParamDto.setNodeName(activityName);
-            processNodeRecordParamDto.setExecutionId(flowableActivityEvent.getExecutionId());
+            processNodeRecordParamDto.setExecutionId(parentId);
             CoreHttpUtil.startNodeEvent(processNodeRecordParamDto);
 
+            //清除变量
+            runtimeService.removeVariable(flowableActivityEvent.getExecutionId(), StrUtil.format("{}_parent_id", activityId));
         }
 
     }

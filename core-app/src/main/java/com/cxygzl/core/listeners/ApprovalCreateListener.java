@@ -26,12 +26,12 @@ import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.AP
 public class ApprovalCreateListener implements TaskListener {
     @Override
     public void notify(DelegateTask delegateTask) {
-        log.debug(delegateTask.getClass().getCanonicalName());
+
         TaskService taskService = SpringUtil.getBean(TaskService.class);
 
         String assignee = delegateTask.getAssignee();
         String name = delegateTask.getName();
-        log.debug("任务{}-执行人:{}", name, assignee);
+        log.info("审批人创建了 任务{}-执行人:{}", name, assignee);
         String processInstanceId = delegateTask.getProcessInstanceId();
         org.flowable.task.service.impl.persistence.entity.TaskEntityImpl taskEntity = (TaskEntityImpl) delegateTask;
         String nodeId = taskEntity.getTaskDefinitionKey();

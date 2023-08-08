@@ -42,7 +42,11 @@ public class TaskAssignedEventListener implements FlowableEventListener {
             {
                 //任务被指派了人员
                 FlowableEntityEvent flowableEntityEvent = (FlowableEntityEvent) event;
+
+
                 TaskEntityImpl task = (TaskEntityImpl) flowableEntityEvent.getEntity();
+
+
                 //执行人id
                 String assignee = task.getAssignee();
                 //任务拥有者
@@ -63,6 +67,7 @@ public class TaskAssignedEventListener implements FlowableEventListener {
                 ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto = new ProcessNodeRecordAssignUserParamDto();
                 processNodeRecordAssignUserParamDto.setFlowId(flowId);
                 processNodeRecordAssignUserParamDto.setProcessInstanceId(processInstanceId);
+              //  processNodeRecordAssignUserParamDto.setParentExecutionId();
 //        processNodeRecordAssignUserParamDto.setData();
                 processNodeRecordAssignUserParamDto.setNodeId(taskDefinitionKey);
                 processNodeRecordAssignUserParamDto.setUserId((assignee));

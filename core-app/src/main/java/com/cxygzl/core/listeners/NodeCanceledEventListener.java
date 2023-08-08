@@ -38,11 +38,11 @@ public class NodeCanceledEventListener implements FlowableEventListener {
             ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto = new ProcessNodeRecordAssignUserParamDto();
 
             processNodeRecordAssignUserParamDto.setProcessInstanceId(processInstanceId);
+           // processNodeRecordAssignUserParamDto.setParentExecutionId();
 
             processNodeRecordAssignUserParamDto.setExecutionId(executionId);
             processNodeRecordAssignUserParamDto.setNodeId(activityId);
             processNodeRecordAssignUserParamDto.setNodeName(activityName);
-
             processNodeRecordAssignUserParamDto.setTaskType(ProcessInstanceConstant.TaskType.REJECT);
 
             CoreHttpUtil.taskCancelEvent(processNodeRecordAssignUserParamDto);

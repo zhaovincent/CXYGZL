@@ -968,7 +968,7 @@ public class ModelUtil {
 
 
                 //来自表单
-                if (node.getStarterMode() == ProcessInstanceConstant.SubProcessStarterMode.FORM.intValue()) {
+                if (node.getStarterMode() == ProcessInstanceConstant.SubProcessStarterMode.FORM) {
                     ExtensionAttribute e1 = new ExtensionAttribute();
                     e1.setName("source");
                     e1.setValue(node.getStarterValue());

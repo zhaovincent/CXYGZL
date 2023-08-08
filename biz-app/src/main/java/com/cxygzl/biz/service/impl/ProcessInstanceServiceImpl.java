@@ -579,8 +579,10 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         }
 
-        Set<String> completeNodeSet = new HashSet<>();
-        Set<String> beingNodeSet = new HashSet<>();
+        //完成的executionId
+        Set<String> completeExecutionIdSet = new HashSet<>();
+        //进行中的
+        Set<String> beingExecutionIdSet = new HashSet<>();
 
         if (StrUtil.isNotBlank(processInstanceId)) {
             List<ProcessNodeRecord> processNodeRecordList = processNodeRecordService.lambdaQuery()
@@ -588,12 +590,14 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                     .in(ProcessNodeRecord::getStatus, CollUtil.newArrayList(NodeStatusEnum.YJS.getCode(), NodeStatusEnum.JXZ.getCode()))
                     .list();
             {
-                Set<String> collect = processNodeRecordList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.YJS.getCode()).map(w -> w.getNodeId()).collect(Collectors.toSet());
-                completeNodeSet.addAll(collect);
+                Set<String> collect = processNodeRecordList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.YJS.getCode())
+                        .map(w -> w.getExecutionId()).collect(Collectors.toSet());
+                completeExecutionIdSet.addAll(collect);
             }
             {
-                Set<String> collect = processNodeRecordList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.JXZ.getCode()).map(w -> w.getNodeId()).collect(Collectors.toSet());
-                beingNodeSet.addAll(collect);
+                Set<String> collect = processNodeRecordList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.JXZ.getCode())
+                        .map(w -> w.getExecutionId()).collect(Collectors.toSet());
+                beingExecutionIdSet.addAll(collect);
             }
         }
 
@@ -604,8 +608,8 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         }
         Node nodeDto = JSON.parseObject(process, Node.class);
 
-        List<NodeVo> processNodeShowDtos = NodeFormatUtil.formatProcessNodeShow(nodeDto, completeNodeSet,
-                beingNodeSet, processInstanceId, paramMap);
+        List<NodeVo> processNodeShowDtos = NodeFormatUtil.formatProcessNodeShow(nodeDto, completeExecutionIdSet,
+                beingExecutionIdSet, processInstanceId, paramMap);
 
         return com.cxygzl.common.dto.R.success(processNodeShowDtos);
     }
