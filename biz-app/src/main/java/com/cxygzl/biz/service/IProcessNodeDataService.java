@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.cxygzl.biz.entity.ProcessNodeData;
 import com.cxygzl.common.dto.ProcessNodeDataDto;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.flow.Node;
 
 /**
  * <p>
@@ -29,5 +30,7 @@ public interface IProcessNodeDataService extends IService<ProcessNodeData> {
      * @return
      */
     R<String> getNodeData(String flowId,String nodeId);
+
+    R<Node> getNode(String flowId, String nodeId);
 
 }

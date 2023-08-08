@@ -2,14 +2,17 @@ package com.cxygzl.common.dto.flow;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
 @Data
-public class Node {
+public class Node implements Cloneable, Serializable {
 
     private String id;
+
+    private String executionId;
 
     private String tempId;
     private String parentId;

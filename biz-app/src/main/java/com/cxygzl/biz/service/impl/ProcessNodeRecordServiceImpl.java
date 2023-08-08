@@ -5,12 +5,15 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cxygzl.biz.constants.NodeStatusEnum;
+import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.entity.ProcessNodeRecord;
 import com.cxygzl.biz.mapper.ProcessNodeRecordMapper;
 import com.cxygzl.biz.service.IProcessInstanceRecordService;
 import com.cxygzl.biz.service.IProcessNodeDataService;
 import com.cxygzl.biz.service.IProcessNodeRecordService;
+import com.cxygzl.biz.service.IProcessService;
+import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
@@ -37,6 +40,8 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
     private IProcessInstanceRecordService processInstanceRecordService;
     @Resource
     private IProcessNodeDataService processNodeDataService;
+    @Resource
+    private IProcessService processService;
 
     /**
      * 节点开始
@@ -53,21 +58,43 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
 
         this.save(processNodeRecord);
 
+        String flowId = processNodeRecordParamDto.getFlowId();
+
         String parentNodeId = processNodeRecordParamDto.getParentNodeId();
         String nodeId = processNodeRecordParamDto.getNodeId();
-        if(StrUtil.isNotBlank(parentNodeId)){
+        //查询父级
+        Process process = processService.getByFlowId(flowId);
+        final Node rootNode = JSON.parseObject(process.getProcess(), Node.class);
+        Node parentNode = NodeUtil.getParentNode(rootNode, nodeId);
 
-            ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processNodeRecordParamDto.getProcessInstanceId()).one();
-            String data = processNodeDataService.getNodeData(processNodeRecordParamDto.getFlowId(), nodeId).getData();
+        //当前流程
+        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processNodeRecordParamDto.getProcessInstanceId()).one();
+        Node currentProcessRootNode = JSON.parseObject(processInstanceRecord.getProcess(), Node.class);
 
-            Node node = JSON.parseObject(processInstanceRecord.getProcess(), Node.class);
-            Node n = NodeUtil.handleChildrenAfterJump(node, parentNodeId, JSON.parseObject(data, Node.class));
+        //设置executionId
+        NodeUtil.handleNodeAddExecutionId(currentProcessRootNode,nodeId,processNodeRecordParamDto.getExecutionId());
+        processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
 
-            log.info("node={}", com.alibaba.fastjson2.JSON.toJSONString(node));
-            processInstanceRecord.setProcess(JSON.toJSONString(node));
-            processInstanceRecordService.updateById(processInstanceRecord);
+        if (parentNode != null) {
+            if (parentNode.getType().intValue() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue()) {
+
+                //处理排他分支为线性
+                NodeUtil.handleExclusiveGatewayAsLine(currentProcessRootNode, parentNode.getId(), nodeId);
+                processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
+            }
+        }
+
+
+        if (StrUtil.isNotBlank(parentNodeId)) {
+            //说明是跳转过来的 要重新构建流程树
+
+            Node currentNode = processNodeDataService.getNode(flowId, nodeId).getData();
+
+            NodeUtil.handleChildrenAfterJump(currentProcessRootNode, parentNodeId, currentNode, processNodeRecordParamDto.getExecutionId());
+            processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
 
         }
+        processInstanceRecordService.updateById(processInstanceRecord);
 
         return R.success();
     }
@@ -84,9 +111,9 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
         String processInstanceId = processNodeRecordParamDto.getProcessInstanceId();
 
         this.lambdaUpdate()
-                .set(ProcessNodeRecord::getStatus,NodeStatusEnum.YJS.getCode())
-                .set(ProcessNodeRecord::getEndTime,new Date())
-                .set(ProcessNodeRecord::getData,processNodeRecordParamDto.getData())
+                .set(ProcessNodeRecord::getStatus, NodeStatusEnum.YJS.getCode())
+                .set(ProcessNodeRecord::getEndTime, new Date())
+                .set(ProcessNodeRecord::getData, processNodeRecordParamDto.getData())
                 .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId)
                 .eq(ProcessNodeRecord::getNodeId, processNodeRecordParamDto.getNodeId())
 //                .eq(ProcessNodeRecord::getExecutionId, processNodeRecordParamDto.getExecutionId())

@@ -117,6 +117,7 @@ public class NodeFormatUtil {
                             .findFirst().get();
                     List<ProcessNodeRecordApproveDesc> approveDescList = processNodeRecordApproveDescService.lambdaQuery()
                             .eq(ProcessNodeRecordApproveDesc::getNodeId, w.getNodeId())
+                            .eq(ProcessNodeRecordApproveDesc::getTaskId, w.getTaskId())
                             .eq(ProcessNodeRecordApproveDesc::getProcessInstanceId, w.getProcessInstanceId())
                             .eq(ProcessNodeRecordApproveDesc::getUserId, w.getUserId()).list();
 
@@ -266,12 +267,10 @@ public class NodeFormatUtil {
 
         List<NodeVo> branchList = new ArrayList<>();
 
-        if (type == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue().intValue()
-                ||type == NodeTypeEnum.PARALLEL_GATEWAY.getValue().intValue()
-                ||type == NodeTypeEnum.INCLUSIVE_GATEWAY.getValue().intValue()
-        ) {
+        List<Node> branchs = node.getConditionNodes();
+
+        if (NodeTypeEnum.getByValue(type).getBranch()&&CollUtil.isNotEmpty(branchs)) {
             //条件分支
-            List<Node> branchs = node.getConditionNodes();
 
             for (Node branch : branchs) {
                 Node children = branch.getChildNode();

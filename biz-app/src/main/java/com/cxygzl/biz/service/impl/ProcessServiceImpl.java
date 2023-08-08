@@ -26,6 +26,7 @@ import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.common.utils.NodeUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -41,6 +42,7 @@ import java.util.Map;
  * @author cxygzl
  * @since 2023-05-25
  */
+@Slf4j
 @Service
 public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> implements IProcessService {
     @Resource
@@ -140,6 +142,14 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         NodeUtil.handleParentId(node,null);
         com.cxygzl.biz.utils.NodeUtil.handleStarterNode(node,JSON.parseArray(processVO.getFormItems(),FormItemVO.class));
         com.cxygzl.biz.utils.NodeUtil.handleApproveForm(node,JSON.parseArray(processVO.getFormItems(),FormItemVO.class));
+
+//        {
+//            Node tempNode = BeanUtil.copyProperties(node, Node.class);
+//            NodeUtil.addEndNode(tempNode);
+//            NodeUtil.initRandomNodeId(tempNode);
+//            List<NodeLinkDto> dtoList = NodeUtil.buildLinkList(tempNode, null, true);
+//            log.info("连线数据：{}",JSON.toJSONString(dtoList));
+//        }
 
         com.cxygzl.common.dto.R<String> r = CoreHttpUtil.createFlow(node, StpUtil.getLoginIdAsString());
         if (!r.isOk()) {
