@@ -16,10 +16,12 @@ import com.cxygzl.biz.mapper.DeptMapper;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.DataUtil;
 import com.cxygzl.common.dto.*;
+import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.dto.third.UserFieldDto;
+import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -264,17 +266,20 @@ public class RemoteServiceImpl implements IRemoteService {
 
         Process process = processService.getByFlowId(processInstanceRecordParamDto.getFlowId());
 
-        ProcessGroup oaFormGroups = processGroupService.getById(process.getGroupId());
+        ProcessGroup processGroup = processGroupService.getById(process.getGroupId());
 
         entity.setName(process.getName());
         entity.setLogo(process.getLogo());
         entity.setUserId(processInstanceRecordParamDto.getUserId());
         entity.setFlowId(processInstanceRecordParamDto.getFlowId());
         entity.setProcessInstanceId(processInstanceRecordParamDto.getProcessInstanceId());
-        entity.setGroupId(oaFormGroups.getId());
-        entity.setGroupName(oaFormGroups.getGroupName());
+        entity.setGroupId(processGroup.getId());
+        entity.setGroupName(processGroup.getGroupName());
         entity.setStatus(NodeStatusEnum.JXZ.getCode());
-        entity.setProcess(process.getProcess());
+        String processStr = process.getProcess();
+        Node node = JSON.parseObject(processStr, Node.class);
+        NodeUtil.addEndNode(node);
+        entity.setProcess(JSON.toJSONString(node));
 
         processInstanceRecordService.save(entity);
 
@@ -326,7 +331,10 @@ public class RemoteServiceImpl implements IRemoteService {
      */
     @Override
     public R taskCancelEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        return processNodeRecordAssignUserService.rejectTaskEvent(processNodeRecordAssignUserParamDto);
+        processNodeRecordService.rejectNodeEvent(processNodeRecordAssignUserParamDto);
+        processNodeRecordAssignUserService.rejectTaskEvent(processNodeRecordAssignUserParamDto);
+
+        return R.success();
     }
 
     /**

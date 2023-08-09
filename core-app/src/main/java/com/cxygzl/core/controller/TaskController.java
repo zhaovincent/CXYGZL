@@ -2,6 +2,7 @@ package com.cxygzl.core.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
@@ -308,6 +309,7 @@ public class TaskController {
                     ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE, true);
         }
         runtimeService.setVariable(task.getExecutionId(), StrUtil.format("{}_parent_id", targetKey), task.getTaskDefinitionKey());
+        runtimeService.setVariable(task.getExecutionId(), StrUtil.format("{}_jump_label", targetKey), IdUtil.fastSimpleUUID());
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 ProcessInstanceConstant.TaskType.REJECT

@@ -36,19 +36,20 @@ import java.util.stream.Collectors;
 public class NodeFormatUtil {
 
 
-
     /**
      * 格式化流程节点显示
      *
      * @param node
-     * @param completeExecutionIdSet
-     * @param continueExecutionIdSet
+     * @param endUniqueId
+     * @param beingUniqueId
+     * @param cancelUniqueId
      * @param processInstanceId
      * @param paramMap
      */
     public static List<NodeVo> formatProcessNodeShow(Node node,
-                                                     Set<String> completeExecutionIdSet,
-                                                     Set<String> continueExecutionIdSet,
+                                                     Set<String> endUniqueId,
+                                                     Set<String> beingUniqueId,
+                                                     Set<String> cancelUniqueId,
                                                      String processInstanceId,
                                                      Map<String, Object> paramMap) {
         List<NodeVo> list = new ArrayList();
@@ -70,13 +71,15 @@ public class NodeFormatUtil {
         nodeVo.setType(type);
         nodeVo.setStatus(NodeStatusEnum.WKS.getCode());
         String executionId = node.getExecutionId();
-        if(StrUtil.isNotBlank(executionId)) {
-            if (completeExecutionIdSet.contains(executionId)) {
+        if (StrUtil.isNotBlank(executionId)) {
+            if (endUniqueId.contains(StrUtil.format("{}@@{}", node.getId(), executionId))) {
                 nodeVo.setStatus(NodeStatusEnum.YJS.getCode());
 
-            }
-            if (continueExecutionIdSet.contains(executionId)) {
+            } else if (beingUniqueId.contains(StrUtil.format("{}@@{}", node.getId(), executionId))) {
                 nodeVo.setStatus(NodeStatusEnum.JXZ.getCode());
+
+            }else if (cancelUniqueId.contains(StrUtil.format("{}@@{}", node.getId(), executionId))) {
+                nodeVo.setStatus(NodeStatusEnum.YCX.getCode());
 
             }
         }
@@ -101,10 +104,12 @@ public class NodeFormatUtil {
             }
 
             // 用户列表
-            if (StrUtil.isNotBlank(processInstanceId)&&StrUtil.isNotBlank(node.getExecutionId())) {
+            if (StrUtil.isNotBlank(processInstanceId) && StrUtil.isNotBlank(node.getExecutionId())) {
 
                 IProcessExecutionService processExecutionService = SpringUtil.getBean(IProcessExecutionService.class);
-                List<ProcessExecution> processExecutionList = processExecutionService.lambdaQuery().eq(ProcessExecution::getExecutionId, node.getExecutionId()).list();
+                List<ProcessExecution> processExecutionList = processExecutionService.lambdaQuery()
+                        .eq(ProcessExecution::getExecutionId, node.getExecutionId())
+                        .list();
                 List<String> childExecutionIdList = processExecutionList.stream().map(w -> w.getChildExecutionId()).collect(Collectors.toList());
 
                 IProcessNodeRecordAssignUserService processNodeRecordAssignUserService = SpringUtil.getBean(IProcessNodeRecordAssignUserService.class);
@@ -119,7 +124,7 @@ public class NodeFormatUtil {
 
                 Set<String> userIdSet = processNodeRecordAssignUserList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
 
-              //  Map<String, List<ProcessNodeRecordAssignUser>> map = processNodeRecordAssignUserList.stream().collect(Collectors.groupingBy(w -> w.getTaskId()));
+                //  Map<String, List<ProcessNodeRecordAssignUser>> map = processNodeRecordAssignUserList.stream().collect(Collectors.groupingBy(w -> w.getTaskId()));
 
                 for (String userId : userIdSet) {
 
@@ -133,7 +138,7 @@ public class NodeFormatUtil {
 
                     UserVo userVo = buildUser((userId));
                     userVo.setShowTime(w.getEndTime());
-                    userVo.setApproveDesc(approveDescList.isEmpty()?"":approveDescList.get(0).getApproveDesc());
+                    userVo.setApproveDesc(approveDescList.isEmpty() ? "" : approveDescList.get(0).getApproveDesc());
                     userVo.setStatus(w.getStatus());
                     userVo.setOperType(w.getTaskType());
 
@@ -148,8 +153,8 @@ public class NodeFormatUtil {
                     if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF_SELECT) {
                         //发起人自选
                         Object variable = paramMap.get(StrUtil.format("{}_assignee_select", node.getId()));
-                        if(variable==null){
-                            variable=new ArrayList<>();
+                        if (variable == null) {
+                            variable = new ArrayList<>();
                         }
                         List<NodeUser> nodeUserDtos = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class);
 
@@ -279,12 +284,12 @@ public class NodeFormatUtil {
 
         List<Node> branchs = node.getConditionNodes();
 
-        if (NodeTypeEnum.getByValue(type).getBranch()&&CollUtil.isNotEmpty(branchs)) {
+        if (NodeTypeEnum.getByValue(type).getBranch() && CollUtil.isNotEmpty(branchs)) {
             //条件分支
 
             for (Node branch : branchs) {
                 Node children = branch.getChildNode();
-                List<NodeVo> processNodeShowDtos = formatProcessNodeShow(children, completeExecutionIdSet, continueExecutionIdSet, processInstanceId, paramMap);
+                List<NodeVo> processNodeShowDtos = formatProcessNodeShow(children, endUniqueId, beingUniqueId, cancelUniqueId, processInstanceId, paramMap);
 
                 NodeVo p = new NodeVo();
                 p.setChildren(processNodeShowDtos);
@@ -298,7 +303,7 @@ public class NodeFormatUtil {
 
         list.add(nodeVo);
 
-        List<NodeVo> next = formatProcessNodeShow(node.getChildNode(), completeExecutionIdSet, continueExecutionIdSet, processInstanceId, paramMap);
+        List<NodeVo> next = formatProcessNodeShow(node.getChildNode(), endUniqueId, beingUniqueId, cancelUniqueId, processInstanceId, paramMap);
         list.addAll(next);
 
 
@@ -346,16 +351,16 @@ public class NodeFormatUtil {
         List<UserVo> userVoList = new ArrayList<>();
         //用户id
         List<String> userIdList = nodeUserList.stream().filter(w -> StrUtil.equals(w.getType(),
-                NodeUserTypeEnum.USER.getKey())).map(w ->(w.getId())).collect(Collectors.toList());
+                NodeUserTypeEnum.USER.getKey())).map(w -> (w.getId())).collect(Collectors.toList());
         //部门id
-        List<String> deptIdList = nodeUserList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.DEPT.getKey())).map(w ->(w.getId())).collect(Collectors.toList());
+        List<String> deptIdList = nodeUserList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.DEPT.getKey())).map(w -> (w.getId())).collect(Collectors.toList());
 
         if (CollUtil.isNotEmpty(deptIdList)) {
 
             IRemoteService iRemoteService = SpringUtil.getBean(IRemoteService.class);
 
             List<String> data =
-                    iRemoteService.queryUserIdListByDepIdList(deptIdList.stream().map(w->String.valueOf(w)).collect(Collectors.toList())).getData();
+                    iRemoteService.queryUserIdListByDepIdList(deptIdList.stream().map(w -> String.valueOf(w)).collect(Collectors.toList())).getData();
 
             if (CollUtil.isNotEmpty(data)) {
                 for (String datum : data) {

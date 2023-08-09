@@ -43,6 +43,9 @@ public class NodeStartEventListener implements FlowableEventListener {
             //节点开始执行
             //org.flowable.engine.delegate.event.impl.FlowableActivityEventImpl
             FlowableActivityEventImpl flowableActivityEvent = (FlowableActivityEventImpl) event;
+
+
+
             String activityId = flowableActivityEvent.getActivityId();
             String activityName = flowableActivityEvent.getActivityName();
             String parentId = "";
@@ -84,10 +87,11 @@ public class NodeStartEventListener implements FlowableEventListener {
             processNodeRecordParamDto.setChildExecutionId(childExecutionIdList);
             processNodeRecordParamDto.setData(JSON.toJSONString(processVariables));
             processNodeRecordParamDto.setNodeId(activityId);
+            processNodeRecordParamDto.setJumpLabel(MapUtil.getStr(processVariables, StrUtil.format("{}_jump_label", activityId)));
             processNodeRecordParamDto.setParentNodeId(MapUtil.getStr(processVariables, StrUtil.format("{}_parent_id", activityId)));
             if (node != null) {
 
-                processNodeRecordParamDto.setNodeType(String.valueOf(node.getType()));
+                processNodeRecordParamDto.setNodeType((node.getType()));
 
             }
             processNodeRecordParamDto.setNodeName(activityName);

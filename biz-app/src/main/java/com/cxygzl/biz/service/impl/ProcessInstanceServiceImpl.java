@@ -580,24 +580,47 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         }
 
         //完成的executionId
-        Set<String> completeExecutionIdSet = new HashSet<>();
+        Set<String> endUniqueId = new HashSet<>();
         //进行中的
-        Set<String> beingExecutionIdSet = new HashSet<>();
+        Set<String> beingUniqueId = new HashSet<>();
+        Set<String> cancelUniqueId = new HashSet<>();
 
         if (StrUtil.isNotBlank(processInstanceId)) {
             List<ProcessNodeRecord> processNodeRecordList = processNodeRecordService.lambdaQuery()
                     .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId)
-                    .in(ProcessNodeRecord::getStatus, CollUtil.newArrayList(NodeStatusEnum.YJS.getCode(), NodeStatusEnum.JXZ.getCode()))
                     .list();
             {
                 Set<String> collect = processNodeRecordList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.YJS.getCode())
-                        .map(w -> w.getExecutionId()).collect(Collectors.toSet());
-                completeExecutionIdSet.addAll(collect);
+                        .map(w -> {
+                            String nodeId = w.getNodeId();
+                            if(StrUtil.startWith(nodeId,ProcessInstanceConstant.VariableKey.STARTER)){
+                                nodeId=ProcessInstanceConstant.VariableKey.STARTER;
+                            }
+                            return StrUtil.format("{}@@{}", nodeId,w.getExecutionId());
+                        }).collect(Collectors.toSet());
+                endUniqueId.addAll(collect);
             }
             {
                 Set<String> collect = processNodeRecordList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.JXZ.getCode())
-                        .map(w -> w.getExecutionId()).collect(Collectors.toSet());
-                beingExecutionIdSet.addAll(collect);
+                        .map(w -> {
+                            String nodeId = w.getNodeId();
+                            if(StrUtil.startWith(nodeId,ProcessInstanceConstant.VariableKey.STARTER)){
+                                nodeId=ProcessInstanceConstant.VariableKey.STARTER;
+                            }
+                            return StrUtil.format("{}@@{}", nodeId,w.getExecutionId());
+                        }).collect(Collectors.toSet());
+                beingUniqueId.addAll(collect);
+            }
+            {
+                Set<String> collect = processNodeRecordList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.YCX.getCode())
+                        .map(w -> {
+                            String nodeId = w.getNodeId();
+                            if(StrUtil.startWith(nodeId,ProcessInstanceConstant.VariableKey.STARTER)){
+                                nodeId=ProcessInstanceConstant.VariableKey.STARTER;
+                            }
+                            return StrUtil.format("{}@@{}", nodeId,w.getExecutionId());
+                        }).collect(Collectors.toSet());
+                cancelUniqueId.addAll(collect);
             }
         }
 
@@ -608,8 +631,8 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         }
         Node nodeDto = JSON.parseObject(process, Node.class);
 
-        List<NodeVo> processNodeShowDtos = NodeFormatUtil.formatProcessNodeShow(nodeDto, completeExecutionIdSet,
-                beingExecutionIdSet, processInstanceId, paramMap);
+        List<NodeVo> processNodeShowDtos = NodeFormatUtil.formatProcessNodeShow(nodeDto, endUniqueId,
+                beingUniqueId, cancelUniqueId, processInstanceId, paramMap);
 
         return com.cxygzl.common.dto.R.success(processNodeShowDtos);
     }

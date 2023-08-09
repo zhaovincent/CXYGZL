@@ -1,5 +1,6 @@
 package com.cxygzl.core.servicetask;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
@@ -64,6 +65,7 @@ public class RouteServiceTask implements JavaDelegate {
             }
 
             runtimeService.setVariable(execution.getId(), StrUtil.format("{}_parent_id", targetKey), nodeId);
+            runtimeService.setVariable(execution.getId(), StrUtil.format("{}_jump_label", targetKey), IdUtil.fastSimpleUUID());
 
             //跳转
             runtimeService.createChangeActivityStateBuilder()

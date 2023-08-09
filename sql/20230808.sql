@@ -9,3 +9,6 @@ CREATE TABLE `process_execution` (
                                      KEY `idx_id` (`id`) USING BTREE
 ) ENGINE=InnoDB   DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='流程-执行id关系';
 
+
+ALTER TABLE  `process_node_record`
+    ADD COLUMN `jump_label` varchar(255) NULL COMMENT '跳转标识' ;

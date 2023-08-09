@@ -20,7 +20,7 @@ public class NodeUtil {
             return;
         }
 
-        if (StrUtil.contains(nodeId, node.getId()) && StrUtil.isBlank(node.getExecutionId())) {
+        if (((StrUtil.contains(nodeId, node.getId()) && StrUtil.startWith(nodeId, ProcessInstanceConstant.VariableKey.STARTER)) || (StrUtil.equals(nodeId, node.getId()))) && StrUtil.isBlank(node.getExecutionId())) {
             node.setExecutionId(executionId);
             return;
         }
@@ -28,7 +28,7 @@ public class NodeUtil {
 
         Integer type = node.getType();
 
-        if (NodeTypeEnum.getByValue(type).getBranch()&&CollUtil.isNotEmpty(node.getConditionNodes())) {
+        if (NodeTypeEnum.getByValue(type).getBranch() && CollUtil.isNotEmpty(node.getConditionNodes())) {
 
             //条件分支
             List<Node> branchs = node.getConditionNodes();
@@ -442,14 +442,16 @@ public class NodeUtil {
      * @param node
      * @param executionId
      */
-    public static void handleChildrenAfterJump(Node node, String parentId, Node c,String executionId) {
+    public static void handleChildrenAfterJump(Node node, String parentId, Node c, String executionId) {
         if (!isNode(node)) {
             return;
         }
         Node childNode = node.getChildNode();
 
 
-        if (StrUtil.contains(parentId,node.getId())&&(!isNode(childNode)||StrUtil.isBlank(childNode.getExecutionId()))) {
+        if (((StrUtil.contains(parentId, node.getId())&&
+                StrUtil.startWith(parentId,ProcessInstanceConstant.VariableKey.STARTER)
+                )||(StrUtil.equals(parentId,node.getId()))) && (!isNode(childNode) || StrUtil.isBlank(childNode.getExecutionId()))) {
             node.setChildNode(c);
             Node finalChildrenNode = getFinalChildrenNode(c);
             if (finalChildrenNode.getType().intValue() != NodeTypeEnum.END.getValue()) {

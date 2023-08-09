@@ -25,7 +25,10 @@ public class ProcessNodeRecordParamDto {
      * 表单数据
      */
     private String data;
-
+    /**
+     * 跳转标识
+     */
+    private String jumpLabel;
     private String nodeId;
 
 
@@ -34,7 +37,7 @@ public class ProcessNodeRecordParamDto {
     /**
      * 节点类型
      */
-    private String nodeType;
+    private Integer nodeType;
 
     /**
      * 节点名字

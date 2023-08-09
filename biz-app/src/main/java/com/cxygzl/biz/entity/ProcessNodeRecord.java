@@ -42,12 +42,17 @@ public class ProcessNodeRecord  extends BaseEntity {
     private String data;
     @TableField("`node_id`")
     private String nodeId;
+    /**
+     * 跳转标识
+     */
+    @TableField("`jump_label`")
+    private String jumpLabel;
 
     /**
      * 节点类型
      */
     @TableField("`node_type`")
-    private String nodeType;
+    private Integer nodeType;
 
     /**
      * 节点名字
