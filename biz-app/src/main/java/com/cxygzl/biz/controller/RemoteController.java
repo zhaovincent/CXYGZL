@@ -133,6 +133,17 @@ public class RemoteController {
         return remoteService.startNodeEvent(recordParamDto);
     }
 
+    /**
+     * 记录执行节点父子关系
+     *
+     * @param recordParamDto
+     * @return
+     */
+    @PostMapping("saveParentChildExecution")
+    public R saveParentChildExecution(@RequestBody ProcessNodeRecordParamDto recordParamDto) {
+        return remoteService.saveParentChildExecution(recordParamDto);
+    }
+
 
     /**
      * 流程创建了
@@ -154,6 +165,17 @@ public class RemoteController {
     @PostMapping("endNodeEvent")
     public R endNodeEvent(@RequestBody ProcessNodeRecordParamDto recordParamDto) {
         return remoteService.endNodeEvent(recordParamDto);
+    }
+
+    /**
+     * 取消节点事件
+     *
+     * @param recordParamDto
+     * @return
+     */
+    @PostMapping("cancelNodeEvent")
+    public R cancelNodeEvent(@RequestBody ProcessNodeRecordParamDto recordParamDto) {
+        return remoteService.cancelNodeEvent(recordParamDto);
     }
 
     /**

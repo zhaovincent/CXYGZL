@@ -312,10 +312,12 @@ public class TaskController {
         }
         runtimeService.setVariable(task.getExecutionId(), StrUtil.format("{}_parent_id", targetKey), task.getTaskDefinitionKey());
         runtimeService.setVariable(task.getExecutionId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
+        runtimeService.setVariableLocal(task.getExecutionId(),  ProcessInstanceConstant.VariableKey.TASK_TYPE,  ProcessInstanceConstant.TaskType.REJECT);
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 ProcessInstanceConstant.TaskType.REJECT
         );
+
 
         runtimeService.createChangeActivityStateBuilder()
                 .processInstanceId(taskParamDto.getProcessInstanceId())

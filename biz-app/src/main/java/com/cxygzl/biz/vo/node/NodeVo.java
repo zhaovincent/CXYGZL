@@ -59,4 +59,6 @@ public class NodeVo {
     private String showTimeStr;
 
 
+    private List approveDescList;
+
 }

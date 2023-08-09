@@ -3,6 +3,7 @@ package com.cxygzl.biz.utils;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
@@ -99,19 +100,21 @@ public class NodeFormatUtil {
             nodeVo.setPlaceholder(node.getPlaceHolder());
 
         }
-        if(StrUtil.isAllNotBlank(processInstanceId,node.getExecutionId(),node.getFlowUniqueId())){
+        if (StrUtil.isAllNotBlank(processInstanceId, node.getExecutionId(), node.getFlowUniqueId())) {
             IProcessNodeRecordService processNodeRecordService = SpringUtil.getBean(IProcessNodeRecordService.class);
             ProcessNodeRecord processNodeRecord = processNodeRecordService.lambdaQuery()
                     .eq(ProcessNodeRecord::getExecutionId, node.getExecutionId())
                     .eq(ProcessNodeRecord::getFlowUniqueId, node.getFlowUniqueId())
                     .eq(ProcessNodeRecord::getNodeId, node.getId())
                     .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId).one();
-            if(processNodeRecord!=null){
+            if (processNodeRecord != null) {
                 nodeVo.setShowTimeStr(nodeDateShow(processNodeRecord.getStartTime()));
-                if(processNodeRecord.getEndTime()!=null){
+                if (processNodeRecord.getEndTime() != null) {
                     nodeVo.setShowTimeStr(nodeDateShow(processNodeRecord.getEndTime()));
 
                 }
+
+
             }
         }
 
@@ -137,29 +140,61 @@ public class NodeFormatUtil {
                         .list();
                 List<String> childExecutionIdList = processExecutionList.stream().map(w -> w.getChildExecutionId()).collect(Collectors.toList());
 
+                if (CollUtil.isEmpty(processExecutionList)) {
+                    childExecutionIdList.add(node.getExecutionId());
+                }
+
                 IProcessNodeRecordAssignUserService processNodeRecordAssignUserService = SpringUtil.getBean(IProcessNodeRecordAssignUserService.class);
                 List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = processNodeRecordAssignUserService
-                        .lambdaQuery().
-                        eq(ProcessNodeRecordAssignUser::getNodeId, node.getId())
+                        .lambdaQuery()
+                        .eq(ProcessNodeRecordAssignUser::getNodeId, node.getId())
                         .in(ProcessNodeRecordAssignUser::getExecutionId, childExecutionIdList)
                         .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processInstanceId)
                         .orderByAsc(ProcessNodeRecordAssignUser::getCreateTime)
                         .list();
 
+                //处理用户评论
+                if (CollUtil.isNotEmpty(processNodeRecordAssignUserList)) {
+                    List<String> taskIdList = processNodeRecordAssignUserList.stream().map(w -> w.getTaskId()).collect(Collectors.toList());
+
+                    List<ProcessNodeRecordApproveDesc> approveDescList = processNodeRecordApproveDescService.lambdaQuery()
+                            .eq(ProcessNodeRecordApproveDesc::getNodeId, node.getId())
+                            .in(ProcessNodeRecordApproveDesc::getTaskId, taskIdList)
+                            .eq(ProcessNodeRecordApproveDesc::getProcessInstanceId, processInstanceId)
+                            .orderByDesc(ProcessNodeRecordApproveDesc::getDescDate)
+                            .list();
+
+                    List descList = new ArrayList();
+                    for (ProcessNodeRecordApproveDesc processNodeRecordApproveDesc : approveDescList) {
+
+                        ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserList.stream()
+                                .filter(w -> StrUtil.equals(w.getUserId(), processNodeRecordApproveDesc.getUserId()))
+                                .filter(w -> StrUtil.equals(w.getTaskId(),
+                                        processNodeRecordApproveDesc.getTaskId())).findFirst().get();
+
+                        UserVo userVo = buildUser(processNodeRecordApproveDesc.getUserId());
+                        Dict set = Dict.create()
+                                .set("desc", processNodeRecordApproveDesc.getApproveDesc())
+                                .set("taskType", processNodeRecordAssignUser.getTaskType())
+                                .set("descType", processNodeRecordApproveDesc.getDescType())
+                                .set("showTimeStr", nodeDateShow(processNodeRecordApproveDesc.getDescDate()))
+                                .set("user", userVo);
+                        descList.add(set);
+
+                    }
+
+                    nodeVo.setApproveDescList(descList);
+
+                }
+
 
                 Set<String> userIdSet = processNodeRecordAssignUserList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
-
-                //  Map<String, List<ProcessNodeRecordAssignUser>> map = processNodeRecordAssignUserList.stream().collect(Collectors.groupingBy(w -> w.getTaskId()));
 
                 for (String userId : userIdSet) {
 
                     ProcessNodeRecordAssignUser w = processNodeRecordAssignUserList.stream().filter(k -> StrUtil.equals(k.getUserId(), userId))
                             .findFirst().get();
-                    List<ProcessNodeRecordApproveDesc> approveDescList = processNodeRecordApproveDescService.lambdaQuery()
-                            .eq(ProcessNodeRecordApproveDesc::getNodeId, w.getNodeId())
-                            .eq(ProcessNodeRecordApproveDesc::getTaskId, w.getTaskId())
-                            .eq(ProcessNodeRecordApproveDesc::getProcessInstanceId, w.getProcessInstanceId())
-                            .eq(ProcessNodeRecordApproveDesc::getUserId, w.getUserId()).list();
+
 
                     UserVo userVo = buildUser((userId));
                     userVo.setShowTime(w.getEndTime());
@@ -360,7 +395,6 @@ public class NodeFormatUtil {
      */
     private static UserVo buildUser(String userId) {
 
-        IUserService userService = SpringUtil.getBean(IUserService.class);
         UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
 
         if (user == null) {

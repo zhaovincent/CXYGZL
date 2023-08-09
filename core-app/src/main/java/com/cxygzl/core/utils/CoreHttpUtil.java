@@ -59,6 +59,14 @@ public class CoreHttpUtil {
     public static void startNodeEvent(ProcessNodeRecordParamDto nodeRecordParamDto) {
         post(nodeRecordParamDto, "/remote/startNodeEvent");
     }
+    /**
+     * 保存父子节点执行关系
+     *
+     * @param nodeRecordParamDto
+     */
+    public static void saveParentChildExecution(ProcessNodeRecordParamDto nodeRecordParamDto) {
+        post(nodeRecordParamDto, "/remote/saveParentChildExecution");
+    }
 
     /**
      * 节点结束事件
@@ -67,6 +75,15 @@ public class CoreHttpUtil {
      */
     public static void endNodeEvent(ProcessNodeRecordParamDto nodeRecordParamDto) {
         post(nodeRecordParamDto, "/remote/endNodeEvent");
+    }
+
+    /**
+     * 节点取消事件
+     *
+     * @param nodeRecordParamDto
+     */
+    public static void cancelNodeEvent(ProcessNodeRecordParamDto nodeRecordParamDto) {
+        post(nodeRecordParamDto, "/remote/cancelNodeEvent");
     }
     /**
      * 保存消息

@@ -13,6 +13,7 @@ import com.cxygzl.biz.service.IProcessOperRecordService;
 import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.SimpleApproveDescDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -27,6 +28,7 @@ import java.util.List;
  * @author cxygzl
  * @since 2023-05-10
  */
+@Slf4j
 @Service
 public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessNodeRecordAssignUserMapper, ProcessNodeRecordAssignUser> implements IProcessNodeRecordAssignUserService {
 
@@ -99,14 +101,13 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
      * @return
      */
     @Override
-    public R completeTaskEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
+    public R taskEndEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
         ProcessNodeRecordAssignUser processNodeRecordAssignUser = this.lambdaQuery()
                 .eq(ProcessNodeRecordAssignUser::getTaskId, processNodeRecordAssignUserParamDto.getTaskId())
                 .eq(ProcessNodeRecordAssignUser::getUserId, processNodeRecordAssignUserParamDto.getUserId())
                 .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processNodeRecordAssignUserParamDto.getProcessInstanceId())
                 .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
-                .orderByDesc(ProcessNodeRecordAssignUser::getId)
-                .last("limit 1").one();
+                .one();
         processNodeRecordAssignUser.setStatus(NodeStatusEnum.YJS.getCode());
         processNodeRecordAssignUser.setEndTime(new Date());
         processNodeRecordAssignUser.setData(processNodeRecordAssignUserParamDto.getData());
@@ -132,12 +133,13 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
      * @return
      */
     @Override
-    public R rejectTaskEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
+    public R taskCancelEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
+        log.info("任务撤销:{} - {} -{}",processNodeRecordAssignUserParamDto.getNodeName(),
+                processNodeRecordAssignUserParamDto.getUserId(),processNodeRecordAssignUserParamDto.getTaskType());
         ProcessNodeRecordAssignUser processNodeRecordAssignUser = this.lambdaQuery()
                 .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processNodeRecordAssignUserParamDto.getProcessInstanceId())
                 .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
                 .eq(ProcessNodeRecordAssignUser::getExecutionId, processNodeRecordAssignUserParamDto.getExecutionId())
-                .orderByDesc(ProcessNodeRecordAssignUser::getId)
                 .one();
         if (processNodeRecordAssignUser == null) {
             return R.success();

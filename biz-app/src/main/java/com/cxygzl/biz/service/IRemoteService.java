@@ -86,6 +86,13 @@ public interface IRemoteService {
     R startNodeEvent(ProcessNodeRecordParamDto recordParamDto);
 
     /**
+     * 记录父子执行id
+     * @param recordParamDto
+     * @return
+     */
+    R saveParentChildExecution(ProcessNodeRecordParamDto recordParamDto);
+
+    /**
      * 流程创建了
      * @param processInstanceRecordParamDto
      * @return
@@ -100,6 +107,13 @@ public interface IRemoteService {
      * @return
      */
     R endNodeEvent(ProcessNodeRecordParamDto recordParamDto);
+
+    /**
+     * 节点取消
+     * @param recordParamDto
+     * @return
+     */
+    R cancelNodeEvent(ProcessNodeRecordParamDto recordParamDto);
 
     /**
      * 开始设置执行人

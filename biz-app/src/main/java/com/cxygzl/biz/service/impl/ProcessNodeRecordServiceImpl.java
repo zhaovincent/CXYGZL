@@ -1,19 +1,16 @@
 package com.cxygzl.biz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
-import com.cxygzl.biz.entity.ProcessExecution;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.entity.ProcessNodeRecord;
 import com.cxygzl.biz.mapper.ProcessNodeRecordMapper;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.common.constants.NodeTypeEnum;
-import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
 import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
@@ -23,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
-import java.util.List;
 
 /**
  * <p>
@@ -56,32 +52,12 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
     public R start(ProcessNodeRecordParamDto processNodeRecordParamDto) {
 
 
-
-        Long count = this.lambdaQuery()
-                .eq(ProcessNodeRecord::getExecutionId, processNodeRecordParamDto.getExecutionId())
-                .eq(ProcessNodeRecord::getNodeId, processNodeRecordParamDto.getNodeId())
-                .eq(ProcessNodeRecord::getFlowUniqueId, processNodeRecordParamDto.getFlowUniqueId())
-                .count();
-        if (count > 0) {
-            return R.success();
-        }
-        log.info("开始节点：{} - {} - {} -{}",processNodeRecordParamDto.getNodeId(),processNodeRecordParamDto.getNodeName(),processNodeRecordParamDto.getExecutionId(),processNodeRecordParamDto.getFlowUniqueId());
-        List<String> childExecutionId = processNodeRecordParamDto.getChildExecutionId();
-        if (CollUtil.isNotEmpty(childExecutionId)) {
-            //子级
-
-            for (String s : childExecutionId) {
-                ProcessExecution entity = new ProcessExecution();
-                entity.setChildExecutionId(s);
-                entity.setExecutionId(processNodeRecordParamDto.getExecutionId());
-                processExecutionService.save(entity);
-            }
-        }
+        log.info("开始节点：{} - {} - {} -{}", processNodeRecordParamDto.getNodeId(), processNodeRecordParamDto.getNodeName(), processNodeRecordParamDto.getExecutionId(), processNodeRecordParamDto.getFlowUniqueId());
 
         ProcessNodeRecord processNodeRecord = BeanUtil.copyProperties(processNodeRecordParamDto, ProcessNodeRecord.class);
         processNodeRecord.setStartTime(new Date());
         processNodeRecord.setStatus(NodeStatusEnum.JXZ.getCode());
-        if(processNodeRecordParamDto.getNodeType()!=null&&processNodeRecordParamDto.getNodeType()==NodeTypeEnum.END.getValue().intValue()){
+        if (processNodeRecordParamDto.getNodeType() != null && processNodeRecordParamDto.getNodeType() == NodeTypeEnum.END.getValue().intValue()) {
             processNodeRecord.setStatus(NodeStatusEnum.YJS.getCode());
 
         }
@@ -117,7 +93,7 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
             //说明是跳转过来的 要重新构建流程树
 
             Node currentNode = processNodeDataService.getNode(flowId, nodeId).getData();
-           // currentNode.setExecutionId(processNodeRecordParamDto.getExecutionId());
+            // currentNode.setExecutionId(processNodeRecordParamDto.getExecutionId());
 
             NodeUtil.handleChildrenAfterJump(currentProcessRootNode, parentNodeId, currentNode, processNodeRecordParamDto.getExecutionId());
             processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
@@ -149,31 +125,28 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
                 .set(ProcessNodeRecord::getEndTime, new Date())
                 .set(ProcessNodeRecord::getData, processNodeRecordParamDto.getData())
                 .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId)
-                .eq(ProcessNodeRecord::getStatus,  NodeStatusEnum.JXZ.getCode())
+                .eq(ProcessNodeRecord::getStatus, NodeStatusEnum.JXZ.getCode())
                 .eq(ProcessNodeRecord::getNodeId, processNodeRecordParamDto.getNodeId())
-//                .eq(ProcessNodeRecord::getExecutionId, processNodeRecordParamDto.getExecutionId())
-//                .eq(ProcessNodeRecord::getFlowUniqueId, processNodeRecordParamDto.getFlowUniqueId())
+
                 .update(new ProcessNodeRecord());
 
-        //判断是否是动态路由，如果是动态路由  则要修改节点连线
-        //NodeUtil.handleNodeLine(processInstanceId,processNodeRecordParamDto.getNodeId());
         return R.success();
     }
 
     /**
      * 驳回
      *
-     * @param processNodeRecordAssignUserParamDto
+     * @param processNodeRecordParamDto
      * @return
      */
     @Override
-    public R rejectNodeEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        String processInstanceId = processNodeRecordAssignUserParamDto.getProcessInstanceId();
-        String nodeId = processNodeRecordAssignUserParamDto.getNodeId();
-        this.lambdaUpdate().set(ProcessNodeRecord::getStatus,NodeStatusEnum.YCX.getCode())
-                .eq(ProcessNodeRecord::getProcessInstanceId,processInstanceId)
-                .eq(ProcessNodeRecord::getNodeId,nodeId)
-                .eq(ProcessNodeRecord::getStatus,NodeStatusEnum.JXZ.getCode())
+    public R cancelNodeEvent(ProcessNodeRecordParamDto processNodeRecordParamDto) {
+        String processInstanceId = processNodeRecordParamDto.getProcessInstanceId();
+        String nodeId = processNodeRecordParamDto.getNodeId();
+        this.lambdaUpdate().set(ProcessNodeRecord::getStatus, NodeStatusEnum.YCX.getCode())
+                .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId)
+                .eq(ProcessNodeRecord::getNodeId, nodeId)
+                .eq(ProcessNodeRecord::getStatus, NodeStatusEnum.JXZ.getCode())
                 .update(new ProcessNodeRecord());
         return R.success();
     }

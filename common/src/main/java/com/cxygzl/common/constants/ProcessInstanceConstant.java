@@ -119,6 +119,8 @@ public class ProcessInstanceConstant {
         public static final String FRONT_JOIN="frontJoin";
         //转办
         public static final String BACK_JOIN="backJoin";
+        //任务取消了
+        public static final String CANCEL="cancel";
 
     }
     /**
