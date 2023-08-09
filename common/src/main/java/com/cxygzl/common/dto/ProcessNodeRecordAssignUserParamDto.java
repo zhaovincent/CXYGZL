@@ -40,6 +40,8 @@ public class ProcessNodeRecordAssignUserParamDto {
 
     private List<SimpleApproveDescDto> simpleApproveDescDtoList;
     private String nodeName;
+    private String flowUniqueId;
+
     private String taskType;
 
 

@@ -22,7 +22,11 @@ import java.util.Date;
 @TableName("`process_node_record_assign_user`")
 public class ProcessNodeRecordAssignUser  extends BaseEntity {
 
-
+    /**
+     * 流程唯一标识
+     */
+    @TableField("`flow_unique_id`")
+    private String flowUniqueId;
 
     /**
      * 流程id

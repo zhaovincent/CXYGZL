@@ -39,6 +39,10 @@ public class ApprovalCreateListener implements TaskListener {
         //流程id
         String flowId = NodeUtil.getFlowId(processDefinitionId);
 
+        //设置流程唯一id
+        taskService.setVariableLocal(taskEntity.getId(),ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID,taskService.getVariable(taskEntity.getId(),ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID));
+
+
         if (StrUtil.isBlank(assignee) || StrUtil.equals(ProcessInstanceConstant.DEFAULT_EMPTY_ASSIGN, assignee)) {
 
             Node node = NodeDataStoreFactory.getInstance().getNode(flowId, nodeId);

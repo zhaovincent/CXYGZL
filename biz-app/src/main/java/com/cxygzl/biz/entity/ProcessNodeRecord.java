@@ -45,7 +45,7 @@ public class ProcessNodeRecord  extends BaseEntity {
     /**
      * 流程唯一标识
      */
-    @TableField("`flow_unqiue_id`")
+    @TableField("`flow_unique_id`")
     private String flowUniqueId;
 
     /**
