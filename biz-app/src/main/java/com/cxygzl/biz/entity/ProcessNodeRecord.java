@@ -43,10 +43,10 @@ public class ProcessNodeRecord  extends BaseEntity {
     @TableField("`node_id`")
     private String nodeId;
     /**
-     * 跳转标识
+     * 流程唯一标识
      */
-    @TableField("`jump_label`")
-    private String jumpLabel;
+    @TableField("`flow_unqiue_id`")
+    private String flowUniqueId;
 
     /**
      * 节点类型

@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID;
+
 /**
  * 任务控制器
  */
@@ -309,7 +311,7 @@ public class TaskController {
                     ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE, true);
         }
         runtimeService.setVariable(task.getExecutionId(), StrUtil.format("{}_parent_id", targetKey), task.getTaskDefinitionKey());
-        runtimeService.setVariable(task.getExecutionId(), StrUtil.format("{}_jump_label", targetKey), IdUtil.fastSimpleUUID());
+        runtimeService.setVariable(task.getExecutionId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 ProcessInstanceConstant.TaskType.REJECT

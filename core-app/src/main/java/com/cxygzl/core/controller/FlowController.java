@@ -2,6 +2,7 @@ package com.cxygzl.core.controller;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.ENABLE_SKIP_EXPRESSION;
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID;
 
 /**
  * 工作流控制器
@@ -94,6 +96,7 @@ public class FlowController {
         Map<String, Object> paramMap = processInstanceParamDto.getParamMap();
         //支持自动跳过
         paramMap.put(ENABLE_SKIP_EXPRESSION,true);
+        paramMap.put(FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(processInstanceParamDto.getFlowId(),
                 paramMap);
 

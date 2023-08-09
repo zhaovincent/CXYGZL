@@ -72,13 +72,13 @@ public class NodeFormatUtil {
         nodeVo.setStatus(NodeStatusEnum.WKS.getCode());
         String executionId = node.getExecutionId();
         if (StrUtil.isNotBlank(executionId)) {
-            if (endUniqueId.contains(StrUtil.format("{}@@{}", node.getId(), executionId))) {
+            if (endUniqueId.contains(StrUtil.format("{}@@{}@@{}", node.getId(), executionId,node.getFlowUniqueId()))) {
                 nodeVo.setStatus(NodeStatusEnum.YJS.getCode());
 
-            } else if (beingUniqueId.contains(StrUtil.format("{}@@{}", node.getId(), executionId))) {
+            } else if (beingUniqueId.contains(StrUtil.format("{}@@{}@@{}", node.getId(), executionId,node.getFlowUniqueId()))) {
                 nodeVo.setStatus(NodeStatusEnum.JXZ.getCode());
 
-            }else if (cancelUniqueId.contains(StrUtil.format("{}@@{}", node.getId(), executionId))) {
+            }else if (cancelUniqueId.contains(StrUtil.format("{}@@{}@@{}", node.getId(), executionId,node.getFlowUniqueId()))) {
                 nodeVo.setStatus(NodeStatusEnum.YCX.getCode());
 
             }

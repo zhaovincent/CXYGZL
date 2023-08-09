@@ -357,6 +357,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                         NodeStatusEnum.YJS.getCode())
                 .set(processInstanceParamDto.getCancel(), ProcessInstanceRecord::getStatus, NodeStatusEnum.YCX.getCode())
                 .eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceParamDto.getProcessInstanceId())
+                .eq(ProcessInstanceRecord::getStatus,NodeStatusEnum.JXZ.getCode())
                 .update(new ProcessInstanceRecord());
         return com.cxygzl.common.dto.R.success();
     }
@@ -596,7 +597,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                             if(StrUtil.startWith(nodeId,ProcessInstanceConstant.VariableKey.STARTER)){
                                 nodeId=ProcessInstanceConstant.VariableKey.STARTER;
                             }
-                            return StrUtil.format("{}@@{}", nodeId,w.getExecutionId());
+                            return StrUtil.format("{}@@{}@@{}", nodeId,w.getExecutionId(),w.getFlowUniqueId());
                         }).collect(Collectors.toSet());
                 endUniqueId.addAll(collect);
             }
@@ -607,7 +608,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                             if(StrUtil.startWith(nodeId,ProcessInstanceConstant.VariableKey.STARTER)){
                                 nodeId=ProcessInstanceConstant.VariableKey.STARTER;
                             }
-                            return StrUtil.format("{}@@{}", nodeId,w.getExecutionId());
+                            return StrUtil.format("{}@@{}@@{}", nodeId,w.getExecutionId(),w.getFlowUniqueId());
                         }).collect(Collectors.toSet());
                 beingUniqueId.addAll(collect);
             }
@@ -618,7 +619,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                             if(StrUtil.startWith(nodeId,ProcessInstanceConstant.VariableKey.STARTER)){
                                 nodeId=ProcessInstanceConstant.VariableKey.STARTER;
                             }
-                            return StrUtil.format("{}@@{}", nodeId,w.getExecutionId());
+                            return StrUtil.format("{}@@{}@@{}", nodeId,w.getExecutionId(),w.getFlowUniqueId());
                         }).collect(Collectors.toSet());
                 cancelUniqueId.addAll(collect);
             }

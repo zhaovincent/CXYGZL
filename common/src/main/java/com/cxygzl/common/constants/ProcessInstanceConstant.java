@@ -86,6 +86,10 @@ public class ProcessInstanceConstant {
 
         public static final String APPROVE_NODE_RESULT ="approveNodeResult";
 
+
+        //流程唯一id
+        public static final String FLOW_UNIQUE_ID ="flowUniqueId";
+
     }
 
 

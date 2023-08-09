@@ -13,15 +13,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NodeUtil {
-
-    public static void handleNodeAddExecutionId(Node node, String nodeId, String executionId) {
+    /**
+     * 处理节点添加执行id和流程唯一id
+     * @param node
+     * @param nodeId
+     * @param executionId
+     * @param flowUniqueId
+     */
+    public static void handleNodeAddExecutionIdFlowUniqueId(Node node, String nodeId, String executionId, String flowUniqueId) {
 
         if (!isNode(node)) {
             return;
         }
 
-        if (((StrUtil.contains(nodeId, node.getId()) && StrUtil.startWith(nodeId, ProcessInstanceConstant.VariableKey.STARTER)) || (StrUtil.equals(nodeId, node.getId()))) && StrUtil.isBlank(node.getExecutionId())) {
+        if (((StrUtil.contains(nodeId, node.getId()) && StrUtil.startWith(nodeId, ProcessInstanceConstant.VariableKey.STARTER)) ||
+                (StrUtil.equals(nodeId, node.getId()))) && StrUtil.isBlank(node.getExecutionId())) {
             node.setExecutionId(executionId);
+            node.setFlowUniqueId(flowUniqueId);
             return;
         }
 
@@ -35,12 +43,12 @@ public class NodeUtil {
             for (Node branch : branchs) {
                 Node children = branch.getChildNode();
 
-                handleNodeAddExecutionId(children, nodeId, executionId);
+                handleNodeAddExecutionIdFlowUniqueId(children, nodeId, executionId, flowUniqueId);
 
             }
         }
 
-        handleNodeAddExecutionId(node.getChildNode(), nodeId, executionId);
+        handleNodeAddExecutionIdFlowUniqueId(node.getChildNode(), nodeId, executionId, flowUniqueId);
     }
 
     /**

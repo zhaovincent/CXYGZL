@@ -60,11 +60,12 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
         Long count = this.lambdaQuery()
                 .eq(ProcessNodeRecord::getExecutionId, processNodeRecordParamDto.getExecutionId())
                 .eq(ProcessNodeRecord::getNodeId, processNodeRecordParamDto.getNodeId())
+                .eq(ProcessNodeRecord::getFlowUniqueId, processNodeRecordParamDto.getFlowUniqueId())
                 .count();
         if (count > 0) {
             return R.success();
         }
-        log.info("开始节点：{} - {}",processNodeRecordParamDto.getNodeId(),processNodeRecordParamDto.getNodeName());
+        log.info("开始节点：{} - {} - {} -{}",processNodeRecordParamDto.getNodeId(),processNodeRecordParamDto.getNodeName(),processNodeRecordParamDto.getExecutionId(),processNodeRecordParamDto.getFlowUniqueId());
         List<String> childExecutionId = processNodeRecordParamDto.getChildExecutionId();
         if (CollUtil.isNotEmpty(childExecutionId)) {
             //子级
@@ -100,9 +101,6 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processNodeRecordParamDto.getProcessInstanceId()).one();
         Node currentProcessRootNode = JSON.parseObject(processInstanceRecord.getProcess(), Node.class);
 
-        //设置executionId
-        NodeUtil.handleNodeAddExecutionId(currentProcessRootNode, nodeId, processNodeRecordParamDto.getExecutionId());
-        processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
 
         if (parentNode != null) {
             if (parentNode.getType().intValue() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue()) {
@@ -119,12 +117,17 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
             //说明是跳转过来的 要重新构建流程树
 
             Node currentNode = processNodeDataService.getNode(flowId, nodeId).getData();
-            currentNode.setExecutionId(processNodeRecordParamDto.getExecutionId());
+           // currentNode.setExecutionId(processNodeRecordParamDto.getExecutionId());
 
             NodeUtil.handleChildrenAfterJump(currentProcessRootNode, parentNodeId, currentNode, processNodeRecordParamDto.getExecutionId());
             processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
 
         }
+
+        //设置executionId
+        NodeUtil.handleNodeAddExecutionIdFlowUniqueId(currentProcessRootNode, nodeId, processNodeRecordParamDto.getExecutionId(), processNodeRecordParamDto.getFlowUniqueId());
+        processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
+
         processInstanceRecordService.updateById(processInstanceRecord);
 
         return R.success();
@@ -146,8 +149,10 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
                 .set(ProcessNodeRecord::getEndTime, new Date())
                 .set(ProcessNodeRecord::getData, processNodeRecordParamDto.getData())
                 .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId)
+                .eq(ProcessNodeRecord::getStatus,  NodeStatusEnum.JXZ.getCode())
                 .eq(ProcessNodeRecord::getNodeId, processNodeRecordParamDto.getNodeId())
 //                .eq(ProcessNodeRecord::getExecutionId, processNodeRecordParamDto.getExecutionId())
+//                .eq(ProcessNodeRecord::getFlowUniqueId, processNodeRecordParamDto.getFlowUniqueId())
                 .update(new ProcessNodeRecord());
 
         //判断是否是动态路由，如果是动态路由  则要修改节点连线

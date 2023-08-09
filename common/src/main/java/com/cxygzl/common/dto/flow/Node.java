@@ -13,6 +13,7 @@ public class Node implements Cloneable, Serializable {
     private String id;
 
     private String executionId;
+    private String flowUniqueId;
 
     private String tempId;
     private String parentId;

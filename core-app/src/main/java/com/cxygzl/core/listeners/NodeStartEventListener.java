@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID;
+
 /**
  * 流程监听器
  */
@@ -87,8 +89,8 @@ public class NodeStartEventListener implements FlowableEventListener {
             processNodeRecordParamDto.setChildExecutionId(childExecutionIdList);
             processNodeRecordParamDto.setData(JSON.toJSONString(processVariables));
             processNodeRecordParamDto.setNodeId(activityId);
-            processNodeRecordParamDto.setJumpLabel(MapUtil.getStr(processVariables, StrUtil.format("{}_jump_label", activityId)));
             processNodeRecordParamDto.setParentNodeId(MapUtil.getStr(processVariables, StrUtil.format("{}_parent_id", activityId)));
+            processNodeRecordParamDto.setFlowUniqueId(MapUtil.getStr(processVariables, FLOW_UNIQUE_ID));
             if (node != null) {
 
                 processNodeRecordParamDto.setNodeType((node.getType()));

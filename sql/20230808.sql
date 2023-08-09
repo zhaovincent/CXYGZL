@@ -12,3 +12,6 @@ CREATE TABLE `process_execution` (
 
 ALTER TABLE  `process_node_record`
     ADD COLUMN `jump_label` varchar(255) NULL COMMENT '跳转标识' ;
+
+ALTER TABLE  `process_node_record`
+    CHANGE COLUMN `jump_label` `flow_unqiue_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流转唯一标识' ;

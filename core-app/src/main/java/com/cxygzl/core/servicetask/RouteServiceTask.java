@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID;
+
 /**
  * 触发器任务处理器--java服务任务
  */
@@ -65,7 +67,7 @@ public class RouteServiceTask implements JavaDelegate {
             }
 
             runtimeService.setVariable(execution.getId(), StrUtil.format("{}_parent_id", targetKey), nodeId);
-            runtimeService.setVariable(execution.getId(), StrUtil.format("{}_jump_label", targetKey), IdUtil.fastSimpleUUID());
+            runtimeService.setVariable(execution.getId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
 
             //跳转
             runtimeService.createChangeActivityStateBuilder()

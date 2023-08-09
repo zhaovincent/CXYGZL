@@ -28,7 +28,7 @@ public class ProcessNodeRecordParamDto {
     /**
      * 跳转标识
      */
-    private String jumpLabel;
+    private String flowUniqueId;
     private String nodeId;
 
 
