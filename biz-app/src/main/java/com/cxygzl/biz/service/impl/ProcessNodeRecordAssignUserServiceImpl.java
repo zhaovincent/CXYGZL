@@ -142,7 +142,7 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
         if (processNodeRecordAssignUser == null) {
             return R.success();
         }
-        processNodeRecordAssignUser.setStatus(NodeStatusEnum.YJS.getCode());
+        processNodeRecordAssignUser.setStatus(NodeStatusEnum.YCX.getCode());
         processNodeRecordAssignUser.setEndTime(new Date());
         processNodeRecordAssignUser.setData(processNodeRecordAssignUserParamDto.getData());
         processNodeRecordAssignUser.setLocalData(processNodeRecordAssignUserParamDto.getLocalData());

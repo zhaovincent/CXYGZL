@@ -63,6 +63,7 @@ public class TaskCompleteEventListener implements FlowableEventListener {
             processNodeRecordAssignUserParamDto.setUserId((assignee));
             processNodeRecordAssignUserParamDto.setTaskId(task.getId());
             processNodeRecordAssignUserParamDto.setNodeName(task.getName());
+            processNodeRecordAssignUserParamDto.setFlowUniqueId(task.getVariableLocal(ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID,String.class));
             String taskType = task.getVariableLocal(ProcessInstanceConstant.VariableKey.TASK_TYPE, String.class);
             //RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
             processNodeRecordAssignUserParamDto.setTaskType(taskType);

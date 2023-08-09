@@ -2,15 +2,13 @@ package com.cxygzl.biz.utils;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
-import com.cxygzl.biz.entity.ProcessExecution;
-import com.cxygzl.biz.entity.ProcessInstanceRecord;
-import com.cxygzl.biz.entity.ProcessNodeRecordApproveDesc;
-import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
+import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.biz.vo.node.UserVo;
@@ -24,16 +22,28 @@ import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.NodeUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * 节点格式化显示工具
  */
 public class NodeFormatUtil {
+
+    private static String nodeDateShow(Date date) {
+        if (date == null) {
+            return "";
+        }
+        if (DateUtil.isSameDay(date, new Date())) {
+            return DateUtil.format(date, "HH:mm");
+        }
+
+        if (DateUtil.year(date) == DateUtil.year(new Date())) {
+            return DateUtil.format(date, "MM-dd HH:mm");
+        }
+        return DateUtil.format(date, "yyyy-MM-dd HH:mm");
+
+    }
 
 
     /**
@@ -72,13 +82,13 @@ public class NodeFormatUtil {
         nodeVo.setStatus(NodeStatusEnum.WKS.getCode());
         String executionId = node.getExecutionId();
         if (StrUtil.isNotBlank(executionId)) {
-            if (endUniqueId.contains(StrUtil.format("{}@@{}@@{}", node.getId(), executionId,node.getFlowUniqueId()))) {
+            if (endUniqueId.contains(StrUtil.format("{}@@{}@@{}", node.getId(), executionId, node.getFlowUniqueId()))) {
                 nodeVo.setStatus(NodeStatusEnum.YJS.getCode());
 
-            } else if (beingUniqueId.contains(StrUtil.format("{}@@{}@@{}", node.getId(), executionId,node.getFlowUniqueId()))) {
+            } else if (beingUniqueId.contains(StrUtil.format("{}@@{}@@{}", node.getId(), executionId, node.getFlowUniqueId()))) {
                 nodeVo.setStatus(NodeStatusEnum.JXZ.getCode());
 
-            }else if (cancelUniqueId.contains(StrUtil.format("{}@@{}@@{}", node.getId(), executionId,node.getFlowUniqueId()))) {
+            } else if (cancelUniqueId.contains(StrUtil.format("{}@@{}@@{}", node.getId(), executionId, node.getFlowUniqueId()))) {
                 nodeVo.setStatus(NodeStatusEnum.YCX.getCode());
 
             }
@@ -88,6 +98,21 @@ public class NodeFormatUtil {
 
             nodeVo.setPlaceholder(node.getPlaceHolder());
 
+        }
+        if(StrUtil.isAllNotBlank(processInstanceId,node.getExecutionId(),node.getFlowUniqueId())){
+            IProcessNodeRecordService processNodeRecordService = SpringUtil.getBean(IProcessNodeRecordService.class);
+            ProcessNodeRecord processNodeRecord = processNodeRecordService.lambdaQuery()
+                    .eq(ProcessNodeRecord::getExecutionId, node.getExecutionId())
+                    .eq(ProcessNodeRecord::getFlowUniqueId, node.getFlowUniqueId())
+                    .eq(ProcessNodeRecord::getNodeId, node.getId())
+                    .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId).one();
+            if(processNodeRecord!=null){
+                nodeVo.setShowTimeStr(nodeDateShow(processNodeRecord.getStartTime()));
+                if(processNodeRecord.getEndTime()!=null){
+                    nodeVo.setShowTimeStr(nodeDateShow(processNodeRecord.getEndTime()));
+
+                }
+            }
         }
 
         IProcessNodeRecordApproveDescService processNodeRecordApproveDescService = SpringUtil.getBean(IProcessNodeRecordApproveDescService.class);
@@ -138,7 +163,7 @@ public class NodeFormatUtil {
 
                     UserVo userVo = buildUser((userId));
                     userVo.setShowTime(w.getEndTime());
-                    userVo.setApproveDesc(approveDescList.isEmpty() ? "" : approveDescList.get(0).getApproveDesc());
+                    userVo.setShowTimeStr(nodeDateShow(w.getEndTime()));
                     userVo.setStatus(w.getStatus());
                     userVo.setOperType(w.getTaskType());
 
@@ -264,6 +289,7 @@ public class NodeFormatUtil {
 
                 UserVo userVo = buildRootUser(processInstanceId);
                 userVo.setShowTime(processInstanceRecord.getCreateTime());
+                userVo.setShowTimeStr(nodeDateShow(processInstanceRecord.getCreateTime()));
                 userVo.setStatus(NodeStatusEnum.YJS.getCode());
                 userVoList.addAll(CollUtil.newArrayList(userVo));
 

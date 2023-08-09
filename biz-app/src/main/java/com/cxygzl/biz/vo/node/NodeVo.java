@@ -53,6 +53,10 @@ public class NodeVo {
      * 分支列表
      */
     private List<NodeVo> branch;
+    /**
+     * 显示时间
+     */
+    private String showTimeStr;
 
 
 }

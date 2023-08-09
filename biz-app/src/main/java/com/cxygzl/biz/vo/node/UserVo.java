@@ -24,15 +24,12 @@ public class UserVo {
 
 
     private Date showTime;
+    private String showTimeStr;
 
 
     private String avatar;
 
 
-    /**
-     * 意见
-     */
-    private String approveDesc;
 
     private String operType;
     /**
