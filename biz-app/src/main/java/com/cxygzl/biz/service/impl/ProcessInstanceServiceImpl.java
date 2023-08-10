@@ -18,6 +18,7 @@ import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.FormUtil;
 import com.cxygzl.biz.utils.NodeFormatUtil;
+import com.cxygzl.biz.utils.NodeImageUtil;
 import com.cxygzl.biz.vo.FormItemVO;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.ProcessCopyVo;
@@ -29,6 +30,7 @@ import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.*;
 import com.cxygzl.common.dto.third.UserDto;
+import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -521,10 +523,18 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         com.cxygzl.common.dto.R<String> stringR = JSON.parseObject(s, new TypeReference<com.cxygzl.common.dto.R<String>>() {
         });
         String data = stringR.getData();
-//
-//        OutputStream out = response.getOutputStream();
-//
-//        Base64.decodeToStream(data, out, true);
+
+        //
+        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, procInsId).one();
+        String flowId = processInstanceRecord.getFlowId();
+        Process process = processService.getByFlowId(flowId);
+        String content = process.getProcess();
+        Node node = JSON.parseObject(content, Node.class);
+        NodeUtil.addEndNode(node);
+        List<NodeLinkDto> dtoList = NodeImageUtil.buildLinkList(node, null, true);
+        log.info("连线：{}",JSON.toJSONString(dtoList));
+        NodeImageUtil.initNum(node);
+
         return com.cxygzl.common.dto.R.success(data);
     }
 

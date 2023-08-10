@@ -6,7 +6,6 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
-import com.cxygzl.common.dto.NodeLinkDto;
 import com.cxygzl.common.dto.flow.Node;
 
 import java.util.ArrayList;
@@ -266,80 +265,6 @@ public class NodeUtil {
 
         initRandomNodeId(childNode);
 
-    }
-
-    /**
-     * 创建节点连线集合
-     *
-     * @param node
-     * @param parentBranchNextNode
-     * @param effect
-     * @return
-     */
-    public static List<NodeLinkDto> buildLinkList(Node node, Node parentBranchNextNode, boolean effect) {
-        List<NodeLinkDto> list = new ArrayList();
-
-        if (!isNode(node)) {
-            return list;
-        }
-
-
-        Integer type = node.getType();
-
-        Node childNode = node.getChildNode();
-
-        if (!NodeTypeEnum.getByValue(type).getBranch()) {
-
-            if (isNode(childNode) && !StrUtil.equals(node.getId(), childNode.getId())) {
-                NodeLinkDto build = NodeLinkDto.builder()
-                        .prevId(node.getTempId())
-                        .prevNodeId(node.getId())
-                        .prevName(node.getNodeName())
-                        .nextId(childNode.getTempId())
-                        .nextNodeId(childNode.getId())
-                        .nextName(childNode.getNodeName()).build();
-                list.add(build);
-            } else if (parentBranchNextNode != null && !StrUtil.equals(node.getId(), parentBranchNextNode.getId())) {
-                NodeLinkDto build = NodeLinkDto.builder()
-                        .prevId(node.getTempId())
-                        .prevNodeId(node.getId())
-                        .prevName(node.getNodeName())
-                        .nextId(parentBranchNextNode.getTempId())
-                        .nextNodeId(parentBranchNextNode.getId())
-                        .nextName(parentBranchNextNode.getNodeName())
-                        .build();
-                list.add(build);
-            }
-        }
-
-
-        if (NodeTypeEnum.getByValue(type).getBranch()) {
-
-            //条件分支
-            List<Node> branchs = node.getConditionNodes();
-            for (Node branch : branchs) {
-                Node children = branch.getChildNode();
-
-                //记录节点和分支下的节点数据
-                NodeLinkDto build = NodeLinkDto.builder()
-                        .prevId(node.getTempId())
-                        .prevNodeId(node.getId())
-                        .prevName(node.getNodeName())
-                        .nextId(children.getTempId())
-                        .nextNodeId(children.getId())
-                        .nextName(children.getNodeName())
-                        .build();
-                list.add(build);
-
-
-                List<NodeLinkDto> dtoList = buildLinkList(children, isNode(childNode) ? childNode : parentBranchNextNode, true);
-                list.addAll(dtoList);
-            }
-        }
-
-        List<NodeLinkDto> dtoList = buildLinkList(childNode, parentBranchNextNode, !NodeTypeEnum.getByValue(type).getBranch());
-        list.addAll(dtoList);
-        return list;
     }
 
 
