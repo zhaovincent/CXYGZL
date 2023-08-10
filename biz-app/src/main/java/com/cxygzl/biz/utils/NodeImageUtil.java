@@ -1,5 +1,6 @@
 package com.cxygzl.biz.utils;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.biz.vo.node.NodeImageVO;
 import com.cxygzl.common.constants.NodeTypeEnum;
@@ -19,12 +20,16 @@ public class NodeImageUtil {
         log.info("节点:{}的上级是：{}", node.getNodeName(), parentNode == null ? "" : parentNode.getNodeName());
     }
 
-    public static void initNum(Node node){
+    public static void initMaxNum(NodeImageVO node){
+
+    }
+    public static void initNum(NodeImageVO node){
         if(!NodeUtil.isNode(node)){
             return;
         }
         List<Node> childrenNodeList = NodeUtil.getChildrenNodeList(node, node.getId());
-        log.info("节点：{} 的子级数量：{} ",node.getNodeName(),childrenNodeList.size());
+        log.info("节点：{} 的子级数量：{} ",node.getNodeName(),childrenNodeList.size()-1);
+        node.setChildrenNum(childrenNodeList.size()-1);
 
         Integer type = node.getType();
 
@@ -32,10 +37,12 @@ public class NodeImageUtil {
         if (NodeTypeEnum.getByValue(type).getBranch()) {
             List<Node> conditionNodes = node.getConditionNodes();
             for (Node conditionNode : conditionNodes) {
-                initNum(conditionNode.getChildNode());
+                initNum(BeanUtil.copyProperties(conditionNode.getChildNode(),NodeImageVO.class));
             }
+            node.setBranchNum(conditionNodes.size());
         }
-        initNum(node.getChildNode());
+        initNum(BeanUtil.copyProperties(node.getChildNode(),NodeImageVO.class));
+
     }
 
 

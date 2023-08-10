@@ -23,6 +23,7 @@ import com.cxygzl.biz.vo.FormItemVO;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.ProcessCopyVo;
 import com.cxygzl.biz.vo.ProcessInstanceRecordVO;
+import com.cxygzl.biz.vo.node.NodeImageVO;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
@@ -533,7 +534,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         NodeUtil.addEndNode(node);
         List<NodeLinkDto> dtoList = NodeImageUtil.buildLinkList(node, null, true);
         log.info("连线：{}",JSON.toJSONString(dtoList));
-        NodeImageUtil.initNum(node);
+        NodeImageUtil.initNum(BeanUtil.copyProperties(node,NodeImageVO.class));
 
         return com.cxygzl.common.dto.R.success(data);
     }
