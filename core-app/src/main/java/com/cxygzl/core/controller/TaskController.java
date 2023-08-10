@@ -2,9 +2,11 @@ package com.cxygzl.core.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
@@ -242,22 +244,23 @@ public class TaskController {
             return R.fail("任务不存在");
         }
 
-        Boolean approveResult = taskParamDto.getApproveResult();
+        boolean approveResult = taskParamDto.getApproveResult();
         runtimeService.setVariableLocal(task.getExecutionId(), ProcessInstanceConstant.VariableKey.APPROVE_RESULT,
                 approveResult);
         //保存任务类型
-        if (approveResult != null) {
 
 
-            taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
-                    approveResult ? ProcessInstanceConstant.TaskType.PASS : ProcessInstanceConstant.TaskType.REFUSE);
-        }
+        taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
+                approveResult ? ProcessInstanceConstant.TaskType.PASS : ProcessInstanceConstant.TaskType.REFUSE);
+
         String descType = approveResult ? ApproveDescTypeEnum.PASS.getType() : ApproveDescTypeEnum.REFUSE.getType();
-        if (StrUtil.isNotBlank(taskParamDto.getApproveDesc()) && approveResult != null) {
-            saveUserCommentToTask(task, descType, taskParamDto);
+        if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
+            saveUserCommentToTask(task, descType,
+                    taskParamDto.getApproveDesc(),
+                    taskParamDto.getUserId(), "提交任务并添加了评论");
+        } else {
+             saveSysCommentToTask(task, descType, "提交任务", taskParamDto.getUserId());
         }
-        saveSysCommentToTask(task, descType, "提交任务", taskParamDto.getUserId());
-
         Map<String, Object> paramMap = taskParamDto.getParamMap();
         taskService.complete(task.getId(), paramMap);
 
@@ -278,12 +281,18 @@ public class TaskController {
         }
 
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            saveUserCommentToTask(task, ApproveDescTypeEnum.FRONT_JOIN.getType(), taskParamDto);
+            saveUserCommentToTask(task, ApproveDescTypeEnum.FRONT_JOIN.getType(),
+                    taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
+                    StrUtil.format("委派任务给:[{}]并添加了评论",
+                            taskParamDto.getTargetUserName()
+                    ));
 
+        }else{
+            saveSysCommentToTask(task, ApproveDescTypeEnum.FRONT_JOIN.getType(), StrUtil.format("委派任务给:{}",
+                    taskParamDto.getTargetUserName()
+            ), taskParamDto.getUserId());
         }
-        saveSysCommentToTask(task, ApproveDescTypeEnum.FRONT_JOIN.getType(), StrUtil.format("委派任务给:{}",
-               taskParamDto.getTargetUserName()
-                ), taskParamDto.getUserId());
+
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 ProcessInstanceConstant.TaskType.FRONT_JOIN
@@ -308,11 +317,14 @@ public class TaskController {
 
 
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            saveUserCommentToTask(task, ApproveDescTypeEnum.RESOLVE.getType(), taskParamDto);
+            saveUserCommentToTask(task, ApproveDescTypeEnum.RESOLVE.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
+                    "完成任务并添加了评论");
 
+        }else{
+            saveSysCommentToTask(task, ApproveDescTypeEnum.RESOLVE.getType(), StrUtil.format("完成任务"
+            ), taskParamDto.getUserId());
         }
-        saveSysCommentToTask(task, ApproveDescTypeEnum.RESOLVE.getType(), StrUtil.format("完成任务"
-        ), taskParamDto.getUserId());
+
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 ProcessInstanceConstant.TaskType.RESOLVE
         );
@@ -339,12 +351,17 @@ public class TaskController {
                 ProcessInstanceConstant.TaskType.BACK_JOIN
         );
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            saveUserCommentToTask(task, ApproveDescTypeEnum.BACK_JOIN.getType(), taskParamDto);
+            saveUserCommentToTask(task, ApproveDescTypeEnum.BACK_JOIN.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
+                    StrUtil.format("转办任务给:[{}]并添加了评论",
+                            taskParamDto.getTargetUserName()
+                    ));
 
+        }else{
+            saveSysCommentToTask(task, ApproveDescTypeEnum.BACK_JOIN.getType(), StrUtil.format("转办任务给:{}",
+                    taskParamDto.getTargetUserName()
+            ), taskParamDto.getUserId());
         }
-        saveSysCommentToTask(task, ApproveDescTypeEnum.BACK_JOIN.getType(), StrUtil.format("转办任务给:{}",
-                taskParamDto.getTargetUserName()
-        ), taskParamDto.getUserId());
+
         taskService.setAssignee(taskParamDto.getTaskId(), taskParamDto.getTargetUserId());
 
         return R.success();
@@ -390,7 +407,10 @@ public class TaskController {
 
 
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            saveUserCommentToTask(task, ApproveDescTypeEnum.REJECT.getType(), taskParamDto);
+            saveUserCommentToTask(task, ApproveDescTypeEnum.REJECT.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
+                    "驳回了任务并添加了评论");
+        }else{
+            saveSysCommentToTask(task,ApproveDescTypeEnum.REJECT.getType(),"驳回了任务",taskParamDto.getUserId());
         }
 
         runtimeService.createChangeActivityStateBuilder()
@@ -400,18 +420,18 @@ public class TaskController {
         return R.success();
     }
 
-    private void saveUserCommentToTask(Task task, String type, TaskParamDto taskParamDto) {
+    private void saveUserCommentToTask(Task task, String type, String desc, String userId, String descTitle) {
         Comment comment = taskService.addComment(task.getId(), task.getProcessInstanceId(),
-                type, taskParamDto.getApproveDesc());
+                type, JSON.toJSONString(Dict.create().set("content", desc).set("title", descTitle)));
         String id = comment.getId();
-        taskService.setVariable(task.getId(), StrUtil.format("user_id_{}", id), taskParamDto.getUserId());
+        taskService.setVariable(task.getId(), StrUtil.format("user_id_{}", id), userId);
         taskService.setVariable(task.getId(), StrUtil.format("sys_{}", id), false);
 
     }
 
     private void saveSysCommentToTask(Task task, String type, String desc, String userId) {
         Comment comment = taskService.addComment(task.getId(), task.getProcessInstanceId(),
-                type, desc);
+                type, JSON.toJSONString(Dict.create().set("content", desc)));
         String id = comment.getId();
         taskService.setVariable(task.getId(), StrUtil.format("sys_{}", id), true);
         taskService.setVariable(task.getId(), StrUtil.format("user_id_{}", id), userId);

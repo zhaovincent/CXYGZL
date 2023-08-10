@@ -1,12 +1,9 @@
 package com.cxygzl.core.listeners;
 
-import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
-import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.MessageTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
-import com.cxygzl.common.dto.SimpleApproveDescDto;
 import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.utils.CoreHttpUtil;
@@ -15,14 +12,8 @@ import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEntityEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
-import org.flowable.engine.TaskService;
-import org.flowable.engine.task.Comment;
 import org.flowable.task.service.impl.persistence.entity.TaskEntity;
 import org.flowable.task.service.impl.persistence.entity.TaskEntityImpl;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * 流程监听器
@@ -83,9 +74,7 @@ public class TaskAssignedEventListener implements FlowableEventListener {
                 processNodeRecordAssignUserParamDto.setExecutionId(task.getExecutionId());
 
 
-                List<SimpleApproveDescDto> simpleApproveDescDtoList = getSimpleApproveDescDtoList(task);
 
-                processNodeRecordAssignUserParamDto.setSimpleApproveDescDtoList(simpleApproveDescDtoList);
 
                 CoreHttpUtil.startAssignUser(processNodeRecordAssignUserParamDto);
 
@@ -123,32 +112,6 @@ public class TaskAssignedEventListener implements FlowableEventListener {
 
     }
 
-    private static List<SimpleApproveDescDto> getSimpleApproveDescDtoList(TaskEntityImpl task) {
-        TaskService taskService = SpringUtil.getBean(TaskService.class);
-
-        List<Comment> taskComments = new ArrayList<>();
-
-        for (String s : ApproveDescTypeEnum.getTypeList()) {
-            List<Comment> approveDescList = taskService.getTaskComments(task.getId(),s);
-            taskComments.addAll(approveDescList);
-        }
-
-
-        List<SimpleApproveDescDto> simpleApproveDescDtoList = new ArrayList<>();
-        for (Comment comment : taskComments) {
-            String id = comment.getId();
-            Date time = comment.getTime();
-            String fullMessage = comment.getFullMessage();
-
-            SimpleApproveDescDto simpleApproveDescDto = new SimpleApproveDescDto();
-            simpleApproveDescDto.setDate(time);
-            simpleApproveDescDto.setMsgId(id);
-            simpleApproveDescDto.setType(comment.getType());
-            simpleApproveDescDto.setMessage(fullMessage);
-            simpleApproveDescDtoList.add(simpleApproveDescDto);
-        }
-        return simpleApproveDescDtoList;
-    }
 
     /**
      * @return whether or not the current operation should fail when this listeners execution throws an exception.

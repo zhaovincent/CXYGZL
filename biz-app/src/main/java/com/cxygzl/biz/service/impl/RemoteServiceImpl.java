@@ -309,7 +309,7 @@ public class RemoteServiceImpl implements IRemoteService {
 
 
         //记录日志
-        processOperRecordService.startProcessInstance(processInstanceRecordParamDto);
+       // processOperRecordService.startProcessInstance(processInstanceRecordParamDto);
 
         return R.success();
     }

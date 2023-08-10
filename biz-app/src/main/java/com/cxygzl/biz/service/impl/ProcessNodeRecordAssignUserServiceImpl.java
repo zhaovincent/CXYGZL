@@ -1,24 +1,17 @@
 package com.cxygzl.biz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
-import com.cxygzl.biz.entity.ProcessNodeRecordApproveDesc;
 import com.cxygzl.biz.mapper.ProcessNodeRecordAssignUserMapper;
-import com.cxygzl.biz.service.IProcessNodeRecordApproveDescService;
 import com.cxygzl.biz.service.IProcessNodeRecordAssignUserService;
-import com.cxygzl.biz.service.IProcessOperRecordService;
 import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
 import com.cxygzl.common.dto.R;
-import com.cxygzl.common.dto.SimpleApproveDescDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.Date;
-import java.util.List;
 
 /**
  * <p>
@@ -33,11 +26,11 @@ import java.util.List;
 public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessNodeRecordAssignUserMapper, ProcessNodeRecordAssignUser> implements IProcessNodeRecordAssignUserService {
 
 
-    @Resource
-    private IProcessOperRecordService processOperRecordService;
-
-    @Resource
-    private IProcessNodeRecordApproveDescService processNodeRecordApproveDescService;
+//    @Resource
+//    private IProcessOperRecordService processOperRecordService;
+//
+//    @Resource
+//    private IProcessNodeRecordApproveDescService processNodeRecordApproveDescService;
 
     /**
      * 设置执行人
@@ -61,17 +54,17 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
                 processNodeRecordAssignUser.setEndTime(new Date());
                 this.updateById(processNodeRecordAssignUser);
 
-                List<SimpleApproveDescDto> simpleApproveDescDtoList = processNodeRecordAssignUserParamDto.getSimpleApproveDescDtoList();
-
-
-                saveApproveDescList(processNodeRecordAssignUser, simpleApproveDescDtoList);
+//                List<SimpleApproveDescDto> simpleApproveDescDtoList = processNodeRecordAssignUserParamDto.getSimpleApproveDescDtoList();
+//
+//
+//                saveApproveDescList(processNodeRecordAssignUser, simpleApproveDescDtoList);
 
 
                 //修改任务
-                ProcessNodeRecordAssignUserParamDto p = BeanUtil.copyProperties(processNodeRecordAssignUserParamDto,
-                        ProcessNodeRecordAssignUserParamDto.class);
-                p.setUserId(processNodeRecordAssignUser.getUserId());
-                processOperRecordService.completeTask(p);
+//                ProcessNodeRecordAssignUserParamDto p = BeanUtil.copyProperties(processNodeRecordAssignUserParamDto,
+//                        ProcessNodeRecordAssignUserParamDto.class);
+//                p.setUserId(processNodeRecordAssignUser.getUserId());
+//                processOperRecordService.completeTask(p);
 
 
             }
@@ -89,7 +82,7 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
 
 
         //记录日志
-        processOperRecordService.taskSetAssignee(processNodeRecordAssignUserParamDto);
+      //  processOperRecordService.taskSetAssignee(processNodeRecordAssignUserParamDto);
 
         return R.success();
     }
@@ -115,13 +108,13 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
         processNodeRecordAssignUser.setTaskType(processNodeRecordAssignUserParamDto.getTaskType());
         this.updateById(processNodeRecordAssignUser);
 
-        List<SimpleApproveDescDto> simpleApproveDescDtoList = processNodeRecordAssignUserParamDto.getSimpleApproveDescDtoList();
-
-        saveApproveDescList(processNodeRecordAssignUser, simpleApproveDescDtoList);
+//        List<SimpleApproveDescDto> simpleApproveDescDtoList = processNodeRecordAssignUserParamDto.getSimpleApproveDescDtoList();
+//
+//        saveApproveDescList(processNodeRecordAssignUser, simpleApproveDescDtoList);
 
         //记录日志
 
-        processOperRecordService.completeTask(processNodeRecordAssignUserParamDto);
+        // processOperRecordService.completeTask(processNodeRecordAssignUserParamDto);
 
         return R.success();
     }
@@ -151,44 +144,44 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
         processNodeRecordAssignUser.setTaskType(processNodeRecordAssignUserParamDto.getTaskType());
         this.updateById(processNodeRecordAssignUser);
 
-        List<SimpleApproveDescDto> simpleApproveDescDtoList = processNodeRecordAssignUserParamDto.getSimpleApproveDescDtoList();
-
-        saveApproveDescList(processNodeRecordAssignUser, simpleApproveDescDtoList);
+//        List<SimpleApproveDescDto> simpleApproveDescDtoList = processNodeRecordAssignUserParamDto.getSimpleApproveDescDtoList();
+//
+//        saveApproveDescList(processNodeRecordAssignUser, simpleApproveDescDtoList);
 
         //记录日志
-        processNodeRecordAssignUserParamDto.setUserId(processNodeRecordAssignUser.getUserId());
-        processOperRecordService.nodeCancel(processNodeRecordAssignUserParamDto);
+//        processNodeRecordAssignUserParamDto.setUserId(processNodeRecordAssignUser.getUserId());
+//        processOperRecordService.nodeCancel(processNodeRecordAssignUserParamDto);
 
 
         return R.success();
     }
 
-    private void saveApproveDescList(ProcessNodeRecordAssignUser processNodeRecordAssignUser, List<SimpleApproveDescDto> simpleApproveDescDtoList) {
-        if (CollUtil.isNotEmpty(simpleApproveDescDtoList)) {
-            for (SimpleApproveDescDto simpleApproveDescDto : simpleApproveDescDtoList) {
-
-                Long count = processNodeRecordApproveDescService.lambdaQuery().eq(ProcessNodeRecordApproveDesc::getDescId, simpleApproveDescDto.getMsgId()).count();
-                if (count > 0) {
-                    continue;
-                }
-
-
-                ProcessNodeRecordApproveDesc entity = new ProcessNodeRecordApproveDesc();
-                entity.setFlowId(processNodeRecordAssignUser.getFlowId());
-                entity.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
-                entity.setNodeId(processNodeRecordAssignUser.getNodeId());
-                entity.setUserId(processNodeRecordAssignUser.getUserId());
-                entity.setExecutionId(processNodeRecordAssignUser.getExecutionId());
-                entity.setTaskId(processNodeRecordAssignUser.getTaskId());
-                entity.setApproveDesc(simpleApproveDescDto.getMessage());
-                entity.setDescDate(simpleApproveDescDto.getDate());
-                entity.setDescId(simpleApproveDescDto.getMsgId());
-                entity.setDescType(simpleApproveDescDto.getType());
-                entity.setNodeName(processNodeRecordAssignUser.getNodeName());
-
-
-                processNodeRecordApproveDescService.save(entity);
-            }
-        }
-    }
+//    private void saveApproveDescList(ProcessNodeRecordAssignUser processNodeRecordAssignUser, List<SimpleApproveDescDto> simpleApproveDescDtoList) {
+//        if (CollUtil.isNotEmpty(simpleApproveDescDtoList)) {
+//            for (SimpleApproveDescDto simpleApproveDescDto : simpleApproveDescDtoList) {
+//
+//                Long count = processNodeRecordApproveDescService.lambdaQuery().eq(ProcessNodeRecordApproveDesc::getDescId, simpleApproveDescDto.getMsgId()).count();
+//                if (count > 0) {
+//                    continue;
+//                }
+//
+//
+//                ProcessNodeRecordApproveDesc entity = new ProcessNodeRecordApproveDesc();
+//                entity.setFlowId(processNodeRecordAssignUser.getFlowId());
+//                entity.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
+//                entity.setNodeId(processNodeRecordAssignUser.getNodeId());
+//                entity.setUserId(processNodeRecordAssignUser.getUserId());
+//                entity.setExecutionId(processNodeRecordAssignUser.getExecutionId());
+//                entity.setTaskId(processNodeRecordAssignUser.getTaskId());
+//                entity.setApproveDesc(simpleApproveDescDto.getMessage());
+//                entity.setDescDate(simpleApproveDescDto.getDate());
+//                entity.setDescId(simpleApproveDescDto.getMsgId());
+//                entity.setDescType(simpleApproveDescDto.getType());
+//                entity.setNodeName(processNodeRecordAssignUser.getNodeName());
+//
+//
+//                processNodeRecordApproveDescService.save(entity);
+//            }
+//        }
+//    }
 }

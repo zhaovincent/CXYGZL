@@ -2,8 +2,6 @@ package com.cxygzl.common.dto;
 
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * 流程节点记录-执行人
  */
@@ -37,8 +35,6 @@ public class ProcessNodeRecordAssignUserParamDto {
     private String userId;
     private String executionId;
     private String taskId;
-
-    private List<SimpleApproveDescDto> simpleApproveDescDtoList;
     private String nodeName;
     private String flowUniqueId;
 
