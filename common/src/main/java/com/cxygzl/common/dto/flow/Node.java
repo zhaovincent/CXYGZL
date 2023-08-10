@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class Node implements Cloneable, Serializable {
+public class Node  implements Cloneable, Serializable {
 
     private String id;
 
@@ -98,5 +98,17 @@ public class Node implements Cloneable, Serializable {
     private List<HttpSettingData> cpFormList;
 
     private List operList;
+
+
+
+    //分支下的最大数量
+    private Integer containNodeNum;
+    private Integer containBranchNum;
+    private Integer nodeBeforeNum;
+    private Integer xPosition;
+    private Integer yPosition;
+
+
+
 
 }

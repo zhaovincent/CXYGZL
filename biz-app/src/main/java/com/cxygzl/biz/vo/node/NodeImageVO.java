@@ -1,7 +1,11 @@
 package com.cxygzl.biz.vo.node;
 
-import com.cxygzl.common.dto.flow.Node;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * @author Huijun Zhao
@@ -9,17 +13,40 @@ import lombok.Data;
  * @date 2023-08-10 17:37
  */
 @Data
-public class NodeImageVO  extends Node {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class NodeImageVO   {
+
+    private List<Node> nodes;
+    private List<Edge> edges;
 
 
-    private Integer x;
-    private Integer y;
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class Node{
+        private Integer x;
+        private Integer y;
 
-    //分支下最大的数量
-    private Integer maxChildrenNumAtBranch;
 
-    //分支数量
-    private Integer branchNum;
-    //子级数量
-    private Integer childrenNum;
+        private String id;
+
+        private String text;
+        private String type;
+    }
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class Edge{
+
+
+        private String sourceNodeId;
+        private String targetNodeId;
+
+        private String type="polyline";
+    }
+
 }

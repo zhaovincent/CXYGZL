@@ -14,6 +14,7 @@ import java.util.List;
 public class NodeUtil {
     /**
      * 处理节点添加执行id和流程唯一id
+     *
      * @param node
      * @param nodeId
      * @param executionId
@@ -172,6 +173,17 @@ public class NodeUtil {
      * @return
      */
     private static Node getFinalChildrenNode(Node n) {
+        List<Node> nodeList = getChildrenNodeListSameBranch(n);
+        return nodeList.get(nodeList.size() - 1);
+    }
+
+    /**
+     * 获取最后一个节点
+     *
+     * @param n
+     * @return
+     */
+    public static List<Node> getChildrenNodeListSameBranch(Node n) {
 
         List<Node> nodeList = new ArrayList<>();
         nodeList.add(n);
@@ -187,7 +199,34 @@ public class NodeUtil {
                 break;
             }
         }
-        return nodeList.get(nodeList.size() - 1);
+        return nodeList;
+    }
+
+    /**
+     * 一直到最上层的节点
+     *
+     * @param node
+     * @param nodeId
+     * @return
+     */
+    public static List<Node> getParentNodeUntilRoot(Node node, String nodeId) {
+
+        List<Node> nodeList = new ArrayList<>();
+
+
+        while (true) {
+            Node parentNode = getParentNode(node, nodeId);
+
+            if (isNode(parentNode)) {
+                nodeList.add(parentNode);
+                nodeId = parentNode.getId();
+            } else {
+                break;
+            }
+        }
+
+
+        return nodeList;
     }
 
     /**
@@ -382,9 +421,9 @@ public class NodeUtil {
         Node childNode = node.getChildNode();
 
 
-        if (((StrUtil.contains(parentId, node.getId())&&
-                StrUtil.startWith(parentId,ProcessInstanceConstant.VariableKey.STARTER)
-                )||(StrUtil.equals(parentId,node.getId()))) && (!isNode(childNode) || StrUtil.isBlank(childNode.getExecutionId()))) {
+        if (((StrUtil.contains(parentId, node.getId()) &&
+                StrUtil.startWith(parentId, ProcessInstanceConstant.VariableKey.STARTER)
+        ) || (StrUtil.equals(parentId, node.getId()))) && (!isNode(childNode) || StrUtil.isBlank(childNode.getExecutionId()))) {
             node.setChildNode(c);
             Node finalChildrenNode = getFinalChildrenNode(c);
             if (finalChildrenNode.getType().intValue() != NodeTypeEnum.END.getValue()) {

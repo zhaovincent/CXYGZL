@@ -520,10 +520,10 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      */
     @Override
     public R showImg(String procInsId) {
-        String s = CoreHttpUtil.showImg(procInsId);
-        com.cxygzl.common.dto.R<String> stringR = JSON.parseObject(s, new TypeReference<com.cxygzl.common.dto.R<String>>() {
-        });
-        String data = stringR.getData();
+//        String s = CoreHttpUtil.showImg(procInsId);
+//        com.cxygzl.common.dto.R<String> stringR = JSON.parseObject(s, new TypeReference<com.cxygzl.common.dto.R<String>>() {
+//        });
+//        String data = stringR.getData();
 
         //
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, procInsId).one();
@@ -532,11 +532,9 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         String content = process.getProcess();
         Node node = JSON.parseObject(content, Node.class);
         NodeUtil.addEndNode(node);
-        List<NodeLinkDto> dtoList = NodeImageUtil.buildLinkList(node, null, true);
-        log.info("连线：{}",JSON.toJSONString(dtoList));
-        NodeImageUtil.initNum(BeanUtil.copyProperties(node,NodeImageVO.class));
+        NodeImageVO imageVO = NodeImageUtil.initPosition(node);
 
-        return com.cxygzl.common.dto.R.success(data);
+        return com.cxygzl.common.dto.R.success(imageVO);
     }
 
     /**
