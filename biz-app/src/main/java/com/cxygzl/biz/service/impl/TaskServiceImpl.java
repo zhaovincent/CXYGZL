@@ -265,6 +265,8 @@ public class TaskServiceImpl implements ITaskService {
 
 
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
+        UserDto user = ApiStrategyFactory.getStrategy().getUser(taskParamDto.getTargetUserId());
+        taskParamDto.setTargetUserName(user.getName());
 
         com.cxygzl.common.dto.R r = CoreHttpUtil.delegateTask(taskParamDto);
 
@@ -285,6 +287,7 @@ public class TaskServiceImpl implements ITaskService {
      */
     @Override
     public R resolveTask(TaskParamDto taskParamDto) {
+        taskParamDto.setUserId(StpUtil.getLoginIdAsString());
         String post = CoreHttpUtil.resolveTask(taskParamDto);
         com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
         });
@@ -305,6 +308,8 @@ public class TaskServiceImpl implements ITaskService {
     @Override
     public R setAssignee(TaskParamDto taskParamDto) {
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
+        UserDto user = ApiStrategyFactory.getStrategy().getUser(taskParamDto.getTargetUserId());
+        taskParamDto.setTargetUserName(user.getName());
         String post = CoreHttpUtil.setAssignee(taskParamDto);
         com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
         });

@@ -73,12 +73,9 @@ public class ProcessInstanceConstant {
         public static final String SUB_PROCESS_STARTER_NODE ="subProcessStartHandle";
         // 支持自动跳过
         public static final String ENABLE_SKIP_EXPRESSION ="_ACTIVITI_SKIP_EXPRESSION_ENABLED";
-        //审批描述
-        public static final String APPROVE_DESC ="approveDesc";
-        //后加签描述
-        public static final String BACK_JOIN_DESC ="backJoinDesc";
-        //前加签描述
-        public static final String FRONT_JOIN_DESC ="frontJoinDesc";
+
+
+
         //审批结果 boolean
         public static final String APPROVE_RESULT ="approveResult";
         //任务类型

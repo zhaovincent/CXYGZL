@@ -141,6 +141,7 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
      */
     @Override
     public R cancelNodeEvent(ProcessNodeRecordParamDto processNodeRecordParamDto) {
+        log.info("节点取消：{}-{}",processNodeRecordParamDto.getNodeId(),processNodeRecordParamDto.getNodeName());
         String processInstanceId = processNodeRecordParamDto.getProcessInstanceId();
         String nodeId = processNodeRecordParamDto.getNodeId();
         this.lambdaUpdate().set(ProcessNodeRecord::getStatus, NodeStatusEnum.YCX.getCode())

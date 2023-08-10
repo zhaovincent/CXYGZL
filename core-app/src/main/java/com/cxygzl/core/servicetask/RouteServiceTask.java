@@ -46,8 +46,6 @@ public class RouteServiceTask implements JavaDelegate {
         Node node = NodeDataStoreFactory.getInstance().getNode(flowId, nodeId);
 
 
-        Map<String, Object> variables = execution.getVariables();
-
 
         List<Node> list = node.getList();
 

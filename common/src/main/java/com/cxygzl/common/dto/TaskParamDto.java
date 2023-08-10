@@ -39,6 +39,7 @@ public class TaskParamDto {
      * 模板用户id
      */
     private String targetUserId;
+    private String targetUserName;
     /**
      * 参数
      */

@@ -1,5 +1,6 @@
 package com.cxygzl.core.servicetask;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_NODE_RESULT;
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID;
 
 /**
  * 审批任务处理器--java服务任务
@@ -71,6 +73,11 @@ public class ApproveServiceTask implements JavaDelegate {
                     runtimeService.setVariable(execution.getId(),
                             ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE, true);
                 }
+
+
+                runtimeService.setVariable(execution.getId(), StrUtil.format("{}_parent_id", targetKey), nodeId);
+                runtimeService.setVariable(execution.getId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
+
                 runtimeService.createChangeActivityStateBuilder()
                         .processInstanceId(processInstanceId)
                         .moveActivityIdTo(nodeIdO, targetKey)

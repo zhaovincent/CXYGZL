@@ -2,27 +2,26 @@ package com.cxygzl.core.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
-import com.cxygzl.common.dto.R;
-import com.cxygzl.common.dto.TaskParamDto;
-import com.cxygzl.common.dto.TaskResultDto;
-import com.cxygzl.common.dto.VariableQueryParamDto;
+import com.cxygzl.common.dto.*;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.*;
+import org.flowable.engine.task.Comment;
 import org.flowable.task.api.DelegationState;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
+import org.flowable.variable.api.history.HistoricVariableInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID;
 
@@ -74,6 +73,71 @@ public class TaskController {
 
         Map<String, Object> variables = taskService.getVariables(paramDto.getTaskId(), keyList);
         return R.success(variables);
+
+    }
+
+    /**
+     * 查询任务评论
+     *
+     * @param paramDto
+     * @return
+     */
+    @PostMapping("queryTaskComments")
+    public R queryTaskComments(@RequestBody VariableQueryParamDto paramDto) {
+        String taskId = paramDto.getTaskId();
+
+        List<Comment> taskComments = new ArrayList<>();
+
+        for (String s : ApproveDescTypeEnum.getTypeList()) {
+            List<Comment> approveDescList = taskService.getTaskComments(taskId, s);
+            taskComments.addAll(approveDescList);
+        }
+
+
+        Map<String, Object> variableMap = new HashMap<>();
+
+        {
+            TaskQuery taskQuery = taskService.createTaskQuery();
+
+            Task task = taskQuery.taskId(taskId).singleResult();
+            if (task == null) {
+                HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().taskId(taskId).singleResult();
+                if (historicTaskInstance == null) {
+                    return R.fail("任务不存在");
+                }
+                List<HistoricVariableInstance> list = historyService.createHistoricVariableInstanceQuery()
+                        .processInstanceId(historicTaskInstance.getProcessInstanceId())
+                        .list();
+
+                for (HistoricVariableInstance historicVariableInstance : list) {
+                    variableMap.put(historicVariableInstance.getVariableName(), historicVariableInstance.getValue());
+                }
+            } else {
+                variableMap.putAll(taskService.getVariables(taskId));
+            }
+        }
+
+
+        List<SimpleApproveDescDto> simpleApproveDescDtoList = new ArrayList<>();
+        for (Comment comment : taskComments) {
+            String id = comment.getId();
+            Date time = comment.getTime();
+            String fullMessage = comment.getFullMessage();
+
+            String userId = MapUtil.getStr(variableMap, "user_id_" + id);
+            Boolean isSys = MapUtil.getBool(variableMap, "sys_" + id, true);
+
+
+            SimpleApproveDescDto simpleApproveDescDto = new SimpleApproveDescDto();
+            simpleApproveDescDto.setDate(time);
+            simpleApproveDescDto.setMsgId(id);
+            simpleApproveDescDto.setSys(isSys);
+            simpleApproveDescDto.setUserId(userId);
+            simpleApproveDescDto.setType(comment.getType());
+            simpleApproveDescDto.setMessage(fullMessage);
+            simpleApproveDescDtoList.add(simpleApproveDescDto);
+        }
+        return R.success(simpleApproveDescDtoList);
 
     }
 
@@ -188,11 +252,12 @@ public class TaskController {
             taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                     approveResult ? ProcessInstanceConstant.TaskType.PASS : ProcessInstanceConstant.TaskType.REFUSE);
         }
-
-        if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            taskService.addComment(task.getId(), task.getProcessInstanceId(),
-                    ProcessInstanceConstant.VariableKey.APPROVE_DESC, taskParamDto.getApproveDesc());
+        String descType = approveResult ? ApproveDescTypeEnum.PASS.getType() : ApproveDescTypeEnum.REFUSE.getType();
+        if (StrUtil.isNotBlank(taskParamDto.getApproveDesc()) && approveResult != null) {
+            saveUserCommentToTask(task, descType, taskParamDto);
         }
+        saveSysCommentToTask(task, descType, "提交任务", taskParamDto.getUserId());
+
         Map<String, Object> paramMap = taskParamDto.getParamMap();
         taskService.complete(task.getId(), paramMap);
 
@@ -202,8 +267,6 @@ public class TaskController {
     /**
      * 前加签
      *
-     * @param taskId
-     * @param userId
      * @return
      */
     @PostMapping("delegateTask")
@@ -215,12 +278,15 @@ public class TaskController {
         }
 
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            taskService.addComment(task.getId(), task.getProcessInstanceId(),
-                    ProcessInstanceConstant.VariableKey.FRONT_JOIN_DESC, taskParamDto.getApproveDesc());
+            saveUserCommentToTask(task, ApproveDescTypeEnum.FRONT_JOIN.getType(), taskParamDto);
+
         }
+        saveSysCommentToTask(task, ApproveDescTypeEnum.FRONT_JOIN.getType(), StrUtil.format("委派任务给:{}",
+               taskParamDto.getTargetUserName()
+                ), taskParamDto.getUserId());
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
-                 ProcessInstanceConstant.TaskType.FRONT_JOIN
+                ProcessInstanceConstant.TaskType.FRONT_JOIN
         );
 
         taskService.delegateTask(taskParamDto.getTaskId(), taskParamDto.getTargetUserId());
@@ -242,10 +308,11 @@ public class TaskController {
 
 
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            taskService.addComment(task.getId(), task.getProcessInstanceId(),
-                    ProcessInstanceConstant.VariableKey.APPROVE_DESC, taskParamDto.getApproveDesc());
-        }
+            saveUserCommentToTask(task, ApproveDescTypeEnum.RESOLVE.getType(), taskParamDto);
 
+        }
+        saveSysCommentToTask(task, ApproveDescTypeEnum.RESOLVE.getType(), StrUtil.format("完成任务"
+        ), taskParamDto.getUserId());
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 ProcessInstanceConstant.TaskType.RESOLVE
         );
@@ -272,9 +339,12 @@ public class TaskController {
                 ProcessInstanceConstant.TaskType.BACK_JOIN
         );
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            taskService.addComment(task.getId(), task.getProcessInstanceId(),
-                    ProcessInstanceConstant.VariableKey.BACK_JOIN_DESC, taskParamDto.getApproveDesc());
+            saveUserCommentToTask(task, ApproveDescTypeEnum.BACK_JOIN.getType(), taskParamDto);
+
         }
+        saveSysCommentToTask(task, ApproveDescTypeEnum.BACK_JOIN.getType(), StrUtil.format("转办任务给:{}",
+                taskParamDto.getTargetUserName()
+        ), taskParamDto.getUserId());
         taskService.setAssignee(taskParamDto.getTaskId(), taskParamDto.getTargetUserId());
 
         return R.success();
@@ -294,7 +364,7 @@ public class TaskController {
 
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
 
-        if(task==null){
+        if (task == null) {
             return R.fail("任务不存在");
         }
 
@@ -312,18 +382,41 @@ public class TaskController {
         }
         runtimeService.setVariable(task.getExecutionId(), StrUtil.format("{}_parent_id", targetKey), task.getTaskDefinitionKey());
         runtimeService.setVariable(task.getExecutionId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
-        runtimeService.setVariableLocal(task.getExecutionId(),  ProcessInstanceConstant.VariableKey.TASK_TYPE,  ProcessInstanceConstant.TaskType.REJECT);
+        runtimeService.setVariableLocal(task.getExecutionId(), ProcessInstanceConstant.VariableKey.TASK_TYPE, ProcessInstanceConstant.TaskType.REJECT);
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 ProcessInstanceConstant.TaskType.REJECT
         );
 
 
+        if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
+            saveUserCommentToTask(task, ApproveDescTypeEnum.REJECT.getType(), taskParamDto);
+        }
+
         runtimeService.createChangeActivityStateBuilder()
                 .processInstanceId(taskParamDto.getProcessInstanceId())
                 .moveActivityIdTo(taskParamDto.getNodeId(), targetKey)
                 .changeState();
         return R.success();
+    }
+
+    private void saveUserCommentToTask(Task task, String type, TaskParamDto taskParamDto) {
+        Comment comment = taskService.addComment(task.getId(), task.getProcessInstanceId(),
+                type, taskParamDto.getApproveDesc());
+        String id = comment.getId();
+        taskService.setVariable(task.getId(), StrUtil.format("user_id_{}", id), taskParamDto.getUserId());
+        taskService.setVariable(task.getId(), StrUtil.format("sys_{}", id), false);
+
+    }
+
+    private void saveSysCommentToTask(Task task, String type, String desc, String userId) {
+        Comment comment = taskService.addComment(task.getId(), task.getProcessInstanceId(),
+                type, desc);
+        String id = comment.getId();
+        taskService.setVariable(task.getId(), StrUtil.format("sys_{}", id), true);
+        taskService.setVariable(task.getId(), StrUtil.format("user_id_{}", id), userId);
+
+
     }
 
 

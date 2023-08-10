@@ -59,6 +59,23 @@ public class CoreHttpUtil {
         return post(variableQueryParamDto, "/task/queryTaskVariables");
 
     }
+    /**
+     * 查询任务评论
+     * 全部都是
+     *
+     * @param taskId
+     * @return
+     */
+    public static R<List<SimpleApproveDescDto>> queryTaskComments(String taskId) {
+        VariableQueryParamDto variableQueryParamDto = new VariableQueryParamDto();
+        variableQueryParamDto.setTaskId(taskId);
+
+        String post = post(variableQueryParamDto, "/task/queryTaskComments");
+        R<List<SimpleApproveDescDto>> listR = JSON.parseObject(post, new TypeReference<R<List<SimpleApproveDescDto>>>() {
+        });
+        return listR;
+
+    }
 
     /**
      * 查询流程变量

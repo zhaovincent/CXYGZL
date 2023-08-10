@@ -3,25 +3,31 @@ package com.cxygzl.biz.utils;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
-import com.cxygzl.biz.entity.*;
+import com.cxygzl.biz.entity.ProcessExecution;
+import com.cxygzl.biz.entity.ProcessInstanceRecord;
+import com.cxygzl.biz.entity.ProcessNodeRecord;
+import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
 import com.cxygzl.biz.service.*;
+import com.cxygzl.biz.vo.ProcessFormatNodeApproveDescVo;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.biz.vo.node.UserVo;
+import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.SimpleApproveDescDto;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.NodeUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,6 +35,7 @@ import java.util.stream.Collectors;
 /**
  * 节点格式化显示工具
  */
+@Slf4j
 public class NodeFormatUtil {
 
     private static String nodeDateShow(Date date) {
@@ -111,14 +118,12 @@ public class NodeFormatUtil {
                 nodeVo.setShowTimeStr(nodeDateShow(processNodeRecord.getStartTime()));
                 if (processNodeRecord.getEndTime() != null) {
                     nodeVo.setShowTimeStr(nodeDateShow(processNodeRecord.getEndTime()));
-
                 }
 
 
             }
         }
 
-        IProcessNodeRecordApproveDescService processNodeRecordApproveDescService = SpringUtil.getBean(IProcessNodeRecordApproveDescService.class);
 
         List<UserVo> userVoList = new ArrayList<>();
         if (type == NodeTypeEnum.APPROVAL.getValue().intValue()) {
@@ -155,33 +160,41 @@ public class NodeFormatUtil {
 
                 //处理用户评论
                 if (CollUtil.isNotEmpty(processNodeRecordAssignUserList)) {
-                    List<String> taskIdList = processNodeRecordAssignUserList.stream().map(w -> w.getTaskId()).collect(Collectors.toList());
+                    Set<String> taskIdList = processNodeRecordAssignUserList.stream().map(w -> w.getTaskId()).collect(Collectors.toSet());
 
-                    List<ProcessNodeRecordApproveDesc> approveDescList = processNodeRecordApproveDescService.lambdaQuery()
-                            .eq(ProcessNodeRecordApproveDesc::getNodeId, node.getId())
-                            .in(ProcessNodeRecordApproveDesc::getTaskId, taskIdList)
-                            .eq(ProcessNodeRecordApproveDesc::getProcessInstanceId, processInstanceId)
-                            .orderByDesc(ProcessNodeRecordApproveDesc::getDescDate)
-                            .list();
+                    List<ProcessFormatNodeApproveDescVo> descList = new ArrayList();
 
-                    List descList = new ArrayList();
-                    for (ProcessNodeRecordApproveDesc processNodeRecordApproveDesc : approveDescList) {
+                    for (String taskId : taskIdList) {
+                        List<SimpleApproveDescDto> simpleApproveDescDtoList = CoreHttpUtil.queryTaskComments(taskId).getData();
 
-                        ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserList.stream()
-                                .filter(w -> StrUtil.equals(w.getUserId(), processNodeRecordApproveDesc.getUserId()))
-                                .filter(w -> StrUtil.equals(w.getTaskId(),
-                                        processNodeRecordApproveDesc.getTaskId())).findFirst().get();
+                        for (SimpleApproveDescDto simpleApproveDescDto : simpleApproveDescDtoList) {
+                            UserVo userVo = buildUser(simpleApproveDescDto.getUserId());
+                            ProcessFormatNodeApproveDescVo descVo = ProcessFormatNodeApproveDescVo.builder()
+                                    .user(userVo)
+                                    .desc(simpleApproveDescDto.getMessage())
+                                    .descType(simpleApproveDescDto.getType())
+                                    .sys(simpleApproveDescDto.getSys())
+                                    .descTypeStr(ApproveDescTypeEnum.get(simpleApproveDescDto.getType()).getName())
+                                    .showTimeStr(nodeDateShow(simpleApproveDescDto.getDate()))
+                                    .date(simpleApproveDescDto.getDate())
+                                    .build();
 
-                        UserVo userVo = buildUser(processNodeRecordApproveDesc.getUserId());
-                        Dict set = Dict.create()
-                                .set("desc", processNodeRecordApproveDesc.getApproveDesc())
-                                .set("taskType", processNodeRecordAssignUser.getTaskType())
-                                .set("descType", processNodeRecordApproveDesc.getDescType())
-                                .set("showTimeStr", nodeDateShow(processNodeRecordApproveDesc.getDescDate()))
-                                .set("user", userVo);
-                        descList.add(set);
+                            descList.add(descVo);
+                        }
 
                     }
+
+
+
+                    CollUtil.sort(descList, new Comparator<ProcessFormatNodeApproveDescVo>() {
+                        @Override
+                        public int compare(ProcessFormatNodeApproveDescVo t0,
+                                           ProcessFormatNodeApproveDescVo t1) {
+                            long time0 = t0.getDate().getTime();
+                            long time1 = t1.getDate().getTime();
+                            return time0>time1?1:-1;
+                        }
+                    });
 
                     nodeVo.setApproveDescList(descList);
 
@@ -318,14 +331,18 @@ public class NodeFormatUtil {
 
             } else {
 
-                IProcessInstanceRecordService processInstanceRecordService = SpringUtil.getBean(IProcessInstanceRecordService.class);
-                ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
 
+                IProcessNodeRecordService processNodeRecordService = SpringUtil.getBean(IProcessNodeRecordService.class);
+                ProcessNodeRecord processNodeRecord = processNodeRecordService.lambdaQuery()
+                        .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId)
+                        .eq(ProcessNodeRecord::getExecutionId, node.getExecutionId())
+                        .eq(ProcessNodeRecord::getFlowUniqueId, node.getFlowUniqueId())
+                        .one();
 
                 UserVo userVo = buildRootUser(processInstanceId);
-                userVo.setShowTime(processInstanceRecord.getCreateTime());
-                userVo.setShowTimeStr(nodeDateShow(processInstanceRecord.getCreateTime()));
-                userVo.setStatus(NodeStatusEnum.YJS.getCode());
+                userVo.setShowTime(processNodeRecord.getStartTime());
+                userVo.setShowTimeStr(nodeDateShow(processNodeRecord.getStartTime()));
+                userVo.setStatus(processNodeRecord.getStatus());
                 userVoList.addAll(CollUtil.newArrayList(userVo));
 
             }

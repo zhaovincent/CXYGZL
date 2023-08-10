@@ -332,7 +332,7 @@ public class RemoteServiceImpl implements IRemoteService {
 
             List<ProcessExecution> processExecutionList = processExecutionService.lambdaQuery().eq(ProcessExecution::getExecutionId,
                     processNodeRecord.getExecutionId()).list();
-            if(!processExecutionList.isEmpty()){
+            if (!processExecutionList.isEmpty()) {
 
                 List<String> collect = processExecutionList.stream().map(w -> w.getChildExecutionId()).collect(Collectors.toList());
 
@@ -347,7 +347,6 @@ public class RemoteServiceImpl implements IRemoteService {
             }
 
 
-
         }
         return processNodeRecordService.endNodeEvent(recordParamDto);
     }
@@ -360,7 +359,38 @@ public class RemoteServiceImpl implements IRemoteService {
      */
     @Override
     public R cancelNodeEvent(ProcessNodeRecordParamDto recordParamDto) {
-        return processNodeRecordService.cancelNodeEvent(recordParamDto);
+
+
+        //处理任务
+        ProcessNodeRecord processNodeRecord = processNodeRecordService.lambdaQuery()
+
+                .eq(ProcessNodeRecord::getProcessInstanceId, recordParamDto.getProcessInstanceId())
+                .eq(ProcessNodeRecord::getStatus, NodeStatusEnum.JXZ.getCode())
+                .eq(ProcessNodeRecord::getNodeId, recordParamDto.getNodeId()).one();
+        if (processNodeRecord != null) {
+
+            List<ProcessExecution> processExecutionList = processExecutionService.lambdaQuery().eq(ProcessExecution::getExecutionId,
+                    processNodeRecord.getExecutionId()).list();
+            if (!processExecutionList.isEmpty()) {
+
+                List<String> collect = processExecutionList.stream().map(w -> w.getChildExecutionId()).collect(Collectors.toList());
+
+                processNodeRecordAssignUserService.lambdaUpdate()
+                        .set(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.YCX.getCode())
+                        .set(ProcessNodeRecordAssignUser::getTaskType, ProcessInstanceConstant.TaskType.CANCEL)
+                        .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, recordParamDto.getProcessInstanceId())
+                        .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
+                        .eq(ProcessNodeRecordAssignUser::getNodeId, recordParamDto.getNodeId())
+                        .in(ProcessNodeRecordAssignUser::getExecutionId, collect)
+                        .update(new ProcessNodeRecordAssignUser());
+            }
+
+
+        }
+
+        processNodeRecordService.cancelNodeEvent(recordParamDto);
+
+        return R.success();
     }
 
     /**

@@ -11,6 +11,8 @@ public class SimpleApproveDescDto {
 
     private String message;
     private String msgId;
+    private String userId;
     private String type;
+    private Boolean sys;
 
 }

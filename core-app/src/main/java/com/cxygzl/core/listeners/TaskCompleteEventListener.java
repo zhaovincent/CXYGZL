@@ -2,6 +2,7 @@ package com.cxygzl.core.listeners;
 
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
+import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
 import com.cxygzl.common.dto.SimpleApproveDescDto;
@@ -85,19 +86,16 @@ public class TaskCompleteEventListener implements FlowableEventListener {
         TaskService taskService = SpringUtil.getBean(TaskService.class);
 
 
-        List<Comment> approveDescList = taskService.getTaskComments(task.getId(),
-                ProcessInstanceConstant.VariableKey.APPROVE_DESC);
+        List<Comment> taskComments = new ArrayList<>();
 
-        List<Comment> approveDescList1 = taskService.getTaskComments(task.getId(),
-                ProcessInstanceConstant.VariableKey.BACK_JOIN_DESC);
+        for (String s : ApproveDescTypeEnum.getTypeList()) {
+            List<Comment> approveDescList = taskService.getTaskComments(task.getId(),s);
+            taskComments.addAll(approveDescList);
+        }
 
-        List<Comment> approveDescList2 = taskService.getTaskComments(task.getId(),
-                ProcessInstanceConstant.VariableKey.FRONT_JOIN_DESC);
 
-        approveDescList.addAll(approveDescList1);
-        approveDescList.addAll(approveDescList2);
         List<SimpleApproveDescDto> simpleApproveDescDtoList=new ArrayList<>();
-        for (Comment comment : approveDescList) {
+        for (Comment comment : taskComments) {
             String id = comment.getId();
             Date time = comment.getTime();
             String fullMessage = comment.getFullMessage();
