@@ -35,6 +35,8 @@ public class NodeImageVO   {
 
         private String text;
         private String type;
+
+        private Object properties;
     }
     @Data
     @NoArgsConstructor

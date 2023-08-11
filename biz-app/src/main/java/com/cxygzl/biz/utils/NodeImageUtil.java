@@ -1,5 +1,7 @@
 package com.cxygzl.biz.utils;
 
+import cn.hutool.core.lang.Dict;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.biz.vo.node.NodeImageVO;
 import com.cxygzl.common.constants.NodeTypeEnum;
@@ -14,16 +16,58 @@ import java.util.List;
 @Slf4j
 public class NodeImageUtil {
 
-    public static final int POSITION_WIDTH = 200;
+    public static final int POSITION_WIDTH = 150;
     public static final int POSITION_HEIGHT = 150;
 
+
+    /**
+     * 添加聚合网关节点
+     *
+     * @param node
+     */
+    public static void addMergeGatewayNode(Node node) {
+        if (!NodeUtil.isNode(node)) {
+            return;
+        }
+
+        addMergeGatewayNode(node.getChildNode());
+
+        Integer type = node.getType();
+        if (NodeTypeEnum.getByValue(type).getBranch()) {
+            List<Node> conditionNodes = node.getConditionNodes();
+            for (Node conditionNode : conditionNodes) {
+                addMergeGatewayNode(conditionNode.getChildNode());
+            }
+            Node childNode = node.getChildNode();
+            {
+                Node end = new Node();
+                end.setId(IdUtil.fastSimpleUUID());
+                end.setType(NodeTypeEnum.MERGE_GATEWAY.getValue());
+                end.setNodeName("聚合网关节点");
+                end.setParentId(node.getId());
+                end.setChildNode(childNode);
+                node.setChildNode(end);
+            }
+        }
+
+
+    }
+
+
+    /**
+     * 初始化坐标位置
+     *
+     * @param node
+     * @return
+     */
     public static NodeImageVO initPosition(Node node) {
+        addMergeGatewayNode(node);
         //初始化各个分支下的各个子级最大数量
         initNum(node);
         //初始化X坐标
         initXPosition(node, 0);
         //初始化Y坐标
-        initYPosition(node, 150);
+        initYPosition(node, 200);
 
         List<NodeLinkDto> nodeLinkDtoList = buildLinkList(node, null, true);
         List<NodeImageVO.Edge> edges = new ArrayList<>();
@@ -50,7 +94,14 @@ public class NodeImageUtil {
                 .type("rect")
                 .x(node.getXPosition())
                 .y(node.getYPosition())
+                .properties(Dict.create().set("outlineColor","red"))
                 .build();
+        if (NodeTypeEnum.getByValue(node.getType()).getBranch() || node.getType() == NodeTypeEnum.MERGE_GATEWAY.getValue().intValue()) {
+            imageVO.setType("diamond");
+        }
+        if (node.getType() == NodeTypeEnum.ROOT.getValue().intValue() || node.getType() == NodeTypeEnum.END.getValue().intValue()) {
+            imageVO.setType("circle");
+        }
         list.add(imageVO);
 
 
@@ -252,29 +303,26 @@ public class NodeImageUtil {
                         .build();
                 list.add(build);
             }
-        }
-
-
-        if (NodeTypeEnum.getByValue(type).getBranch()) {
+        } else {
 
             //条件分支
             List<Node> branchs = node.getConditionNodes();
             for (Node branch : branchs) {
-                Node children = branch.getChildNode();
+               // Node children = branch.getChildNode();
 
                 //记录节点和分支下的节点数据
                 NodeLinkDto build = NodeLinkDto.builder()
                         .prevId(node.getTempId())
                         .prevNodeId(node.getId())
                         .prevName(node.getNodeName())
-                        .nextId(children.getTempId())
-                        .nextNodeId(children.getId())
-                        .nextName(children.getNodeName())
+                        .nextId(branch.getTempId())
+                        .nextNodeId(branch.getId())
+                        .nextName(branch.getNodeName())
                         .build();
                 list.add(build);
 
 
-                List<NodeLinkDto> dtoList = buildLinkList(children, NodeUtil.isNode(childNode) ? childNode : parentBranchNextNode, true);
+                List<NodeLinkDto> dtoList = buildLinkList(branch, NodeUtil.isNode(childNode) ? childNode : parentBranchNextNode, true);
                 list.addAll(dtoList);
             }
         }

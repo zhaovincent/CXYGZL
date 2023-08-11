@@ -12,6 +12,7 @@ public enum NodeTypeEnum {
 
     ROOT( "根节点",0,false),
     END( "结束节点",-1,false),
+    MERGE_GATEWAY( "聚合网关",-2,false),
 
     APPROVAL( "审批节点",1,false),
     CC( "抄送节点",2,false),
