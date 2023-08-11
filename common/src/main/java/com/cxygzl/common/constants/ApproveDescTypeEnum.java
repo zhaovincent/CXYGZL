@@ -15,12 +15,12 @@ import java.util.stream.Collectors;
 public enum ApproveDescTypeEnum {
 
 
-    PASS("passDesc","通过"),
-    RESOLVE("resolveDesc","通过"),
+    PASS("passDesc","完成"),
+    RESOLVE("resolveDesc","完成"),
     REFUSE("refuseDesc","拒绝"),
     BACK_JOIN("backJoinDesc","转办"),
     FRONT_JOIN("frontJoinDesc","委派"),
-    REJECT("rejectDesc","拒绝"),
+    REJECT("rejectDesc","驳回"),
 
     ;
 

@@ -58,16 +58,11 @@ public class NodeFormatUtil {
      * 格式化流程节点显示
      *
      * @param node
-     * @param endUniqueId
-     * @param beingUniqueId
-     * @param cancelUniqueId
      * @param processInstanceId
      * @param paramMap
      */
     public static List<NodeVo> formatProcessNodeShow(Node node,
-                                                     Set<String> endUniqueId,
-                                                     Set<String> beingUniqueId,
-                                                     Set<String> cancelUniqueId,
+
                                                      String processInstanceId,
                                                      Map<String, Object> paramMap) {
         List<NodeVo> list = new ArrayList();
@@ -80,26 +75,26 @@ public class NodeFormatUtil {
         Integer type = node.getType();
 
 
-        //SELF_SELECT
-
-
         NodeVo nodeVo = new NodeVo();
         nodeVo.setId(node.getId());
         nodeVo.setName(name);
         nodeVo.setType(type);
         nodeVo.setStatus(NodeStatusEnum.WKS.getCode());
         String executionId = node.getExecutionId();
-        if (StrUtil.isNotBlank(executionId)) {
-            if (endUniqueId.contains(StrUtil.format("{}@@{}@@{}", node.getId(), executionId, node.getFlowUniqueId()))) {
-                nodeVo.setStatus(NodeStatusEnum.YJS.getCode());
+        ProcessNodeRecord processNodeRecord = null;
+        if (StrUtil.isAllNotBlank(executionId, processInstanceId)) {
 
-            } else if (beingUniqueId.contains(StrUtil.format("{}@@{}@@{}", node.getId(), executionId, node.getFlowUniqueId()))) {
-                nodeVo.setStatus(NodeStatusEnum.JXZ.getCode());
+            IProcessNodeRecordService processNodeRecordService = SpringUtil.getBean(IProcessNodeRecordService.class);
+            processNodeRecord = processNodeRecordService.lambdaQuery()
+                    .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId)
+                    .eq(ProcessNodeRecord::getExecutionId, executionId)
+                    .eq(!StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER), ProcessNodeRecord::getNodeId, node.getId())
+                    .likeRight(StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER),
+                            ProcessNodeRecord::getNodeId, ProcessInstanceConstant.VariableKey.STARTER)
+                    .eq(ProcessNodeRecord::getFlowUniqueId, node.getFlowUniqueId())
+                    .one();
+            nodeVo.setStatus(processNodeRecord.getStatus());
 
-            } else if (cancelUniqueId.contains(StrUtil.format("{}@@{}@@{}", node.getId(), executionId, node.getFlowUniqueId()))) {
-                nodeVo.setStatus(NodeStatusEnum.YCX.getCode());
-
-            }
         }
 
         {
@@ -108,12 +103,7 @@ public class NodeFormatUtil {
 
         }
         if (StrUtil.isAllNotBlank(processInstanceId, node.getExecutionId(), node.getFlowUniqueId())) {
-            IProcessNodeRecordService processNodeRecordService = SpringUtil.getBean(IProcessNodeRecordService.class);
-            ProcessNodeRecord processNodeRecord = processNodeRecordService.lambdaQuery()
-                    .eq(ProcessNodeRecord::getExecutionId, node.getExecutionId())
-                    .eq(ProcessNodeRecord::getFlowUniqueId, node.getFlowUniqueId())
-                    .eq(ProcessNodeRecord::getNodeId, node.getId())
-                    .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId).one();
+
             if (processNodeRecord != null) {
                 nodeVo.setShowTimeStr(nodeDateShow(processNodeRecord.getStartTime()));
                 if (processNodeRecord.getEndTime() != null) {
@@ -137,86 +127,9 @@ public class NodeFormatUtil {
             }
 
             // 用户列表
-            if (StrUtil.isNotBlank(processInstanceId) && StrUtil.isNotBlank(node.getExecutionId())) {
+            if (StrUtil.isAllNotBlank(processInstanceId,node.getExecutionId())) {
 
-                IProcessExecutionService processExecutionService = SpringUtil.getBean(IProcessExecutionService.class);
-                List<ProcessExecution> processExecutionList = processExecutionService.lambdaQuery()
-                        .eq(ProcessExecution::getExecutionId, node.getExecutionId())
-                        .list();
-                List<String> childExecutionIdList = processExecutionList.stream().map(w -> w.getChildExecutionId()).collect(Collectors.toList());
-
-                if (CollUtil.isEmpty(processExecutionList)) {
-                    childExecutionIdList.add(node.getExecutionId());
-                }
-
-                IProcessNodeRecordAssignUserService processNodeRecordAssignUserService = SpringUtil.getBean(IProcessNodeRecordAssignUserService.class);
-                List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = processNodeRecordAssignUserService
-                        .lambdaQuery()
-                        .eq(ProcessNodeRecordAssignUser::getNodeId, node.getId())
-                        .in(ProcessNodeRecordAssignUser::getExecutionId, childExecutionIdList)
-                        .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processInstanceId)
-                        .orderByAsc(ProcessNodeRecordAssignUser::getCreateTime)
-                        .list();
-
-                //处理用户评论
-                if (CollUtil.isNotEmpty(processNodeRecordAssignUserList)) {
-                    Set<String> taskIdList = processNodeRecordAssignUserList.stream().map(w -> w.getTaskId()).collect(Collectors.toSet());
-
-                    List<ProcessFormatNodeApproveDescVo> descList = new ArrayList();
-
-                    for (String taskId : taskIdList) {
-                        List<SimpleApproveDescDto> simpleApproveDescDtoList = CoreHttpUtil.queryTaskComments(taskId).getData();
-
-                        for (SimpleApproveDescDto simpleApproveDescDto : simpleApproveDescDtoList) {
-                            UserVo userVo = buildUser(simpleApproveDescDto.getUserId());
-                            ProcessFormatNodeApproveDescVo descVo = ProcessFormatNodeApproveDescVo.builder()
-                                    .user(userVo)
-                                    .desc(simpleApproveDescDto.getMessage())
-                                    .descType(simpleApproveDescDto.getType())
-                                    .sys(simpleApproveDescDto.getSys())
-                                    .descTypeStr(ApproveDescTypeEnum.get(simpleApproveDescDto.getType()).getName())
-                                    .showTimeStr(nodeDateShow(simpleApproveDescDto.getDate()))
-                                    .date(simpleApproveDescDto.getDate())
-                                    .build();
-
-                            descList.add(descVo);
-                        }
-
-                    }
-
-
-
-                    CollUtil.sort(descList, new Comparator<ProcessFormatNodeApproveDescVo>() {
-                        @Override
-                        public int compare(ProcessFormatNodeApproveDescVo t0,
-                                           ProcessFormatNodeApproveDescVo t1) {
-                            long time0 = t0.getDate().getTime();
-                            long time1 = t1.getDate().getTime();
-                            return time0>time1?1:-1;
-                        }
-                    });
-
-                    nodeVo.setApproveDescList(descList);
-
-                }
-
-
-                Set<String> userIdSet = processNodeRecordAssignUserList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
-
-                for (String userId : userIdSet) {
-
-                    ProcessNodeRecordAssignUser w = processNodeRecordAssignUserList.stream().filter(k -> StrUtil.equals(k.getUserId(), userId))
-                            .findFirst().get();
-
-
-                    UserVo userVo = buildUser((userId));
-                    userVo.setShowTime(w.getEndTime());
-                    userVo.setShowTimeStr(nodeDateShow(w.getEndTime()));
-                    userVo.setStatus(w.getStatus());
-                    userVo.setOperType(w.getTaskType());
-
-                    userVoList.add(userVo);
-                }
+                List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = buildApproveDesc(node, processInstanceId, nodeVo, userVoList);
 
                 if (processNodeRecordAssignUserList.isEmpty()) {
                     if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF) {
@@ -332,18 +245,7 @@ public class NodeFormatUtil {
             } else {
 
 
-                IProcessNodeRecordService processNodeRecordService = SpringUtil.getBean(IProcessNodeRecordService.class);
-                ProcessNodeRecord processNodeRecord = processNodeRecordService.lambdaQuery()
-                        .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId)
-                        .eq(ProcessNodeRecord::getExecutionId, node.getExecutionId())
-                        .eq(ProcessNodeRecord::getFlowUniqueId, node.getFlowUniqueId())
-                        .one();
-
-                UserVo userVo = buildRootUser(processInstanceId);
-                userVo.setShowTime(processNodeRecord.getStartTime());
-                userVo.setShowTimeStr(nodeDateShow(processNodeRecord.getStartTime()));
-                userVo.setStatus(processNodeRecord.getStatus());
-                userVoList.addAll(CollUtil.newArrayList(userVo));
+                buildApproveDesc(node,processInstanceId,nodeVo,userVoList);
 
             }
         } else if (node.getType().intValue() == NodeTypeEnum.CC.getValue()) {
@@ -367,7 +269,7 @@ public class NodeFormatUtil {
 
             for (Node branch : branchs) {
                 Node children = branch.getChildNode();
-                List<NodeVo> processNodeShowDtos = formatProcessNodeShow(children, endUniqueId, beingUniqueId, cancelUniqueId, processInstanceId, paramMap);
+                List<NodeVo> processNodeShowDtos = formatProcessNodeShow(children, processInstanceId, paramMap);
 
                 NodeVo p = new NodeVo();
                 p.setChildren(processNodeShowDtos);
@@ -381,11 +283,94 @@ public class NodeFormatUtil {
 
         list.add(nodeVo);
 
-        List<NodeVo> next = formatProcessNodeShow(node.getChildNode(), endUniqueId, beingUniqueId, cancelUniqueId, processInstanceId, paramMap);
+        List<NodeVo> next = formatProcessNodeShow(node.getChildNode(), processInstanceId, paramMap);
         list.addAll(next);
 
 
         return list;
+    }
+
+    private static List<ProcessNodeRecordAssignUser> buildApproveDesc(Node node, String processInstanceId, NodeVo nodeVo, List<UserVo> userVoList) {
+        IProcessExecutionService processExecutionService = SpringUtil.getBean(IProcessExecutionService.class);
+        List<ProcessExecution> processExecutionList = processExecutionService.lambdaQuery()
+                .eq(ProcessExecution::getExecutionId, node.getExecutionId())
+                .list();
+        List<String> childExecutionIdList = processExecutionList.stream().map(w -> w.getChildExecutionId()).collect(Collectors.toList());
+
+        if (CollUtil.isEmpty(processExecutionList)) {
+            childExecutionIdList.add(node.getExecutionId());
+        }
+
+        IProcessNodeRecordAssignUserService processNodeRecordAssignUserService = SpringUtil.getBean(IProcessNodeRecordAssignUserService.class);
+        List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = processNodeRecordAssignUserService
+                .lambdaQuery()
+                .eq(!StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER), ProcessNodeRecordAssignUser::getNodeId, node.getId())
+                .likeRight(StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER),
+                        ProcessNodeRecordAssignUser::getNodeId, ProcessInstanceConstant.VariableKey.STARTER)
+                .in(ProcessNodeRecordAssignUser::getExecutionId, childExecutionIdList)
+                .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processInstanceId)
+                .orderByAsc(ProcessNodeRecordAssignUser::getCreateTime)
+                .list();
+
+        //处理用户评论
+        if (CollUtil.isNotEmpty(processNodeRecordAssignUserList)) {
+            Set<String> taskIdList = processNodeRecordAssignUserList.stream().map(w -> w.getTaskId()).collect(Collectors.toSet());
+
+            List<ProcessFormatNodeApproveDescVo> descList = new ArrayList();
+
+            for (String taskId : taskIdList) {
+                List<SimpleApproveDescDto> simpleApproveDescDtoList = CoreHttpUtil.queryTaskComments(taskId).getData();
+
+                for (SimpleApproveDescDto simpleApproveDescDto : simpleApproveDescDtoList) {
+                    UserVo userVo = buildUser(simpleApproveDescDto.getUserId());
+                    ProcessFormatNodeApproveDescVo descVo = ProcessFormatNodeApproveDescVo.builder()
+                            .user(userVo)
+                            .desc(simpleApproveDescDto.getMessage())
+                            .descType(simpleApproveDescDto.getType())
+                            .sys(simpleApproveDescDto.getSys())
+                            .descTypeStr(ApproveDescTypeEnum.get(simpleApproveDescDto.getType()).getName())
+                            .showTimeStr(nodeDateShow(simpleApproveDescDto.getDate()))
+                            .date(simpleApproveDescDto.getDate())
+                            .build();
+
+                    descList.add(descVo);
+                }
+
+            }
+
+
+            CollUtil.sort(descList, new Comparator<ProcessFormatNodeApproveDescVo>() {
+                @Override
+                public int compare(ProcessFormatNodeApproveDescVo t0,
+                                   ProcessFormatNodeApproveDescVo t1) {
+                    long time0 = t0.getDate().getTime();
+                    long time1 = t1.getDate().getTime();
+                    return time0 > time1 ? 1 : -1;
+                }
+            });
+
+            nodeVo.setApproveDescList(descList);
+
+        }
+
+
+        Set<String> userIdSet = processNodeRecordAssignUserList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
+
+        for (String userId : userIdSet) {
+
+            ProcessNodeRecordAssignUser w = processNodeRecordAssignUserList.stream().filter(k -> StrUtil.equals(k.getUserId(), userId))
+                    .findFirst().get();
+
+
+            UserVo userVo = buildUser((userId));
+            userVo.setShowTime(w.getEndTime());
+            userVo.setShowTimeStr(nodeDateShow(w.getEndTime()));
+            userVo.setStatus(w.getStatus());
+            userVo.setOperType(w.getTaskType());
+
+            userVoList.add(userVo);
+        }
+        return processNodeRecordAssignUserList;
     }
 
 
