@@ -327,6 +327,22 @@ public class NodeImageUtil {
 
         Integer type = node.getType();
 
+        if(type.intValue()==NodeTypeEnum.ROUTE.getValue()){
+            //路由分支
+            List<Node> routeList = node.getList();
+//            for (Node n : routeList) {
+//                NodeLinkDto build = NodeLinkDto.builder()
+//                        .prevId(node.getTempId())
+//                        .prevNodeId(node.getId())
+//                        .prevName(node.getNodeName())
+//                        .nextId("")
+//                        .nextNodeId(n.getNodeId())
+//                        .nextName("").build();
+//                list.add(build);
+//            }
+
+        }
+
         Node childNode = node.getChildNode();
 
         if (!NodeTypeEnum.getByValue(type).getBranch()) {
