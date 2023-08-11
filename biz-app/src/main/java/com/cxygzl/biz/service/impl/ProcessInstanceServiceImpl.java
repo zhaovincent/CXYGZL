@@ -532,7 +532,10 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         String content = process.getProcess();
         Node node = JSON.parseObject(content, Node.class);
         NodeUtil.addEndNode(node);
-        NodeImageVO imageVO = NodeImageUtil.initPosition(node);
+
+
+
+        NodeImageVO imageVO = NodeImageUtil.initPosition(node,procInsId );
 
         return com.cxygzl.common.dto.R.success(imageVO);
     }

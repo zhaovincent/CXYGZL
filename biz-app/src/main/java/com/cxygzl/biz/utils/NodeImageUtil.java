@@ -1,10 +1,16 @@
 package com.cxygzl.biz.utils;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
+import com.cxygzl.biz.constants.NodeStatusEnum;
+import com.cxygzl.biz.entity.ProcessNodeRecord;
+import com.cxygzl.biz.service.IProcessNodeRecordService;
 import com.cxygzl.biz.vo.node.NodeImageVO;
 import com.cxygzl.common.constants.NodeTypeEnum;
+import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.NodeLinkDto;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.NodeUtil;
@@ -12,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class NodeImageUtil {
@@ -58,9 +65,10 @@ public class NodeImageUtil {
      * 初始化坐标位置
      *
      * @param node
+     * @param processInstanceId
      * @return
      */
-    public static NodeImageVO initPosition(Node node) {
+    public static NodeImageVO initPosition(Node node, String processInstanceId) {
         addMergeGatewayNode(node);
         //初始化各个分支下的各个子级最大数量
         initNum(node);
@@ -77,30 +85,70 @@ public class NodeImageUtil {
             edges.add(edge);
         }
 
+        IProcessNodeRecordService processNodeRecordService = SpringUtil.getBean(IProcessNodeRecordService.class);
+        //获取所有执行的节点
+        List<ProcessNodeRecord> processNodeRecordList = processNodeRecordService.lambdaQuery()
+                .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId)
+                .in(ProcessNodeRecord::getStatus, CollUtil.newArrayList(NodeStatusEnum.JXZ.getCode(),
+                        NodeStatusEnum.YJS.getCode(),
+                        NodeStatusEnum.YCX.getCode()
+                ))
+                .list();
 
-        List<NodeImageVO.Node> nodeShowList = getNodeShowList(node);
+
+        List<NodeImageVO.Node> nodeShowList = getNodeShowList(node, processNodeRecordList);
         return NodeImageVO.builder().nodes(nodeShowList).edges(edges).build();
     }
 
-    public static List<NodeImageVO.Node> getNodeShowList(Node node) {
+    public static List<NodeImageVO.Node> getNodeShowList(Node node,List<ProcessNodeRecord> processNodeRecordList) {
         List<NodeImageVO.Node> list = new ArrayList<>();
         if (!NodeUtil.isNode(node)) {
             return list;
         }
 
+        //找到执行的节点
+        List<ProcessNodeRecord> runNodeList = processNodeRecordList.stream()
+                .filter(w ->
+                        StrUtil.equals(w.getNodeId(), node.getId())
+                                ||
+                                (StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER)
+                                        && w.getNodeId().startsWith(ProcessInstanceConstant.VariableKey.STARTER)
+                                )
+                ).collect(Collectors.toList());
+        int status=NodeStatusEnum.WKS.getCode();
+        {
+            long count = runNodeList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.YCX.getCode()).count();
+            if(count>0){
+                status=NodeStatusEnum.YCX.getCode();
+            }
+        }
+        {
+            long count = runNodeList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.YJS.getCode()).count();
+            if(count>0){
+                status=NodeStatusEnum.YJS.getCode();
+            }
+        }
+        {
+            long count = runNodeList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.JXZ.getCode()).count();
+            if(count>0){
+                status=NodeStatusEnum.JXZ.getCode();
+            }
+        }
+
         NodeImageVO.Node imageVO = NodeImageVO.Node.builder()
                 .text(node.getNodeName())
                 .id(node.getId())
-                .type("rect")
+                .type("cxygzlRect")
                 .x(node.getXPosition())
                 .y(node.getYPosition())
-                .properties(Dict.create().set("outlineColor","red"))
+                .properties(Dict.create()
+                        .set("status", status))
                 .build();
         if (NodeTypeEnum.getByValue(node.getType()).getBranch() || node.getType() == NodeTypeEnum.MERGE_GATEWAY.getValue().intValue()) {
             imageVO.setType("diamond");
         }
         if (node.getType() == NodeTypeEnum.ROOT.getValue().intValue() || node.getType() == NodeTypeEnum.END.getValue().intValue()) {
-            imageVO.setType("circle");
+            imageVO.setType("cxygzlCircle");
         }
         list.add(imageVO);
 
@@ -112,13 +160,13 @@ public class NodeImageUtil {
 
             List<Node> conditionNodes = node.getConditionNodes();
             for (Node conditionNode : conditionNodes) {
-                List<NodeImageVO.Node> nodeShowList = getNodeShowList(conditionNode);
+                List<NodeImageVO.Node> nodeShowList = getNodeShowList(conditionNode, processNodeRecordList);
                 list.addAll(nodeShowList);
             }
 
 
         }
-        List<NodeImageVO.Node> nodeShowList = getNodeShowList(node.getChildNode());
+        List<NodeImageVO.Node> nodeShowList = getNodeShowList(node.getChildNode(), processNodeRecordList);
         list.addAll(nodeShowList);
         return list;
     }
@@ -308,7 +356,7 @@ public class NodeImageUtil {
             //条件分支
             List<Node> branchs = node.getConditionNodes();
             for (Node branch : branchs) {
-               // Node children = branch.getChildNode();
+                // Node children = branch.getChildNode();
 
                 //记录节点和分支下的节点数据
                 NodeLinkDto build = NodeLinkDto.builder()
