@@ -12,7 +12,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.SecurityConstants;
-import com.cxygzl.biz.constants.StatusEnum;
 import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.mapper.UserMapper;
 import com.cxygzl.biz.service.*;
@@ -21,8 +20,8 @@ import com.cxygzl.biz.vo.UserListQueryVO;
 import com.cxygzl.biz.vo.UserVO;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.LoginPlatEnum;
+import com.cxygzl.common.constants.StatusEnum;
 import com.cxygzl.common.dto.R;
-import com.cxygzl.common.dto.third.UserDto;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.context.annotation.Lazy;
@@ -167,8 +166,8 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
     public com.cxygzl.common.dto.R getCurrentUserDetail() {
         String userId = StpUtil.getLoginIdAsString();
 
-//        User user = this.getById(userId);
-        UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
+        User user = this.getById(userId);
+       // UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
 
 
 

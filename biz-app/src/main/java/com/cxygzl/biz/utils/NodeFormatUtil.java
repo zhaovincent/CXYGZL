@@ -200,8 +200,13 @@ public class NodeFormatUtil {
                     if (deptDtoList.size() >= level) {
                         com.cxygzl.common.dto.third.DeptDto deptDto = deptDtoList.get(level - 1);
 
+                        List<String> leaderUserIdList = deptDto.getLeaderUserIdList();
+                        for (String s : leaderUserIdList) {
+                            UserVo userVo = buildUser(s);
+                            userVoList.add(userVo);
+                        }
 
-                        userVoList.addAll(CollUtil.newArrayList(buildUser(deptDto.getLeaderUserId())));
+
 
                     }
                 }
@@ -227,7 +232,13 @@ public class NodeFormatUtil {
                         if (level != null && level < index) {
                             break;
                         }
-                        userVoList.addAll(CollUtil.newArrayList(buildUser(deptDto.getLeaderUserId())));
+
+
+                        List<String> leaderUserIdList = deptDto.getLeaderUserIdList();
+                        for (String s : leaderUserIdList) {
+                            UserVo userVo = buildUser(s);
+                            userVoList.add(userVo);
+                        }
 
                         index++;
                     }

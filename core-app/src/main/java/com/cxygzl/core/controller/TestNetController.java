@@ -1,5 +1,6 @@
 package com.cxygzl.core.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.IdUtil;
@@ -88,27 +89,28 @@ public class TestNetController {
             roleList.add(d);
         }
         {
-            DeptDto d = DeptDto.builder().id("dept1").name("部门1").parentId("0").leaderUserId("user1").status(1).build();
+            DeptDto d =
+                    DeptDto.builder().id("dept1").name("部门1").parentId("0").leaderUserIdList(CollUtil.newArrayList("user1")).status(1).build();
             deptList.add(d);
         }
         {
             DeptDto d =
-                    DeptDto.builder().id("dept2").name("部门2").parentId("dept1").leaderUserId("user11").status(1).build();
+                    DeptDto.builder().id("dept2").name("部门2").parentId("dept1").leaderUserIdList(CollUtil.newArrayList("user11")).status(1).build();
             deptList.add(d);
         }
         {
             DeptDto d =
-                    DeptDto.builder().id("dept3").name("部门3").parentId("dept1").leaderUserId("user15").status(1).build();
+                    DeptDto.builder().id("dept3").name("部门3").parentId("dept1").leaderUserIdList(CollUtil.newArrayList("user15")).status(1).build();
             deptList.add(d);
         }
         {
             DeptDto d =
-                    DeptDto.builder().id("dept4").name("部门4").parentId("dept2").leaderUserId("user21").status(1).build();
+                    DeptDto.builder().id("dept4").name("部门4").parentId("dept2").leaderUserIdList(CollUtil.newArrayList("user21")).status(1).build();
             deptList.add(d);
         }
         {
             DeptDto d =
-                    DeptDto.builder().id("dept5").name("部门5").parentId("dept3").leaderUserId("user45").status(1).build();
+                    DeptDto.builder().id("dept5").name("部门5").parentId("dept3").leaderUserIdList(CollUtil.newArrayList("user45")).status(1).build();
             deptList.add(d);
         }
         //用户属性

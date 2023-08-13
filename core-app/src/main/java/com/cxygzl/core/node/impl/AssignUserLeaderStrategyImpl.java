@@ -1,7 +1,6 @@
 package com.cxygzl.core.node.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
@@ -42,10 +41,13 @@ public class AssignUserLeaderStrategyImpl implements InitializingBean, AssignUse
             if (deptDtoList.size() >= level) {
                 DeptDto deptDto = deptDtoList.get(level - 1);
 
-                String leaderUserId = deptDto.getLeaderUserId();
-                if(StrUtil.isNotBlank(leaderUserId)) {
-                    userIdList.add(leaderUserId);
+                List<String> leaderUserIdList = deptDto.getLeaderUserIdList();
+
+                if(CollUtil.isNotEmpty(leaderUserIdList)){
+                    userIdList.addAll(leaderUserIdList);
                 }
+
+
             }
         }
 

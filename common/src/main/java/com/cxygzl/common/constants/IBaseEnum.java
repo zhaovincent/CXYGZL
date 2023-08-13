@@ -1,4 +1,4 @@
-package com.cxygzl.biz.constants;
+package com.cxygzl.common.constants;
 
 
 import cn.hutool.core.util.ObjectUtil;

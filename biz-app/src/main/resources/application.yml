@@ -70,6 +70,9 @@ sa-token:
 ##核心模块访问路径
 core:
   url: http://127.0.0.1:26858
+##钉钉模块访问路径
+dingtalk:
+  url: http://127.0.0.1:26860
 
 ##流程的数据api开关
 api:

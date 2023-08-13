@@ -69,7 +69,7 @@ public interface ApiStrategy {
 
     /**
      * 根据名字搜索用户
-     *
+     *钉钉不提供
      * @param name
      * @return
      */

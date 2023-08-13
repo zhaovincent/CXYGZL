@@ -39,6 +39,7 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     private IDeptService deptService;
     @Resource
     private IUserService userService;
+
     /**
      * 根据角色id集合获取拥有该角色的用户id集合
      *
@@ -60,7 +61,7 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     @Override
     public List<RoleDto> loadAllRole() {
         List<Role> roleList = roleService.lambdaQuery().list();
-        return BeanUtil.copyToList(roleList,RoleDto.class);
+        return BeanUtil.copyToList(roleList, RoleDto.class);
     }
 
     /**
@@ -73,7 +74,7 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     @Override
     public List<String> loadUserIdListByDeptIdList(List<String> deptIdList) {
         if (CollUtil.isEmpty(deptIdList)) {
-           return new ArrayList<>();
+            return new ArrayList<>();
         }
         List<User> userList = userService.lambdaQuery().in(User::getDeptId, deptIdList).list();
         return userList.stream().map(w -> String.valueOf(w.getId())).collect(Collectors.toList());
@@ -89,7 +90,14 @@ public class LocalApi implements ApiStrategy, InitializingBean {
         List<Dept> deptList = deptService.lambdaQuery()
                 .eq(parentDeptId != null, Dept::getParentId, parentDeptId)
                 .list();
-        return BeanUtil.copyToList(deptList,DeptDto.class);
+        List<DeptDto> deptDtoList = new ArrayList<>();
+        for (Dept dept : deptList) {
+            DeptDto deptDto = BeanUtil.copyProperties(dept, DeptDto.class);
+            deptDto.setLeaderUserIdList(CollUtil.newArrayList(String.valueOf(dept.getLeaderUserId())));
+            deptDtoList.add(deptDto);
+        }
+
+        return deptDtoList;
     }
 
     /**
@@ -103,7 +111,7 @@ public class LocalApi implements ApiStrategy, InitializingBean {
         List<User> userList = userService.lambdaQuery()
                 .eq(User::getDeptId, deptId)
                 .list();
-        return BeanUtil.copyToList(userList,UserDto.class);
+        return BeanUtil.copyToList(userList, UserDto.class);
     }
 
     /**
@@ -115,7 +123,7 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     @Override
     public UserDto getUser(String userId) {
         User user = userService.getById(userId);
-        return BeanUtil.copyProperties(user,UserDto.class);
+        return BeanUtil.copyProperties(user, UserDto.class);
     }
 
     @Override
@@ -126,7 +134,7 @@ public class LocalApi implements ApiStrategy, InitializingBean {
                         .or(w -> w.like(User::getName, name))
         ).list();
 
-        return BeanUtil.copyToList(userList,UserDto.class);
+        return BeanUtil.copyToList(userList, UserDto.class);
     }
 
     /**
@@ -139,7 +147,7 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     @Override
     public String getUserIdByToken(String token) {
         Object loginIdByToken = StpUtil.getLoginIdByToken(token);
-        return loginIdByToken==null?null:loginIdByToken.toString();
+        return loginIdByToken == null ? null : loginIdByToken.toString();
     }
 
     /**
@@ -150,7 +158,7 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     @Override
     public List<UserFieldDto> queryUserFieldList() {
         List<UserField> list = userFieldService.lambdaQuery().list();
-        return BeanUtil.copyToList(list,UserFieldDto.class);
+        return BeanUtil.copyToList(list, UserFieldDto.class);
     }
 
     /**

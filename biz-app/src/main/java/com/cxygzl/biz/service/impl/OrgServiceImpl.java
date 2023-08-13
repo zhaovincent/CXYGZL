@@ -56,6 +56,7 @@ public class OrgServiceImpl implements IOrgService {
 
     @Resource
     private IProcessService processService;
+
     /**
      * 查询组织架构树
      *
@@ -85,25 +86,25 @@ public class OrgServiceImpl implements IOrgService {
             }
 
             Dict dict = Dict.create()
-                    .set("roleList",orgs)
-                    .set("childDepartments",orgs)
-                    .set("employees",new ArrayList<>());
+                    .set("roleList", orgs)
+                    .set("childDepartments", orgs)
+                    .set("employees", new ArrayList<>());
 
             return com.cxygzl.common.dto.R.success(dict);
 
         }
 
         Dict dict = Dict.create()
-                .set("titleDepartments",new ArrayList<>())
-                .set("roleList",new ArrayList<>())
-                .set("employees",new ArrayList<>());
+                .set("titleDepartments", new ArrayList<>())
+                .set("roleList", new ArrayList<>())
+                .set("employees", new ArrayList<>());
 
 
         List<DeptDto> deptList = ApiStrategyFactory.getStrategy().loadAllDept(deptId);
 
         //查询所有部门及员工
         {
-            List deptVoList=new ArrayList();
+            List deptVoList = new ArrayList();
             for (DeptDto dept : deptList) {
                 OrgTreeVo orgTreeVo = new OrgTreeVo();
                 orgTreeVo.setId(dept.getId());
@@ -113,12 +114,11 @@ public class OrgServiceImpl implements IOrgService {
                 orgTreeVo.setStatus(dept.getStatus());
                 deptVoList.add(orgTreeVo);
             }
-            dict.set("childDepartments",deptVoList);
+            dict.set("childDepartments", deptVoList);
         }
         if (!StrUtil.equals(type, NodeUserTypeEnum.DEPT.getKey())) {
 
-            List userVoList=new ArrayList();
-
+            List userVoList = new ArrayList();
 
 
             List<UserDto> userList = ApiStrategyFactory.getStrategy().loadUserByDept((deptId));
@@ -134,13 +134,13 @@ public class OrgServiceImpl implements IOrgService {
                 userVoList.add(orgTreeVo);
 
             }
-            dict.set("employees",userVoList);
+            dict.set("employees", userVoList);
         }
 
-        if(StrUtil.isNotBlank(deptId)){
+        if (StrUtil.isNotBlank(deptId)) {
             List<DeptDto> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
             List<DeptDto> depts = DataUtil.selectParentByDept(deptId, allDept);
-            dict.set("titleDepartments",CollUtil.reverse(depts));
+            dict.set("titleDepartments", CollUtil.reverse(depts));
         }
 
         return com.cxygzl.common.dto.R.success(dict);
@@ -156,58 +156,52 @@ public class OrgServiceImpl implements IOrgService {
     public com.cxygzl.common.dto.R getOrgTreeDataAll(String keywords, Integer status) {
 
         List<Dept> deptListDb = deptService.lambdaQuery()
-                .eq(status!=null,Dept::getStatus,status)
-                .like(StrUtil.isNotBlank(keywords),Dept::getName,keywords)
+                .eq(status != null, Dept::getStatus, status)
+                .like(StrUtil.isNotBlank(keywords), Dept::getName, keywords)
                 .list();
 
-        List<DeptDto> deptDtoList = ApiStrategyFactory.getStrategy().loadAllDept(null);
-        List<DeptDto> deptList = deptDtoList.stream().filter(w -> status != null ? (w.getStatus().intValue() == status) : true)
-                .filter(w -> StrUtil.isNotBlank(keywords) ? StrUtil.contains(w.getName(), keywords) : true).collect(Collectors.toList());
+
+        if (StrUtil.isNotBlank(keywords) || status != null) {
+            List list = new ArrayList();
+            for (Dept dept : deptListDb) {
+
+                User user = userService.getById(dept.getLeaderUserId());
 
 
-        if(StrUtil.isNotBlank(keywords)||status!=null){
-            List list=new ArrayList();
-            for (DeptDto dept : deptList) {
-                String leader = dept.getLeaderUserId();
-                UserDto user = ApiStrategyFactory.getStrategy().getUser(leader);
-
-                Dept deptDb =
-                        deptListDb.stream().filter(w -> StrUtil.equals(String.valueOf(w.getId()), dept.getId())).findAny().orElse(null);
-
-                Dict set = Dict.create().set("leaderUserId", leader)
+                Dict set = Dict.create().set("leaderUserId", dept.getLeaderUserId())
                         .set("leaderName", user.getName())
                         .set("leaderAvatar", user.getAvatarUrl())
                         .set("status", dept.getStatus())
-                        .set("id", dept.getId())
+                        .set("id", String.valueOf(dept.getId()))
                         .set("name", dept.getName())
-                        .set("sort",deptDb==null?null: deptDb.getSort())
-                        .set("roodIdList", CollUtil.reverse(DeptUtil.queryRootIdList(dept.getId(), deptList)));
+                        .set("sort", dept == null ? null : dept.getSort())
+                        .set("roodIdList", CollUtil.reverse(DeptUtil.queryRootIdList(String.valueOf(dept.getId()),
+                                BeanUtil.copyToList(deptListDb, DeptDto.class))));
                 list.add(set);
             }
-           return  com.cxygzl.common.dto.R.success(list);
+            return com.cxygzl.common.dto.R.success(list);
         }
 
         List<TreeNode<String>> nodeList = CollUtil.newArrayList();
 
-        for (DeptDto dept : deptList) {
-            Dept deptDb =
-                    deptListDb.stream().filter(w -> StrUtil.equals(String.valueOf(w.getId()), dept.getId())).findAny().orElse(null);
+        for (Dept dept : deptListDb) {
 
 
-            TreeNode<String> treeNode = new TreeNode<>(dept.getId(), dept.getParentId(),
+            TreeNode<String> treeNode = new TreeNode<>(String.valueOf(dept.getId()), String.valueOf(dept.getParentId()),
                     dept.getName(), 1);
-            String leader = dept.getLeaderUserId();
+            Long leader = dept.getLeaderUserId();
 
-            UserDto user = ApiStrategyFactory.getStrategy().getUser(leader);
+            User user = userService.getById(dept.getLeaderUserId());
+
 
             treeNode.setExtra(Dict.create().set("leaderUserId", leader)
                     .set("leaderName", user.getName())
                     .set("leaderAvatar", user.getAvatarUrl())
 
                     .set("status", dept.getStatus())
-                    .set("sort",deptDb==null?null: deptDb.getSort())
-
-                    .set("roodIdList", CollUtil.reverse(DeptUtil.queryRootIdList(dept.getId(), deptList)))
+                    .set("sort", dept.getSort())
+                    .set("roodIdList", CollUtil.reverse(DeptUtil.queryRootIdList(String.valueOf(dept.getId()),
+                            BeanUtil.copyToList(deptListDb, DeptDto.class))))
             );
             nodeList.add(treeNode);
 
@@ -262,7 +256,6 @@ public class OrgServiceImpl implements IOrgService {
         List<DeptDto> deptList = DataUtil.selectChildrenByDept(String.valueOf(id), allDept);
 
 
-
         Set<String> depIdSet = deptList.stream().map(w -> w.getId()).collect(Collectors.toSet());
 
         Long count = userService.lambdaQuery().in(User::getDeptId, depIdSet).count();
@@ -286,15 +279,14 @@ public class OrgServiceImpl implements IOrgService {
     public R getUserDetail(long userId) {
 
 
-        MPJLambdaWrapper<User> lambdaQueryWrapper=new MPJLambdaWrapper<User>()
+        MPJLambdaWrapper<User> lambdaQueryWrapper = new MPJLambdaWrapper<User>()
                 .selectAll(User.class)
                 .selectAs(Dept::getName, UserVO::getDeptName)
-                .leftJoin(Dept.class,Dept::getId,User::getDeptId)
+                .leftJoin(Dept.class, Dept::getId, User::getDeptId)
 
-                .eq(User::getId, userId)
-                ;
+                .eq(User::getId, userId);
         UserVO userVO = userService.selectJoinOne(UserVO.class, lambdaQueryWrapper);
-        if(userVO!=null){
+        if (userVO != null) {
             List<DeptDto> deptDtoList = ApiStrategyFactory.getStrategy().loadAllDept(null);
 
             List<String> depIdRootList = DeptUtil.queryRootIdList(String.valueOf(userVO.getDeptId()), deptDtoList);
@@ -309,16 +301,15 @@ public class OrgServiceImpl implements IOrgService {
         List<UserFieldDataVo> userFieldDataVos = BeanUtil.copyToList(userFieldList, UserFieldDataVo.class);
         for (UserFieldDataVo userFieldDataVo : userFieldDataVos) {
             UserFieldData userFieldData = userFieldDataList.stream().filter(w -> StrUtil.equals(w.getKey(), userFieldDataVo.getKey())).findAny().orElse(null);
-            if(userFieldData!=null){
+            if (userFieldData != null) {
                 userFieldDataVo.setData(userFieldData.getData());
             }
         }
 
 
-
         userVO.setUserFieldDataList(userFieldDataVos);
         List<UserRole> userRoleList = userRoleService.queryListByUserId(userId).getData();
-        userVO.setRoleIds(userRoleList.stream().map(w->w.getRoleId()).collect(Collectors.toList()));
+        userVO.setRoleIds(userRoleList.stream().map(w -> w.getRoleId()).collect(Collectors.toList()));
 
         return com.cxygzl.common.dto.R.success(userVO);
     }
@@ -345,7 +336,7 @@ public class OrgServiceImpl implements IOrgService {
             PageResultDto<TaskDto> pageResultDto = r.getData();
 
             Long total = pageResultDto.getTotal();
-            if(total>0){
+            if (total > 0) {
                 return com.cxygzl.common.dto.R.fail("当前用户仍有待办任务，不能离职");
             }
 
@@ -353,18 +344,17 @@ public class OrgServiceImpl implements IOrgService {
         //判断是否是流程管理员
         {
             List<com.cxygzl.biz.entity.Process> processList = processService.lambdaQuery().eq(Process::getAdminId, user.getId()).list();
-            if(!processList.isEmpty()){
-                return com.cxygzl.common.dto.R.fail(StrUtil.format("当前用户是流程[{}]的管理员，请先修改流程管理员之后才能离职",processList.stream().map(w->w.getName()).collect(Collectors.joining(","))));
+            if (!processList.isEmpty()) {
+                return com.cxygzl.common.dto.R.fail(StrUtil.format("当前用户是流程[{}]的管理员，请先修改流程管理员之后才能离职", processList.stream().map(w -> w.getName()).collect(Collectors.joining(","))));
             }
         }
         //判断是否是部门负责人
         {
             List<Dept> deptList = deptService.lambdaQuery().eq(Dept::getLeaderUserId, user.getId()).list();
-            if(!deptList.isEmpty()){
-                return com.cxygzl.common.dto.R.fail(StrUtil.format("当前用户是部门[{}]的负责人，请先修改部门负责人之后才能离职",deptList.stream().map(w->w.getName()).collect(Collectors.joining(","))));
+            if (!deptList.isEmpty()) {
+                return com.cxygzl.common.dto.R.fail(StrUtil.format("当前用户是部门[{}]的负责人，请先修改部门负责人之后才能离职", deptList.stream().map(w -> w.getName()).collect(Collectors.joining(","))));
             }
         }
-
 
 
         userService.removeById(user.getId());

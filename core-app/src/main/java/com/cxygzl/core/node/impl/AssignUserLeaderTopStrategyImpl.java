@@ -49,10 +49,15 @@ public class AssignUserLeaderTopStrategyImpl implements InitializingBean, Assign
                 if (level != null && level < index) {
                     break;
                 }
-                String leaderUserId = deptDto.getLeaderUserId();
-                if (StrUtil.isNotBlank(leaderUserId) && !userIdList.contains(leaderUserId)) {
-                    userIdList.add(String.valueOf(leaderUserId));
+                List<String> leaderUserIdList = deptDto.getLeaderUserIdList();
+                if (CollUtil.isNotEmpty(leaderUserIdList)) {
+                    for (String s : leaderUserIdList) {
+                        if (StrUtil.isNotBlank(s) && !userIdList.contains(s)) {
+                            userIdList.add((s));
+                        }
+                    }
                 }
+
                 index++;
             }
         }

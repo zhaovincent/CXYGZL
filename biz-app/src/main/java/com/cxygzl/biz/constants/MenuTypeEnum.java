@@ -1,6 +1,7 @@
 package com.cxygzl.biz.constants;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.cxygzl.common.constants.IBaseEnum;
 import lombok.Getter;
 
 /**

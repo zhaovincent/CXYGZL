@@ -81,7 +81,6 @@ public class MultiInstanceHandler {
                     userIdList.remove(rootUserId);
                     userIdList.add(index, adminId);
                 } else if (StrUtil.equals(ProcessInstanceConstant.UserTaskSameAsStarterHandler.TO_DEPT_LEADER, handler)) {
-                    int index = userIdList.indexOf(rootUserId);
                     userIdList.remove(rootUserId);
 
 
@@ -94,9 +93,14 @@ public class MultiInstanceHandler {
                         if (CollUtil.isNotEmpty(deptDtoList)) {
                             if (deptDtoList.size() >= 1) {
                                 DeptDto deptDto = deptDtoList.get(0);
-                                String leaderUserId = deptDto.getLeaderUserId();
-                                if (StrUtil.isNotBlank(leaderUserId)) {
-                                    userIdList.add(index, leaderUserId);
+                                List<String> leaderUserIdList = deptDto.getLeaderUserIdList();
+                                if (CollUtil.isNotEmpty(leaderUserIdList)) {
+                                    for (String s : leaderUserIdList) {
+                                        if (userIdList.contains(s)) {
+                                            continue;
+                                        }
+                                        userIdList.add(s);
+                                    }
                                 }
                             }
                         }
@@ -181,7 +185,6 @@ public class MultiInstanceHandler {
         List<String> assignList = new ArrayList<>();
 
 
-
         //发起人
         Object rootUserObj = execution.getVariable(ProcessInstanceConstant.VariableKey.STARTER);
         NodeUser rootUser = JSON.parseArray(JSON.toJSONString(rootUserObj), NodeUser.class).get(0);
@@ -204,7 +207,6 @@ public class MultiInstanceHandler {
 
         UserTask flowNode = (UserTask) FlowableUtils.getFlowNode(execution.getProcessInstanceId(), ((ExecutionEntityImpl) execution).getActivityId());
         String nodeId = FlowableUtils.getNodeIdFromExtension(flowNode);
-
 
 
         Node node = NodeDataStoreFactory.getInstance().getNode(processDefinitionKey, nodeId);
