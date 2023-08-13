@@ -85,14 +85,17 @@ public class NodeFormatUtil {
         if (StrUtil.isAllNotBlank(executionId, processInstanceId)) {
 
             IProcessNodeRecordService processNodeRecordService = SpringUtil.getBean(IProcessNodeRecordService.class);
-            processNodeRecord = processNodeRecordService.lambdaQuery()
+            List<ProcessNodeRecord> processNodeRecordList = processNodeRecordService.lambdaQuery()
                     .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId)
                     .eq(ProcessNodeRecord::getExecutionId, executionId)
                     .eq(!StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER), ProcessNodeRecord::getNodeId, node.getId())
                     .likeRight(StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER),
                             ProcessNodeRecord::getNodeId, ProcessInstanceConstant.VariableKey.STARTER)
                     .eq(ProcessNodeRecord::getFlowUniqueId, node.getFlowUniqueId())
-                    .one();
+                    .orderByDesc(ProcessNodeRecord::getCreateTime)
+                    .list();
+            processNodeRecord= processNodeRecordList.get(0);
+
             nodeVo.setStatus(processNodeRecord.getStatus());
 
         }
@@ -127,7 +130,7 @@ public class NodeFormatUtil {
             }
 
             // 用户列表
-            if (StrUtil.isAllNotBlank(processInstanceId,node.getExecutionId())) {
+            if (StrUtil.isAllNotBlank(processInstanceId, node.getExecutionId())) {
 
                 List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = buildApproveDesc(node, processInstanceId, nodeVo, userVoList);
 
@@ -207,7 +210,6 @@ public class NodeFormatUtil {
                         }
 
 
-
                     }
                 }
 
@@ -256,7 +258,7 @@ public class NodeFormatUtil {
             } else {
 
 
-                buildApproveDesc(node,processInstanceId,nodeVo,userVoList);
+                buildApproveDesc(node, processInstanceId, nodeVo, userVoList);
 
             }
         } else if (node.getType().intValue() == NodeTypeEnum.CC.getValue()) {
@@ -369,8 +371,10 @@ public class NodeFormatUtil {
 
         for (String userId : userIdSet) {
 
-            ProcessNodeRecordAssignUser w = processNodeRecordAssignUserList.stream().filter(k -> StrUtil.equals(k.getUserId(), userId))
-                    .findFirst().get();
+            List<ProcessNodeRecordAssignUser> list =
+                    processNodeRecordAssignUserList.stream().filter(k -> StrUtil.equals(k.getUserId(), userId))
+                    .collect(Collectors.toList());
+            ProcessNodeRecordAssignUser w = list.get(list.size()-1);
 
 
             UserVo userVo = buildUser((userId));

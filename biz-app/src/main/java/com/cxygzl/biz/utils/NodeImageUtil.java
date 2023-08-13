@@ -17,6 +17,7 @@ import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -100,7 +101,7 @@ public class NodeImageUtil {
         return NodeImageVO.builder().nodes(nodeShowList).edges(edges).build();
     }
 
-    public static List<NodeImageVO.Node> getNodeShowList(Node node,List<ProcessNodeRecord> processNodeRecordList) {
+    public static List<NodeImageVO.Node> getNodeShowList(Node node, List<ProcessNodeRecord> processNodeRecordList) {
         List<NodeImageVO.Node> list = new ArrayList<>();
         if (!NodeUtil.isNode(node)) {
             return list;
@@ -114,26 +115,19 @@ public class NodeImageUtil {
                                 (StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER)
                                         && w.getNodeId().startsWith(ProcessInstanceConstant.VariableKey.STARTER)
                                 )
-                ).collect(Collectors.toList());
-        int status=NodeStatusEnum.WKS.getCode();
-        {
-            long count = runNodeList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.YCX.getCode()).count();
-            if(count>0){
-                status=NodeStatusEnum.YCX.getCode();
-            }
+                ).sorted(new Comparator<ProcessNodeRecord>() {
+                    @Override
+                    public int compare(ProcessNodeRecord o1, ProcessNodeRecord o2) {
+                        long l1 = o1.getCreateTime().getTime();
+                        long l2 = o2.getCreateTime().getTime();
+                        return l1 > l2 ? 1 : -1;
+                    }
+                }).collect(Collectors.toList());
+        int status = NodeStatusEnum.WKS.getCode();
+        if (!runNodeList.isEmpty()) {
+            status = runNodeList.get(0).getStatus();
         }
-        {
-            long count = runNodeList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.YJS.getCode()).count();
-            if(count>0){
-                status=NodeStatusEnum.YJS.getCode();
-            }
-        }
-        {
-            long count = runNodeList.stream().filter(w -> w.getStatus().intValue() == NodeStatusEnum.JXZ.getCode()).count();
-            if(count>0){
-                status=NodeStatusEnum.JXZ.getCode();
-            }
-        }
+
 
         NodeImageVO.Node imageVO = NodeImageVO.Node.builder()
                 .text(node.getNodeName())
@@ -327,7 +321,7 @@ public class NodeImageUtil {
 
         Integer type = node.getType();
 
-        if(type.intValue()==NodeTypeEnum.ROUTE.getValue()){
+        if (type.intValue() == NodeTypeEnum.ROUTE.getValue()) {
             //路由分支
             List<Node> routeList = node.getList();
 //            for (Node n : routeList) {
