@@ -94,7 +94,7 @@ public class NodeFormatUtil {
                     .eq(ProcessNodeRecord::getFlowUniqueId, node.getFlowUniqueId())
                     .orderByDesc(ProcessNodeRecord::getCreateTime)
                     .list();
-            processNodeRecord= processNodeRecordList.get(0);
+            processNodeRecord = processNodeRecordList.get(0);
 
             nodeVo.setStatus(processNodeRecord.getStatus());
 
@@ -318,7 +318,7 @@ public class NodeFormatUtil {
         List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = processNodeRecordAssignUserService
                 .lambdaQuery()
                 .eq(!StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER), ProcessNodeRecordAssignUser::getNodeId, node.getId())
-                .likeRight(StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER),
+                .like(StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER),
                         ProcessNodeRecordAssignUser::getNodeId, ProcessInstanceConstant.VariableKey.STARTER)
                 .in(ProcessNodeRecordAssignUser::getExecutionId, childExecutionIdList)
                 .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processInstanceId)
@@ -368,13 +368,28 @@ public class NodeFormatUtil {
 
 
         Set<String> userIdSet = processNodeRecordAssignUserList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
+        if (CollUtil.isEmpty(userIdSet) && node.getId().equals(ProcessInstanceConstant.VariableKey.STARTER)) {
+
+            IProcessInstanceRecordService processInstanceRecordService = SpringUtil.getBean(IProcessInstanceRecordService.class);
+            ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
+            String userId = processInstanceRecord.getUserId();
+
+
+            UserVo userVo = buildUser((userId));
+            userVo.setShowTime(processInstanceRecord.getCreateTime());
+            userVo.setShowTimeStr(nodeDateShow(processInstanceRecord.getCreateTime()));
+            userVo.setStatus(NodeStatusEnum.YJS.getCode());
+//            userVo.setOperType(w.getTaskType());
+
+            userVoList.add(userVo);
+        }
 
         for (String userId : userIdSet) {
 
             List<ProcessNodeRecordAssignUser> list =
                     processNodeRecordAssignUserList.stream().filter(k -> StrUtil.equals(k.getUserId(), userId))
-                    .collect(Collectors.toList());
-            ProcessNodeRecordAssignUser w = list.get(list.size()-1);
+                            .collect(Collectors.toList());
+            ProcessNodeRecordAssignUser w = list.get(list.size() - 1);
 
 
             UserVo userVo = buildUser((userId));
