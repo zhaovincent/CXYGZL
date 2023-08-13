@@ -57,78 +57,8 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
     private IUserRoleService userRoleService;
     @Resource
     private IMenuService menuService;
-    @Resource
-    private RedisTemplate redisTemplate;
-
-    /**
-     * 登录
-     *
-     * @param userVO
-     * @return
-     */
-    @Override
-    public R login(UserVO userVO) {
-
-        Object cacheVerifyCode =
-                redisTemplate.opsForValue().get(SecurityConstants.VERIFY_CODE_CACHE_PREFIX + userVO.getVerifyCodeKey());
-        if (cacheVerifyCode == null) {
-            return com.cxygzl.common.dto.R.fail("验证码错误");
-        } else {
-            // 验证码比对
-            if (!StrUtil.equals(userVO.getVerifyCode(), Convert.toStr(cacheVerifyCode))) {
-                return com.cxygzl.common.dto.R.fail("验证码错误");
-
-            }
-        }
-
-        String phone = userVO.getPhone();
-        String password = userVO.getPassword();
-
-        User u = this.lambdaQuery()
-                .eq(User::getPhone, phone)
-                .eq(User::getPassword, password)
-                .eq(User::getStatus, StatusEnum.ENABLE.getValue())
-
-                .one();
-        if (u == null) {
-            return R.fail("账号或者密码错误");
-        }
 
 
-        StpUtil.login(u.getId(), LoginPlatEnum.ADMIN.getType());
-
-        SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
-
-        return com.cxygzl.common.dto.R.success(tokenInfo);
-    }
-
-    /**
-     * token登录
-     *
-     * @param token
-     * @return
-     */
-    @Override
-    public R loginByToken(String token) {
-        String userId = ApiStrategyFactory.getStrategy().getUserIdByToken(token);
-        StpUtil.login(userId,LoginPlatEnum.ADMIN.getType());
-
-        SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
-
-        return com.cxygzl.common.dto.R.success(tokenInfo);
-    }
-
-    /**
-     * 退出登录
-     *
-     * @return
-     */
-    @Override
-    public com.cxygzl.common.dto.R logout() {
-
-        StpUtil.logout(StpUtil.getLoginId(),LoginPlatEnum.ADMIN.getType());
-        return com.cxygzl.common.dto.R.success();
-    }
 
     /**
      * 修改密码

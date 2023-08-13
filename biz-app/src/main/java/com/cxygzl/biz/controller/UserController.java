@@ -57,45 +57,6 @@ public class UserController {
     }
 
 
-    /**
-     * 用户登录
-     *
-     * @param user
-     * @return
-     */
-    @SneakyThrows
-    @PostMapping("login")
-    public R login(@RequestBody UserVO user) {
-
-        return userService.login(user);
-
-    }
-    /**
-     * 用户token自动登录
-     *
-     * @param token
-     * @return
-     */
-    @SneakyThrows
-    @GetMapping("loginByToken")
-    public R loginByToken ( String token) {
-
-        return userService.loginByToken(token);
-
-    }
-
-    /**
-     * 用户退出登录
-     *
-     * @return
-     */
-    @SneakyThrows
-    @PostMapping("logout")
-    public R logout() {
-
-        return userService.logout();
-
-    }
 
     /**
      * 修改密码

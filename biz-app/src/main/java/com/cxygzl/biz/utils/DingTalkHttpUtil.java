@@ -4,6 +4,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
+import com.cxygzl.common.dto.R;
 import com.yomahub.tlog.hutoolhttp.TLogHutoolhttpInterceptor;
 import org.springframework.core.env.Environment;
 
@@ -38,5 +40,15 @@ public class DingTalkHttpUtil {
 
     }
 
+    /**
+     * 根据code获取用户id
+     * @param authCode
+     * @return
+     */
+    public static R<String> getUserIdByCode(String authCode){
+        String s = get("/user/getUserIdByCode?authCode=" + authCode);
+        return JSON.parseObject(s, new TypeReference<R<String>>() {
+        });
+    }
 
 }

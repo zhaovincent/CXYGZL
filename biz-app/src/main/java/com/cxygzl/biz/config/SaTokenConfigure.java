@@ -25,10 +25,8 @@ public class SaTokenConfigure implements WebMvcConfigurer {
                 }))
                 .addPathPatterns("/**")
                 .excludePathPatterns(
-                        "/user/login",
-                        "/user/loginByToken",
-                        "/api/user/loginByToken",
-                        "/api/user/login",
+                        "/login/*",
+                        "/api/login/*",
                         "/api/user/captcha",
                         "/user/captcha",
                         "/remote/*",

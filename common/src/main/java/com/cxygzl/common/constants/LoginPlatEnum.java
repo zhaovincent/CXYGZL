@@ -11,6 +11,7 @@ import lombok.Getter;
 public enum LoginPlatEnum {
 
     ADMIN("admin","管理员后台"),
+    DING_TALK("dingtalk","钉钉登录"),
 
 
 
