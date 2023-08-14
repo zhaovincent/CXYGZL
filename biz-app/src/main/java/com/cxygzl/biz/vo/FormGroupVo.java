@@ -17,7 +17,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FormGroupVo {
-
     private Long id;
     /**
      * 流程名字

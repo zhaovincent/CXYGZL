@@ -19,7 +19,7 @@ import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.FormUtil;
 import com.cxygzl.biz.utils.NodeFormatUtil;
 import com.cxygzl.biz.utils.NodeImageUtil;
-import com.cxygzl.biz.vo.FormItemVO;
+import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.ProcessCopyVo;
 import com.cxygzl.biz.vo.ProcessInstanceRecordVO;

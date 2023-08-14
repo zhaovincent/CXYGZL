@@ -99,6 +99,12 @@ public interface ApiStrategy {
     Map<String,String> queryUserFieldData(String userId);
 
     /**
+     * 创建流程
+     * @param processDto
+     */
+    void createProcess(ProcessDto processDto);
+
+    /**
      * 发送消息
      * @param messageDto
      */

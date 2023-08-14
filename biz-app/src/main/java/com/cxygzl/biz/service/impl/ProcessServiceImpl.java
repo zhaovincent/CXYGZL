@@ -9,6 +9,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessStarter;
 import com.cxygzl.biz.entity.ProcessSubProcess;
@@ -17,13 +18,14 @@ import com.cxygzl.biz.service.IProcessService;
 import com.cxygzl.biz.service.IProcessStarterService;
 import com.cxygzl.biz.service.IProcessSubProcessService;
 import com.cxygzl.biz.utils.CoreHttpUtil;
-import com.cxygzl.biz.vo.FormItemVO;
+import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.biz.vo.ProcessVO;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.dto.third.ProcessDto;
 import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -143,13 +145,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         com.cxygzl.biz.utils.NodeUtil.handleStarterNode(node,JSON.parseArray(processVO.getFormItems(),FormItemVO.class));
         com.cxygzl.biz.utils.NodeUtil.handleApproveForm(node,JSON.parseArray(processVO.getFormItems(),FormItemVO.class));
 
-//        {
-//            Node tempNode = BeanUtil.copyProperties(node, Node.class);
-//            NodeUtil.addEndNode(tempNode);
-//            NodeUtil.initRandomNodeId(tempNode);
-//            List<NodeLinkDto> dtoList = NodeUtil.buildLinkList(tempNode, null, true);
-//            log.info("连线数据：{}",JSON.toJSONString(dtoList));
-//        }
+
 
         com.cxygzl.common.dto.R<String> r = CoreHttpUtil.createFlow(node, StpUtil.getLoginIdAsString());
         if (!r.isOk()) {
@@ -239,6 +235,8 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
             }
         }
 
+        //创建第三方对接流程
+        ApiStrategyFactory.getStrategy().createProcess(ProcessDto.builder().name(processVO.getName()).description(processVO.getRemark()).formItemVOList(JSON.parseArray(processVO.getFormItems(),FormItemVO.class)).build());
 
         return com.cxygzl.common.dto.R.success();
     }

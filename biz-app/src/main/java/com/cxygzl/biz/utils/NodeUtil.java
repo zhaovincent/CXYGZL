@@ -1,6 +1,6 @@
 package com.cxygzl.biz.utils;
 
-import com.cxygzl.biz.vo.FormItemVO;
+import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.flow.Node;

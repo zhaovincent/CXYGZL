@@ -132,6 +132,16 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     }
 
     /**
+     * 创建流程
+     *
+     * @param processDto
+     */
+    @Override
+    public void createProcess(ProcessDto processDto) {
+        DingTalkHttpUtil.post(processDto,"/remote/createProcess");
+    }
+
+    /**
      * 发送消息
      *
      * @param messageDto

@@ -62,3 +62,6 @@ ALTER TABLE `user_field_data`
 
 ALTER TABLE `user_role`
     MODIFY COLUMN `id` bigint NOT NULL COMMENT 'id' FIRST;
+
+ALTER TABLE  `process`
+    MODIFY COLUMN `group_id` bigint NOT NULL COMMENT '分组ID' ;

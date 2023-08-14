@@ -1,12 +1,16 @@
-package com.cxygzl.biz.vo;
+package com.cxygzl.common.dto.flow;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 表单
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class FormItemVO {
 

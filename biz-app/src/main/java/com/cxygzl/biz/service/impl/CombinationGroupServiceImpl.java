@@ -49,7 +49,7 @@ public class CombinationGroupServiceImpl implements ICombinationGroupService {
 
         processGroupList.forEach(group -> {
             FormGroupVo formGroupVo = FormGroupVo.builder()
-                    .id(group.getId())
+                    .id((group.getId()))
                     .name(group.getGroupName())
                     .items(new LinkedList<>())
                     .build();
@@ -97,7 +97,7 @@ public class CombinationGroupServiceImpl implements ICombinationGroupService {
 
         processGroupList.forEach(group -> {
             FormGroupVo formGroupVo = FormGroupVo.builder()
-                    .id(group.getId())
+                    .id( (group.getId()))
                     .name(group.getGroupName())
                     .items(new LinkedList<>())
                     .build();

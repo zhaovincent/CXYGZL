@@ -15,7 +15,7 @@ import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.FormUtil;
-import com.cxygzl.biz.vo.FormItemVO;
+import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;

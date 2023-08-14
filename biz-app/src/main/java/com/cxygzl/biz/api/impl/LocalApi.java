@@ -175,6 +175,16 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     }
 
     /**
+     * 创建流程
+     *
+     * @param processDto
+     */
+    @Override
+    public void createProcess(ProcessDto processDto) {
+
+    }
+
+    /**
      * 发送消息
      *
      * @param messageDto

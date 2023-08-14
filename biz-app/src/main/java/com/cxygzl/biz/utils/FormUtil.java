@@ -1,7 +1,7 @@
 package com.cxygzl.biz.utils;
 
 import cn.hutool.core.util.StrUtil;
-import com.cxygzl.biz.vo.FormItemVO;
+import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.constants.FormTypeEnum;
 
 public class FormUtil {
