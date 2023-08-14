@@ -347,14 +347,14 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                     });
             if (!r.isOk()) {
 
-                ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
+                List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
                         .eq(ProcessNodeRecordAssignUser::getTaskId, nodeFormatParamVo.getTaskId())
                         .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.YJS.getCode())
-                        .last("limit 1")
-                        .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
-                        .one();
 
-                String data = processNodeRecordAssignUser.getData();
+                        .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
+                        .list();
+
+                String data = list.get(0).getData();
                 Map<String, Object> variableMap = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
                 });
                 variableMap.putAll(paramMap);

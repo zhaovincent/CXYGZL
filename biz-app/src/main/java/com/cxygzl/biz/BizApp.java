@@ -8,9 +8,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @Slf4j
 @MapperScan(basePackages = "com.cxygzl.biz.mapper")
 @SpringBootApplication(scanBasePackages = "com.cxygzl.biz")
-public class CoreBiz {
+public class BizApp {
     public static void main(String[] args) {
-        SpringApplication.run(CoreBiz.class, args);
+        SpringApplication.run(BizApp.class, args);
         log.info("=====================Core Biz  Start========================");
     }
 }

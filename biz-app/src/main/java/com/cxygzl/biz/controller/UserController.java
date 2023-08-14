@@ -1,12 +1,10 @@
 package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.entity.User;
-import com.cxygzl.biz.security.captcha.EasyCaptchaService;
 import com.cxygzl.biz.service.IOrgService;
 import com.cxygzl.biz.service.IUserService;
 import com.cxygzl.biz.vo.UserListQueryVO;
 import com.cxygzl.biz.vo.UserVO;
-import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.dto.R;
 import lombok.SneakyThrows;
 import org.springframework.web.bind.annotation.*;
@@ -25,18 +23,7 @@ public class UserController {
     @Resource
     private IOrgService orgService;
 
-    @Resource
-    private EasyCaptchaService captchaService;
 
-    /**
-     * 获取验证码
-     * @return
-     */
-    @GetMapping("/captcha")
-    @NotWriteLogAnno(printResultLog = false)
-    public R getCaptcha() {
-       return captchaService.getCaptcha();
-    }
     /**
      * 创建用户
      * @param user
@@ -57,45 +44,6 @@ public class UserController {
     }
 
 
-    /**
-     * 用户登录
-     *
-     * @param user
-     * @return
-     */
-    @SneakyThrows
-    @PostMapping("login")
-    public R login(@RequestBody UserVO user) {
-
-        return userService.login(user);
-
-    }
-    /**
-     * 用户token自动登录
-     *
-     * @param token
-     * @return
-     */
-    @SneakyThrows
-    @GetMapping("loginByToken")
-    public R loginByToken ( String token) {
-
-        return userService.loginByToken(token);
-
-    }
-
-    /**
-     * 用户退出登录
-     *
-     * @return
-     */
-    @SneakyThrows
-    @PostMapping("logout")
-    public R logout() {
-
-        return userService.logout();
-
-    }
 
     /**
      * 修改密码

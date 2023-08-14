@@ -73,16 +73,16 @@ public class TaskServiceImpl implements ITaskService {
         //是否是当前活动任务
         Boolean currentTask = taskResultDto.getCurrentTask();
         if(!currentTask){
-            ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
+            List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
                     .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
                     .eq(ProcessNodeRecordAssignUser::getUserId, userId)
                     .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.YJS.getCode())
-                    .last("limit 1")
-                    .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
-                    .one();
 
-            if(processNodeRecordAssignUser!=null){
-                String data = processNodeRecordAssignUser.getData();
+                    .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
+                    .list();
+
+            if(CollUtil.isNotEmpty(list)){
+                String data = list.get(0).getData();
                 if(StrUtil.isNotBlank(data)){
                     Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
                     });

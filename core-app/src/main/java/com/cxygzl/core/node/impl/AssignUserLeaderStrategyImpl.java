@@ -42,7 +42,16 @@ public class AssignUserLeaderStrategyImpl implements InitializingBean, AssignUse
             if (deptDtoList.size() >= level) {
                 DeptDto deptDto = deptDtoList.get(level - 1);
 
-                userIdList.add((deptDto.getLeaderUserId()));
+                List<String> leaderUserIdList = deptDto.getLeaderUserIdList();
+                if(CollUtil.isNotEmpty(leaderUserIdList)){
+                    for (String s : leaderUserIdList) {
+                        if(userIdList.contains(s)){
+                            continue;
+                        }
+                        userIdList.add(s);
+                    }
+                }
+
             }
         }
 

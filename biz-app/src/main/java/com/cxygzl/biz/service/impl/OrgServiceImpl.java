@@ -1,7 +1,6 @@
 package com.cxygzl.biz.service.impl;
 
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.lang.tree.Tree;
@@ -9,14 +8,15 @@ import cn.hutool.core.lang.tree.TreeNode;
 import cn.hutool.core.lang.tree.TreeUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.biz.api.ApiStrategyFactory;
+import com.cxygzl.biz.entity.Dept;
 import com.cxygzl.biz.entity.Process;
-import com.cxygzl.biz.entity.*;
+import com.cxygzl.biz.entity.User;
+import com.cxygzl.biz.entity.UserRole;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.DataUtil;
 import com.cxygzl.biz.utils.DeptUtil;
 import com.cxygzl.biz.vo.OrgTreeVo;
-import com.cxygzl.biz.vo.UserFieldDataVo;
 import com.cxygzl.biz.vo.UserVO;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.dto.PageResultDto;
@@ -167,7 +167,7 @@ public class OrgServiceImpl implements IOrgService {
         if(StrUtil.isNotBlank(keywords)||status!=null){
             List list=new ArrayList();
             for (DeptDto dept : deptList) {
-                String leader = dept.getLeaderUserId();
+                String leader = dept.getLeaderUserIdList().get(0);
                 UserDto user = ApiStrategyFactory.getStrategy().getUser(leader);
 
                 Dept deptDb =
@@ -195,7 +195,7 @@ public class OrgServiceImpl implements IOrgService {
 
             TreeNode<String> treeNode = new TreeNode<>(dept.getId(), dept.getParentId(),
                     dept.getName(), 1);
-            String leader = dept.getLeaderUserId();
+            String leader = dept.getLeaderUserIdList().get(0);
 
             UserDto user = ApiStrategyFactory.getStrategy().getUser(leader);
 

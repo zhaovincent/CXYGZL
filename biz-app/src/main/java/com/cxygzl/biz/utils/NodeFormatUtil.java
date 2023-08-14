@@ -2,20 +2,16 @@ package com.cxygzl.biz.utils;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
-import com.cxygzl.biz.api.ApiStrategy;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
-import com.cxygzl.biz.entity.User;
 import com.cxygzl.biz.service.IProcessInstanceRecordService;
 import com.cxygzl.biz.service.IProcessNodeRecordAssignUserService;
 import com.cxygzl.biz.service.IRemoteService;
-import com.cxygzl.biz.service.IUserService;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.biz.vo.node.UserVo;
 import com.cxygzl.common.constants.NodeTypeEnum;
@@ -189,8 +185,12 @@ public class NodeFormatUtil {
                     if (deptDtoList.size() >= level) {
                         com.cxygzl.common.dto.third.DeptDto deptDto = deptDtoList.get(level - 1);
 
+                        List<String> leaderUserIdList = deptDto.getLeaderUserIdList();
+                        for (String s : leaderUserIdList) {
+                            UserVo userVo = buildUser(s);
+                            userVoList.add(userVo);
+                        }
 
-                        userVoList.addAll(CollUtil.newArrayList(buildUser(deptDto.getLeaderUserId())));
 
                     }
                 }
@@ -216,7 +216,13 @@ public class NodeFormatUtil {
                         if (level != null && level < index) {
                             break;
                         }
-                        userVoList.addAll(CollUtil.newArrayList(buildUser(deptDto.getLeaderUserId())));
+
+                        List<String> leaderUserIdList = deptDto.getLeaderUserIdList();
+                        for (String s : leaderUserIdList) {
+                            UserVo userVo = buildUser(s);
+                            userVoList.add(userVo);
+                        }
+
 
                         index++;
                     }

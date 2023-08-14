@@ -15,27 +15,7 @@ import com.github.yulichang.base.MPJBaseService;
  * @since 2023-05-05
  */
 public interface IUserService extends MPJBaseService<User> {
-    /**
-     * 登录
-     *
-     * @param userVO
-     * @return
-     */
-    R login(UserVO userVO);
 
-    /**
-     * token登录
-     *
-     * @param token
-     * @return
-     */
-    R loginByToken(String token);
-
-    /**
-     * 退出登录
-     * @return
-     */
-    R logout();
 
     /**
      * 修改密码

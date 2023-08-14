@@ -42,7 +42,7 @@ public class UserFieldServiceImpl extends ServiceImpl<UserFieldMapper, UserField
 
         {
             //先查询所有的
-            List<UserField> userFieldListDb = this.lambdaQuery().ge(UserField::getId, 0).list();
+            List<UserField> userFieldListDb = this.lambdaQuery().list();
             //判断是否删除了
             for (UserField userField : userFieldListDb) {
                 boolean b = userFieldParamVOList.stream().anyMatch(w -> StrUtil.equals(w.getKey(), userField.getKey()));
@@ -54,9 +54,7 @@ public class UserFieldServiceImpl extends ServiceImpl<UserFieldMapper, UserField
                 }
             }
         }
-        LambdaQueryWrapper<UserField> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.ge(UserField::getId,0);
-        this.remove(queryWrapper);
+        this.remove(new LambdaQueryWrapper<>());
         for (UserFieldParamVO userFieldParamVO : userFieldParamVOList) {
             UserField userField = BeanUtil.copyProperties(userFieldParamVO, UserField.class);
             if(StrUtil.isBlank(userField.getKey())){
@@ -74,7 +72,7 @@ public class UserFieldServiceImpl extends ServiceImpl<UserFieldMapper, UserField
      */
     @Override
     public R queryAll() {
-        List<UserField> userFieldList = this.lambdaQuery().ge(UserField::getId, 0).list();
+        List<UserField> userFieldList = this.lambdaQuery().list();
 
         return R.success(userFieldList);
     }

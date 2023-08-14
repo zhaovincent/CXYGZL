@@ -1,6 +1,7 @@
 package com.cxygzl.biz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cxygzl.biz.constants.NodeStatusEnum;
@@ -12,6 +13,7 @@ import com.cxygzl.common.dto.R;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -31,12 +33,13 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
      */
     @Override
     public R addAssignUser(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-       if(StrUtil.isNotBlank(processNodeRecordAssignUserParamDto.getApproveDesc())) {
-            ProcessNodeRecordAssignUser processNodeRecordAssignUser = this.lambdaQuery()
+        if (StrUtil.isNotBlank(processNodeRecordAssignUserParamDto.getApproveDesc())) {
+            List<ProcessNodeRecordAssignUser> list = this.lambdaQuery()
                     .eq(ProcessNodeRecordAssignUser::getTaskId, processNodeRecordAssignUserParamDto.getTaskId())
-                    .orderByDesc(ProcessNodeRecordAssignUser::getId)
-                    .last("limit 1").one();
-            if(processNodeRecordAssignUser!=null){
+                    .orderByDesc(ProcessNodeRecordAssignUser::getCreateTime)
+                    .list();
+            if (CollUtil.isNotEmpty(list)) {
+                ProcessNodeRecordAssignUser processNodeRecordAssignUser = list.get(0);
                 processNodeRecordAssignUser.setApproveDesc(processNodeRecordAssignUserParamDto.getApproveDesc());
                 processNodeRecordAssignUser.setTaskType(processNodeRecordAssignUserParamDto.getTaskType());
                 processNodeRecordAssignUser.setStatus(NodeStatusEnum.YJS.getCode());
@@ -64,13 +67,14 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
      */
     @Override
     public R completeTaskEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        ProcessNodeRecordAssignUser processNodeRecordAssignUser = this.lambdaQuery()
+        List<ProcessNodeRecordAssignUser> list = this.lambdaQuery()
                 .eq(ProcessNodeRecordAssignUser::getTaskId, processNodeRecordAssignUserParamDto.getTaskId())
                 .eq(ProcessNodeRecordAssignUser::getUserId, processNodeRecordAssignUserParamDto.getUserId())
                 .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processNodeRecordAssignUserParamDto.getProcessInstanceId())
                 .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
-                .orderByDesc(ProcessNodeRecordAssignUser::getId)
-                .last("limit 1").one();
+                .orderByDesc(ProcessNodeRecordAssignUser::getCreateTime)
+                .list();
+        ProcessNodeRecordAssignUser processNodeRecordAssignUser = list.get(0);
         processNodeRecordAssignUser.setStatus(NodeStatusEnum.YJS.getCode());
         processNodeRecordAssignUser.setApproveDesc(processNodeRecordAssignUserParamDto.getApproveDesc());
         processNodeRecordAssignUser.setEndTime(new Date());

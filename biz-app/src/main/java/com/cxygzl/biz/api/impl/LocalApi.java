@@ -3,6 +3,7 @@ package com.cxygzl.biz.api.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import com.cxygzl.biz.api.ApiStrategy;
 import com.cxygzl.biz.entity.Dept;
 import com.cxygzl.biz.entity.Role;
@@ -90,7 +91,15 @@ public class LocalApi implements ApiStrategy, InitializingBean {
         List<Dept> deptList = deptService.lambdaQuery()
                 .eq(parentDeptId != null, Dept::getParentId, parentDeptId)
                 .list();
-        return BeanUtil.copyToList(deptList,DeptDto.class);
+
+        List<DeptDto> deptDtoList=new ArrayList<>();
+        for (Dept dept : deptList) {
+            DeptDto deptDto = BeanUtil.copyProperties(dept, DeptDto.class);
+            deptDto.setLeaderUserIdList(CollectionUtil.newArrayList(String.valueOf(dept.getLeaderUserId())));
+            deptDtoList.add(deptDto);
+        }
+
+        return deptDtoList;
 
     }
 
