@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Huijun Zhao
@@ -26,6 +27,12 @@ public class ProcessDto {
     private String name;
 
     private String description;
+
+    private String mobile;
+
+    private String processInstanceId;
+
+    private Map<String,Object> valueMap;
 
     private List<FormItemVO> formItemVOList;
 

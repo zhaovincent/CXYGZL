@@ -145,6 +145,16 @@ public class NetApi implements ApiStrategy, InitializingBean {
     }
 
     /**
+     * 发起流程
+     *
+     * @param processDto
+     */
+    @Override
+    public void startProcess(ProcessDto processDto) {
+
+    }
+
+    /**
      * 发送消息
      *
      * @param messageDto

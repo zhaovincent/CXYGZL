@@ -6,6 +6,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
@@ -14,11 +15,10 @@ import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.DataUtil;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
+import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.dto.flow.Node;
-import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.dto.third.*;
 import com.cxygzl.common.dto.third.MessageDto;
-import com.cxygzl.common.dto.third.UserDto;
-import com.cxygzl.common.dto.third.UserFieldDto;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -308,8 +308,14 @@ public class RemoteServiceImpl implements IRemoteService {
         processInstanceRecordService.save(entity);
 
 
-        //记录日志
-       // processOperRecordService.startProcessInstance(processInstanceRecordParamDto);
+
+        //调用接口通知其他
+        String formData = processInstanceRecordParamDto.getFormData();
+        Map<String, Object> valueMap = JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
+        });
+        ProcessDto processDto =
+                ProcessDto.builder().mobile(processInstanceRecordParamDto.getUserId()).flowId(process.getFlowId()).formItemVOList(JSON.parseArray(process.getFormItems(), FormItemVO.class)).valueMap(valueMap).build();
+        ApiStrategyFactory.getStrategy().startProcess(processDto);
 
         return R.success();
     }

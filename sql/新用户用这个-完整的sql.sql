@@ -1,465 +1,3 @@
-
-
-SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
-
--- ----------------------------
--- Table structure for dept
--- ----------------------------
-DROP TABLE IF EXISTS `dept`;
-CREATE TABLE `dept`  (
-                         `id` bigint NOT NULL AUTO_INCREMENT COMMENT '部门id',
-                         `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '部门名',
-                         `parent_id` bigint NOT NULL DEFAULT 0 COMMENT '上级部门id',
-                         `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                         `leader_user_id` bigint NOT NULL COMMENT '主管user_id',
-                         `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                         `update_time` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                         `status` int NOT NULL DEFAULT 1,
-                         `sort` int NOT NULL DEFAULT 1,
-                         PRIMARY KEY (`id`) USING BTREE,
-                         INDEX `idx_id`(`id` ASC) USING BTREE,
-                         INDEX `idx_parent_id`(`parent_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '部门表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Table structure for menu
--- ----------------------------
-DROP TABLE IF EXISTS `menu`;
-CREATE TABLE `menu`  (
-                         `id` bigint NOT NULL AUTO_INCREMENT,
-                         `parent_id` bigint NOT NULL COMMENT '父菜单ID',
-                         `tree_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '父节点ID路径',
-                         `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '菜单名称',
-                         `type` tinyint NOT NULL COMMENT '菜单类型(1:菜单；2:目录；3:外链；4:按钮)',
-                         `path` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '路由路径(浏览器地址栏路径)',
-                         `component` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '组件路径(vue页面完整路径，省略.vue后缀)',
-                         `perm` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '权限标识',
-                         `visible` tinyint(1) NOT NULL DEFAULT 1 COMMENT '显示状态(1-显示;0-隐藏)',
-                         `sort` int NULL DEFAULT 0 COMMENT '排序',
-                         `icon` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '菜单图标',
-                         `redirect` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '跳转路径',
-                         `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                         `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-                         `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                         PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 103 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '菜单管理' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Table structure for message
--- ----------------------------
-DROP TABLE IF EXISTS `message`;
-CREATE TABLE `message`  (
-                            `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                            `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                            `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                            `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-                            `type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '类型',
-                            `readed` tinyint(1) NOT NULL COMMENT '是否已读',
-                            `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户id',
-                            `unique_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '唯一id',
-                            `param` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '消息参数',
-                            `content` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '消息内容',
-                            `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '消息头',
-                            `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
-                            `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程实例id',
-                            PRIMARY KEY (`id`) USING BTREE,
-                            INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 516 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '通知消息' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for process
--- ----------------------------
-DROP TABLE IF EXISTS `process`;
-CREATE TABLE `process`  (
-                            `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                            `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                            `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                            `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-                            `flow_id` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '表单ID',
-                            `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '表单名称',
-                            `logo` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '图标配置',
-                            `settings` json NULL COMMENT '设置项',
-                            `group_id` bigint NOT NULL COMMENT '分组ID',
-                            `form_items` json NOT NULL COMMENT '表单设置内容',
-                            `process` json NOT NULL COMMENT '流程设置内容',
-                            `remark` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
-                            `sort` int NOT NULL,
-                            `is_hidden` tinyint(1) NOT NULL COMMENT '0 正常 1=隐藏',
-                            `is_stop` tinyint(1) NOT NULL COMMENT '0 正常 1=停用 ',
-                            `admin_id` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流程管理员',
-                            `unique_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '唯一性id',
-                            `admin` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '管理员',
-                            `range_show` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '范围描述显示',
-                            PRIMARY KEY (`id`) USING BTREE,
-                            UNIQUE INDEX `idx_form_id`(`flow_id` ASC) USING BTREE,
-                            INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 564 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Table structure for process_copy
--- ----------------------------
-DROP TABLE IF EXISTS `process_copy`;
-CREATE TABLE `process_copy`  (
-                                 `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                                 `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                 `create_time` datetime NOT NULL COMMENT '创建时间',
-                                 `update_time` datetime NOT NULL COMMENT '更新时间',
-                                 `start_time` datetime NOT NULL COMMENT ' 流程发起时间',
-                                 `node_time` datetime NOT NULL COMMENT '当前节点时间',
-                                 `start_user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '发起人',
-                                 `flow_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
-                                 `process_instance_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '实例id',
-                                 `node_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点id',
-                                 `group_id` bigint NOT NULL COMMENT '分组id',
-                                 `group_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分组名称',
-                                 `process_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程名称',
-                                 `node_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点 名称',
-                                 `form_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '表单数据',
-                                 `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '抄送人id',
-                                 PRIMARY KEY (`id`) USING BTREE,
-                                 INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 90 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程抄送数据' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for process_execution
--- ----------------------------
-DROP TABLE IF EXISTS `process_execution`;
-CREATE TABLE `process_execution`  (
-                                      `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                                      `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                      `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                                      `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-                                      `execution_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '执行id',
-                                      `child_execution_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT ' 子级执行id',
-                                      PRIMARY KEY (`id`) USING BTREE,
-                                      INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 217 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程-执行id关系' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for process_group
--- ----------------------------
-DROP TABLE IF EXISTS `process_group`;
-CREATE TABLE `process_group`  (
-                                  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                                  `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                                  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-                                  `group_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分组名',
-                                  `sort` int NOT NULL DEFAULT 0 COMMENT '排序',
-                                  PRIMARY KEY (`id`) USING BTREE,
-                                  INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Table structure for process_instance_record
--- ----------------------------
-DROP TABLE IF EXISTS `process_instance_record`;
-CREATE TABLE `process_instance_record`  (
-                                            `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                                            `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程名字',
-                                            `logo` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '头像',
-                                            `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户id',
-                                            `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                            `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                                            `update_time` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                                            `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流程id',
-                                            `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流程实例id',
-                                            `form_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '表单数据',
-                                            `group_id` bigint NULL DEFAULT NULL COMMENT '组id',
-                                            `group_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '组名称',
-                                            `status` int NULL DEFAULT 1 COMMENT '状态',
-                                            `end_time` datetime NULL DEFAULT NULL COMMENT '结束时间',
-                                            `parent_process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '上级流程实例id',
-                                            `process` json NULL COMMENT '节点对象',
-                                            PRIMARY KEY (`id`) USING BTREE,
-                                            INDEX `idx_id`(`id` ASC) USING BTREE,
-                                            INDEX `idx_dep_id`(`user_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 840 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程记录' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Table structure for process_node_data
--- ----------------------------
-DROP TABLE IF EXISTS `process_node_data`;
-CREATE TABLE `process_node_data`  (
-                                      `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                                      `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                      `create_time` datetime NOT NULL COMMENT '创建时间',
-                                      `update_time` datetime NOT NULL COMMENT '更新时间',
-                                      `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
-                                      `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '表单数据',
-                                      `node_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-                                      PRIMARY KEY (`id`) USING BTREE,
-                                      INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3718 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程节点数据' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Table structure for process_node_record
--- ----------------------------
-DROP TABLE IF EXISTS `process_node_record`;
-CREATE TABLE `process_node_record`  (
-                                        `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                                        `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                        `create_time` datetime NOT NULL COMMENT '创建时间',
-                                        `update_time` datetime NOT NULL COMMENT '更新时间',
-                                        `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
-                                        `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程实例id',
-                                        `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '表单数据',
-                                        `node_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-                                        `node_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '节点类型',
-                                        `node_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点名字',
-                                        `status` int NOT NULL COMMENT '节点状态',
-                                        `start_time` datetime NOT NULL COMMENT '开始时间',
-                                        `end_time` datetime NULL DEFAULT NULL COMMENT '结束时间',
-                                        `execution_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '执行id',
-                                        `parent_node_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '上一层级id',
-                                        `flow_unique_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流转唯一标识',
-                                        PRIMARY KEY (`id`) USING BTREE,
-                                        INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3779 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程节点记录' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Table structure for process_node_record_approve_desc
--- ----------------------------
-DROP TABLE IF EXISTS `process_node_record_approve_desc`;
-CREATE TABLE `process_node_record_approve_desc`  (
-                                                     `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                                                     `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                                     `create_time` datetime NOT NULL COMMENT '创建时间',
-                                                     `update_time` datetime NOT NULL COMMENT '更新时间',
-                                                     `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
-                                                     `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程实例id',
-                                                     `node_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-                                                     `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT ' 用户id',
-                                                     `execution_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '执行id',
-                                                     `task_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT ' 任务id',
-                                                     `approve_desc` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '审批意见',
-                                                     `node_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT ' 节点名称',
-                                                     `desc_date` datetime NULL DEFAULT NULL COMMENT '评论时间',
-                                                     `desc_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '消息id',
-                                                     `desc_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '类型',
-                                                     PRIMARY KEY (`id`) USING BTREE,
-                                                     INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1344 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程节点记录-执行人-审批意见' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Table structure for process_node_record_assign_user
--- ----------------------------
-DROP TABLE IF EXISTS `process_node_record_assign_user`;
-CREATE TABLE `process_node_record_assign_user`  (
-                                                    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                                                    `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                                    `create_time` datetime NOT NULL COMMENT '创建时间',
-                                                    `update_time` datetime NOT NULL COMMENT '更新时间',
-                                                    `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
-                                                    `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程实例id',
-                                                    `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '表单数据',
-                                                    `node_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-                                                    `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT ' 用户id',
-                                                    `status` int NOT NULL COMMENT '节点状态',
-                                                    `start_time` datetime NOT NULL COMMENT '开始时间',
-                                                    `end_time` datetime NULL DEFAULT NULL COMMENT '结束时间',
-                                                    `execution_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '执行id',
-                                                    `task_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT ' 任务id',
-                                                    `approve_desc` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '审批意见',
-                                                    `node_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT ' 节点名称',
-                                                    `task_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '任务类型',
-                                                    `local_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '表单本地数据',
-                                                    `flow_unique_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流转唯一标识',
-                                                    PRIMARY KEY (`id`) USING BTREE,
-                                                    INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1502 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程节点记录-执行人' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Table structure for process_oper_record
--- ----------------------------
-DROP TABLE IF EXISTS `process_oper_record`;
-CREATE TABLE `process_oper_record`  (
-                                        `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                                        `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                        `create_time` datetime NOT NULL COMMENT '创建时间',
-                                        `update_time` datetime NOT NULL COMMENT '更新时间',
-                                        `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
-                                        `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程实例id',
-                                        `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '表单数据',
-                                        `node_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-                                        `task_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '任务id',
-                                        `node_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点名字',
-                                        `status` int NOT NULL COMMENT '任务状态',
-                                        `start_time` datetime NOT NULL COMMENT '开始时间',
-                                        `end_time` datetime NULL DEFAULT NULL COMMENT '结束时间',
-                                        `execution_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '执行id',
-                                        `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
-                                        `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '用户id',
-                                        `parent_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '上级id',
-                                        `task_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '任务类型',
-                                        PRIMARY KEY (`id`) USING BTREE,
-                                        INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3293 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程操作记录' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Table structure for process_starter
--- ----------------------------
-DROP TABLE IF EXISTS `process_starter`;
-CREATE TABLE `process_starter`  (
-                                    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                                    `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                    `create_time` datetime NOT NULL COMMENT '创建时间',
-                                    `update_time` datetime NOT NULL COMMENT '更新时间',
-                                    `type_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户id或者部门id',
-                                    `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT ' 类型 user dept',
-                                    `process_id` bigint NOT NULL COMMENT '流程id',
-                                    `data` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '数据',
-                                    PRIMARY KEY (`id`) USING BTREE,
-                                    INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 339 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程发起人' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for process_sub_process
--- ----------------------------
-DROP TABLE IF EXISTS `process_sub_process`;
-CREATE TABLE `process_sub_process`  (
-                                        `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                                        `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                        `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                                        `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-                                        `flow_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
-                                        `sub_flow_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '子流程id',
-                                        PRIMARY KEY (`id`) USING BTREE,
-                                        INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程关联下的子流程' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for role
--- ----------------------------
-DROP TABLE IF EXISTS `role`;
-CREATE TABLE `role`  (
-                         `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                         `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                         `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                         `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-                         `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '角色名字',
-                         `user_id` bigint NULL DEFAULT NULL COMMENT '创建人',
-                         `key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-                         `desc` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-                         `status` int NULL DEFAULT 1,
-                         `sort` int NULL DEFAULT 1,
-                         `data_scope` int NOT NULL DEFAULT 0,
-                         PRIMARY KEY (`id`) USING BTREE,
-                         INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 34 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for role_menu
--- ----------------------------
-DROP TABLE IF EXISTS `role_menu`;
-CREATE TABLE `role_menu`  (
-                              `role_id` bigint NOT NULL COMMENT '角色ID',
-                              `menu_id` bigint NOT NULL COMMENT '菜单ID',
-                              `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                              `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                              `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                              `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-                              PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 490 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色和菜单关联表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Table structure for user
--- ----------------------------
-DROP TABLE IF EXISTS `user`;
-CREATE TABLE `user`  (
-                         `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                         `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户名',
-                         `pinyin` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '拼音  全拼',
-                         `py` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '拼音, 首字母缩写',
-                         `nick_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '昵称',
-                         `avatar_url` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '头像url',
-                         `gender` int NULL DEFAULT 1 COMMENT '性别1男2女',
-                         `dept_id` bigint NOT NULL COMMENT '部门id',
-                         `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                         `entry_date` date NULL DEFAULT NULL COMMENT '入职日期',
-                         `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                         `update_time` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                         `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '登录密码',
-                         `phone` varchar(18) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '手机号',
-                         `status` int NOT NULL DEFAULT 0,
-                         PRIMARY KEY (`id`) USING BTREE,
-                         INDEX `idx_id`(`id` ASC) USING BTREE,
-                         INDEX `idx_dep_id`(`dept_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Table structure for user_field
--- ----------------------------
-DROP TABLE IF EXISTS `user_field`;
-CREATE TABLE `user_field`  (
-                               `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                               `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户名',
-                               `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                               `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                               `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-                               `type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '字段类型',
-                               `required` tinyint(1) NOT NULL COMMENT '是否必填',
-                               `props` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '配置json字符串',
-                               `key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '字段',
-                               PRIMARY KEY (`id`) USING BTREE,
-                               INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 116 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户字段' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for user_field_data
--- ----------------------------
-DROP TABLE IF EXISTS `user_field_data`;
-CREATE TABLE `user_field_data`  (
-                                    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                                    `user_id` bigint NOT NULL COMMENT '用户id',
-                                    `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                    `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                                    `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-                                    `data` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '数据',
-                                    `key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '字段',
-                                    PRIMARY KEY (`id`) USING BTREE,
-                                    INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 129 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户字段-数据' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for user_role
--- ----------------------------
-DROP TABLE IF EXISTS `user_role`;
-CREATE TABLE `user_role`  (
-                              `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
-                              `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                              `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                              `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-                              `user_id` bigint NOT NULL COMMENT '用户id',
-                              `role_id` bigint NOT NULL COMMENT '角色id',
-                              PRIMARY KEY (`id`) USING BTREE,
-                              INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 68 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户-角色' ROW_FORMAT = Dynamic;
-
-SET FOREIGN_KEY_CHECKS = 1;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
  Navicat Premium Data Transfer
 
@@ -473,7 +11,7 @@ SET FOREIGN_KEY_CHECKS = 1;
  Target Server Version : 80021
  File Encoding         : 65001
 
- Date: 13/08/2023 21:05:35
+ Date: 14/08/2023 23:46:18
 */
 
 SET NAMES utf8mb4;
@@ -484,7 +22,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `dept`;
 CREATE TABLE `dept`  (
-                         `id` bigint NOT NULL AUTO_INCREMENT COMMENT '部门id',
+                         `id` bigint NOT NULL COMMENT '部门id',
                          `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '部门名',
                          `parent_id` bigint NOT NULL DEFAULT 0 COMMENT '上级部门id',
                          `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
@@ -496,7 +34,7 @@ CREATE TABLE `dept`  (
                          PRIMARY KEY (`id`) USING BTREE,
                          INDEX `idx_id`(`id` ASC) USING BTREE,
                          INDEX `idx_parent_id`(`parent_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '部门表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '部门表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of dept
@@ -515,7 +53,7 @@ INSERT INTO `dept` VALUES (8, '发发发', 5, 0, 3, '2023-07-07 00:01:54', '2023
 -- ----------------------------
 DROP TABLE IF EXISTS `menu`;
 CREATE TABLE `menu`  (
-                         `id` bigint NOT NULL AUTO_INCREMENT,
+                         `id` bigint NOT NULL,
                          `parent_id` bigint NOT NULL COMMENT '父菜单ID',
                          `tree_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '父节点ID路径',
                          `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '菜单名称',
@@ -531,7 +69,7 @@ CREATE TABLE `menu`  (
                          `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
                          `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
                          PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 103 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '菜单管理' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 102 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '菜单管理' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu
@@ -594,7 +132,7 @@ INSERT INTO `menu` VALUES (102, 36, '0,36', '签名', 1, 'signature', 'demo/sign
 -- ----------------------------
 DROP TABLE IF EXISTS `role`;
 CREATE TABLE `role`  (
-                         `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
+                         `id` bigint NOT NULL COMMENT 'id',
                          `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
                          `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
                          `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
@@ -607,7 +145,7 @@ CREATE TABLE `role`  (
                          `data_scope` int NOT NULL DEFAULT 0,
                          PRIMARY KEY (`id`) USING BTREE,
                          INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 34 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 33 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of role
@@ -624,12 +162,12 @@ DROP TABLE IF EXISTS `role_menu`;
 CREATE TABLE `role_menu`  (
                               `role_id` bigint NOT NULL COMMENT '角色ID',
                               `menu_id` bigint NOT NULL COMMENT '菜单ID',
-                              `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
+                              `id` bigint NOT NULL COMMENT 'id',
                               `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
                               `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
                               `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
                               PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 490 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色和菜单关联表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 489 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色和菜单关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of role_menu
@@ -1129,7 +667,7 @@ INSERT INTO `role_menu` VALUES (2, 39, 489, 0, '2023-07-25 22:16:07', '2023-07-2
 -- ----------------------------
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`  (
-                         `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
+                         `id` bigint NOT NULL COMMENT 'id',
                          `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户名',
                          `pinyin` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '拼音  全拼',
                          `py` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '拼音, 首字母缩写',
@@ -1147,7 +685,7 @@ CREATE TABLE `user`  (
                          PRIMARY KEY (`id`) USING BTREE,
                          INDEX `idx_id`(`id` ASC) USING BTREE,
                          INDEX `idx_dep_id`(`dept_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of user
@@ -1169,11 +707,251 @@ INSERT INTO `user` VALUES (14, '是防辐', 'shifangfu', 'sff', '是防辐', 'ht
 INSERT INTO `user` VALUES (15, '张三', 'zhangsan', 'zs', '张三', 'https://f.ittool.cc/pic/m.jpg', 1, 2, 0, NULL, '2023-06-10 16:35:40', '2023-08-13 13:04:54', '123456', '15265235896', 1);
 
 -- ----------------------------
+-- Table structure for user_field
+-- ----------------------------
+DROP TABLE IF EXISTS `user_field`;
+CREATE TABLE `user_field`  (
+                               `id` bigint NOT NULL COMMENT 'id',
+                               `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户名',
+                               `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                               `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+                               `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+                               `type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '字段类型',
+                               `required` tinyint(1) NOT NULL COMMENT '是否必填',
+                               `props` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '配置json字符串',
+                               `key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '字段',
+                               PRIMARY KEY (`id`) USING BTREE,
+                               INDEX `idx_id`(`id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 115 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户字段' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of user_field
+-- ----------------------------
+INSERT INTO `user_field` VALUES (17, '哈哈', 1, '2023-06-10 18:48:33', '2023-06-10 18:48:35', 'Number', 1, NULL, 'asdfas');
+INSERT INTO `user_field` VALUES (18, 'a', 1, '2023-07-17 23:46:12', '2023-07-17 23:46:12', 'Number', 1, '[]', 'cxygzl_087646546015');
+INSERT INTO `user_field` VALUES (19, 'b', 1, '2023-07-17 23:46:12', '2023-07-17 23:46:12', 'Input', 0, '[]', 'cxygzl_087671491569');
+INSERT INTO `user_field` VALUES (20, 'a', 1, '2023-07-17 23:46:59', '2023-07-17 23:46:59', 'Number', 1, '[]', 'cxygzl_087646546015');
+INSERT INTO `user_field` VALUES (21, 'b', 1, '2023-07-17 23:46:59', '2023-07-17 23:46:59', 'Input', 0, '[]', 'cxygzl_087671491569');
+INSERT INTO `user_field` VALUES (22, 'c', 1, '2023-07-17 23:46:59', '2023-07-17 23:46:59', 'Time', 0, '[]', 'cxygzl_088003845841');
+INSERT INTO `user_field` VALUES (23, 'd', 1, '2023-07-17 23:46:59', '2023-07-17 23:46:59', 'Select', 0, '[{\"key\":\"1\",\"value\":\"a收到\"},{\"key\":\"2\",\"value\":\"阿斯蒂芬\"}]', 'cxygzl_088052122430');
+INSERT INTO `user_field` VALUES (24, 'a', 1, '2023-07-17 23:49:04', '2023-07-17 23:49:04', 'Number', 1, '[]', 'cxygzl_087646546015');
+INSERT INTO `user_field` VALUES (25, 'b', 1, '2023-07-17 23:49:04', '2023-07-17 23:49:04', 'Input', 0, '[]', 'cxygzl_087671491569');
+INSERT INTO `user_field` VALUES (26, 'c', 1, '2023-07-17 23:49:04', '2023-07-17 23:49:04', 'Time', 1, '[]', 'cxygzl_088003845841');
+INSERT INTO `user_field` VALUES (27, 'd', 1, '2023-07-17 23:49:04', '2023-07-17 23:49:04', 'Select', 0, '[{\"key\":\"1\",\"value\":\"a收到\"},{\"key\":\"2\",\"value\":\"阿斯蒂芬\"}]', 'cxygzl_088052122430');
+INSERT INTO `user_field` VALUES (28, 'a', 1, '2023-07-17 23:50:01', '2023-07-17 23:50:01', 'Number', 1, '[]', 'cxygzl_087646546015');
+INSERT INTO `user_field` VALUES (29, 'c', 1, '2023-07-17 23:50:01', '2023-07-17 23:50:01', 'Time', 1, '[]', 'cxygzl_088003845841');
+INSERT INTO `user_field` VALUES (30, 'd', 1, '2023-07-17 23:50:01', '2023-07-17 23:50:01', 'Select', 0, '[{\"key\":\"1\",\"value\":\"a收到\"},{\"key\":\"2\",\"value\":\"阿斯蒂芬\"}]', 'cxygzl_088052122430');
+INSERT INTO `user_field` VALUES (31, 'a', 1, '2023-07-17 23:50:06', '2023-07-17 23:50:06', 'Number', 1, '[]', 'cxygzl_087646546015');
+INSERT INTO `user_field` VALUES (32, 'c', 1, '2023-07-17 23:50:06', '2023-07-17 23:50:06', 'Time', 0, '[]', 'cxygzl_088003845841');
+INSERT INTO `user_field` VALUES (33, 'd', 1, '2023-07-17 23:50:06', '2023-07-17 23:50:06', 'Select', 0, '[{\"key\":\"1\",\"value\":\"a收到\"},{\"key\":\"2\",\"value\":\"阿斯蒂芬\"}]', 'cxygzl_088052122430');
+INSERT INTO `user_field` VALUES (34, '数字', 1, '2023-07-20 21:15:51', '2023-07-20 21:15:51', 'Number', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589340798480');
+INSERT INTO `user_field` VALUES (35, '单行文本', 1, '2023-07-20 21:15:51', '2023-07-20 21:15:51', 'Input', 1, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589401979402');
+INSERT INTO `user_field` VALUES (36, '数字', 1, '2023-07-20 22:39:01', '2023-07-20 22:39:01', 'Number', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589340798480');
+INSERT INTO `user_field` VALUES (37, '单行文本', 1, '2023-07-20 22:39:01', '2023-07-20 22:39:01', 'Input', 1, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589401979402');
+INSERT INTO `user_field` VALUES (38, '单选', 1, '2023-07-20 22:39:01', '2023-07-20 22:39:01', 'Select', 0, '{\"options\":[{\"key\":\"1\",\"value\":\"啊啊\"},{\"key\":\"2\",\"value\":\"版本\"}],\"radixNum\":0}', 'cxygzl_639227109812');
+INSERT INTO `user_field` VALUES (39, '数字', 1, '2023-07-20 23:18:26', '2023-07-20 23:18:26', 'Number', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589340798480');
+INSERT INTO `user_field` VALUES (40, '单行文本', 1, '2023-07-20 23:18:26', '2023-07-20 23:18:26', 'Input', 1, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589401979402');
+INSERT INTO `user_field` VALUES (41, '单选', 1, '2023-07-20 23:18:26', '2023-07-20 23:18:26', 'SingleSelect', 0, '{\"options\":[{\"key\":\"1\",\"value\":\"给各个\"},{\"key\":\"2\",\"value\":\"订单的\"}],\"radixNum\":0}', 'cxygzl_662901137717');
+INSERT INTO `user_field` VALUES (42, '数字', 1, '2023-07-21 23:07:22', '2023-07-21 23:07:22', 'Number', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589340798480');
+INSERT INTO `user_field` VALUES (43, '单行文本', 1, '2023-07-21 23:07:22', '2023-07-21 23:07:22', 'Input', 1, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589401979402');
+INSERT INTO `user_field` VALUES (44, '单选', 1, '2023-07-21 23:07:23', '2023-07-21 23:07:23', 'SingleSelect', 0, '{\"options\":[{\"key\":\"1\",\"value\":\"给各个\"},{\"key\":\"2\",\"value\":\"订单的\"}],\"radixNum\":0}', 'cxygzl_662901137717');
+INSERT INTO `user_field` VALUES (45, '数字', 1, '2023-07-21 23:18:48', '2023-07-21 23:18:48', 'Number', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589340798480');
+INSERT INTO `user_field` VALUES (46, '单行文本', 1, '2023-07-21 23:18:48', '2023-07-21 23:18:48', 'Input', 1, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589401979402');
+INSERT INTO `user_field` VALUES (47, '单选', 1, '2023-07-21 23:18:48', '2023-07-21 23:18:48', 'SingleSelect', 0, '{\"options\":[{\"key\":\"1\",\"value\":\"给各个\"},{\"key\":\"2\",\"value\":\"订单的\"}],\"radixNum\":0}', 'cxygzl_662901137717');
+INSERT INTO `user_field` VALUES (48, '日期', 1, '2023-07-21 23:18:48', '2023-07-21 23:18:48', 'Date', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526833808878');
+INSERT INTO `user_field` VALUES (49, '日期时间', 1, '2023-07-21 23:18:48', '2023-07-21 23:18:48', 'DateTime', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526917176344');
+INSERT INTO `user_field` VALUES (50, '时间', 1, '2023-07-21 23:18:48', '2023-07-21 23:18:48', 'Time', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526978033309');
+INSERT INTO `user_field` VALUES (51, '多选', 1, '2023-07-21 23:18:48', '2023-07-21 23:18:48', 'MultiSelect', 0, '{\"options\":[{\"key\":\"a\",\"value\":\"aa\"},{\"key\":\"b\",\"value\":\"bb\"}],\"radixNum\":0}', 'cxygzl_527041476634');
+INSERT INTO `user_field` VALUES (52, '数字', 1, '2023-07-21 23:35:40', '2023-07-21 23:35:40', 'Number', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589340798480');
+INSERT INTO `user_field` VALUES (53, '单行文本', 1, '2023-07-21 23:35:40', '2023-07-21 23:35:40', 'Input', 1, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589401979402');
+INSERT INTO `user_field` VALUES (54, '单选', 1, '2023-07-21 23:35:40', '2023-07-21 23:35:40', 'SingleSelect', 0, '{\"options\":[{\"key\":\"1\",\"value\":\"给各个\"},{\"key\":\"2\",\"value\":\"订单的\"}],\"radixNum\":0}', 'cxygzl_662901137717');
+INSERT INTO `user_field` VALUES (55, '日期', 1, '2023-07-21 23:35:40', '2023-07-21 23:35:40', 'Date', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526833808878');
+INSERT INTO `user_field` VALUES (56, '日期时间', 1, '2023-07-21 23:35:40', '2023-07-21 23:35:40', 'DateTime', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526917176344');
+INSERT INTO `user_field` VALUES (57, '时间', 1, '2023-07-21 23:35:40', '2023-07-21 23:35:40', 'Time', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526978033309');
+INSERT INTO `user_field` VALUES (58, '多选', 1, '2023-07-21 23:35:40', '2023-07-21 23:35:40', 'MultiSelect', 0, '{\"options\":[{\"key\":\"a\",\"value\":\"aa\"},{\"key\":\"b\",\"value\":\"bb\"}],\"radixNum\":0}', 'cxygzl_527041476634');
+INSERT INTO `user_field` VALUES (59, '金额', 1, '2023-07-21 23:35:40', '2023-07-21 23:35:40', 'Number', 0, '{\"options\":[],\"radixNum\":4}', 'cxygzl_537339762010');
+INSERT INTO `user_field` VALUES (60, '年龄', 1, '2023-07-21 23:43:04', '2023-07-21 23:43:04', 'Number', 0, '{\"options\":[],\"radixNum\":2}', 'cxygzl_589340798480');
+INSERT INTO `user_field` VALUES (61, '单行文本', 1, '2023-07-21 23:43:04', '2023-07-21 23:43:04', 'Input', 1, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589401979402');
+INSERT INTO `user_field` VALUES (62, '单选', 1, '2023-07-21 23:43:04', '2023-07-21 23:43:04', 'SingleSelect', 0, '{\"options\":[{\"key\":\"1\",\"value\":\"给各个\"},{\"key\":\"2\",\"value\":\"订单的\"}],\"radixNum\":0}', 'cxygzl_662901137717');
+INSERT INTO `user_field` VALUES (63, '日期', 1, '2023-07-21 23:43:04', '2023-07-21 23:43:04', 'Date', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526833808878');
+INSERT INTO `user_field` VALUES (64, '日期时间', 1, '2023-07-21 23:43:04', '2023-07-21 23:43:04', 'DateTime', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526917176344');
+INSERT INTO `user_field` VALUES (65, '时间', 1, '2023-07-21 23:43:04', '2023-07-21 23:43:04', 'Time', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526978033309');
+INSERT INTO `user_field` VALUES (66, '多选', 1, '2023-07-21 23:43:04', '2023-07-21 23:43:04', 'MultiSelect', 0, '{\"options\":[{\"key\":\"a\",\"value\":\"aa\"},{\"key\":\"b\",\"value\":\"bb\"}],\"radixNum\":0}', 'cxygzl_527041476634');
+INSERT INTO `user_field` VALUES (67, '金额', 1, '2023-07-21 23:43:04', '2023-07-21 23:43:04', 'Number', 0, '{\"options\":[],\"radixNum\":1}', 'cxygzl_537339762010');
+INSERT INTO `user_field` VALUES (68, '年龄', 1, '2023-07-21 23:43:14', '2023-07-21 23:43:14', 'Number', 0, '{\"options\":[],\"radixNum\":2}', 'cxygzl_589340798480');
+INSERT INTO `user_field` VALUES (69, '单行文本', 1, '2023-07-21 23:43:14', '2023-07-21 23:43:14', 'Input', 1, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589401979402');
+INSERT INTO `user_field` VALUES (70, '单选', 1, '2023-07-21 23:43:14', '2023-07-21 23:43:14', 'SingleSelect', 0, '{\"options\":[{\"key\":\"1\",\"value\":\"给各个\"},{\"key\":\"2\",\"value\":\"订单的\"}],\"radixNum\":0}', 'cxygzl_662901137717');
+INSERT INTO `user_field` VALUES (71, '日期', 1, '2023-07-21 23:43:14', '2023-07-21 23:43:14', 'Date', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526833808878');
+INSERT INTO `user_field` VALUES (72, '日期时间', 1, '2023-07-21 23:43:14', '2023-07-21 23:43:14', 'DateTime', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526917176344');
+INSERT INTO `user_field` VALUES (73, '时间', 1, '2023-07-21 23:43:14', '2023-07-21 23:43:14', 'Time', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526978033309');
+INSERT INTO `user_field` VALUES (74, '多选', 1, '2023-07-21 23:43:14', '2023-07-21 23:43:14', 'MultiSelect', 0, '{\"options\":[{\"key\":\"a\",\"value\":\"aa\"},{\"key\":\"b\",\"value\":\"bb\"}],\"radixNum\":0}', 'cxygzl_527041476634');
+INSERT INTO `user_field` VALUES (75, '金额', 1, '2023-07-21 23:43:14', '2023-07-21 23:43:14', 'Number', 0, '{\"options\":[],\"radixNum\":1}', 'cxygzl_537339762010');
+INSERT INTO `user_field` VALUES (76, '年龄', 1, '2023-07-21 23:45:14', '2023-07-21 23:45:14', 'Number', 0, '{\"options\":[],\"radixNum\":2}', 'cxygzl_589340798480');
+INSERT INTO `user_field` VALUES (77, '单行文本', 1, '2023-07-21 23:45:14', '2023-07-21 23:45:14', 'Input', 1, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589401979402');
+INSERT INTO `user_field` VALUES (78, '单选', 1, '2023-07-21 23:45:14', '2023-07-21 23:45:14', 'SingleSelect', 0, '{\"options\":[{\"key\":\"1\",\"value\":\"给各个\"},{\"key\":\"2\",\"value\":\"订单的\"}],\"radixNum\":0}', 'cxygzl_662901137717');
+INSERT INTO `user_field` VALUES (79, '日期', 1, '2023-07-21 23:45:14', '2023-07-21 23:45:14', 'Date', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526833808878');
+INSERT INTO `user_field` VALUES (80, '日期时间', 1, '2023-07-21 23:45:14', '2023-07-21 23:45:14', 'DateTime', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526917176344');
+INSERT INTO `user_field` VALUES (81, '时间', 1, '2023-07-21 23:45:14', '2023-07-21 23:45:14', 'Time', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526978033309');
+INSERT INTO `user_field` VALUES (82, '多选', 1, '2023-07-21 23:45:14', '2023-07-21 23:45:14', 'MultiSelect', 0, '{\"options\":[{\"key\":\"a\",\"value\":\"aa\"},{\"key\":\"b\",\"value\":\"bb\"}],\"radixNum\":0}', 'cxygzl_527041476634');
+INSERT INTO `user_field` VALUES (83, '金额', 1, '2023-07-21 23:45:14', '2023-07-21 23:45:14', 'Number', 0, '{\"options\":[],\"radixNum\":1}', 'cxygzl_537339762010');
+INSERT INTO `user_field` VALUES (84, '年龄', 1, '2023-07-21 23:45:22', '2023-07-21 23:45:22', 'Number', 0, '{\"options\":[],\"radixNum\":2}', 'cxygzl_589340798480');
+INSERT INTO `user_field` VALUES (85, '单行文本', 1, '2023-07-21 23:45:22', '2023-07-21 23:45:22', 'Input', 1, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589401979402');
+INSERT INTO `user_field` VALUES (86, '单选', 1, '2023-07-21 23:45:22', '2023-07-21 23:45:22', 'SingleSelect', 0, '{\"options\":[{\"key\":\"1\",\"value\":\"给各个\"},{\"key\":\"2\",\"value\":\"订单的\"}],\"radixNum\":0}', 'cxygzl_662901137717');
+INSERT INTO `user_field` VALUES (87, '日期', 1, '2023-07-21 23:45:22', '2023-07-21 23:45:22', 'Date', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526833808878');
+INSERT INTO `user_field` VALUES (88, '日期时间', 1, '2023-07-21 23:45:22', '2023-07-21 23:45:22', 'DateTime', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526917176344');
+INSERT INTO `user_field` VALUES (89, '时间', 1, '2023-07-21 23:45:22', '2023-07-21 23:45:22', 'Time', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526978033309');
+INSERT INTO `user_field` VALUES (90, '多选', 1, '2023-07-21 23:45:22', '2023-07-21 23:45:22', 'MultiSelect', 0, '{\"options\":[{\"key\":\"a\",\"value\":\"aa\"},{\"key\":\"b\",\"value\":\"bb\"}],\"radixNum\":0}', 'cxygzl_527041476634');
+INSERT INTO `user_field` VALUES (91, '金额', 1, '2023-07-21 23:45:22', '2023-07-21 23:45:22', 'Number', 0, '{\"options\":[],\"radixNum\":1}', 'cxygzl_537339762010');
+INSERT INTO `user_field` VALUES (92, '年龄', 1, '2023-07-21 23:45:38', '2023-07-21 23:45:38', 'Number', 0, '{\"options\":[],\"radixNum\":2}', 'cxygzl_589340798480');
+INSERT INTO `user_field` VALUES (93, '单行文本', 1, '2023-07-21 23:45:38', '2023-07-21 23:45:38', 'Input', 1, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589401979402');
+INSERT INTO `user_field` VALUES (94, '单选', 1, '2023-07-21 23:45:38', '2023-07-21 23:45:38', 'SingleSelect', 0, '{\"options\":[{\"key\":\"1\",\"value\":\"给各个\"},{\"key\":\"2\",\"value\":\"订单的\"}],\"radixNum\":0}', 'cxygzl_662901137717');
+INSERT INTO `user_field` VALUES (95, '日期', 1, '2023-07-21 23:45:38', '2023-07-21 23:45:38', 'Date', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526833808878');
+INSERT INTO `user_field` VALUES (96, '日期时间', 1, '2023-07-21 23:45:38', '2023-07-21 23:45:38', 'DateTime', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526917176344');
+INSERT INTO `user_field` VALUES (97, '时间', 1, '2023-07-21 23:45:38', '2023-07-21 23:45:38', 'Time', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526978033309');
+INSERT INTO `user_field` VALUES (98, '多选', 1, '2023-07-21 23:45:38', '2023-07-21 23:45:38', 'MultiSelect', 0, '{\"options\":[{\"key\":\"a\",\"value\":\"aa\"},{\"key\":\"b\",\"value\":\"bb\"}],\"radixNum\":0}', 'cxygzl_527041476634');
+INSERT INTO `user_field` VALUES (99, '金额', 1, '2023-07-21 23:45:38', '2023-07-21 23:45:38', 'Number', 0, '{\"options\":[],\"radixNum\":1}', 'cxygzl_537339762010');
+INSERT INTO `user_field` VALUES (100, '年龄', 1, '2023-07-21 23:45:40', '2023-07-21 23:45:40', 'Number', 0, '{\"options\":[],\"radixNum\":2}', 'cxygzl_589340798480');
+INSERT INTO `user_field` VALUES (101, '单行文本', 1, '2023-07-21 23:45:40', '2023-07-21 23:45:40', 'Input', 1, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589401979402');
+INSERT INTO `user_field` VALUES (102, '单选', 1, '2023-07-21 23:45:40', '2023-07-21 23:45:40', 'SingleSelect', 0, '{\"options\":[{\"key\":\"1\",\"value\":\"给各个\"},{\"key\":\"2\",\"value\":\"订单的\"}],\"radixNum\":0}', 'cxygzl_662901137717');
+INSERT INTO `user_field` VALUES (103, '日期', 1, '2023-07-21 23:45:40', '2023-07-21 23:45:40', 'Date', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526833808878');
+INSERT INTO `user_field` VALUES (104, '日期时间', 1, '2023-07-21 23:45:40', '2023-07-21 23:45:40', 'DateTime', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526917176344');
+INSERT INTO `user_field` VALUES (105, '时间', 1, '2023-07-21 23:45:40', '2023-07-21 23:45:40', 'Time', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526978033309');
+INSERT INTO `user_field` VALUES (106, '多选', 1, '2023-07-21 23:45:40', '2023-07-21 23:45:40', 'MultiSelect', 0, '{\"options\":[{\"key\":\"a\",\"value\":\"aa\"},{\"key\":\"b\",\"value\":\"bb\"}],\"radixNum\":0}', 'cxygzl_527041476634');
+INSERT INTO `user_field` VALUES (107, '金额', 1, '2023-07-21 23:45:40', '2023-07-21 23:45:40', 'Number', 0, '{\"options\":[],\"radixNum\":1}', 'cxygzl_537339762010');
+INSERT INTO `user_field` VALUES (108, '年龄', 0, '2023-07-21 23:47:43', '2023-07-21 23:47:43', 'Number', 0, '{\"options\":[],\"radixNum\":2}', 'cxygzl_589340798480');
+INSERT INTO `user_field` VALUES (109, '单行文本', 0, '2023-07-21 23:47:43', '2023-07-21 23:47:43', 'Input', 1, '{\"options\":[],\"radixNum\":0}', 'cxygzl_589401979402');
+INSERT INTO `user_field` VALUES (110, '单选', 0, '2023-07-21 23:47:43', '2023-07-21 23:47:43', 'SingleSelect', 0, '{\"options\":[{\"key\":\"1\",\"value\":\"给各个\"},{\"key\":\"2\",\"value\":\"订单的\"}],\"radixNum\":0}', 'cxygzl_662901137717');
+INSERT INTO `user_field` VALUES (111, '日期', 0, '2023-07-21 23:47:43', '2023-07-21 23:47:43', 'Date', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526833808878');
+INSERT INTO `user_field` VALUES (112, '日期时间', 0, '2023-07-21 23:47:43', '2023-07-21 23:47:43', 'DateTime', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526917176344');
+INSERT INTO `user_field` VALUES (113, '时间', 0, '2023-07-21 23:47:43', '2023-07-21 23:47:43', 'Time', 0, '{\"options\":[],\"radixNum\":0}', 'cxygzl_526978033309');
+INSERT INTO `user_field` VALUES (114, '多选', 0, '2023-07-21 23:47:43', '2023-07-21 23:47:43', 'MultiSelect', 0, '{\"options\":[{\"key\":\"a\",\"value\":\"aa\"},{\"key\":\"b\",\"value\":\"bb\"}],\"radixNum\":0}', 'cxygzl_527041476634');
+INSERT INTO `user_field` VALUES (115, '金额', 0, '2023-07-21 23:47:43', '2023-07-21 23:47:43', 'Number', 0, '{\"options\":[],\"radixNum\":6}', 'cxygzl_537339762010');
+
+-- ----------------------------
+-- Table structure for user_field_data
+-- ----------------------------
+DROP TABLE IF EXISTS `user_field_data`;
+CREATE TABLE `user_field_data`  (
+                                    `id` bigint NOT NULL COMMENT 'id',
+                                    `user_id` bigint NOT NULL COMMENT '用户id',
+                                    `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                                    `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+                                    `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+                                    `data` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '数据',
+                                    `key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '字段',
+                                    PRIMARY KEY (`id`) USING BTREE,
+                                    INDEX `idx_id`(`id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 128 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户字段-数据' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of user_field_data
+-- ----------------------------
+INSERT INTO `user_field_data` VALUES (30, 15, 1, '2023-07-20 21:19:58', '2023-07-20 21:19:58', '啊啊', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (31, 15, 1, '2023-07-20 21:20:04', '2023-07-20 21:20:04', '2', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (32, 15, 1, '2023-07-20 21:20:04', '2023-07-20 21:20:04', '啊啊', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (33, 13, 1, '2023-07-20 23:49:05', '2023-07-20 23:49:05', '3', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (34, 13, 1, '2023-07-20 23:49:05', '2023-07-20 23:49:05', '啊333', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (35, 13, 1, '2023-07-20 23:49:05', '2023-07-20 23:49:05', '1', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (36, 15, 1, '2023-07-20 23:49:29', '2023-07-20 23:49:29', '2', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (37, 15, 1, '2023-07-20 23:49:29', '2023-07-20 23:49:29', '啊啊', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (38, 15, 1, '2023-07-20 23:49:29', '2023-07-20 23:49:29', '2', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (39, 13, 1, '2023-07-21 22:55:31', '2023-07-21 22:55:31', '3', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (40, 13, 1, '2023-07-21 22:55:31', '2023-07-21 22:55:31', '44', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (41, 13, 1, '2023-07-21 22:55:31', '2023-07-21 22:55:31', '1', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (42, 13, 1, '2023-07-21 23:03:33', '2023-07-21 23:03:33', '3', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (43, 13, 1, '2023-07-21 23:03:33', '2023-07-21 23:03:33', '441', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (44, 13, 1, '2023-07-21 23:03:33', '2023-07-21 23:03:33', '1', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (45, 13, 1, '2023-07-21 23:07:02', '2023-07-21 23:07:02', '1', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (46, 13, 1, '2023-07-21 23:07:02', '2023-07-21 23:07:02', '441', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (47, 13, 1, '2023-07-21 23:07:02', '2023-07-21 23:07:02', '1', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (48, 13, 1, '2023-07-21 23:19:07', '2023-07-21 23:19:07', '1', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (49, 13, 1, '2023-07-21 23:19:07', '2023-07-21 23:19:07', '441', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (50, 13, 1, '2023-07-21 23:19:07', '2023-07-21 23:19:07', '1', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (51, 13, 1, '2023-07-21 23:19:07', '2023-07-21 23:19:07', '2023-07-20T16:00:00.000Z', 'cxygzl_526833808878');
+INSERT INTO `user_field_data` VALUES (52, 13, 1, '2023-07-21 23:19:07', '2023-07-21 23:19:07', '2023-07-21T15:18:58.000Z', 'cxygzl_526917176344');
+INSERT INTO `user_field_data` VALUES (53, 13, 1, '2023-07-21 23:19:07', '2023-07-21 23:19:07', '2023-07-21T15:18:52.263Z', 'cxygzl_526978033309');
+INSERT INTO `user_field_data` VALUES (54, 13, 1, '2023-07-21 23:19:07', '2023-07-21 23:19:07', '[\"a\",\"b\"]', 'cxygzl_527041476634');
+INSERT INTO `user_field_data` VALUES (55, 13, 1, '2023-07-21 23:22:42', '2023-07-21 23:22:42', '1', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (56, 13, 1, '2023-07-21 23:22:42', '2023-07-21 23:22:42', '441', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (57, 13, 1, '2023-07-21 23:22:42', '2023-07-21 23:22:42', '1', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (58, 13, 1, '2023-07-21 23:22:42', '2023-07-21 23:22:42', '2023-07-20T16:00:00.000Z', 'cxygzl_526833808878');
+INSERT INTO `user_field_data` VALUES (59, 13, 1, '2023-07-21 23:22:42', '2023-07-21 23:22:42', '2023-07-21T15:18:58.000Z', 'cxygzl_526917176344');
+INSERT INTO `user_field_data` VALUES (60, 13, 1, '2023-07-21 23:22:42', '2023-07-21 23:22:42', '2023-07-21T15:18:52.263Z', 'cxygzl_526978033309');
+INSERT INTO `user_field_data` VALUES (61, 13, 1, '2023-07-21 23:22:42', '2023-07-21 23:22:42', '[\"a\",\"b\"]', 'cxygzl_527041476634');
+INSERT INTO `user_field_data` VALUES (62, 13, 1, '2023-07-21 23:23:13', '2023-07-21 23:23:13', '1', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (63, 13, 1, '2023-07-21 23:23:13', '2023-07-21 23:23:13', '441', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (64, 13, 1, '2023-07-21 23:23:13', '2023-07-21 23:23:13', '1', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (65, 13, 1, '2023-07-21 23:23:13', '2023-07-21 23:23:13', '2023-07-19', 'cxygzl_526833808878');
+INSERT INTO `user_field_data` VALUES (66, 13, 1, '2023-07-21 23:23:13', '2023-07-21 23:23:13', '2023-07-21 23:23:03', 'cxygzl_526917176344');
+INSERT INTO `user_field_data` VALUES (67, 13, 1, '2023-07-21 23:23:13', '2023-07-21 23:23:13', '20:03:07', 'cxygzl_526978033309');
+INSERT INTO `user_field_data` VALUES (68, 13, 1, '2023-07-21 23:23:13', '2023-07-21 23:23:13', '[\"\\\"a\\\"\",\"\\\"b\\\"\"]', 'cxygzl_527041476634');
+INSERT INTO `user_field_data` VALUES (69, 13, 1, '2023-07-21 23:24:17', '2023-07-21 23:24:17', '1', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (70, 13, 1, '2023-07-21 23:24:17', '2023-07-21 23:24:17', '441', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (71, 13, 1, '2023-07-21 23:24:17', '2023-07-21 23:24:17', '1', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (72, 13, 1, '2023-07-21 23:24:17', '2023-07-21 23:24:17', '2023-07-21', 'cxygzl_526833808878');
+INSERT INTO `user_field_data` VALUES (73, 13, 1, '2023-07-21 23:24:17', '2023-07-21 23:24:17', '2023-07-21 23:23:03', 'cxygzl_526917176344');
+INSERT INTO `user_field_data` VALUES (74, 13, 1, '2023-07-21 23:24:17', '2023-07-21 23:24:17', '20:03:07', 'cxygzl_526978033309');
+INSERT INTO `user_field_data` VALUES (75, 13, 1, '2023-07-21 23:24:17', '2023-07-21 23:24:17', '[\"\\\"\\\\\\\"a\\\\\\\"\\\"\",\"\\\"\\\\\\\"b\\\\\\\"\\\"\"]', 'cxygzl_527041476634');
+INSERT INTO `user_field_data` VALUES (76, 13, 1, '2023-07-21 23:27:58', '2023-07-21 23:27:58', '1', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (77, 13, 1, '2023-07-21 23:27:58', '2023-07-21 23:27:58', '441', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (78, 13, 1, '2023-07-21 23:27:58', '2023-07-21 23:27:58', '2', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (79, 13, 1, '2023-07-21 23:27:58', '2023-07-21 23:27:58', '2023-07-21', 'cxygzl_526833808878');
+INSERT INTO `user_field_data` VALUES (80, 13, 1, '2023-07-21 23:27:58', '2023-07-21 23:27:58', '2023-07-21 23:23:03', 'cxygzl_526917176344');
+INSERT INTO `user_field_data` VALUES (81, 13, 1, '2023-07-21 23:27:58', '2023-07-21 23:27:58', '20:03:07', 'cxygzl_526978033309');
+INSERT INTO `user_field_data` VALUES (82, 13, 1, '2023-07-21 23:27:58', '2023-07-21 23:27:58', '[\"\\\"\\\\\\\"\\\\\\\\\\\\\\\"a\\\\\\\\\\\\\\\"\\\\\\\"\\\"\",\"\\\"\\\\\\\"\\\\\\\\\\\\\\\"b\\\\\\\\\\\\\\\"\\\\\\\"\\\"\"]', 'cxygzl_527041476634');
+INSERT INTO `user_field_data` VALUES (83, 13, 1, '2023-07-21 23:35:49', '2023-07-21 23:35:49', '1', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (84, 13, 1, '2023-07-21 23:35:49', '2023-07-21 23:35:49', '441', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (85, 13, 1, '2023-07-21 23:35:49', '2023-07-21 23:35:49', '2', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (86, 13, 1, '2023-07-21 23:35:49', '2023-07-21 23:35:49', '2023-07-21', 'cxygzl_526833808878');
+INSERT INTO `user_field_data` VALUES (87, 13, 1, '2023-07-21 23:35:49', '2023-07-21 23:35:49', '2023-07-21 23:23:03', 'cxygzl_526917176344');
+INSERT INTO `user_field_data` VALUES (88, 13, 1, '2023-07-21 23:35:49', '2023-07-21 23:35:49', '20:03:07', 'cxygzl_526978033309');
+INSERT INTO `user_field_data` VALUES (89, 13, 1, '2023-07-21 23:35:49', '2023-07-21 23:35:49', '[]', 'cxygzl_527041476634');
+INSERT INTO `user_field_data` VALUES (90, 13, 1, '2023-07-21 23:35:49', '2023-07-21 23:35:49', '6', 'cxygzl_537339762010');
+INSERT INTO `user_field_data` VALUES (91, 15, 1, '2023-07-26 21:40:43', '2023-07-26 21:40:43', '2', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (92, 15, 1, '2023-07-26 21:40:43', '2023-07-26 21:40:43', '啊啊', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (93, 15, 1, '2023-07-26 21:40:43', '2023-07-26 21:40:43', '2', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (94, 15, 1, '2023-07-26 21:40:43', '2023-07-26 21:40:43', '[]', 'cxygzl_527041476634');
+INSERT INTO `user_field_data` VALUES (95, 15, 1, '2023-07-26 21:51:42', '2023-07-26 21:51:42', '2', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (96, 15, 1, '2023-07-26 21:51:42', '2023-07-26 21:51:42', '啊啊', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (97, 15, 1, '2023-07-26 21:51:42', '2023-07-26 21:51:42', '2', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (98, 15, 1, '2023-07-26 21:51:42', '2023-07-26 21:51:42', '[]', 'cxygzl_527041476634');
+INSERT INTO `user_field_data` VALUES (99, 13, 1, '2023-07-28 23:04:47', '2023-07-28 23:04:47', '1', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (100, 13, 1, '2023-07-28 23:04:47', '2023-07-28 23:04:47', '441', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (101, 13, 1, '2023-07-28 23:04:47', '2023-07-28 23:04:47', '2', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (102, 13, 1, '2023-07-28 23:04:47', '2023-07-28 23:04:47', '2023-07-21', 'cxygzl_526833808878');
+INSERT INTO `user_field_data` VALUES (103, 13, 1, '2023-07-28 23:04:47', '2023-07-28 23:04:47', '2023-07-21 23:23:03', 'cxygzl_526917176344');
+INSERT INTO `user_field_data` VALUES (104, 13, 1, '2023-07-28 23:04:47', '2023-07-28 23:04:47', '20:03:07', 'cxygzl_526978033309');
+INSERT INTO `user_field_data` VALUES (105, 13, 1, '2023-07-28 23:04:47', '2023-07-28 23:04:47', '[\"a\",\"b\"]', 'cxygzl_527041476634');
+INSERT INTO `user_field_data` VALUES (106, 13, 1, '2023-07-28 23:04:47', '2023-07-28 23:04:47', '6', 'cxygzl_537339762010');
+INSERT INTO `user_field_data` VALUES (107, 13, 1, '2023-07-28 23:16:56', '2023-07-28 23:16:56', '1', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (108, 13, 1, '2023-07-28 23:16:56', '2023-07-28 23:16:56', '441', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (109, 13, 1, '2023-07-28 23:16:56', '2023-07-28 23:16:56', '1', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (110, 13, 1, '2023-07-28 23:16:56', '2023-07-28 23:16:56', '2023-07-21', 'cxygzl_526833808878');
+INSERT INTO `user_field_data` VALUES (111, 13, 1, '2023-07-28 23:16:56', '2023-07-28 23:16:56', '2023-07-21 23:23:03', 'cxygzl_526917176344');
+INSERT INTO `user_field_data` VALUES (112, 13, 1, '2023-07-28 23:16:56', '2023-07-28 23:16:56', '20:03:07', 'cxygzl_526978033309');
+INSERT INTO `user_field_data` VALUES (113, 13, 1, '2023-07-28 23:16:56', '2023-07-28 23:16:56', '[\"\\\"a\\\"\",\"\\\"b\\\"\"]', 'cxygzl_527041476634');
+INSERT INTO `user_field_data` VALUES (114, 13, 1, '2023-07-28 23:16:56', '2023-07-28 23:16:56', '6', 'cxygzl_537339762010');
+INSERT INTO `user_field_data` VALUES (115, 12, 0, '2023-07-30 00:51:57', '2023-07-30 00:51:57', '234', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (116, 12, 0, '2023-07-30 00:51:57', '2023-07-30 00:51:57', '1', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (117, 13, 0, '2023-08-13 20:46:12', '2023-08-13 20:46:12', '1', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (118, 13, 0, '2023-08-13 20:46:12', '2023-08-13 20:46:12', '441', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (119, 13, 0, '2023-08-13 20:46:12', '2023-08-13 20:46:12', '1', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (120, 13, 0, '2023-08-13 20:46:12', '2023-08-13 20:46:12', '2023-07-21', 'cxygzl_526833808878');
+INSERT INTO `user_field_data` VALUES (121, 13, 0, '2023-08-13 20:46:12', '2023-08-13 20:46:12', '2023-07-21 23:23:03', 'cxygzl_526917176344');
+INSERT INTO `user_field_data` VALUES (122, 13, 0, '2023-08-13 20:46:12', '2023-08-13 20:46:12', '20:03:07', 'cxygzl_526978033309');
+INSERT INTO `user_field_data` VALUES (123, 13, 0, '2023-08-13 20:46:12', '2023-08-13 20:46:12', '[]', 'cxygzl_527041476634');
+INSERT INTO `user_field_data` VALUES (124, 13, 0, '2023-08-13 20:46:12', '2023-08-13 20:46:12', '6', 'cxygzl_537339762010');
+INSERT INTO `user_field_data` VALUES (125, 15, 0, '2023-08-13 20:54:06', '2023-08-13 20:54:06', '2', 'cxygzl_589340798480');
+INSERT INTO `user_field_data` VALUES (126, 15, 0, '2023-08-13 20:54:06', '2023-08-13 20:54:06', '啊啊', 'cxygzl_589401979402');
+INSERT INTO `user_field_data` VALUES (127, 15, 0, '2023-08-13 20:54:06', '2023-08-13 20:54:06', '2', 'cxygzl_662901137717');
+INSERT INTO `user_field_data` VALUES (128, 15, 0, '2023-08-13 20:54:06', '2023-08-13 20:54:06', '[]', 'cxygzl_527041476634');
+
+-- ----------------------------
 -- Table structure for user_role
 -- ----------------------------
 DROP TABLE IF EXISTS `user_role`;
 CREATE TABLE `user_role`  (
-                              `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户id',
+                              `id` bigint NOT NULL COMMENT 'id',
                               `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
                               `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
                               `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
@@ -1181,7 +959,7 @@ CREATE TABLE `user_role`  (
                               `role_id` bigint NOT NULL COMMENT '角色id',
                               PRIMARY KEY (`id`) USING BTREE,
                               INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 68 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户-角色' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 67 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户-角色' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of user_role
@@ -1224,5 +1002,310 @@ INSERT INTO `user_role` VALUES (64, 1, '2023-07-28 23:16:56', '2023-07-28 23:16:
 INSERT INTO `user_role` VALUES (65, 0, '2023-07-30 00:51:57', '2023-07-30 00:51:57', 12, 1);
 INSERT INTO `user_role` VALUES (66, 0, '2023-08-13 20:46:12', '2023-08-13 20:46:12', 13, 2);
 INSERT INTO `user_role` VALUES (67, 0, '2023-08-13 20:54:06', '2023-08-13 20:54:06', 15, 1);
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+    /*
+ Navicat Premium Data Transfer
+
+ Source Server         : 本地
+ Source Server Type    : MySQL
+ Source Server Version : 80021
+ Source Host           : localhost:3307
+ Source Schema         : simple_flow_biz
+
+ Target Server Type    : MySQL
+ Target Server Version : 80021
+ File Encoding         : 65001
+
+ Date: 14/08/2023 23:46:32
+*/
+
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for message
+-- ----------------------------
+DROP TABLE IF EXISTS `message`;
+CREATE TABLE `message`  (
+                            `id` bigint NOT NULL COMMENT 'id',
+                            `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                            `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+                            `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+                            `type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '类型',
+                            `readed` tinyint(1) NOT NULL COMMENT '是否已读',
+                            `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户id',
+                            `unique_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '唯一id',
+                            `param` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '消息参数',
+                            `content` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '消息内容',
+                            `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '消息头',
+                            `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
+                            `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程实例id',
+                            PRIMARY KEY (`id`) USING BTREE,
+                            INDEX `idx_id`(`id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 526 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '通知消息' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for process
+-- ----------------------------
+DROP TABLE IF EXISTS `process`;
+CREATE TABLE `process`  (
+                            `id` bigint NOT NULL COMMENT 'id',
+                            `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                            `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+                            `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+                            `flow_id` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '表单ID',
+                            `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '表单名称',
+                            `logo` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '图标配置',
+                            `settings` json NULL COMMENT '设置项',
+                            `group_id` bigint NOT NULL COMMENT '分组ID',
+                            `form_items` json NOT NULL COMMENT '表单设置内容',
+                            `process` json NOT NULL COMMENT '流程设置内容',
+                            `remark` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
+                            `sort` int NOT NULL,
+                            `is_hidden` tinyint(1) NOT NULL COMMENT '0 正常 1=隐藏',
+                            `is_stop` tinyint(1) NOT NULL COMMENT '0 正常 1=停用 ',
+                            `admin_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流程管理员',
+                            `unique_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '唯一性id',
+                            `admin` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '管理员',
+                            `range_show` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '范围描述显示',
+                            PRIMARY KEY (`id`) USING BTREE,
+                            UNIQUE INDEX `idx_form_id`(`flow_id` ASC) USING BTREE,
+                            INDEX `idx_id`(`id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 564 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for process_copy
+-- ----------------------------
+DROP TABLE IF EXISTS `process_copy`;
+CREATE TABLE `process_copy`  (
+                                 `id` bigint NOT NULL COMMENT 'id',
+                                 `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                                 `create_time` datetime NOT NULL COMMENT '创建时间',
+                                 `update_time` datetime NOT NULL COMMENT '更新时间',
+                                 `start_time` datetime NOT NULL COMMENT ' 流程发起时间',
+                                 `node_time` datetime NOT NULL COMMENT '当前节点时间',
+                                 `start_user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '发起人',
+                                 `flow_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
+                                 `process_instance_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '实例id',
+                                 `node_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点id',
+                                 `group_id` bigint NOT NULL COMMENT '分组id',
+                                 `group_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分组名称',
+                                 `process_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程名称',
+                                 `node_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点 名称',
+                                 `form_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '表单数据',
+                                 `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '抄送人id',
+                                 PRIMARY KEY (`id`) USING BTREE,
+                                 INDEX `idx_id`(`id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 89 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程抄送数据' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for process_execution
+-- ----------------------------
+DROP TABLE IF EXISTS `process_execution`;
+CREATE TABLE `process_execution`  (
+                                      `id` bigint NOT NULL COMMENT 'id',
+                                      `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                                      `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+                                      `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+                                      `execution_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '执行id',
+                                      `child_execution_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT ' 子级执行id',
+                                      PRIMARY KEY (`id`) USING BTREE,
+                                      INDEX `idx_id`(`id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 223 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程-执行id关系' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for process_group
+-- ----------------------------
+DROP TABLE IF EXISTS `process_group`;
+CREATE TABLE `process_group`  (
+                                  `id` bigint NOT NULL COMMENT 'id',
+                                  `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                                  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+                                  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+                                  `group_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分组名',
+                                  `sort` int NOT NULL DEFAULT 0 COMMENT '排序',
+                                  PRIMARY KEY (`id`) USING BTREE,
+                                  INDEX `idx_id`(`id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for process_instance_record
+-- ----------------------------
+DROP TABLE IF EXISTS `process_instance_record`;
+CREATE TABLE `process_instance_record`  (
+                                            `id` bigint NOT NULL COMMENT 'id',
+                                            `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程名字',
+                                            `logo` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '头像',
+                                            `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户id',
+                                            `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                                            `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+                                            `update_time` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                            `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流程id',
+                                            `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流程实例id',
+                                            `form_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '表单数据',
+                                            `group_id` bigint NULL DEFAULT NULL COMMENT '组id',
+                                            `group_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '组名称',
+                                            `status` int NULL DEFAULT 1 COMMENT '状态',
+                                            `end_time` datetime NULL DEFAULT NULL COMMENT '结束时间',
+                                            `parent_process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '上级流程实例id',
+                                            `process` json NULL COMMENT '节点对象',
+                                            PRIMARY KEY (`id`) USING BTREE,
+                                            INDEX `idx_id`(`id` ASC) USING BTREE,
+                                            INDEX `idx_dep_id`(`user_id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 842 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程记录' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for process_node_data
+-- ----------------------------
+DROP TABLE IF EXISTS `process_node_data`;
+CREATE TABLE `process_node_data`  (
+                                      `id` bigint NOT NULL COMMENT 'id',
+                                      `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                                      `create_time` datetime NOT NULL COMMENT '创建时间',
+                                      `update_time` datetime NOT NULL COMMENT '更新时间',
+                                      `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
+                                      `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '表单数据',
+                                      `node_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+                                      PRIMARY KEY (`id`) USING BTREE,
+                                      INDEX `idx_id`(`id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 3720 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程节点数据' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for process_node_record
+-- ----------------------------
+DROP TABLE IF EXISTS `process_node_record`;
+CREATE TABLE `process_node_record`  (
+                                        `id` bigint NOT NULL COMMENT 'id',
+                                        `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                                        `create_time` datetime NOT NULL COMMENT '创建时间',
+                                        `update_time` datetime NOT NULL COMMENT '更新时间',
+                                        `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
+                                        `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程实例id',
+                                        `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '表单数据',
+                                        `node_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+                                        `node_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '节点类型',
+                                        `node_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点名字',
+                                        `status` int NOT NULL COMMENT '节点状态',
+                                        `start_time` datetime NOT NULL COMMENT '开始时间',
+                                        `end_time` datetime NULL DEFAULT NULL COMMENT '结束时间',
+                                        `execution_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '执行id',
+                                        `parent_node_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '上一层级id',
+                                        `flow_unique_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流转唯一标识',
+                                        PRIMARY KEY (`id`) USING BTREE,
+                                        INDEX `idx_id`(`id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 3790 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程节点记录' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for process_node_record_approve_desc
+-- ----------------------------
+DROP TABLE IF EXISTS `process_node_record_approve_desc`;
+CREATE TABLE `process_node_record_approve_desc`  (
+                                                     `id` bigint NOT NULL COMMENT 'id',
+                                                     `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                                                     `create_time` datetime NOT NULL COMMENT '创建时间',
+                                                     `update_time` datetime NOT NULL COMMENT '更新时间',
+                                                     `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
+                                                     `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程实例id',
+                                                     `node_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+                                                     `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT ' 用户id',
+                                                     `execution_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '执行id',
+                                                     `task_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT ' 任务id',
+                                                     `approve_desc` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '审批意见',
+                                                     `node_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT ' 节点名称',
+                                                     `desc_date` datetime NULL DEFAULT NULL COMMENT '评论时间',
+                                                     `desc_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '消息id',
+                                                     `desc_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '类型',
+                                                     PRIMARY KEY (`id`) USING BTREE,
+                                                     INDEX `idx_id`(`id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1344 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程节点记录-执行人-审批意见' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for process_node_record_assign_user
+-- ----------------------------
+DROP TABLE IF EXISTS `process_node_record_assign_user`;
+CREATE TABLE `process_node_record_assign_user`  (
+                                                    `id` bigint NOT NULL COMMENT 'id',
+                                                    `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                                                    `create_time` datetime NOT NULL COMMENT '创建时间',
+                                                    `update_time` datetime NOT NULL COMMENT '更新时间',
+                                                    `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
+                                                    `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程实例id',
+                                                    `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '表单数据',
+                                                    `node_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+                                                    `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT ' 用户id',
+                                                    `status` int NOT NULL COMMENT '节点状态',
+                                                    `start_time` datetime NOT NULL COMMENT '开始时间',
+                                                    `end_time` datetime NULL DEFAULT NULL COMMENT '结束时间',
+                                                    `execution_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '执行id',
+                                                    `task_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT ' 任务id',
+                                                    `approve_desc` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '审批意见',
+                                                    `node_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT ' 节点名称',
+                                                    `task_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '任务类型',
+                                                    `local_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '表单本地数据',
+                                                    `flow_unique_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流转唯一标识',
+                                                    PRIMARY KEY (`id`) USING BTREE,
+                                                    INDEX `idx_id`(`id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1512 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程节点记录-执行人' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for process_oper_record
+-- ----------------------------
+DROP TABLE IF EXISTS `process_oper_record`;
+CREATE TABLE `process_oper_record`  (
+                                        `id` bigint NOT NULL COMMENT 'id',
+                                        `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                                        `create_time` datetime NOT NULL COMMENT '创建时间',
+                                        `update_time` datetime NOT NULL COMMENT '更新时间',
+                                        `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
+                                        `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程实例id',
+                                        `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '表单数据',
+                                        `node_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+                                        `task_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '任务id',
+                                        `node_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点名字',
+                                        `status` int NOT NULL COMMENT '任务状态',
+                                        `start_time` datetime NOT NULL COMMENT '开始时间',
+                                        `end_time` datetime NULL DEFAULT NULL COMMENT '结束时间',
+                                        `execution_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '执行id',
+                                        `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
+                                        `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '用户id',
+                                        `parent_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '上级id',
+                                        `task_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '任务类型',
+                                        PRIMARY KEY (`id`) USING BTREE,
+                                        INDEX `idx_id`(`id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 3293 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程操作记录' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for process_starter
+-- ----------------------------
+DROP TABLE IF EXISTS `process_starter`;
+CREATE TABLE `process_starter`  (
+                                    `id` bigint NOT NULL COMMENT 'id',
+                                    `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                                    `create_time` datetime NOT NULL COMMENT '创建时间',
+                                    `update_time` datetime NOT NULL COMMENT '更新时间',
+                                    `type_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户id或者部门id',
+                                    `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT ' 类型 user dept',
+                                    `process_id` bigint NOT NULL COMMENT '流程id',
+                                    `data` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '数据',
+                                    PRIMARY KEY (`id`) USING BTREE,
+                                    INDEX `idx_id`(`id` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程发起人' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for process_sub_process
+-- ----------------------------
+DROP TABLE IF EXISTS `process_sub_process`;
+CREATE TABLE `process_sub_process`  (
+                                        `id` bigint NOT NULL COMMENT 'id',
+                                        `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                                        `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+                                        `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+                                        `flow_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
+                                        `sub_flow_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '子流程id',
+                                        PRIMARY KEY (`id`) USING BTREE,
+                                        INDEX `idx_id`(`id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程关联下的子流程' ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;

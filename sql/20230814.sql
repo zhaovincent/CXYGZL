@@ -69,3 +69,6 @@ ALTER TABLE  `process`
 
 ALTER TABLE  `process_instance_record`
     MODIFY COLUMN `group_id` bigint NULL DEFAULT NULL COMMENT '组id'  ;
+
+ALTER TABLE `process`
+    MODIFY COLUMN `admin_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流程管理员' ;

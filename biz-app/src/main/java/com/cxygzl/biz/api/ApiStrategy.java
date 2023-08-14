@@ -105,6 +105,12 @@ public interface ApiStrategy {
     void createProcess(ProcessDto processDto);
 
     /**
+     * 发起流程
+     * @param processDto
+     */
+    void startProcess(ProcessDto processDto);
+
+    /**
      * 发送消息
      * @param messageDto
      */
