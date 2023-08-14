@@ -65,3 +65,7 @@ ALTER TABLE `user_role`
 
 ALTER TABLE  `process`
     MODIFY COLUMN `group_id` bigint NOT NULL COMMENT '分组ID' ;
+
+
+ALTER TABLE  `process_instance_record`
+    MODIFY COLUMN `group_id` bigint NULL DEFAULT NULL COMMENT '组id'  ;

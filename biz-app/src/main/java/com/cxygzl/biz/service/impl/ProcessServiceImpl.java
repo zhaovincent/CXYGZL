@@ -138,6 +138,28 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
     @Override
     public R create(ProcessVO processVO) {
 
+        {
+            //名字唯一
+            String name = processVO.getName();
+            List<Process> processList = this.lambdaQuery()
+                    .eq(Process::getName, name)
+                    .eq(Process::getHidden, false)
+                    .list();
+            if(StrUtil.isNotBlank(processVO.getFlowId())){
+                Process process = this.getByFlowId(processVO.getFlowId());
+                String uniqueId = process.getUniqueId();
+                long count = processList.stream().filter(w -> !StrUtil.equals(w.getUniqueId(), uniqueId)).count();
+                if(count>0){
+                    return R.fail("流程名字已存在，不能重复");
+                }
+            }else{
+                if(!processList.isEmpty()){
+                    return R.fail("流程名字已存在，不能重复");
+
+                }
+            }
+        }
+
         String processStr = processVO.getProcess();
 
         Node node = JSON.parseObject(processStr, Node.class);
@@ -236,7 +258,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         }
 
         //创建第三方对接流程
-        ApiStrategyFactory.getStrategy().createProcess(ProcessDto.builder().name(processVO.getName()).description(processVO.getRemark()).formItemVOList(JSON.parseArray(processVO.getFormItems(),FormItemVO.class)).build());
+        ApiStrategyFactory.getStrategy().createProcess(ProcessDto.builder().oriFlowId(processVO.getFlowId()).flowId(flowId).name(processVO.getName()).description(processVO.getRemark()).formItemVOList(JSON.parseArray(processVO.getFormItems(),FormItemVO.class)).build());
 
         return com.cxygzl.common.dto.R.success();
     }

@@ -1,18 +1,4 @@
-/*
- Navicat Premium Data Transfer
 
- Source Server         : 本地
- Source Server Type    : MySQL
- Source Server Version : 80021
- Source Host           : localhost:3307
- Source Schema         : simple_flow_biz
-
- Target Server Type    : MySQL
- Target Server Version : 80021
- File Encoding         : 65001
-
- Date: 13/08/2023 21:03:32
-*/
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -94,7 +80,7 @@ CREATE TABLE `process`  (
                             `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '表单名称',
                             `logo` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '图标配置',
                             `settings` json NULL COMMENT '设置项',
-                            `group_id` int NOT NULL COMMENT '分组ID',
+                            `group_id` bigint NOT NULL COMMENT '分组ID',
                             `form_items` json NOT NULL COMMENT '表单设置内容',
                             `process` json NOT NULL COMMENT '流程设置内容',
                             `remark` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
@@ -180,7 +166,7 @@ CREATE TABLE `process_instance_record`  (
                                             `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流程id',
                                             `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流程实例id',
                                             `form_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '表单数据',
-                                            `group_id` int NULL DEFAULT NULL COMMENT '组id',
+                                            `group_id` bigint NULL DEFAULT NULL COMMENT '组id',
                                             `group_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '组名称',
                                             `status` int NULL DEFAULT 1 COMMENT '状态',
                                             `end_time` datetime NULL DEFAULT NULL COMMENT '结束时间',

@@ -19,6 +19,10 @@ import java.util.List;
 @Data
 public class ProcessDto {
 
+    private String flowId;
+
+    private String oriFlowId;
+
     private String name;
 
     private String description;
