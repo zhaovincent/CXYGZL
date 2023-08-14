@@ -25,18 +25,7 @@ public class UserController {
     @Resource
     private IOrgService orgService;
 
-    @Resource
-    private EasyCaptchaService captchaService;
 
-    /**
-     * 获取验证码
-     * @return
-     */
-    @GetMapping("/captcha")
-    @NotWriteLogAnno(printResultLog = false)
-    public R getCaptcha() {
-       return captchaService.getCaptcha();
-    }
     /**
      * 创建用户
      * @param user

@@ -244,4 +244,25 @@ public class RemoteController {
         return remoteService.queryProcessSetting(flowId);
     }
 
+
+    /**
+     * 保存节点数据
+     * @param processNodeDataDto
+     * @return
+     */
+    @PostMapping("saveNodeData")
+    public R saveNodeData(@RequestBody ProcessNodeDataDto processNodeDataDto){
+        return remoteService.saveNodeData(processNodeDataDto);
+    }
+
+    /**
+     * 获取节点数据
+     * @param flowId
+     * @param nodeId
+     * @return
+     */
+    @GetMapping("getNodeData")
+    public R<String> getNodeData(String flowId,String nodeId){
+        return remoteService.getNodeData(flowId, nodeId);
+    }
 }

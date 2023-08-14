@@ -1,9 +1,8 @@
 package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.service.IProcessNodeDataService;
-import com.cxygzl.common.dto.ProcessNodeDataDto;
-import com.cxygzl.common.dto.R;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
@@ -22,25 +21,5 @@ public class ProcessNodeDataController {
     @Resource
     private IProcessNodeDataService processNodeDataService;
 
-    /**
-     * 保存节点数据
-     * @param processNodeDataDto
-     * @return
-     */
-    @PostMapping("saveNodeData")
-    public R saveNodeData(@RequestBody ProcessNodeDataDto processNodeDataDto){
-        return processNodeDataService.saveNodeData(processNodeDataDto);
-    }
-
-    /**
-     * 获取节点数据
-     * @param flowId
-     * @param nodeId
-     * @return
-     */
-    @GetMapping("getNodeData")
-    public R<String> getNodeData(String flowId,String nodeId){
-        return processNodeDataService.getNodeData(flowId, nodeId);
-    }
 
 }

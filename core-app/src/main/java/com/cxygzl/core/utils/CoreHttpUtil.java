@@ -177,7 +177,7 @@ public class CoreHttpUtil {
      * @return
      */
     public static R<String> queryNodeOriData(String flowId, String nodeId) {
-        String s = get(StrUtil.format("/processNodeData/getNodeData?flowId" +
+        String s = get(StrUtil.format("/remote/getNodeData?flowId" +
                 "={}&nodeId={}", flowId, nodeId));
         R<String> r = JSON.parseObject(s, new TypeReference<R<String>>() {
         });
@@ -257,6 +257,6 @@ public class CoreHttpUtil {
      * @return
      */
     public static void saveNodeOriData(ProcessNodeDataDto processNodeDataDto) {
-        post(processNodeDataDto, "/processNodeData/saveNodeData");
+        post(processNodeDataDto, "/remote/saveNodeData");
     }
 }

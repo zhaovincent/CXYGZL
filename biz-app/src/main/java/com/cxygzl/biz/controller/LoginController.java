@@ -1,7 +1,9 @@
 package com.cxygzl.biz.controller;
 
+import com.cxygzl.biz.security.captcha.EasyCaptchaService;
 import com.cxygzl.biz.service.ILoginService;
 import com.cxygzl.biz.vo.UserVO;
+import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.dto.R;
 import lombok.SneakyThrows;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +20,18 @@ public class LoginController {
     @Resource
     private ILoginService loginService;
 
+    @Resource
+    private EasyCaptchaService captchaService;
 
+    /**
+     * 获取验证码
+     * @return
+     */
+    @GetMapping("/captcha")
+    @NotWriteLogAnno(printResultLog = false)
+    public R getCaptcha() {
+        return captchaService.getCaptcha();
+    }
     /**
      * 用户登录
      *

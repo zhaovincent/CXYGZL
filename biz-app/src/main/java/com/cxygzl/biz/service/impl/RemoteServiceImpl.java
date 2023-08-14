@@ -51,7 +51,7 @@ public class RemoteServiceImpl implements IRemoteService {
     private IProcessGroupService processGroupService;
 
     @Resource
-    private IProcessOperRecordService processOperRecordService;
+    private IProcessNodeDataService processNodeDataService;
 
     /**
      * 保存待办任务
@@ -465,5 +465,27 @@ public class RemoteServiceImpl implements IRemoteService {
             return R.fail("该流程没有设置");
         }
         return R.success(JSON.parseObject(settings, FlowSettingDto.class));
+    }
+
+    /**
+     * 保存流程节点数据
+     *
+     * @param processNodeDataDto
+     * @return
+     */
+    @Override
+    public R saveNodeData(ProcessNodeDataDto processNodeDataDto) {
+        return processNodeDataService.saveNodeData(processNodeDataDto);
+    }
+
+    /***
+     * 获取节点数据
+     * @param flowId
+     * @param nodeId
+     * @return
+     */
+    @Override
+    public R<String> getNodeData(String flowId, String nodeId) {
+        return processNodeDataService.getNodeData(flowId, nodeId);
     }
 }
