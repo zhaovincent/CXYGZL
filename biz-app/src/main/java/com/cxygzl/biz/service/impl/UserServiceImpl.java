@@ -1,17 +1,13 @@
 package com.cxygzl.biz.service.impl;
 
-import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.cxygzl.biz.api.ApiStrategyFactory;
-import com.cxygzl.biz.constants.SecurityConstants;
 import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.mapper.UserMapper;
 import com.cxygzl.biz.service.*;
@@ -19,13 +15,10 @@ import com.cxygzl.biz.utils.PinYinUtil;
 import com.cxygzl.biz.vo.UserListQueryVO;
 import com.cxygzl.biz.vo.UserVO;
 import com.cxygzl.common.constants.FormTypeEnum;
-import com.cxygzl.common.constants.LoginPlatEnum;
-import com.cxygzl.common.constants.StatusEnum;
 import com.cxygzl.common.dto.R;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -142,7 +135,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
 
         //额外的字段
         Map<String, Object> fieldData = userVO.getFieldData();
-        List<UserField> userFieldList = userFieldService.lambdaQuery().ge(UserField::getId, 0).list();
+        List<UserField> userFieldList = userFieldService.lambdaQuery().list();
         for (UserField userField : userFieldList) {
             String key = userField.getKey();
             String str = MapUtil.getStr(fieldData, key);
@@ -150,7 +143,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
                 continue;
             }
 
-            if (StrUtil.equals(userField.getType(), "MultiSelect")) {
+            if (StrUtil.equals(userField.getType(), FormTypeEnum.MULTI_SELECT.getType())) {
                 List list = MapUtil.get(fieldData, key, List.class);
                 str = JSON.toJSONString(list);
             }
@@ -208,7 +201,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
 
         //额外的字段
         Map<String, Object> fieldData = userVO.getFieldData();
-        List<UserField> userFieldList = userFieldService.lambdaQuery().ge(UserField::getId, 0).list();
+        List<UserField> userFieldList = userFieldService.lambdaQuery().list();
         for (UserField userField : userFieldList) {
             String key = userField.getKey();
             String str = MapUtil.getStr(fieldData, key);

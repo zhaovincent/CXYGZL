@@ -1,7 +1,5 @@
 package com.cxygzl.biz.bo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.cxygzl.biz.constants.MenuTypeEnum;
 import lombok.Data;
 
@@ -15,7 +13,6 @@ public class RouteBO {
     /**
      *
      */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**

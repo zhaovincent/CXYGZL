@@ -297,7 +297,7 @@ public class OrgServiceImpl implements IOrgService {
         //添加扩展字段
         List<UserFieldData> userFieldDataList = userFieldDataService.lambdaQuery().eq(UserFieldData::getUserId, userId).list();
         //判断有没有新的扩展字段
-        List<UserField> userFieldList = userFieldService.lambdaQuery().ge(UserField::getId, 0).list();
+        List<UserField> userFieldList = userFieldService.lambdaQuery().list();
         List<UserFieldDataVo> userFieldDataVos = BeanUtil.copyToList(userFieldList, UserFieldDataVo.class);
         for (UserFieldDataVo userFieldDataVo : userFieldDataVos) {
             UserFieldData userFieldData = userFieldDataList.stream().filter(w -> StrUtil.equals(w.getKey(), userFieldDataVo.getKey())).findAny().orElse(null);

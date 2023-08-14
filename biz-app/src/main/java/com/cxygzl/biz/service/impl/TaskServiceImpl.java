@@ -77,15 +77,14 @@ public class TaskServiceImpl implements ITaskService {
         if (!taskExist) {
             //任务已完成了
 
-            ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
+            List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
                     .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
                     .eq(ProcessNodeRecordAssignUser::getUserId, userId)
                     .eq(ProcessNodeRecordAssignUser::getExecutionId, taskResultDto.getExecutionId())
-                    .last("limit 1")
                     .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
-                    .one();
+                    .list();
 
-            String data = processNodeRecordAssignUser.getData();
+            String data = list.get(0).getData();
             if (StrUtil.isNotBlank(data)) {
                 Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
                 });

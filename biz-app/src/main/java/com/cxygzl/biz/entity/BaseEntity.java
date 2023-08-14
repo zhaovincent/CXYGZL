@@ -11,7 +11,7 @@ public class BaseEntity {
     /**
      * 用户id
      */
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
     /**
      * 逻辑删除字段

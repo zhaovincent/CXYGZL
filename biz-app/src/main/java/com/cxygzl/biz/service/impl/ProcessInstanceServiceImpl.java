@@ -314,17 +314,17 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
             Map<String, Object> paramMap = new LinkedHashMap<>();
             {
 
-                ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
+                List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
                         .eq(ProcessNodeRecordAssignUser::getTaskId, record.getTaskId())
                         .eq(ProcessNodeRecordAssignUser::getUserId, StpUtil.getLoginIdAsString())
                         .eq(ProcessNodeRecordAssignUser::getExecutionId, record.getExecutionId())
                         .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.YJS.getCode())
-                        .last("limit 1")
-                        .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
-                        .one();
 
-                if (processNodeRecordAssignUser != null) {
-                    String data = processNodeRecordAssignUser.getData();
+                        .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
+                        .list();
+
+                if (CollUtil.isNotEmpty(list)) {
+                    String data = list.get(0).getData();
                     if (StrUtil.isNotBlank(data)) {
                         Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
                         });
@@ -570,13 +570,12 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                     });
             if (!r.isOk()) {
 
-                ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
+                List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
                         .eq(ProcessNodeRecordAssignUser::getTaskId, nodeFormatParamVo.getTaskId())
-                        .last("limit 1")
                         .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
-                        .one();
+                        .list();
 
-                String data = processNodeRecordAssignUser.getData();
+                String data = list.get(0).getData();
                 Map<String, Object> variableMap = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
                 });
                 if (variableMap == null) {

@@ -257,7 +257,9 @@ public class MenuServiceImpl extends MPJBaseServiceImpl<MenuMapper, Menu> implem
 
         //组件路径
         if(StrUtil.isNotBlank(menuVO.getComponent())){
-            Long count = this.lambdaQuery().ne(Menu::getType,MenuTypeEnum.CATALOG.getValue()).eq(Menu::getComponent, menuVO.getComponent()).ne(Menu::getId, menuVO.getId()).count();
+            Long count = this.lambdaQuery().ne(Menu::getType,MenuTypeEnum.CATALOG.getValue())
+                    .eq(Menu::getComponent, menuVO.getComponent())
+                    .ne(Menu::getId, menuVO.getId()).count();
             if(count>0){
                 return R.fail("组件路径已存在");
 

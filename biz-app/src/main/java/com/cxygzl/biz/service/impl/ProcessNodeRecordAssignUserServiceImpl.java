@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -26,12 +27,6 @@ import java.util.Date;
 public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessNodeRecordAssignUserMapper, ProcessNodeRecordAssignUser> implements IProcessNodeRecordAssignUserService {
 
 
-//    @Resource
-//    private IProcessOperRecordService processOperRecordService;
-//
-//    @Resource
-//    private IProcessNodeRecordApproveDescService processNodeRecordApproveDescService;
-
     /**
      * 设置执行人
      *
@@ -41,32 +36,18 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
     @Override
     public R addAssignUser(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
         {
-            ProcessNodeRecordAssignUser processNodeRecordAssignUser = this.lambdaQuery()
+            List<ProcessNodeRecordAssignUser> list = this.lambdaQuery()
                     .eq(ProcessNodeRecordAssignUser::getTaskId, processNodeRecordAssignUserParamDto.getTaskId())
                     .eq(ProcessNodeRecordAssignUser::getExecutionId, processNodeRecordAssignUserParamDto.getExecutionId())
-//                    .eq(ProcessNodeRecordAssignUser::getUserId, processNodeRecordAssignUserParamDto.getUserId())
-                    .orderByDesc(ProcessNodeRecordAssignUser::getId)
-                    .last("limit 1").one();
+                    .orderByDesc(ProcessNodeRecordAssignUser::getCreateTime)
+                    .list();
 
-            if (processNodeRecordAssignUser != null) {
+            if (!list.isEmpty()) {
+                ProcessNodeRecordAssignUser processNodeRecordAssignUser = list.get(0);
                 processNodeRecordAssignUser.setTaskType(processNodeRecordAssignUserParamDto.getTaskType());
                 processNodeRecordAssignUser.setStatus(NodeStatusEnum.YJS.getCode());
                 processNodeRecordAssignUser.setEndTime(new Date());
                 this.updateById(processNodeRecordAssignUser);
-
-//                List<SimpleApproveDescDto> simpleApproveDescDtoList = processNodeRecordAssignUserParamDto.getSimpleApproveDescDtoList();
-//
-//
-//                saveApproveDescList(processNodeRecordAssignUser, simpleApproveDescDtoList);
-
-
-                //修改任务
-//                ProcessNodeRecordAssignUserParamDto p = BeanUtil.copyProperties(processNodeRecordAssignUserParamDto,
-//                        ProcessNodeRecordAssignUserParamDto.class);
-//                p.setUserId(processNodeRecordAssignUser.getUserId());
-//                processOperRecordService.completeTask(p);
-
-
             }
 
 
@@ -76,13 +57,9 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
         ProcessNodeRecordAssignUser processNodeRecordAssignUser = BeanUtil.copyProperties(processNodeRecordAssignUserParamDto, ProcessNodeRecordAssignUser.class);
         processNodeRecordAssignUser.setStartTime(new Date());
         processNodeRecordAssignUser.setStatus(NodeStatusEnum.JXZ.getCode());
-//        processNodeRecordAssignUser.setApproveDesc("");
         processNodeRecordAssignUser.setTaskType("");
         this.save(processNodeRecordAssignUser);
 
-
-        //记录日志
-      //  processOperRecordService.taskSetAssignee(processNodeRecordAssignUserParamDto);
 
         return R.success();
     }
