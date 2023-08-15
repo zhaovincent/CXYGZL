@@ -1,6 +1,5 @@
 package com.cxygzl.biz.api.impl;
 
-import cn.dev33.satoken.stp.StpUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategy;
@@ -153,6 +152,26 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     }
 
     /**
+     * 获取登录地址
+     *
+     * @return
+     */
+    @Override
+    public String getLoginUrl() {
+        return "/ddlogin";
+    }
+
+    /**
+     * 获取登录参数
+     *
+     * @return
+     */
+    @Override
+    public Object getLoginParam() {
+        return null;
+    }
+
+    /**
      * 发送消息
      *
      * @param messageDto
@@ -171,8 +190,12 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      */
     @Override
     public String getUserIdByToken(String token) {
-        Object loginIdByToken = StpUtil.getLoginIdByToken(token);
-        return loginIdByToken==null?null:loginIdByToken.toString();
+
+        String s = DingTalkHttpUtil.get("/remote/getUserIdByCode?authCode=" + token);
+        R<String> r = JSON.parseObject(s, new TypeReference<R<String>>() {
+        });
+
+        return r.getData();
     }
 
     @Override

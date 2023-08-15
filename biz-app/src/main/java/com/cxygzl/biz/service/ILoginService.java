@@ -34,4 +34,16 @@ public interface ILoginService {
      */
     R loginAtDingTalk(String authCode);
 
+    /**
+     * 获取登录地址
+     * @return
+     */
+    R getLoginUrl();
+
+    /**
+     * 获取登录参数
+     * @return
+     */
+    R getLoginParam();
+
 }

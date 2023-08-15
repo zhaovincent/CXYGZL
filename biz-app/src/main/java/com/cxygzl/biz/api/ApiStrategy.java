@@ -111,6 +111,18 @@ public interface ApiStrategy {
     void startProcess(ProcessDto processDto);
 
     /**
+     * 获取登录地址
+     * @return
+     */
+    String getLoginUrl();
+
+    /**
+     * 获取登录参数
+     * @return
+     */
+    Object getLoginParam();
+
+    /**
      * 发送消息
      * @param messageDto
      */

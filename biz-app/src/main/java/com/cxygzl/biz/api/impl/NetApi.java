@@ -155,6 +155,26 @@ public class NetApi implements ApiStrategy, InitializingBean {
     }
 
     /**
+     * 获取登录地址
+     *
+     * @return
+     */
+    @Override
+    public String getLoginUrl() {
+        return null;
+    }
+
+    /**
+     * 获取登录参数
+     *
+     * @return
+     */
+    @Override
+    public Object getLoginParam() {
+        return null;
+    }
+
+    /**
      * 发送消息
      *
      * @param messageDto

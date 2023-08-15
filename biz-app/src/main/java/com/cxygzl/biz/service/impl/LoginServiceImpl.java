@@ -118,4 +118,25 @@ public class LoginServiceImpl implements ILoginService {
 
         return com.cxygzl.common.dto.R.success(tokenInfo);
     }
+
+    /**
+     * 获取登录地址
+     *
+     * @return
+     */
+    @Override
+    public R getLoginUrl() {
+        return R.success(ApiStrategyFactory.getStrategy().getLoginUrl());
+    }
+
+    /**
+     * 获取登录参数
+     *
+     * @return
+     */
+    @Override
+    public R getLoginParam() {
+        return R.success(ApiStrategyFactory.getStrategy().getLoginParam());
+
+    }
 }

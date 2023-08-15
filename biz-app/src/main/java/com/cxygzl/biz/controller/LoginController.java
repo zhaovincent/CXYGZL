@@ -25,6 +25,7 @@ public class LoginController {
 
     /**
      * 获取验证码
+     *
      * @return
      */
     @GetMapping("/captcha")
@@ -32,6 +33,7 @@ public class LoginController {
     public R getCaptcha() {
         return captchaService.getCaptcha();
     }
+
     /**
      * 用户登录
      *
@@ -82,4 +84,23 @@ public class LoginController {
         return loginService.loginAtDingTalk(authCode);
     }
 
+    /**
+     * 获取登录地址
+     *
+     * @return
+     */
+    @GetMapping("/getLoginUrl")
+    public R getLoginUrl() {
+        return loginService.getLoginUrl();
+    }
+
+    /**
+     * 获取登录参数
+     *
+     * @return
+     */
+    @GetMapping("/getLoginParam")
+    public R getLoginParam() {
+        return loginService.getLoginParam();
+    }
 }

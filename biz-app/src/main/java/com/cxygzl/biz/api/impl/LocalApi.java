@@ -12,10 +12,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -192,6 +189,26 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     @Override
     public void startProcess(ProcessDto processDto) {
 
+    }
+
+    /**
+     * 获取登录地址
+     *
+     * @return
+     */
+    @Override
+    public String getLoginUrl() {
+        return "/aplogin";
+    }
+
+    /**
+     * 获取登录参数
+     *
+     * @return
+     */
+    @Override
+    public Object getLoginParam() {
+        return new HashMap<>();
     }
 
     /**
