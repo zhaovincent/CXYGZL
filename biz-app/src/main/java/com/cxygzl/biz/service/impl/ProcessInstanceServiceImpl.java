@@ -362,6 +362,14 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 .eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceParamDto.getProcessInstanceId())
                 .eq(ProcessInstanceRecord::getStatus,NodeStatusEnum.JXZ.getCode())
                 .update(new ProcessInstanceRecord());
+
+        //通知第三方
+        if(processInstanceParamDto.getCancel()){
+            ApiStrategyFactory.getStrategy().stopProcessInstance(processInstanceParamDto);
+        }else{
+            ApiStrategyFactory.getStrategy().completeProcessInstance(processInstanceParamDto);
+        }
+
         return com.cxygzl.common.dto.R.success();
     }
 

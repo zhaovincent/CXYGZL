@@ -208,6 +208,7 @@ public class TaskServiceImpl implements ITaskService {
                 .set("node", nodeDataJson)
                 .set("nodeId", nodeId)
                 .set("starterAvatarUrl", starterUser.getAvatarUrl())
+                .set("starterName", starterUser.getName())
                 .set("startTime", processInstanceRecord.getCreateTime())
                 .set("taskExist", taskExist)
                 .set("processName", oaForms.getName())

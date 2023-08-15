@@ -4,7 +4,10 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategy;
 import com.cxygzl.biz.utils.DingTalkHttpUtil;
+import com.cxygzl.common.dto.LoginUrlDto;
+import com.cxygzl.common.dto.ProcessInstanceParamDto;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.third.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -41,7 +44,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      */
     @Override
     public List<RoleDto> loadAllRole() {
-        String post = DingTalkHttpUtil.get( "/remote/loadAllRole");
+        String post = DingTalkHttpUtil.get("/remote/loadAllRole");
         return JSON.parseObject(post, new TypeReference<R<List<RoleDto>>>() {
         }).getData();
     }
@@ -67,7 +70,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      */
     @Override
     public List<DeptDto> loadAllDept(String parentDeptId) {
-        String post = DingTalkHttpUtil.get( "/remote/loadAllDept?deptId="+(parentDeptId==null?"":parentDeptId));
+        String post = DingTalkHttpUtil.get("/remote/loadAllDept?deptId=" + (parentDeptId == null ? "" : parentDeptId));
         return JSON.parseObject(post, new TypeReference<R<List<DeptDto>>>() {
         }).getData();
     }
@@ -80,7 +83,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      */
     @Override
     public List<UserDto> loadUserByDept(String deptId) {
-        String post = DingTalkHttpUtil.get( "/remote/loadUserByDept?deptId="+deptId);
+        String post = DingTalkHttpUtil.get("/remote/loadUserByDept?deptId=" + deptId);
         return JSON.parseObject(post, new TypeReference<R<List<UserDto>>>() {
         }).getData();
     }
@@ -93,14 +96,14 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      */
     @Override
     public UserDto getUser(String userId) {
-        String post = DingTalkHttpUtil.get( "/remote/getUser?userId="+userId);
+        String post = DingTalkHttpUtil.get("/remote/getUser?userId=" + userId);
         return JSON.parseObject(post, new TypeReference<R<UserDto>>() {
         }).getData();
     }
 
     @Override
     public List<UserDto> searchUser(String name) {
-        String post = DingTalkHttpUtil.get( "/remote/searchUser?name="+name);
+        String post = DingTalkHttpUtil.get("/remote/searchUser?name=" + name);
         return JSON.parseObject(post, new TypeReference<R<List<UserDto>>>() {
         }).getData();
     }
@@ -112,7 +115,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      */
     @Override
     public List<UserFieldDto> queryUserFieldList() {
-        String post = DingTalkHttpUtil.get( "/remote/queryUserFieldList");
+        String post = DingTalkHttpUtil.get("/remote/queryUserFieldList");
         return JSON.parseObject(post, new TypeReference<R<List<UserFieldDto>>>() {
         }).getData();
     }
@@ -125,7 +128,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      */
     @Override
     public Map<String, String> queryUserFieldData(String userId) {
-        String post = DingTalkHttpUtil.get( "/remote/queryUserFieldData?userId="+userId);
+        String post = DingTalkHttpUtil.get("/remote/queryUserFieldData?userId=" + userId);
         return JSON.parseObject(post, new TypeReference<R<Map<String, String>>>() {
         }).getData();
     }
@@ -137,7 +140,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      */
     @Override
     public void createProcess(ProcessDto processDto) {
-        DingTalkHttpUtil.post(processDto,"/remote/createProcess");
+        DingTalkHttpUtil.post(processDto, "/remote/createProcess");
     }
 
     /**
@@ -147,7 +150,59 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      */
     @Override
     public void startProcess(ProcessDto processDto) {
-        DingTalkHttpUtil.post(processDto,"/remote/startProcess");
+        DingTalkHttpUtil.post(processDto, "/remote/startProcess");
+
+    }
+
+    /**
+     * 完成流程实例
+     *
+     * @param processInstanceParamDto
+     */
+    @Override
+    public void completeProcessInstance(ProcessInstanceParamDto processInstanceParamDto) {
+        DingTalkHttpUtil.post(processInstanceParamDto, "/processInstance/complete");
+    }
+
+    /**
+     * 终止流程
+     *
+     * @param processInstanceParamDto
+     */
+    @Override
+    public void stopProcessInstance(ProcessInstanceParamDto processInstanceParamDto) {
+        DingTalkHttpUtil.post(processInstanceParamDto, "/processInstance/stop");
+    }
+
+    /**
+     * 添加待办任务
+     *
+     * @param taskParamDtoList
+     */
+    @Override
+    public void addWaitTask(List<TaskParamDto> taskParamDtoList) {
+        DingTalkHttpUtil.post(taskParamDtoList, "/processInstance/addWaitTask");
+    }
+
+    /**
+     * 审批通过
+     *
+     * @param taskParamDtoList
+     */
+    @Override
+    public void passTask(List<TaskParamDto> taskParamDtoList) {
+        DingTalkHttpUtil.post(taskParamDtoList, "/processInstance/passTask");
+
+    }
+
+    /**
+     * 审批拒绝
+     *
+     * @param taskParamDtoList
+     */
+    @Override
+    public void refuseTask(List<TaskParamDto> taskParamDtoList) {
+        DingTalkHttpUtil.post(taskParamDtoList, "/processInstance/refuseTask");
 
     }
 
@@ -157,8 +212,12 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      * @return
      */
     @Override
-    public String getLoginUrl() {
-        return "/ddlogin";
+    public LoginUrlDto getLoginUrl() {
+        String s = DingTalkHttpUtil.get("/remote/getLoginUrl");
+        R<LoginUrlDto> r = JSON.parseObject(s, new TypeReference<R<LoginUrlDto>>() {
+        });
+        return r.getData();
+
     }
 
     /**
@@ -194,7 +253,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     @Override
     public String getUserIdByToken(String token) {
 
-        String s = DingTalkHttpUtil.get("/remote/getUserIdByCode?authCode=" + token);
+        String s = DingTalkHttpUtil.get("/user/getUserIdByCode?authCode=" + token);
         R<String> r = JSON.parseObject(s, new TypeReference<R<String>>() {
         });
 

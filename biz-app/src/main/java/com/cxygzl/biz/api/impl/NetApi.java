@@ -8,6 +8,9 @@ import com.cxygzl.biz.service.IRoleService;
 import com.cxygzl.biz.service.IUserRoleService;
 import com.cxygzl.biz.service.IUserService;
 import com.cxygzl.biz.utils.CoreHttpUtil;
+import com.cxygzl.common.dto.LoginUrlDto;
+import com.cxygzl.common.dto.ProcessInstanceParamDto;
+import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.third.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -155,12 +158,62 @@ public class NetApi implements ApiStrategy, InitializingBean {
     }
 
     /**
+     * 完成流程实例
+     *
+     * @param processInstanceParamDto
+     */
+    @Override
+    public void completeProcessInstance(ProcessInstanceParamDto processInstanceParamDto) {
+
+    }
+
+    /**
+     * 终止流程
+     *
+     * @param processInstanceParamDto
+     */
+    @Override
+    public void stopProcessInstance(ProcessInstanceParamDto processInstanceParamDto) {
+
+    }
+
+    /**
+     * 添加待办任务
+     *
+     * @param taskParamDtoList
+     */
+    @Override
+    public void addWaitTask(List<TaskParamDto> taskParamDtoList) {
+
+    }
+
+    /**
+     * 审批通过
+     *
+     * @param taskParamDtoList
+     */
+    @Override
+    public void passTask(List<TaskParamDto> taskParamDtoList) {
+
+    }
+
+    /**
+     * 审批拒绝
+     *
+     * @param taskParamDtoList
+     */
+    @Override
+    public void refuseTask(List<TaskParamDto> taskParamDtoList) {
+
+    }
+
+    /**
      * 获取登录地址
      *
      * @return
      */
     @Override
-    public String getLoginUrl() {
+    public LoginUrlDto getLoginUrl() {
         return null;
     }
 

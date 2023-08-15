@@ -1,13 +1,16 @@
 package com.cxygzl.biz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
 import com.cxygzl.biz.mapper.ProcessNodeRecordAssignUserMapper;
 import com.cxygzl.biz.service.IProcessNodeRecordAssignUserService;
 import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.TaskParamDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -60,6 +63,14 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
         processNodeRecordAssignUser.setTaskType("");
         this.save(processNodeRecordAssignUser);
 
+        //添加待办
+        TaskParamDto taskParamDto=new TaskParamDto();
+        taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
+        taskParamDto.setNodeId(processNodeRecordAssignUser.getNodeId());
+        taskParamDto.setTaskId(processNodeRecordAssignUser.getTaskId());
+        taskParamDto.setUserId(processNodeRecordAssignUser.getUserId());
+        ApiStrategyFactory.getStrategy().addWaitTask(CollUtil.newArrayList(taskParamDto));
+
 
         return R.success();
     }
@@ -85,13 +96,12 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
         processNodeRecordAssignUser.setTaskType(processNodeRecordAssignUserParamDto.getTaskType());
         this.updateById(processNodeRecordAssignUser);
 
-//        List<SimpleApproveDescDto> simpleApproveDescDtoList = processNodeRecordAssignUserParamDto.getSimpleApproveDescDtoList();
-//
-//        saveApproveDescList(processNodeRecordAssignUser, simpleApproveDescDtoList);
-
-        //记录日志
-
-        // processOperRecordService.completeTask(processNodeRecordAssignUserParamDto);
+        //通知第三方
+        TaskParamDto taskParamDto=new TaskParamDto();
+        taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
+        taskParamDto.setUserId(processNodeRecordAssignUser.getUserId());
+        taskParamDto.setTaskId(processNodeRecordAssignUser.getTaskId());
+        ApiStrategyFactory.getStrategy().passTask(CollUtil.newArrayList(taskParamDto));
 
         return R.success();
     }

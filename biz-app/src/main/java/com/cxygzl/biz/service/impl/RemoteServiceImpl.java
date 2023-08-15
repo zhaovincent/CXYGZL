@@ -314,7 +314,12 @@ public class RemoteServiceImpl implements IRemoteService {
         Map<String, Object> valueMap = JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
         });
         ProcessDto processDto =
-                ProcessDto.builder().mobile(processInstanceRecordParamDto.getUserId()).flowId(process.getFlowId()).formItemVOList(JSON.parseArray(process.getFormItems(), FormItemVO.class)).valueMap(valueMap).build();
+                ProcessDto.builder()
+                        .processInstanceId(processInstanceRecordParamDto.getProcessInstanceId())
+                        .mobile(processInstanceRecordParamDto.getUserId())
+                        .flowId(process.getFlowId())
+                        .formItemVOList(JSON.parseArray(process.getFormItems(), FormItemVO.class))
+                        .valueMap(valueMap).build();
         ApiStrategyFactory.getStrategy().startProcess(processDto);
 
         return R.success();

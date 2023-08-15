@@ -1,5 +1,8 @@
 package com.cxygzl.biz.api;
 
+import com.cxygzl.common.dto.LoginUrlDto;
+import com.cxygzl.common.dto.ProcessInstanceParamDto;
+import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.third.*;
 
 import java.util.List;
@@ -35,6 +38,7 @@ public interface ApiStrategy {
      * @return
      */
     List<RoleDto> loadAllRole();
+
     /**
      * 根据部门id集合获取该部门下的用户id集合
      * 注意：直属部门，不包括子级及以下部门
@@ -47,6 +51,7 @@ public interface ApiStrategy {
     /**
      * 根据父级id获取所有的部门
      * 若父级id为空 则获取所有的部门
+     *
      * @param parentDeptId 父级id
      * @return
      */
@@ -54,6 +59,7 @@ public interface ApiStrategy {
 
     /**
      * 根据部门获取部门下的用户集合
+     *
      * @param deptId 部门id
      * @return
      */
@@ -69,7 +75,8 @@ public interface ApiStrategy {
 
     /**
      * 根据名字搜索用户
-     *钉钉不提供
+     * 钉钉不提供
+     *
      * @param name
      * @return
      */
@@ -96,34 +103,74 @@ public interface ApiStrategy {
      *
      * @return
      */
-    Map<String,String> queryUserFieldData(String userId);
+    Map<String, String> queryUserFieldData(String userId);
 
     /**
      * 创建流程
+     *
      * @param processDto
      */
     void createProcess(ProcessDto processDto);
 
     /**
      * 发起流程
+     *
      * @param processDto
      */
     void startProcess(ProcessDto processDto);
 
     /**
+     * 完成流程实例
+     *
+     * @param processInstanceParamDto
+     */
+    void completeProcessInstance(ProcessInstanceParamDto processInstanceParamDto);
+
+    /**
+     * 终止流程
+     *
+     * @param processInstanceParamDto
+     */
+    void stopProcessInstance(ProcessInstanceParamDto processInstanceParamDto);
+
+    /**
+     * 添加待办任务
+     *
+     * @param taskParamDtoList
+     */
+    void addWaitTask(List<TaskParamDto> taskParamDtoList);
+
+    /**
+     * 审批通过
+     *
+     * @param taskParamDtoList
+     */
+    void passTask(List<TaskParamDto> taskParamDtoList);
+
+    /**
+     * 审批拒绝
+     *
+     * @param taskParamDtoList
+     */
+    void refuseTask(List<TaskParamDto> taskParamDtoList);
+
+    /**
      * 获取登录地址
+     *
      * @return
      */
-    String getLoginUrl();
+    LoginUrlDto getLoginUrl();
 
     /**
      * 获取登录参数
+     *
      * @return
      */
     Object getLoginParam();
 
     /**
      * 发送消息
+     *
      * @param messageDto
      */
     void sendMsg(MessageDto messageDto);
