@@ -168,7 +168,10 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      */
     @Override
     public Object getLoginParam() {
-        return null;
+        String s = DingTalkHttpUtil.get("/remote/getLoginParam");
+        R r = JSON.parseObject(s, new TypeReference<R>() {
+        });
+        return r.getData();
     }
 
     /**

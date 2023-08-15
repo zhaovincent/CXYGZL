@@ -76,7 +76,7 @@ dingtalk:
 
 ##流程的数据api开关
 api:
-  ori: local
+  ori: dingtalk
 
 version:
   admin: V2.0.8
