@@ -14,6 +14,7 @@ import com.cxygzl.common.dto.TaskParamDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -42,6 +43,7 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
             List<ProcessNodeRecordAssignUser> list = this.lambdaQuery()
                     .eq(ProcessNodeRecordAssignUser::getTaskId, processNodeRecordAssignUserParamDto.getTaskId())
                     .eq(ProcessNodeRecordAssignUser::getExecutionId, processNodeRecordAssignUserParamDto.getExecutionId())
+                    .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
                     .orderByDesc(ProcessNodeRecordAssignUser::getCreateTime)
                     .list();
 
@@ -51,6 +53,16 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
                 processNodeRecordAssignUser.setStatus(NodeStatusEnum.YJS.getCode());
                 processNodeRecordAssignUser.setEndTime(new Date());
                 this.updateById(processNodeRecordAssignUser);
+
+                //处理任务
+                List<TaskParamDto> taskParamDtoList=new ArrayList<>();
+                TaskParamDto taskParamDto = new TaskParamDto();
+                taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
+                taskParamDto.setUserId(processNodeRecordAssignUser.getUserId());
+                taskParamDto.setTaskId(processNodeRecordAssignUser.getTaskId());
+                taskParamDtoList.add(taskParamDto);
+                ApiStrategyFactory.getStrategy().handleTask(taskParamDtoList,processNodeRecordAssignUser.getTaskType());
+
             }
 
 
@@ -64,7 +76,7 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
         this.save(processNodeRecordAssignUser);
 
         //添加待办
-        TaskParamDto taskParamDto=new TaskParamDto();
+        TaskParamDto taskParamDto = new TaskParamDto();
         taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
         taskParamDto.setNodeId(processNodeRecordAssignUser.getNodeId());
         taskParamDto.setTaskId(processNodeRecordAssignUser.getTaskId());
@@ -97,11 +109,13 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
         this.updateById(processNodeRecordAssignUser);
 
         //通知第三方
-        TaskParamDto taskParamDto=new TaskParamDto();
+        TaskParamDto taskParamDto = new TaskParamDto();
         taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
         taskParamDto.setUserId(processNodeRecordAssignUser.getUserId());
         taskParamDto.setTaskId(processNodeRecordAssignUser.getTaskId());
-        ApiStrategyFactory.getStrategy().passTask(CollUtil.newArrayList(taskParamDto));
+
+        ApiStrategyFactory.getStrategy().handleTask(CollUtil.newArrayList(taskParamDto), processNodeRecordAssignUser.getTaskType());
+
 
         return R.success();
     }
@@ -114,8 +128,8 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
      */
     @Override
     public R taskCancelEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        log.info("任务撤销:{} - {} -{}",processNodeRecordAssignUserParamDto.getNodeName(),
-                processNodeRecordAssignUserParamDto.getUserId(),processNodeRecordAssignUserParamDto.getTaskType());
+        log.info("任务撤销:{} - {} -{}", processNodeRecordAssignUserParamDto.getNodeName(),
+                processNodeRecordAssignUserParamDto.getUserId(), processNodeRecordAssignUserParamDto.getTaskType());
         ProcessNodeRecordAssignUser processNodeRecordAssignUser = this.lambdaQuery()
                 .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processNodeRecordAssignUserParamDto.getProcessInstanceId())
                 .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
@@ -131,44 +145,17 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
         processNodeRecordAssignUser.setTaskType(processNodeRecordAssignUserParamDto.getTaskType());
         this.updateById(processNodeRecordAssignUser);
 
-//        List<SimpleApproveDescDto> simpleApproveDescDtoList = processNodeRecordAssignUserParamDto.getSimpleApproveDescDtoList();
-//
-//        saveApproveDescList(processNodeRecordAssignUser, simpleApproveDescDtoList);
 
-        //记录日志
-//        processNodeRecordAssignUserParamDto.setUserId(processNodeRecordAssignUser.getUserId());
-//        processOperRecordService.nodeCancel(processNodeRecordAssignUserParamDto);
-
+            //处理任务
+        List<TaskParamDto> taskParamDtoList=new ArrayList<>();
+        TaskParamDto taskParamDto = new TaskParamDto();
+        taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
+        taskParamDto.setUserId(processNodeRecordAssignUser.getUserId());
+        taskParamDto.setTaskId(processNodeRecordAssignUser.getTaskId());
+        taskParamDtoList.add(taskParamDto);
+        ApiStrategyFactory.getStrategy().handleTask(taskParamDtoList,processNodeRecordAssignUser.getTaskType());
 
         return R.success();
     }
 
-//    private void saveApproveDescList(ProcessNodeRecordAssignUser processNodeRecordAssignUser, List<SimpleApproveDescDto> simpleApproveDescDtoList) {
-//        if (CollUtil.isNotEmpty(simpleApproveDescDtoList)) {
-//            for (SimpleApproveDescDto simpleApproveDescDto : simpleApproveDescDtoList) {
-//
-//                Long count = processNodeRecordApproveDescService.lambdaQuery().eq(ProcessNodeRecordApproveDesc::getDescId, simpleApproveDescDto.getMsgId()).count();
-//                if (count > 0) {
-//                    continue;
-//                }
-//
-//
-//                ProcessNodeRecordApproveDesc entity = new ProcessNodeRecordApproveDesc();
-//                entity.setFlowId(processNodeRecordAssignUser.getFlowId());
-//                entity.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
-//                entity.setNodeId(processNodeRecordAssignUser.getNodeId());
-//                entity.setUserId(processNodeRecordAssignUser.getUserId());
-//                entity.setExecutionId(processNodeRecordAssignUser.getExecutionId());
-//                entity.setTaskId(processNodeRecordAssignUser.getTaskId());
-//                entity.setApproveDesc(simpleApproveDescDto.getMessage());
-//                entity.setDescDate(simpleApproveDescDto.getDate());
-//                entity.setDescId(simpleApproveDescDto.getMsgId());
-//                entity.setDescType(simpleApproveDescDto.getType());
-//                entity.setNodeName(processNodeRecordAssignUser.getNodeName());
-//
-//
-//                processNodeRecordApproveDescService.save(entity);
-//            }
-//        }
-//    }
 }

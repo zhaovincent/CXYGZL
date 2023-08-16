@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -185,25 +186,23 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     }
 
     /**
-     * 审批通过
+     * 处理任务
      *
      * @param taskParamDtoList
+     * @param taskType
      */
     @Override
-    public void passTask(List<TaskParamDto> taskParamDtoList) {
-        DingTalkHttpUtil.post(taskParamDtoList, "/processInstance/passTask");
+    public void handleTask(List<TaskParamDto> taskParamDtoList, String taskType) {
+        DingTalkHttpUtil.post(taskParamDtoList, "/processInstance/handleTask/"+taskType);
 
     }
 
     /**
-     * 审批拒绝
-     *
-     * @param taskParamDtoList
+     * 重新拉取数据
      */
     @Override
-    public void refuseTask(List<TaskParamDto> taskParamDtoList) {
-        DingTalkHttpUtil.post(taskParamDtoList, "/processInstance/refuseTask");
-
+    public void loadRemoteData() {
+        DingTalkHttpUtil.post(new HashMap<>(), "/remote/loadRemoteData");
     }
 
     /**

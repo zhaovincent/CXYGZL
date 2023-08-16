@@ -140,19 +140,19 @@ public interface ApiStrategy {
      */
     void addWaitTask(List<TaskParamDto> taskParamDtoList);
 
-    /**
-     * 审批通过
-     *
-     * @param taskParamDtoList
-     */
-    void passTask(List<TaskParamDto> taskParamDtoList);
 
     /**
-     * 审批拒绝
+     * 处理任务
      *
      * @param taskParamDtoList
+     * @param taskType
      */
-    void refuseTask(List<TaskParamDto> taskParamDtoList);
+    void handleTask(List<TaskParamDto> taskParamDtoList, String taskType);
+
+    /**
+     * 重新拉取数据
+     */
+    void loadRemoteData();
 
     /**
      * 获取登录地址

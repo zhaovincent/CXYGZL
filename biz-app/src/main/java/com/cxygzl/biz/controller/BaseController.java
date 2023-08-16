@@ -3,6 +3,7 @@ package com.cxygzl.biz.controller;
 import com.cxygzl.biz.service.IBaseService;
 import com.cxygzl.common.dto.R;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,4 +36,15 @@ public class BaseController {
     public R areaList() {
         return baseService.areaList();
     }
+
+    /**
+     * 同步数据
+     *
+     * @return
+     */
+    @PostMapping("loadRemoteData")
+    public R loadRemoteData() {
+        return baseService.loadRemoteData();
+    }
+
 }

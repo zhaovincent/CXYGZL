@@ -52,6 +52,8 @@ public class RemoteServiceImpl implements IRemoteService {
 
     @Resource
     private IProcessNodeDataService processNodeDataService;
+    @Resource
+    private IMessageService messageService;
 
     /**
      * 保存待办任务
@@ -62,6 +64,7 @@ public class RemoteServiceImpl implements IRemoteService {
     @Override
     public R saveMessage(MessageDto messageDto) {
 
+        messageService.saveMessage(messageDto);
         ApiStrategyFactory.getStrategy().sendMsg(messageDto);
         return R.success();
     }

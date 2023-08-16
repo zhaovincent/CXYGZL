@@ -15,4 +15,10 @@ public interface IBaseService {
      * @return
      */
     R areaList();
+
+    /**
+     * 同步数据
+     * @return
+     */
+    R loadRemoteData();
 }

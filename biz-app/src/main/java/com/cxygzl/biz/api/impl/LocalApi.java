@@ -224,23 +224,23 @@ public class LocalApi implements ApiStrategy, InitializingBean {
 
     }
 
+
     /**
-     * 审批通过
+     * 处理任务
      *
      * @param taskParamDtoList
+     * @param taskType
      */
     @Override
-    public void passTask(List<TaskParamDto> taskParamDtoList) {
+    public void handleTask(List<TaskParamDto> taskParamDtoList, String taskType) {
 
     }
 
     /**
-     * 审批拒绝
-     *
-     * @param taskParamDtoList
+     * 重新拉取数据
      */
     @Override
-    public void refuseTask(List<TaskParamDto> taskParamDtoList) {
+    public void loadRemoteData() {
 
     }
 
@@ -271,7 +271,6 @@ public class LocalApi implements ApiStrategy, InitializingBean {
      */
     @Override
     public void sendMsg(MessageDto messageDto) {
-        messageService.saveMessage(messageDto);
     }
 
     @Override

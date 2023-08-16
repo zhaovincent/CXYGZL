@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import com.alibaba.fastjson.JSON;
+import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.ProcessCopy;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.service.IBaseService;
@@ -90,5 +91,16 @@ public class BaseServiceImpl implements IBaseService {
 
 
         return R.success(JSON.parseArray(json));
+    }
+
+    /**
+     * 同步数据
+     *
+     * @return
+     */
+    @Override
+    public R loadRemoteData() {
+        ApiStrategyFactory.getStrategy().loadRemoteData();
+        return R.success();
     }
 }

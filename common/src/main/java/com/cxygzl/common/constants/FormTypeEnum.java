@@ -15,6 +15,7 @@ public enum FormTypeEnum {
 
     INPUT("Input","单行文本",""),
     TEXTAREA("Textarea","多行文本",""),
+    DESCRIPTION("Description","说明",""),
     AREA("Area","地区",new HashMap<>()),
     NUMBER("Number","数字",null),
     DATE("Date","日期",null),
