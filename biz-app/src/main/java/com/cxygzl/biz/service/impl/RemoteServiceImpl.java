@@ -17,13 +17,14 @@ import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.dto.flow.Node;
-import com.cxygzl.common.dto.third.*;
 import com.cxygzl.common.dto.third.MessageDto;
+import com.cxygzl.common.dto.third.*;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -350,6 +351,28 @@ public class RemoteServiceImpl implements IRemoteService {
 
                 List<String> collect = processExecutionList.stream().map(w -> w.getChildExecutionId()).collect(Collectors.toList());
 
+                {
+                    //处理
+                    List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery().eq(ProcessNodeRecordAssignUser::getProcessInstanceId, recordParamDto.getProcessInstanceId())
+                            .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
+                            .eq(ProcessNodeRecordAssignUser::getNodeId, recordParamDto.getNodeId())
+                            .in(ProcessNodeRecordAssignUser::getExecutionId, collect).list();
+                    if(CollUtil.isNotEmpty(list)){
+                        List<TaskParamDto> taskParamDtoList=new ArrayList<>();
+                        for (ProcessNodeRecordAssignUser processNodeRecordAssignUser : list) {
+                            TaskParamDto taskParamDto = new TaskParamDto();
+                            taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
+                            taskParamDto.setUserId(processNodeRecordAssignUser.getUserId());
+                            taskParamDto.setTaskId(processNodeRecordAssignUser.getTaskId());
+                            taskParamDtoList.add(taskParamDto);
+                        }
+
+                        ApiStrategyFactory.getStrategy().handleTask(taskParamDtoList,ProcessInstanceConstant.TaskType.CANCEL);
+                    }
+
+
+                }
+
                 processNodeRecordAssignUserService.lambdaUpdate()
                         .set(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.YCX.getCode())
                         .set(ProcessNodeRecordAssignUser::getTaskType, ProcessInstanceConstant.TaskType.CANCEL)
@@ -358,6 +381,7 @@ public class RemoteServiceImpl implements IRemoteService {
                         .eq(ProcessNodeRecordAssignUser::getNodeId, recordParamDto.getNodeId())
                         .in(ProcessNodeRecordAssignUser::getExecutionId, collect)
                         .update(new ProcessNodeRecordAssignUser());
+
             }
 
 
