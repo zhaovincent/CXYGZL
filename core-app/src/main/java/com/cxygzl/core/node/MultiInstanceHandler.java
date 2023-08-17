@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_NODE_RESULT;
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_RESULT;
 
 @Component("multiInstanceHandler")
 @Slf4j
@@ -203,13 +204,13 @@ public class MultiInstanceHandler {
     public boolean completionCondition(DelegateExecution execution) {
 
         ExecutionEntityImpl entity = (ExecutionEntityImpl) execution;
-        String processDefinitionKey = entity.getProcessDefinitionKey();
+        String flowId = entity.getProcessDefinitionKey();
 
-        UserTask flowNode = (UserTask) FlowableUtils.getFlowNode(execution.getProcessInstanceId(), ((ExecutionEntityImpl) execution).getActivityId());
+        UserTask flowNode = (UserTask) FlowableUtils.getFlowNode(execution.getProcessInstanceId(), entity.getActivityId());
         String nodeId = FlowableUtils.getNodeIdFromExtension(flowNode);
 
 
-        Node node = NodeDataStoreFactory.getInstance().getNode(processDefinitionKey, nodeId);
+        Node node = NodeDataStoreFactory.getInstance().getNode(flowId, nodeId);
 
         Integer multipleMode = node.getMultipleMode();
 
@@ -232,7 +233,7 @@ public class MultiInstanceHandler {
 
         List<? extends DelegateExecution> executionList = execution.getExecutions();
         for (DelegateExecution delegateExecution : executionList) {
-            Boolean variableLocal = delegateExecution.getVariableLocal(ProcessInstanceConstant.VariableKey.APPROVE_RESULT, Boolean.class);
+            Boolean variableLocal = delegateExecution.getVariableLocal(APPROVE_RESULT, Boolean.class);
             if (variableLocal != null && variableLocal) {
                 okNum++;
             }
@@ -249,13 +250,15 @@ public class MultiInstanceHandler {
         ) {
             //或签
             if (okNum > 0) {
-                ((ExecutionEntityImpl) execution).setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                        ProcessInstanceConstant.ApproveNodeResult.OK);
+                entity.setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
+                        ProcessInstanceConstant.ApproveResult.OK);
+
                 return true;
             }
             if (nrOfCompletedInstances == nrOfInstances) {
-                ((ExecutionEntityImpl) execution).setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                        ProcessInstanceConstant.ApproveNodeResult.REFUSE);
+                entity.setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
+                        ProcessInstanceConstant.ApproveResult.REFUSE);
+
                 return true;
             }
 
@@ -266,14 +269,14 @@ public class MultiInstanceHandler {
         ) {
             //顺签
             if (failNum > 0) {
-                ((ExecutionEntityImpl) execution).setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                        ProcessInstanceConstant.ApproveNodeResult.REFUSE);
+                entity.setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
+                        ProcessInstanceConstant.ApproveResult.REFUSE);
 
                 return true;
             }
             if (nrOfCompletedInstances == nrOfInstances) {
-                ((ExecutionEntityImpl) execution).setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                        ProcessInstanceConstant.ApproveNodeResult.OK);
+                entity.setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
+                        ProcessInstanceConstant.ApproveResult.OK);
 
                 return true;
             }
@@ -290,23 +293,23 @@ public class MultiInstanceHandler {
 
             //会签
             if (Convert.toBigDecimal(okNum * 100).compareTo(Convert.toBigDecimal(nrOfInstances).multiply(modePercentage)) >= 0) {
-                ((ExecutionEntityImpl) execution).setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                        ProcessInstanceConstant.ApproveNodeResult.OK);
+                entity.setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
+                        ProcessInstanceConstant.ApproveResult.OK);
                 return true;
             } else {
                 //如果剩余的数量不可能达到比例 也结束了
                 if (Convert.toBigDecimal((nrOfInstances - nrOfCompletedInstances + okNum) * 100).compareTo(Convert.toBigDecimal(nrOfInstances).multiply(modePercentage)) < 0) {
 
-                    ((ExecutionEntityImpl) execution).setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                            ProcessInstanceConstant.ApproveNodeResult.REFUSE);
+                    entity.setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
+                            ProcessInstanceConstant.ApproveResult.REFUSE);
 
                     return true;
                 }
 
                 if (nrOfCompletedInstances == nrOfInstances) {
                     //未满足条件
-                    ((ExecutionEntityImpl) execution).setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                            ProcessInstanceConstant.ApproveNodeResult.REFUSE);
+                    entity.setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
+                            ProcessInstanceConstant.ApproveResult.REFUSE);
 
 
                     return true;

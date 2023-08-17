@@ -77,7 +77,7 @@ public class ApprovalCreateListener implements TaskListener {
                 //自动拒绝
 
                 Dict dict = Dict.create().set(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                        ProcessInstanceConstant.ApproveNodeResult.REFUSE);
+                        ProcessInstanceConstant.ApproveResult.REFUSE);
                 taskService.complete(taskEntity.getId(),dict);
 
 

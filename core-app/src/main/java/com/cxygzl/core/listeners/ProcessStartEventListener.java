@@ -1,6 +1,7 @@
 package com.cxygzl.core.listeners;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.Header;
 import cn.hutool.http.HttpRequest;
@@ -25,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.*;
+
 /**
  * 流程监听器
  */
@@ -46,13 +49,29 @@ public class ProcessStartEventListener implements FlowableEventListener {
 
             ExecutionEntityImpl entity = (ExecutionEntityImpl) flowableProcessStartedEvent.getEntity();
             DelegateExecution execution = flowableProcessStartedEvent.getExecution();
-            String processInstanceId = flowableProcessStartedEvent.getProcessInstanceId();
             String flowId = entity.getProcessDefinitionKey();
+            //上级实例id
+            String nestedProcessInstanceId = flowableProcessStartedEvent.getNestedProcessInstanceId();
+            {
+                //设置唯一id
+                execution.setVariable(FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
+                //判断整体流程默认是通过
+                execution.setVariable(StrUtil.format("{}_{}", flowId, APPROVE_RESULT),
+                        ProcessInstanceConstant.ApproveResult.OK);
+                if(StrUtil.isNotBlank(nestedProcessInstanceId)){
+                    //子流程发起人处理表单
+                    execution.setVariable(SUB_PROCESS_STARTER_NODE,true);
+                }else{
+                    execution.setVariable(SUB_PROCESS_STARTER_NODE,false);
+                }
+            }
+
+            String processInstanceId = flowableProcessStartedEvent.getProcessInstanceId();
+
             Object variable = execution.getVariable(
                     ProcessInstanceConstant.VariableKey.STARTER);
             String startUserId = (JSON.parseArray(JSON.toJSONString(variable), NodeUser.class).get(0).getId());
-            //上级实例id
-            String nestedProcessInstanceId = flowableProcessStartedEvent.getNestedProcessInstanceId();
+
 
             Map<String, Object> variables = execution.getVariables();
             log.info("流程开始了变量是：{}", JSON.toJSONString(variables));

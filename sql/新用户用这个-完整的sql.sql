@@ -1133,28 +1133,28 @@ CREATE TABLE `process_group`  (
 -- Table structure for process_instance_record
 -- ----------------------------
 DROP TABLE IF EXISTS `process_instance_record`;
-CREATE TABLE `process_instance_record`  (
-                                            `id` bigint NOT NULL COMMENT 'id',
-                                            `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程名字',
-                                            `logo` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '头像',
-                                            `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户id',
-                                            `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                            `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-                                            `update_time` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                                            `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流程id',
-                                            `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流程实例id',
-                                            `form_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '表单数据',
-                                            `group_id` bigint NULL DEFAULT NULL COMMENT '组id',
-                                            `group_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '组名称',
-                                            `status` int NULL DEFAULT 1 COMMENT '状态',
-                                            `end_time` datetime NULL DEFAULT NULL COMMENT '结束时间',
-                                            `parent_process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '上级流程实例id',
-                                            `process` json NULL COMMENT '节点对象',
-                                            PRIMARY KEY (`id`) USING BTREE,
-                                            INDEX `idx_id`(`id` ASC) USING BTREE,
-                                            INDEX `idx_dep_id`(`user_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 842 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程记录' ROW_FORMAT = DYNAMIC;
-
+CREATE TABLE `process_instance_record` (
+                                           `id` bigint NOT NULL COMMENT 'id',
+                                           `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程名字',
+                                           `logo` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '头像',
+                                           `user_id` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户id',
+                                           `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
+                                           `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                           `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                           `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '流程id',
+                                           `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '流程实例id',
+                                           `form_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '表单数据',
+                                           `group_id` bigint DEFAULT NULL COMMENT '组id',
+                                           `group_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '组名称',
+                                           `status` int DEFAULT '1' COMMENT '状态',
+                                           `end_time` datetime DEFAULT NULL COMMENT '结束时间',
+                                           `parent_process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '上级流程实例id',
+                                           `process` json DEFAULT NULL,
+                                           `result` int DEFAULT NULL COMMENT '结果',
+                                           PRIMARY KEY (`id`) USING BTREE,
+                                           KEY `idx_id` (`id`) USING BTREE,
+                                           KEY `idx_dep_id` (`user_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='流程记录';
 -- ----------------------------
 -- Table structure for process_node_data
 -- ----------------------------

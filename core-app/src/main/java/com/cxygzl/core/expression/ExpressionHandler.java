@@ -6,7 +6,9 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.EscapeUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
@@ -337,6 +339,51 @@ public class ExpressionHandler {
         return true;
     }
 
+    /**
+     * 判断所有的变量是否为false
+     *
+     * @param execution
+     * @param keyArr
+     * @return
+     */
+    public boolean isAllFalse(DelegateExecution execution, String... keyArr) {
+        Map<String, Object> variables = execution.getVariables(ListUtil.of(keyArr));
+        for (String s : keyArr) {
+
+            Boolean bool = MapUtil.getBool(variables, s);
+            if (bool == null) {
+                return false;
+            }
+
+            if (bool) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 不是所有的都是true
+     * @param execution
+     * @param keyArr
+     * @return
+     */
+    public boolean isNotAllTrue(DelegateExecution execution, String... keyArr) {
+        Map<String, Object> variables = execution.getVariables(ListUtil.of(keyArr));
+        for (String s : keyArr) {
+
+            Boolean bool = MapUtil.getBool(variables, s);
+            if (bool == null) {
+                 return true;
+            }
+
+            if (!bool) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean stringHandler(String key, String param, Object value, String symbol) {
 
         log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
@@ -570,6 +617,16 @@ public class ExpressionHandler {
             //处理多实例表单主子流程参数传递
             Object variable = execution.getVariable(key);
             return CollUtil.newArrayList(variable);
+
+        }
+        if (flag == 5) {
+            //子流程默认传递审批结果是通过
+            return ProcessInstanceConstant.ApproveResult.OK;
+
+        }
+        if (flag == 6) {
+            //子流程默认传递流程唯一id
+            return IdUtil.fastSimpleUUID();
 
         }
 

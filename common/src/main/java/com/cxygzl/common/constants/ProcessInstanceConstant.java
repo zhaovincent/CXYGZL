@@ -95,7 +95,7 @@ public class ProcessInstanceConstant {
     /**
      * 节点审批结果
      */
-    public static class ApproveNodeResult{
+    public static class ApproveResult {
         public static final int OK=1;
         public static final int REFUSE=2;
     }

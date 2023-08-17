@@ -49,8 +49,8 @@ file:
   ##静态文件在磁盘位置，此处与nginx配置要一直
   dir: /tmp/cxygzl
   ##静态文件访问路径
-  showUrl: https://dd.cxygzl.com/dev-api/file/show
-#  showUrl: http://127.0.0.1:${server.port}/file/show
+#  showUrl: https://dd.cxygzl.com/dev-api/file/show
+  showUrl: http://127.0.0.1:${server.port}/file/show
 
 
 sa-token:
@@ -77,7 +77,7 @@ dingtalk:
 
 ##流程的数据api开关
 api:
-  ori: dingtalk
+  ori: local
 
 version:
   admin: V2.0.8

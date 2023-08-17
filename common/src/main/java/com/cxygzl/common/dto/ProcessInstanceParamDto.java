@@ -30,4 +30,9 @@ public class ProcessInstanceParamDto {
      * 是否撤销
      */
     private Boolean cancel;
+    /**
+     * 结果
+     */
+    private Integer result;
+
 }

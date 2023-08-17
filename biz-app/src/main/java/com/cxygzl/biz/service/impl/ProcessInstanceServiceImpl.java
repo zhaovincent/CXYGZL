@@ -355,6 +355,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     @Override
     public com.cxygzl.common.dto.R end(ProcessInstanceParamDto processInstanceParamDto) {
         processInstanceRecordService.lambdaUpdate()
+                .set(ProcessInstanceRecord::getResult,processInstanceParamDto.getResult())
                 .set(ProcessInstanceRecord::getEndTime, new Date())
                 .set(!processInstanceParamDto.getCancel(), ProcessInstanceRecord::getStatus,
                         NodeStatusEnum.YJS.getCode())

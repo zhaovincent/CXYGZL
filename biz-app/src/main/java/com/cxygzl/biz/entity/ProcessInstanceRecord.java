@@ -95,4 +95,9 @@ public class ProcessInstanceRecord  extends BaseEntity {
      */
     @TableField("`process`")
     private String process;
+    /**
+     * 结果
+     */
+    @TableField("`result`")
+    private Integer result;
 }

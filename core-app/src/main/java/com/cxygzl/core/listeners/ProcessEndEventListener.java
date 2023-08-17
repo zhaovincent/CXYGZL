@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_RESULT;
+
 /**
  * 流程监听器
  */
@@ -46,16 +48,20 @@ public class ProcessEndEventListener implements FlowableEventListener {
             String processInstanceId = e.getProcessInstanceId();
             ExecutionEntityImpl entity = (ExecutionEntityImpl) e.getEntity();
             Map<String, Object> variables = execution.getVariables();
+            String flowId = entity.getProcessDefinitionKey();
 
+
+            //结果
+            Integer finalResult = execution.getVariable(StrUtil.format("{}_{}", flowId, APPROVE_RESULT), Integer.class);
 
             ProcessInstanceParamDto processInstanceParamDto = new ProcessInstanceParamDto();
             processInstanceParamDto.setProcessInstanceId(processInstanceId);
             processInstanceParamDto.setCancel(MapUtil.getBool(variables,
                     ProcessInstanceConstant.VariableKey.CANCEL
                     , false));
+            processInstanceParamDto.setResult(finalResult);
             CoreHttpUtil.endProcessEvent(processInstanceParamDto);
             {
-                String flowId = entity.getProcessDefinitionKey();
 
                 {
                     //判断后置事件

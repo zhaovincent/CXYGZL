@@ -28,8 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE;
-import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE;
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.*;
 
 /**
  * 模型工具类 处理模型构建相关的
@@ -482,7 +481,7 @@ public class ModelUtil {
 
             UserTask userTask = buildUserTask(rootUserTask, node.getId(), createListener);
 //            userTask.setSkipExpression("${expressionHandler.isAllNull(rootReject)}");
-            String exp = StrUtil.format("expressionHandler.isAllNull(execution,\"{}\",\"{}\")", REJECT_TO_STARTER_NODE,
+            String exp = StrUtil.format("expressionHandler.isNotAllTrue(execution,\"{}\",\"{}\") && expressionHandler.isAllNull(execution,\"{}\",\"{}\")", REJECT_TO_STARTER_NODE,
                     SUB_PROCESS_STARTER_NODE);
 
             userTask.setSkipExpression(StrUtil.format("${{}}", exp));
@@ -993,34 +992,7 @@ public class ModelUtil {
                 value.add(e);
             }
 
-            {
-                //子流程处理表单数据
-                ExtensionElement e = new ExtensionElement();
-                e.setName("flowable:in");
-                HashMap<String, List<ExtensionAttribute>> attributes = new HashMap<>();
 
-                ArrayList<ExtensionAttribute> value1 = new ArrayList<>();
-                {
-                    ExtensionAttribute e1 = new ExtensionAttribute();
-                    e1.setName("target");
-                    e1.setValue(SUB_PROCESS_STARTER_NODE);
-                    value1.add(e1);
-                }
-
-                {
-
-                    ExtensionAttribute e1 = new ExtensionAttribute();
-                    e1.setName("sourceExpression");
-
-                    e1.setValue(StrUtil.format("${expressionHandler.callActivityVariables(\"{}\",execution,2)}",
-                            SUB_PROCESS_STARTER_NODE));
-                    value1.add(e1);
-                }
-
-                attributes.put(IdUtil.fastSimpleUUID(), value1);
-                e.setAttributes(attributes);
-                value.add(e);
-            }
 
             List<HttpSettingData> pcFormList = node.getPcFormList();
 
