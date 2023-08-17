@@ -1,6 +1,7 @@
 package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.service.IProcessCopyService;
+import com.cxygzl.common.dto.R;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,7 +29,7 @@ public class ProcessCopyController {
      * @return
      */
     @GetMapping("querySingleDetail")
-    public Object querySingleDetail(long id) {
+    public R querySingleDetail(long id) {
         return processCopyService.querySingleDetail(id);
     }
 

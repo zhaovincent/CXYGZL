@@ -19,6 +19,7 @@ import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.FormUtil;
 import com.cxygzl.biz.utils.NodeFormatUtil;
 import com.cxygzl.biz.utils.NodeImageUtil;
+import com.cxygzl.biz.vo.TaskDetailViewVO;
 import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.ProcessCopyVo;
@@ -625,8 +626,6 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     public R detail(String processInstanceId) {
 
 
-        String userId = StpUtil.getLoginIdAsString();
-
 
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
 
@@ -696,13 +695,23 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
 
         }
-        Dict set = Dict.create()
-                .set("processInstanceId", processInstanceId)
-                .set("process", oaForms.getProcess())
 
 
-                .set("formItems", jsonObjectList);
 
-        return com.cxygzl.common.dto.R.success(set);
+        UserDto starterUser = ApiStrategyFactory.getStrategy().getUser(processInstanceRecord.getUserId());
+
+        TaskDetailViewVO taskDetailViewVO = TaskDetailViewVO.builder()
+                .formItems(jsonObjectList)
+                .processInstanceId(processInstanceId)
+                .process(oaForms.getProcess())
+                .processName(oaForms.getName())
+                .starterAvatarUrl(starterUser.getAvatarUrl())
+                .starterName(starterUser.getName())
+                .startTime(processInstanceRecord.getCreateTime())
+                .processInstanceStatus(processInstanceRecord.getStatus())
+                .processInstanceResult(processInstanceRecord.getResult())
+                .build();
+
+        return com.cxygzl.common.dto.R.success(taskDetailViewVO);
     }
 }

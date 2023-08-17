@@ -3,7 +3,6 @@ package com.cxygzl.biz.service.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
@@ -15,12 +14,13 @@ import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.FormUtil;
-import com.cxygzl.common.dto.flow.FormItemVO;
+import com.cxygzl.biz.vo.TaskDetailViewVO;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.TaskResultDto;
+import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.CommonUtil;
@@ -203,32 +203,34 @@ public class TaskServiceImpl implements ITaskService {
 
         UserDto starterUser = ApiStrategyFactory.getStrategy().getUser(starterUserId);
 
-        Dict set = Dict.create()
-                .set("processInstanceId", taskResultDto.getProcessInstanceId())
-                .set("node", nodeDataJson)
-                .set("nodeId", nodeId)
-                .set("starterAvatarUrl", starterUser.getAvatarUrl())
-                .set("starterName", starterUser.getName())
-                .set("startTime", processInstanceRecord.getCreateTime())
-                .set("taskExist", taskExist)
-                .set("processName", oaForms.getName())
-                .set("nodeName", node.getNodeName())
-                .set("flowId", taskResultDto.getFlowId())
-                .set("process", oaForms.getProcess())
-                .set("delegateAgain", taskResultDto.getDelegate())
-                .set("delegationTask", StrUtil.equals(taskResultDto.getDelegationState(), "PENDING"))
-                .set("selectUserNodeId", selectUserNodeId)
-                .set("formItems", formItemVOList);
-        {
-            Object subProcessStarterNode =
-                    paramMap.get(ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE);
-            Object rejectStarterNode = paramMap.get(ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE);
-            set.set("subProcessStarterTask", Convert.toBool(subProcessStarterNode, false) && rejectStarterNode == null);
-
-        }
+        Object subProcessStarterNode =
+                paramMap.get(ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE);
+        Object rejectStarterNode = paramMap.get(ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE);
 
 
-        return R.success(set);
+        TaskDetailViewVO taskDetailViewVO = TaskDetailViewVO.builder()
+                .processInstanceId(taskResultDto.getProcessInstanceId())
+                .node(nodeDataJson)
+                .nodeId(nodeId)
+                .taskExist(taskExist)
+                .processName(oaForms.getName())
+                .process(oaForms.getProcess())
+                .starterAvatarUrl(starterUser.getAvatarUrl())
+                .starterName(starterUser.getName())
+                .startTime(processInstanceRecord.getCreateTime())
+                .nodeName(node.getNodeName())
+                .flowId(taskResultDto.getFlowId())
+                .delegateAgain(taskResultDto.getDelegate())
+                .selectUserNodeId(selectUserNodeId)
+                .formItems(formItemVOList)
+                .processInstanceStatus(processInstanceRecord.getStatus())
+                .processInstanceResult(processInstanceRecord.getResult())
+                .delegationTask(StrUtil.equals(taskResultDto.getDelegationState(), "PENDING"))
+                .subProcessStarterTask(Convert.toBool(subProcessStarterNode, false) && rejectStarterNode == null)
+                .build();
+
+
+        return R.success(taskDetailViewVO);
     }
 
     /**

@@ -1,7 +1,8 @@
 package com.cxygzl.biz.service;
 
-import com.cxygzl.biz.entity.ProcessCopy;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.cxygzl.biz.entity.ProcessCopy;
+import com.cxygzl.common.dto.R;
 
 /**
  * <p>
@@ -17,6 +18,6 @@ public interface IProcessCopyService extends IService<ProcessCopy> {
      * @param id
      * @return
      */
-    Object querySingleDetail(long id);
+    R querySingleDetail(long id);
 
 }
