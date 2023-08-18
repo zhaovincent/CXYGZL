@@ -43,14 +43,11 @@ public class TaskDetailViewVO {
     private String nodeName;
     private String flowId;
     private String process;
-    /**
-     * 是否再次委派
-     */
-    private Boolean delegateAgain;
+
     /**
      * 是否是委派任务
      */
-    private Boolean delegationTask;
+    private Boolean frontJoinTask;
     /**
      * 是否是子流程发起任务
      */

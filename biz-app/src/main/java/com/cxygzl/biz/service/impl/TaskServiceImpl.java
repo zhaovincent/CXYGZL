@@ -8,9 +8,8 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
+import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.entity.Process;
-import com.cxygzl.biz.entity.ProcessInstanceRecord;
-import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.FormUtil;
@@ -33,6 +32,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,6 +48,8 @@ public class TaskServiceImpl implements ITaskService {
     private IProcessNodeRecordAssignUserService processNodeRecordAssignUserService;
     @Resource
     private IProcessInstanceRecordService processInstanceRecordService;
+    @Resource
+    private IProcessExecutionService executionService;
 
     /**
      * 查询任务
@@ -71,20 +73,38 @@ public class TaskServiceImpl implements ITaskService {
 
         TaskResultDto taskResultDto = r.getData();
 
+        String flowId = taskResultDto.getFlowId();
+        Process oaForms = processService.getByFlowId(flowId);
+        if (oaForms == null) {
+            return R.fail("流程不存在");
+        }
+
+
+
+        List<ProcessExecution> processExecutionList = executionService.lambdaQuery()
+                .eq(ProcessExecution::getExecutionId, taskResultDto.getExecutionId())
+                .or()
+                .eq(ProcessExecution::getChildExecutionId, taskResultDto.getExecutionId())
+                .list();
+
+        Set<String> executionIdSet = processExecutionList.stream().map(w -> w.getChildExecutionId()).collect(Collectors.toSet());
+        processExecutionList.forEach(rr->executionIdSet.add(rr.getExecutionId()));
+
+        ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
+                .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
+                .eq(ProcessNodeRecordAssignUser::getUserId, userId)
+                .eq(ProcessNodeRecordAssignUser::getFlowUniqueId, taskResultDto.getFlowUniqueId())
+                .in(ProcessNodeRecordAssignUser::getExecutionId, executionIdSet)
+                .one();
+
         //变量
         Map<String, Object> paramMap = taskResultDto.getVariableAll();
         Boolean taskExist = taskResultDto.getCurrentTask();
         if (!taskExist) {
             //任务已完成了
 
-            List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
-                    .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
-                    .eq(ProcessNodeRecordAssignUser::getUserId, userId)
-                    .eq(ProcessNodeRecordAssignUser::getExecutionId, taskResultDto.getExecutionId())
-                    .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
-                    .list();
 
-            String data = list.get(0).getData();
+            String data = processNodeRecordAssignUser.getData();
             if (StrUtil.isNotBlank(data)) {
                 Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
                 });
@@ -102,15 +122,11 @@ public class TaskServiceImpl implements ITaskService {
             nodeId = ProcessInstanceConstant.VariableKey.STARTER;
         }
         String nodeDataJson =
-                nodeDataService.getNodeData(taskResultDto.getFlowId(), nodeId).getData();
+                nodeDataService.getNodeData(flowId, nodeId).getData();
         Node node = CommonUtil.toObj(nodeDataJson, Node.class);
         Map<String, String> formPerms = node.getFormPerms();
 
 
-        Process oaForms = processService.getByFlowId(taskResultDto.getFlowId());
-        if (oaForms == null) {
-            return R.fail("流程不存在");
-        }
 
         List<FormItemVO> formItemVOList = CommonUtil.toArray(oaForms.getFormItems(), FormItemVO.class);
         for (FormItemVO formItemVO : formItemVOList) {
@@ -194,7 +210,6 @@ public class TaskServiceImpl implements ITaskService {
 
 
         //是否是子流程发起任务
-
         List<String> selectUserNodeId = NodeUtil.selectUserNodeId(node);
 
         //发起人
@@ -208,6 +223,10 @@ public class TaskServiceImpl implements ITaskService {
         Object rejectStarterNode = paramMap.get(ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE);
 
 
+
+
+
+
         TaskDetailViewVO taskDetailViewVO = TaskDetailViewVO.builder()
                 .processInstanceId(taskResultDto.getProcessInstanceId())
                 .node(nodeDataJson)
@@ -219,13 +238,12 @@ public class TaskServiceImpl implements ITaskService {
                 .starterName(starterUser.getName())
                 .startTime(processInstanceRecord.getCreateTime())
                 .nodeName(node.getNodeName())
-                .flowId(taskResultDto.getFlowId())
-                .delegateAgain(taskResultDto.getDelegate())
+                .flowId(flowId)
                 .selectUserNodeId(selectUserNodeId)
                 .formItems(formItemVOList)
                 .processInstanceStatus(processInstanceRecord.getStatus())
                 .processInstanceResult(processInstanceRecord.getResult())
-                .delegationTask(StrUtil.equals(taskResultDto.getDelegationState(), "PENDING"))
+                .frontJoinTask(taskResultDto.getFrontJoinTask())
                 .subProcessStarterTask(Convert.toBool(subProcessStarterNode, false) && rejectStarterNode == null)
                 .build();
 

@@ -31,6 +31,10 @@ public class TaskResultDto {
      */
     private String delegationState;
     /**
+     * 是否是委派的任务
+     */
+    private Boolean frontJoinTask;
+    /**
      * 是否允许继续委派
      */
     private Boolean delegate;
@@ -38,4 +42,6 @@ public class TaskResultDto {
      * 所有变量
      */
     private Map<String, Object> variableAll;
+
+    private String flowUniqueId;
 }

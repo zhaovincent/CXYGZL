@@ -55,9 +55,9 @@ public class ProcessStartEventListener implements FlowableEventListener {
             {
                 //设置唯一id
                 execution.setVariable(FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
-                //判断整体流程默认是通过
-                execution.setVariable(StrUtil.format("{}_{}", flowId, APPROVE_RESULT),
-                        ProcessInstanceConstant.ApproveResult.OK);
+//                //判断整体流程默认是通过
+//                execution.setVariable(StrUtil.format("{}_{}", flowId, APPROVE_RESULT),
+//                        ProcessInstanceConstant.ApproveResult.OK);
                 if(StrUtil.isNotBlank(nestedProcessInstanceId)){
                     //子流程发起人处理表单
                     execution.setVariable(SUB_PROCESS_STARTER_NODE,true);

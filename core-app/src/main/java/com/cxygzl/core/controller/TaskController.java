@@ -166,6 +166,7 @@ public class TaskController {
         //nodeid
         String taskDefinitionKey = null;
         String executionId = null;
+        String flowUniqueId = null;
 
         boolean taskExist = true;
 
@@ -183,6 +184,8 @@ public class TaskController {
                 processInstanceId = historicTaskInstance.getProcessInstanceId();
                 executionId = historicTaskInstance.getExecutionId();
                 processDefinitionId = historicTaskInstance.getProcessDefinitionId();
+                HistoricVariableInstance historicVariableInstance = historyService.createHistoricVariableInstanceQuery().taskId(taskId).variableName(FLOW_UNIQUE_ID).singleResult();
+                flowUniqueId = Convert.toStr(historicVariableInstance.getValue());
             } else {
                 processDefinitionId = task.getProcessDefinitionId();
                 taskDefinitionKey = task.getTaskDefinitionKey();
@@ -191,6 +194,7 @@ public class TaskController {
                 executionId = task.getExecutionId();
                 delegateVariable = taskService.getVariableLocal(taskId, "delegate");
 
+                flowUniqueId = taskService.getVariable(taskId, FLOW_UNIQUE_ID, String.class);
 
             }
         }
@@ -223,8 +227,8 @@ public class TaskController {
         taskResultDto.setDelegate(Convert.toBool(delegateVariable, false));
         taskResultDto.setVariableAll(variableAll);
         taskResultDto.setProcessInstanceId(processInstanceId);
-        taskResultDto.setDelegationState(delegationState == null ? null : delegationState.toString());
-
+        taskResultDto.setFrontJoinTask(delegationState == null ? false : StrUtil.equals(delegationState.toString(),ProcessInstanceConstant.VariableKey.PENDING));
+        taskResultDto.setFlowUniqueId(flowUniqueId);
 
         return R.success(taskResultDto);
     }
@@ -259,7 +263,7 @@ public class TaskController {
                     taskParamDto.getApproveDesc(),
                     taskParamDto.getUserId(), "提交任务并添加了评论");
         } else {
-             saveSysCommentToTask(task, descType, "提交任务", taskParamDto.getUserId());
+            saveSysCommentToTask(task, descType, "提交任务", taskParamDto.getUserId());
         }
         Map<String, Object> paramMap = taskParamDto.getParamMap();
         taskService.complete(task.getId(), paramMap);
@@ -281,7 +285,6 @@ public class TaskController {
         }
 
 
-
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
             saveUserCommentToTask(task, ApproveDescTypeEnum.FRONT_JOIN.getType(),
                     taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
@@ -289,7 +292,7 @@ public class TaskController {
                             taskParamDto.getTargetUserName()
                     ));
 
-        }else{
+        } else {
             saveSysCommentToTask(task, ApproveDescTypeEnum.FRONT_JOIN.getType(), StrUtil.format("委派任务给:{}",
                     taskParamDto.getTargetUserName()
             ), taskParamDto.getUserId());
@@ -322,7 +325,7 @@ public class TaskController {
             saveUserCommentToTask(task, ApproveDescTypeEnum.RESOLVE.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
                     "完成任务并添加了评论");
 
-        }else{
+        } else {
             saveSysCommentToTask(task, ApproveDescTypeEnum.RESOLVE.getType(), StrUtil.format("完成任务"
             ), taskParamDto.getUserId());
         }
@@ -358,7 +361,7 @@ public class TaskController {
                             taskParamDto.getTargetUserName()
                     ));
 
-        }else{
+        } else {
             saveSysCommentToTask(task, ApproveDescTypeEnum.BACK_JOIN.getType(), StrUtil.format("转办任务给:{}",
                     taskParamDto.getTargetUserName()
             ), taskParamDto.getUserId());
@@ -411,8 +414,8 @@ public class TaskController {
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
             saveUserCommentToTask(task, ApproveDescTypeEnum.REJECT.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
                     "驳回了任务并添加了评论");
-        }else{
-            saveSysCommentToTask(task,ApproveDescTypeEnum.REJECT.getType(),"驳回了任务",taskParamDto.getUserId());
+        } else {
+            saveSysCommentToTask(task, ApproveDescTypeEnum.REJECT.getType(), "驳回了任务", taskParamDto.getUserId());
         }
 
         runtimeService.createChangeActivityStateBuilder()
