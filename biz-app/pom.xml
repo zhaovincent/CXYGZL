@@ -16,10 +16,21 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <easy-captcha.version>1.6.2</easy-captcha.version>
+        <weixin-java-miniapp.version>4.5.0</weixin-java-miniapp.version>
 
     </properties>
 
     <dependencies>
+
+        <!-- https://mvnrepository.com/artifact/com.github.binarywang/wx-java -->
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-miniapp</artifactId>
+            <version>${weixin-java-miniapp.version}</version>
+        </dependency>
+
+
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>

@@ -49,8 +49,8 @@ file:
   ##静态文件在磁盘位置，此处与nginx配置要一直
   dir: /tmp/cxygzl
   ##静态文件访问路径
-#  showUrl: https://dd.cxygzl.com/dev-api/file/show
-  showUrl: http://127.0.0.1:${server.port}/file/show
+  showUrl: https://dd.cxygzl.com/api/file/show
+#  showUrl: http://127.0.0.1:${server.port}/file/show
 
 
 sa-token:
@@ -81,3 +81,12 @@ api:
 
 version:
   admin: V2.0.8
+
+wx:
+  miniapp:
+    configs:
+      - appid: wx16f582e2a9fe367ca
+        secret: 1fc126e751fbd1f0c75432decbd3fb615
+        token: #微信小程序消息服务器配置的token
+        aesKey: #微信小程序消息服务器配置的EncodingAESKey
+        msgDataFormat: JSON

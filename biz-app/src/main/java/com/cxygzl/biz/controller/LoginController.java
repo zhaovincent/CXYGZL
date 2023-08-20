@@ -5,6 +5,7 @@ import com.cxygzl.biz.service.ILoginService;
 import com.cxygzl.biz.vo.UserVO;
 import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.WeixinMiniAppQueryPhoneDto;
 import lombok.SneakyThrows;
 import org.springframework.web.bind.annotation.*;
 
@@ -103,4 +104,26 @@ public class LoginController {
     public R getLoginParam() {
         return loginService.getLoginParam();
     }
+
+    /**
+     * 微信小程序--根据code登录
+     *
+     * @param code
+     * @return
+     */
+    @GetMapping("loginAtWxMiniAppByCode")
+    public R loginAtWxMiniAppByCode(String code) {
+        return loginService.loginAtWxMiniAppByCode(code);
+    }
+    /**
+     * 微信小程序获取手机号登录
+     * @param appQueryPhoneDto
+     * @return
+     */
+    @PostMapping("getPhoneDataAndLoginAtWxMiniApp")
+   public R getPhoneDataAndLoginAtWxMiniApp(@RequestBody WeixinMiniAppQueryPhoneDto appQueryPhoneDto){
+        return loginService.getPhoneDataAndLoginAtWxMiniApp(appQueryPhoneDto);
+    }
+
+
 }

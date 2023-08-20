@@ -42,7 +42,9 @@ public class FormItemVO {
         private Object oriForm;
         private Integer minLength;
         private Integer maxLength;
+        private Integer radixNum;
         private Integer maxSize;
+        private Boolean showChinese;
         private String regex;
         private String regexDesc;
         private String unit;

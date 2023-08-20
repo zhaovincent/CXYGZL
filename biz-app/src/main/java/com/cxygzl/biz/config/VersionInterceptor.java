@@ -2,8 +2,6 @@ package com.cxygzl.biz.config;
 
 import cn.hutool.core.comparator.VersionComparator;
 import cn.hutool.core.util.StrUtil;
-import com.cxygzl.biz.config.exception.BusinessException;
-import com.cxygzl.biz.config.exception.ResultCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -39,7 +37,7 @@ public class VersionInterceptor implements WebMvcConfigurer {
                // 1
                int compare = VersionComparator.INSTANCE.compare(cxygzlVersion, version);
                if(compare<0){
-                   throw new BusinessException("请更新版本，当前版本不支持", ResultCode.TOKEN_EXPIRED.getCode(),"");
+                   //throw new BusinessException("请更新版本，当前版本不支持", ResultCode.TOKEN_EXPIRED.getCode(),"");
                }
                return true;
            }

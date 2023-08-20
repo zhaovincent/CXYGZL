@@ -34,6 +34,7 @@ public class SaTokenConfigure implements WebMvcConfigurer {
                         "/img/*",
                         "/fonts/*",
                         "/js/*",
+                        "/api/file/show/*",
                         "/file/show/*"
                 )
 
