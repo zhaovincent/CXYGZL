@@ -9,7 +9,7 @@ import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.core.node.AssignUserStrategy;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +38,7 @@ public class AssignUserFixedStrategyImpl implements InitializingBean, AssignUser
 
         if (CollUtil.isNotEmpty(deptIdList)) {
 
-            R<List<String>> r= CoreHttpUtil.queryUserIdListByDepIdList(deptIdList);
+            R<List<String>> r= BizHttpUtil.queryUserIdListByDepIdList(deptIdList);
 
             List<String> data = r.getData();
             if (CollUtil.isNotEmpty(data)) {

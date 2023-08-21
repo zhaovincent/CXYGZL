@@ -10,7 +10,7 @@ import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.flow.SameAsStarter;
 import com.cxygzl.common.dto.third.DeptDto;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.FlowableUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.UserTask;
@@ -76,7 +76,7 @@ public class MultiInstanceHandler {
                 if (StrUtil.equals(ProcessInstanceConstant.UserTaskSameAsStarterHandler.TO_PASS, handler)) {
                     userIdList.remove(rootUserId);
                 } else if (StrUtil.equals(ProcessInstanceConstant.UserTaskSameAsStarterHandler.TO_ADMIN, handler)) {
-                    R<String> longR = CoreHttpUtil.queryProcessAdmin(flowId);
+                    R<String> longR = BizHttpUtil.queryProcessAdmin(flowId);
                     String adminId = longR.getData();
                     int index = userIdList.indexOf(rootUserId);
                     userIdList.remove(rootUserId);
@@ -88,7 +88,7 @@ public class MultiInstanceHandler {
                     {
                         //去获取主管
 
-                        R<List<com.cxygzl.common.dto.third.DeptDto>> r = CoreHttpUtil.queryParentDepListByUserId(rootUserId);
+                        R<List<com.cxygzl.common.dto.third.DeptDto>> r = BizHttpUtil.queryParentDepListByUserId(rootUserId);
 
                         List<com.cxygzl.common.dto.third.DeptDto> deptDtoList = r.getData();
                         if (CollUtil.isNotEmpty(deptDtoList)) {

@@ -4,13 +4,12 @@ import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.LRUCache;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
-import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.ProcessNodeDataDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.core.node.INodeDataStoreHandler;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -42,7 +41,7 @@ public class RemoteNodeDataStoreHandler implements INodeDataStoreHandler {
         processNodeDataDto.setData(CommonUtil.toJson(data));
 
 
-        CoreHttpUtil.saveNodeOriData(processNodeDataDto);
+        BizHttpUtil.saveNodeOriData(processNodeDataDto);
 
     }
 
@@ -65,7 +64,7 @@ public class RemoteNodeDataStoreHandler implements INodeDataStoreHandler {
         }
 
 
-        R<String> r = CoreHttpUtil.queryNodeOriData(flowId, nodeId);
+        R<String> r = BizHttpUtil.queryNodeOriData(flowId, nodeId);
 
 
         log.debug("flowId={} nodeId={} data={}", flowId, nodeId, JSON.toJSONString(r));

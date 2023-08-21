@@ -23,7 +23,7 @@ import com.cxygzl.common.dto.flow.SelectValue;
 import com.cxygzl.common.dto.third.UserFieldDto;
 import com.cxygzl.common.utils.AreaUtil;
 import com.cxygzl.core.cmd.ExpressCmd;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.ManagementService;
 import org.flowable.engine.delegate.DelegateExecution;
@@ -546,7 +546,7 @@ public class ExpressionHandler {
 
 
             if (CollUtil.isNotEmpty(deptIdList)) {
-                R<List<String>> r = CoreHttpUtil.queryUserIdListByDepIdList(deptIdList);
+                R<List<String>> r = BizHttpUtil.queryUserIdListByDepIdList(deptIdList);
                 List<String> data = r.getData();
                 for (String datum : data) {
                     if (!userIdList.contains(datum)) {
@@ -558,10 +558,10 @@ public class ExpressionHandler {
 
             return inCompare(symbol, (nodeUserDto.getId()), userIdList);
         }
-        Map<String, Object> userInfo = CoreHttpUtil.queryUserInfo(nodeUserDto.getId()).getData();
+        Map<String, Object> userInfo = BizHttpUtil.queryUserInfo(nodeUserDto.getId()).getData();
         log.debug("查询到的用户信息:{}", JSONUtil.toJsonStr(userInfo));
         //查询变量属性
-        List<UserFieldDto> userFieldDtoList = CoreHttpUtil.queryUseField().getData();
+        List<UserFieldDto> userFieldDtoList = BizHttpUtil.queryUseField().getData();
         UserFieldDto userFieldDto = userFieldDtoList.stream().filter(w -> StrUtil.equals(w.getKey(), userKey)).findFirst().get();
         Object userValue = userInfo.get(userKey);
         if (StrUtil.equalsAny(userFieldDto.getType(), FormTypeEnum.INPUT.getType(), FormTypeEnum.TEXTAREA.getType())) {

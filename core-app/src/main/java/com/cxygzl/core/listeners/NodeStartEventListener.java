@@ -8,7 +8,7 @@ import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.node.NodeDataStoreFactory;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
@@ -75,7 +75,7 @@ public class NodeStartEventListener implements FlowableEventListener {
                         ProcessNodeRecordParamDto processNodeRecordParamDto = new ProcessNodeRecordParamDto();
                         processNodeRecordParamDto.setExecutionId(parent.getId());
                         processNodeRecordParamDto.setChildExecutionId(childExecutionIdList);
-                        CoreHttpUtil.saveParentChildExecution(processNodeRecordParamDto);
+                        BizHttpUtil.saveParentChildExecution(processNodeRecordParamDto);
 
 
                         return;
@@ -120,7 +120,7 @@ public class NodeStartEventListener implements FlowableEventListener {
         }
         processNodeRecordParamDto.setNodeName(activityName);
         processNodeRecordParamDto.setExecutionId(executionId);
-        CoreHttpUtil.startNodeEvent(processNodeRecordParamDto);
+        BizHttpUtil.startNodeEvent(processNodeRecordParamDto);
 
 
         //清除变量

@@ -1,17 +1,15 @@
 package com.cxygzl.core.node.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
-import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.core.node.AssignUserStrategy;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +48,7 @@ public class AssignUserFormDeptStrategyImpl implements InitializingBean, AssignU
 
             if (CollUtil.isNotEmpty(deptIdList)) {
 
-                R<List<String>> r= CoreHttpUtil.queryUserIdListByDepIdList(deptIdList);
+                R<List<String>> r= BizHttpUtil.queryUserIdListByDepIdList(deptIdList);
 
                 List<String> data = r.getData();
                 if (CollUtil.isNotEmpty(data)) {

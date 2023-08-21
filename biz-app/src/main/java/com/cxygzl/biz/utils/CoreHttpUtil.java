@@ -2,19 +2,17 @@ package com.cxygzl.biz.utils;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.CommonUtil;
-import com.yomahub.tlog.hutoolhttp.TLogHutoolhttpInterceptor;
+import com.cxygzl.common.utils.HttpUtil;
 import org.springframework.core.env.Environment;
 
 import java.util.List;
 
 public class CoreHttpUtil {
-    private static TLogHutoolhttpInterceptor tLogHutoolhttpInterceptor = new TLogHutoolhttpInterceptor();
 
     public static String getBaseUrl() {
         Environment environment = SpringUtil.getBean(Environment.class);
@@ -25,24 +23,22 @@ public class CoreHttpUtil {
 
     public static String post(Object object, String url) {
 
-        String bizUrl =getBaseUrl();
+        String baseUrl = getBaseUrl();
+
+        return HttpUtil.post(object, url, baseUrl);
 
 
-        String post = HttpRequest.post(StrUtil.format("{}{}", bizUrl, url)).body(JSON.toJSONString(object))
-                .addInterceptor(tLogHutoolhttpInterceptor).execute().body();
-
-
-        return post;
     }
 
     public static String get(String url) {
 
-        String bizUrl = getBaseUrl();
+        String baseUrl = getBaseUrl();
 
-        return HttpRequest.get(StrUtil.format("{}{}", bizUrl, url)).addInterceptor(tLogHutoolhttpInterceptor).execute().body();
+        return HttpUtil.get(url, baseUrl);
 
 
     }
+
     /**
      * 查询任务变量
      * 全部都是
@@ -59,6 +55,7 @@ public class CoreHttpUtil {
         return post(variableQueryParamDto, "/task/queryTaskVariables");
 
     }
+
     /**
      * 查询任务评论
      * 全部都是
@@ -85,7 +82,7 @@ public class CoreHttpUtil {
      */
     public static R<IndexPageStatistics> querySimpleData(String userId) {
 
-        String s =get("/process-instance/querySimpleData?userId=" + userId );
+        String s = get("/process-instance/querySimpleData?userId=" + userId);
         return JSON.parseObject(s, new TypeReference<R<IndexPageStatistics>>() {
         });
 
@@ -140,7 +137,7 @@ public class CoreHttpUtil {
      * @param jsonObject
      * @return
      */
-    public static  com.cxygzl.common.dto.R<PageResultDto<TaskDto>> queryCompletedTask(TaskQueryParamDto jsonObject) {
+    public static com.cxygzl.common.dto.R<PageResultDto<TaskDto>> queryCompletedTask(TaskQueryParamDto jsonObject) {
 
         String post = post(jsonObject, "/flow/queryCompletedTask");
         com.cxygzl.common.dto.R<PageResultDto<TaskDto>> r = JSON.parseObject(post, new TypeReference<com.cxygzl.common.dto.R<PageResultDto<TaskDto>>>() {
@@ -158,7 +155,7 @@ public class CoreHttpUtil {
     public static R completeTask(TaskParamDto jsonObject) {
 
         String post = post(jsonObject, "/task/complete");
-        return CommonUtil.toObj(post,R.class);
+        return CommonUtil.toObj(post, R.class);
 
     }
 
@@ -180,7 +177,7 @@ public class CoreHttpUtil {
      * @param jsonObject
      * @return
      */
-    public static  com.cxygzl.common.dto.R stopProcessInstance(TaskParamDto jsonObject) {
+    public static com.cxygzl.common.dto.R stopProcessInstance(TaskParamDto jsonObject) {
 
         String post = post(jsonObject, "/flow/stopProcessInstance");
         com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
@@ -222,7 +219,7 @@ public class CoreHttpUtil {
     public static R delegateTask(TaskParamDto jsonObject) {
 
         String post = post(jsonObject, "/task/delegateTask");
-        com.cxygzl.common.dto.R r=JSON.parseObject(post,R.class);
+        com.cxygzl.common.dto.R r = JSON.parseObject(post, R.class);
 
         return r;
 
@@ -247,7 +244,7 @@ public class CoreHttpUtil {
      * @param userId
      * @return
      */
-    public static  com.cxygzl.common.dto.R<TaskResultDto> queryTask(String taskId, String userId) {
+    public static com.cxygzl.common.dto.R<TaskResultDto> queryTask(String taskId, String userId) {
 
         String s = get(StrUtil.format("/task/queryTask?taskId={}&userId={}", taskId, userId));
         com.cxygzl.common.dto.R<TaskResultDto> r = JSON.parseObject(s, new TypeReference<R<TaskResultDto>>() {

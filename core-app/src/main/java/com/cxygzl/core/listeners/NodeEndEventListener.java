@@ -4,7 +4,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
 import com.cxygzl.common.utils.NodeUtil;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
@@ -59,7 +59,7 @@ public class NodeEndEventListener implements FlowableEventListener {
 //            processNodeRecordParamDto.setNodeType(nodeDto.getType());
             processNodeRecordParamDto.setNodeName(activityName);
 
-            CoreHttpUtil.endNodeEvent(processNodeRecordParamDto);
+            BizHttpUtil.endNodeEvent(processNodeRecordParamDto);
 
 
         }
@@ -86,7 +86,7 @@ public class NodeEndEventListener implements FlowableEventListener {
 //            processNodeRecordParamDto.setNodeType(nodeDto.getType());
             processNodeRecordParamDto.setNodeName(activityName);
 
-            CoreHttpUtil.endNodeEvent(processNodeRecordParamDto);
+            BizHttpUtil.endNodeEvent(processNodeRecordParamDto);
 
         }
 

@@ -11,7 +11,7 @@ import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.core.node.NodeDataStoreFactory;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.JavaDelegate;
 import org.flowable.engine.impl.persistence.entity.ExecutionEntityImpl;
@@ -45,7 +45,7 @@ public class CopyServiceTask implements JavaDelegate {
 
         if (CollUtil.isNotEmpty(deptIdList)) {
 
-            R<List<String>> r = CoreHttpUtil.queryUserIdListByDepIdList(deptIdList);
+            R<List<String>> r = BizHttpUtil.queryUserIdListByDepIdList(deptIdList);
 
             List<String> data = r.getData();
             if (CollUtil.isNotEmpty(data)) {
@@ -76,7 +76,7 @@ public class CopyServiceTask implements JavaDelegate {
             processCopyDto.setFormData(JSON.toJSONString(variables));
             processCopyDto.setUserId((userIds));
 
-            CoreHttpUtil.saveCC(processCopyDto);
+            BizHttpUtil.saveCC(processCopyDto);
         }
 
 

@@ -7,7 +7,7 @@ import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.core.node.AssignUserStrategy;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +34,7 @@ public class AssignUserLeaderStrategyImpl implements InitializingBean, AssignUse
 
         //去获取主管
 
-        R<List<com.cxygzl.common.dto.third.DeptDto>> r = CoreHttpUtil.queryParentDepListByUserId((rootUser.getId()));
+        R<List<com.cxygzl.common.dto.third.DeptDto>> r = BizHttpUtil.queryParentDepListByUserId((rootUser.getId()));
 
         List<com.cxygzl.common.dto.third.DeptDto> deptDtoList = r.getData();
         if (CollUtil.isNotEmpty(deptDtoList)) {

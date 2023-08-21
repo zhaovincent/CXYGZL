@@ -6,7 +6,7 @@ import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
 import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.utils.NodeUtil;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEntityEvent;
@@ -76,7 +76,7 @@ public class TaskAssignedEventListener implements FlowableEventListener {
 
 
 
-                CoreHttpUtil.startAssignUser(processNodeRecordAssignUserParamDto);
+                BizHttpUtil.startAssignUser(processNodeRecordAssignUserParamDto);
 
             }
             {
@@ -105,7 +105,7 @@ public class TaskAssignedEventListener implements FlowableEventListener {
 
                         .type(MessageTypeEnum.TODO_TASK.getType())
                         .readed(false).build();
-                CoreHttpUtil.saveMessage(messageDto);
+                BizHttpUtil.saveMessage(messageDto);
             }
 
         }

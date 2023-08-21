@@ -2,34 +2,28 @@ package com.cxygzl.core.utils;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.UserFieldDto;
-import com.yomahub.tlog.hutoolhttp.TLogHutoolhttpInterceptor;
+import com.cxygzl.common.utils.HttpUtil;
 import org.springframework.core.env.Environment;
 
 import java.util.List;
 import java.util.Map;
 
-public class CoreHttpUtil {
+public class BizHttpUtil {
 
-    private static TLogHutoolhttpInterceptor tLogHutoolhttpInterceptor = new TLogHutoolhttpInterceptor();
 
 
     public static String post(Object object, String url) {
         Environment environment = SpringUtil.getBean(Environment.class);
         String bizUrl = environment.getProperty("biz.url");
 
+        return HttpUtil.post(object, url, bizUrl);
 
-        String post = HttpRequest.post(StrUtil.format("{}{}", bizUrl, url)).body(JSON.toJSONString(object))
-                .addInterceptor(tLogHutoolhttpInterceptor).execute().body();
-
-
-        return post;
     }
 
 
@@ -45,9 +39,7 @@ public class CoreHttpUtil {
         Environment environment = SpringUtil.getBean(Environment.class);
         String bizUrl = environment.getProperty("biz.url");
 
-        return HttpRequest.get(StrUtil.format("{}{}", bizUrl, url)).addInterceptor(tLogHutoolhttpInterceptor).execute().body();
-
-
+        return HttpUtil.get(url,bizUrl);
     }
 
 
@@ -59,6 +51,7 @@ public class CoreHttpUtil {
     public static void startNodeEvent(ProcessNodeRecordParamDto nodeRecordParamDto) {
         post(nodeRecordParamDto, "/remote/startNodeEvent");
     }
+
     /**
      * 保存父子节点执行关系
      *
@@ -85,6 +78,7 @@ public class CoreHttpUtil {
     public static void cancelNodeEvent(ProcessNodeRecordParamDto nodeRecordParamDto) {
         post(nodeRecordParamDto, "/remote/cancelNodeEvent");
     }
+
     /**
      * 保存消息
      *

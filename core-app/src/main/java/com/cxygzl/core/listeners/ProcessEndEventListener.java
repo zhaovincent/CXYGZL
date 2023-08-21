@@ -12,7 +12,7 @@ import com.cxygzl.common.dto.FlowSettingDto;
 import com.cxygzl.common.dto.ProcessInstanceParamDto;
 import com.cxygzl.common.dto.flow.HttpSetting;
 import com.cxygzl.common.dto.flow.HttpSettingData;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
@@ -60,12 +60,12 @@ public class ProcessEndEventListener implements FlowableEventListener {
                     ProcessInstanceConstant.VariableKey.CANCEL
                     , false));
             processInstanceParamDto.setResult(finalResult);
-            CoreHttpUtil.endProcessEvent(processInstanceParamDto);
+            BizHttpUtil.endProcessEvent(processInstanceParamDto);
             {
 
                 {
                     //判断后置事件
-                    FlowSettingDto flowSettingDto = CoreHttpUtil.queryProcessSetting(flowId).getData();
+                    FlowSettingDto flowSettingDto = BizHttpUtil.queryProcessSetting(flowId).getData();
                     if (flowSettingDto != null) {
                         HttpSetting backNotify = flowSettingDto.getBackNotify();
                         if (backNotify != null && backNotify.getEnable()) {

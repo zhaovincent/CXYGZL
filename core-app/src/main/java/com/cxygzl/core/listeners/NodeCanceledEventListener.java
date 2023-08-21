@@ -6,7 +6,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
 import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
@@ -84,7 +84,7 @@ public class NodeCanceledEventListener implements FlowableEventListener {
                 if (StrUtil.isNotBlank(taskType)) {
                     processNodeRecordAssignUserParamDto.setTaskType(taskType);
                 }
-                CoreHttpUtil.taskCancelEvent(processNodeRecordAssignUserParamDto);
+                BizHttpUtil.taskCancelEvent(processNodeRecordAssignUserParamDto);
             }
             {
                 //节点取消了
@@ -98,7 +98,7 @@ public class NodeCanceledEventListener implements FlowableEventListener {
                 processNodeRecordParamDto.setNodeName(activityName);
 
 
-                CoreHttpUtil.cancelNodeEvent(processNodeRecordParamDto);
+                BizHttpUtil.cancelNodeEvent(processNodeRecordParamDto);
             }
         }
     }

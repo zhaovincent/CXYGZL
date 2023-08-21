@@ -13,7 +13,7 @@ import com.cxygzl.common.dto.ProcessInstanceRecordParamDto;
 import com.cxygzl.common.dto.flow.HttpSetting;
 import com.cxygzl.common.dto.flow.HttpSettingData;
 import com.cxygzl.common.dto.flow.NodeUser;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
@@ -85,11 +85,11 @@ public class ProcessStartEventListener implements FlowableEventListener {
                 processInstanceRecordParamDto.setFlowId(flowId);
                 processInstanceRecordParamDto.setProcessInstanceId(processInstanceId);
                 processInstanceRecordParamDto.setFormData(JSON.toJSONString(variables));
-                CoreHttpUtil.startProcessEvent(processInstanceRecordParamDto);
+                BizHttpUtil.startProcessEvent(processInstanceRecordParamDto);
             }
             {
                 //判断前置事件
-                FlowSettingDto flowSettingDto = CoreHttpUtil.queryProcessSetting(flowId).getData();
+                FlowSettingDto flowSettingDto = BizHttpUtil.queryProcessSetting(flowId).getData();
                 if (flowSettingDto != null) {
                     HttpSetting frontNotify = flowSettingDto.getFrontNotify();
                     if (frontNotify != null && frontNotify.getEnable()) {
