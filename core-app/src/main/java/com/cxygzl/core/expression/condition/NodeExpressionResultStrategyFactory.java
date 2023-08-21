@@ -77,10 +77,16 @@ public class NodeExpressionResultStrategyFactory {
 
         if (!mode) {
 //或
-            return exps.stream().anyMatch(w -> w);
+            String join = CollUtil.join(exps, "||");
+
+            return DataUtil.expression("${(" + join + ")}", Dict.create());
         }
 
-        return !exps.stream().anyMatch(w -> !w);
+        String join = CollUtil.join(exps, "&&");
+
+
+        return DataUtil.expression("${(" + join + ")}", Dict.create());
+
     }
 
 
@@ -101,13 +107,12 @@ public class NodeExpressionResultStrategyFactory {
 
             if (!node.getMode()) {
                 String join = CollUtil.join(exps, "||");
-               // return "${(" + join + ")}";
+
 
                 return DataUtil.expression("${(" + join + ")}", Dict.create());
             }
 
             String join = CollUtil.join(exps, "&&");
-//            return "${(" + join + ")}";
 
             return DataUtil.expression("${(" + join + ")}", Dict.create());
 
@@ -135,8 +140,6 @@ public class NodeExpressionResultStrategyFactory {
             index++;
 
         }
-
-//        return "${(" + expStrString + ")}";
 
         return DataUtil.expression("${(" + expStrString + ")}", Dict.create());
 
