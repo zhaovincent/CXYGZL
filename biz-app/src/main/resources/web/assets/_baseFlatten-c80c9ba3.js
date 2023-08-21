@@ -1,0 +1,1 @@
+import{p as e,c as h}from"./_Uint8Array-c7447712.js";import{bN as m,bF as t}from"./index-d5547550.js";var r=m?m.isConcatSpreadable:void 0;function y(n){return t(n)||e(n)||!!(r&&n&&n[r])}function F(n,i,a,f,o){var s=-1,g=n.length;for(a||(a=y),o||(o=[]);++s<g;){var b=n[s];i>0&&a(b)?i>1?F(b,i-1,a,f,o):h(o,b):f||(o[o.length]=b)}return o}export{F as b};

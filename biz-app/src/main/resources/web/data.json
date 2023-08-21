@@ -1,0 +1,24 @@
+{
+  "code": "200",
+  "msg": "success",
+  "data": {
+	"nodeConfig": {
+	  "nodeName": "发起人",
+	  "type": 0,
+	  "id": "root",
+	  "formPerms": {},
+	  "nodeUserList": [],
+	  "childNode": {
+	  },
+	  "operList": [
+		{
+		  "key": "pass",
+		  "checked": true,
+		  "edit": false,
+		  "name": "完成",
+		  "defaultName": "完成"
+		}
+	  ]
+	}
+  }
+}
