@@ -22,7 +22,7 @@ import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.flow.SelectValue;
 import com.cxygzl.common.dto.third.UserFieldDto;
 import com.cxygzl.common.utils.AreaUtil;
-import com.cxygzl.core.expression.condition.NodeExpressionStrategyFactory;
+import com.cxygzl.core.expression.condition.NodeExpressionResultStrategyFactory;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.DataUtil;
@@ -317,7 +317,7 @@ public class ExpressionHandler {
         String s = NodeDataStoreFactory.getInstance().get(uniqueId, uniqueId);
         Condition condition = JSON.parseObject(s, Condition.class);
         Map<String, Object> variables = execution.getVariables();
-        return NodeExpressionStrategyFactory.handleSingleConditionResult(condition, variables);
+        return NodeExpressionResultStrategyFactory.handleSingleConditionResult(condition, variables);
     }
 
     /**

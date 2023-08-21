@@ -7,7 +7,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.flow.Node;
-import com.cxygzl.core.expression.condition.NodeExpressionStrategyFactory;
+import com.cxygzl.core.expression.condition.NodeExpressionResultStrategyFactory;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import liquibase.repackaged.org.apache.commons.collections4.MapUtils;
@@ -50,7 +50,7 @@ public class RouteServiceTask implements JavaDelegate {
         List<Node> list = node.getList();
 
         for (Node routeNode : list) {
-            boolean match = NodeExpressionStrategyFactory.handle(routeNode, execution.getVariables());
+            boolean match = NodeExpressionResultStrategyFactory.handle(routeNode, execution.getVariables());
             if(match){
 
                 //判断发起人
