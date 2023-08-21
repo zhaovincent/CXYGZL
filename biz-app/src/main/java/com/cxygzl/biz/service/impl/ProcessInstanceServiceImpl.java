@@ -220,15 +220,16 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     /**
      * 流程结束
      *
-     * @param processsInstanceId
+     * @param processInstanceParamDto
      * @return
      */
     @Override
-    public R end(String processsInstanceId) {
+    public R end(ProcessInstanceParamDto processInstanceParamDto) {
         processInstanceRecordService.lambdaUpdate()
+                .set(processInstanceParamDto.getResult()!=null,ProcessInstanceRecord::getResult, processInstanceParamDto.getResult())
                 .set(ProcessInstanceRecord::getEndTime, new Date())
                 .set(ProcessInstanceRecord::getStatus, NodeStatusEnum.YJS.getCode())
-                .eq(ProcessInstanceRecord::getProcessInstanceId, processsInstanceId)
+                .eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceParamDto.getProcessInstanceId())
                 .update(new ProcessInstanceRecord());
         return R.success();
     }

@@ -71,6 +71,8 @@ public class ProcessInstanceConstant {
         //发起人
         public static final String STARTER="root";
 
+        //审批结果 boolean
+        public static final String APPROVE_RESULT ="approveResult";
     }
     /**
      * 表单权限

@@ -11,6 +11,8 @@ import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.JavaDelegate;
 import org.flowable.engine.impl.persistence.entity.ExecutionEntityImpl;
 
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_RESULT;
+
 
 /**
  * 审批任务处理器--java服务任务
@@ -33,6 +35,11 @@ public class ApproveServiceTask implements JavaDelegate {
         Boolean approve = execution.getVariable(StrUtil.format("{}_approve_condition", nodeId), Boolean.class);
 
         if (approve != null) {
+
+            //判断整体流程是通过还是拒绝
+            execution.setVariable(StrUtil.format("{}_{}", flowId, APPROVE_RESULT),
+                    approve);
+
 
             RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
 

@@ -32,7 +32,7 @@
 后端：SpringBoot2.7.6（jdk8）+Mysql8+MybatisPlus+Flowable6.8.0+Hutool+SaToken
 
 ### 技术交流群
-![89cc1b9b7eced393a772bd90e642b1f.jpg](imgs/89cc1b9b7eced393a772bd90e642b1f.jpg)
+![e08fd3419ad4dcac61363415fb4d095.png](imgs/e08fd3419ad4dcac61363415fb4d095.png)
 
 添加作者个人微信进群`cxygzl666`备注：`cxygzl`
 

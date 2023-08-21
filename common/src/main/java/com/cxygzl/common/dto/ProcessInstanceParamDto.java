@@ -26,4 +26,8 @@ public class ProcessInstanceParamDto {
      * 实例id
      */
     private String processInstanceId;
+    /**
+     * 审批结果
+     */
+    private Boolean result;
 }

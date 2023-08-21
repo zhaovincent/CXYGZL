@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.MessageTypeEnum;
-import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.ProcessInstanceParamDto;
 import com.cxygzl.common.dto.ProcessInstanceRecordParamDto;
 import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
@@ -35,6 +34,8 @@ import org.flowable.task.service.impl.persistence.entity.TaskEntityImpl;
 import org.flowable.variable.api.event.FlowableVariableEvent;
 
 import java.util.Map;
+
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_RESULT;
 
 /**
  * 流程监听器
@@ -198,12 +199,15 @@ public class FlowProcessEventListener implements FlowableEventListener {
             DelegateExecution execution = e.getExecution();
             String processInstanceId = e.getProcessInstanceId();
             ExecutionEntityImpl entity = (ExecutionEntityImpl) e.getEntity();
+            String flowId = entity.getProcessDefinitionKey();
 
+            Boolean finalResult = execution.getVariable(StrUtil.format("{}_{}", flowId, APPROVE_RESULT), Boolean.class);
 
 
 
             ProcessInstanceParamDto processInstanceParamDto = new ProcessInstanceParamDto();
             processInstanceParamDto.setProcessInstanceId(processInstanceId);
+            processInstanceParamDto.setResult(finalResult);
             CoreHttpUtil.endProcessEvent(processInstanceParamDto);
 
         }

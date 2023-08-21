@@ -90,4 +90,10 @@ public class ProcessInstanceRecord  extends BaseEntity {
      */
     @TableField("`parent_process_instance_id`")
     private String parentProcessInstanceId;
+
+    /**
+     * 审批结果
+     */
+    @TableField("`result`")
+    private Boolean result;
 }

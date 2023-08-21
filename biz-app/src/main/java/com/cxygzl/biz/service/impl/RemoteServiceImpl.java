@@ -296,12 +296,12 @@ public class RemoteServiceImpl implements IRemoteService {
     /**
      * 实例结束
      *
-     * @param processInstanceId
+     * @param processInstanceParamDto
      * @return
      */
     @Override
-    public R endProcess(String processInstanceId) {
-        return processInstanceService.end(processInstanceId);
+    public R endProcess(ProcessInstanceParamDto processInstanceParamDto) {
+        return processInstanceService.end(processInstanceParamDto);
     }
 
     /**
