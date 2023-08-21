@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
-    public Object businessExceptionHandler(BusinessException e){
+    public R businessExceptionHandler(BusinessException e){
         log.error("BusinessException：",e);
         R fail = R.fail(e.getMessage());
         fail.setTraceId(TLogContext.getTraceId());
@@ -26,18 +26,16 @@ public class GlobalExceptionHandler {
         return fail;
     }
     @ExceptionHandler(LoginExpiredException.class)
-    public Object loginExpiredExceptionHandler(LoginExpiredException e){
-        log.error("LoginExpiredException：",e);
+    public R loginExpiredExceptionHandler(LoginExpiredException e){
         R fail = R.fail(e.getMessage());
         fail.setCode(e.getCode());
         fail.setTraceId(TLogContext.getTraceId());
-
         return fail;
 
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public Object runtimeExceptionHandler(RuntimeException e){
+    public R runtimeExceptionHandler(RuntimeException e){
         log.error("RuntimeException：",e);
         R fail = R.fail(e.getMessage());
         fail.setTraceId(TLogContext.getTraceId());
