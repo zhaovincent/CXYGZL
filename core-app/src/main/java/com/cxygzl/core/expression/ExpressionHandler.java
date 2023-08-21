@@ -10,7 +10,6 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.EscapeUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.FormTypeEnum;
@@ -23,12 +22,11 @@ import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.flow.SelectValue;
 import com.cxygzl.common.dto.third.UserFieldDto;
 import com.cxygzl.common.utils.AreaUtil;
-import com.cxygzl.core.cmd.ExpressCmd;
 import com.cxygzl.core.expression.condition.NodeExpressionStrategyFactory;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.BizHttpUtil;
+import com.cxygzl.core.utils.DataUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.flowable.engine.ManagementService;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Component;
 
@@ -216,12 +214,7 @@ public class ExpressionHandler {
 
 
     private Boolean compare(String symbol, Dict value) {
-        ManagementService managementService = SpringUtil.getBean(ManagementService.class);
-
-
-        Object result = managementService.executeCommand(new ExpressCmd(symbol, value));
-
-        return Convert.toBool(result);
+       return  DataUtil.expression(symbol, value);
     }
 
 
@@ -402,6 +395,28 @@ public class ExpressionHandler {
             }
         }
         return false;
+    }
+
+    /**
+     * 没有一个是true
+     * @param execution
+     * @param keyArr
+     * @return
+     */
+    public boolean isAllNotTrue(DelegateExecution execution, String... keyArr) {
+        Map<String, Object> variables = execution.getVariables(ListUtil.of(keyArr));
+        for (String s : keyArr) {
+
+            Boolean bool = MapUtil.getBool(variables, s);
+            if (bool == null) {
+                continue;
+            }
+
+            if (bool) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean stringHandler(String key, String param, Object value, String symbol) {

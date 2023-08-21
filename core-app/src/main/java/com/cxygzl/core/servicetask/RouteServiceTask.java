@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.core.expression.condition.NodeExpressionStrategyFactory;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import liquibase.repackaged.org.apache.commons.collections4.MapUtils;
@@ -36,43 +37,44 @@ public class RouteServiceTask implements JavaDelegate {
     public void execute(DelegateExecution execution) {
 
         ExecutionEntityImpl entity = (ExecutionEntityImpl) execution;
-        String nodeIdO = entity.getActivityId();
+        String nodeId = entity.getActivityId();
         String flowId = entity.getProcessDefinitionKey();
         String processInstanceId = entity.getProcessInstanceId();
 
-        String nodeId = StrUtil.subBefore(nodeIdO, "_", true);
-        int index = Integer.parseInt(StrUtil.subAfter(nodeIdO, "_", true));
 
         Node node = NodeDataStoreFactory.getInstance().getNode(flowId, nodeId);
 
+        RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
 
 
         List<Node> list = node.getList();
 
+        for (Node routeNode : list) {
+            boolean match = NodeExpressionStrategyFactory.handle(routeNode, execution.getVariables());
+            if(match){
 
-        RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
+                //判断发起人
+                String targetKey = routeNode.getNodeId();
+                if (StrUtil.equals(targetKey, ProcessInstanceConstant.VariableKey.STARTER)) {
+                    targetKey = StrUtil.format("{}_user_task", targetKey);
+                    runtimeService.setVariable(execution.getId(),
+                            ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE, true);
+                }
 
-        if (index < list.size()) {
-            Node routeNode = list.get(index);
+                runtimeService.setVariable(execution.getId(), StrUtil.format("{}_parent_id", targetKey), nodeId);
+                runtimeService.setVariable(execution.getId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
 
-
-            //判断发起人
-            String targetKey = routeNode.getNodeId();
-            if (StrUtil.equals(targetKey, ProcessInstanceConstant.VariableKey.STARTER)) {
-                targetKey = StrUtil.format("{}_user_task", targetKey);
-                runtimeService.setVariable(execution.getId(),
-                        ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE, true);
+                //跳转
+                runtimeService.createChangeActivityStateBuilder()
+                        .processInstanceId(processInstanceId)
+                        .moveActivityIdTo(nodeId, targetKey)
+                        .changeState();
+                break;
             }
-
-            runtimeService.setVariable(execution.getId(), StrUtil.format("{}_parent_id", targetKey), nodeId);
-            runtimeService.setVariable(execution.getId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
-
-            //跳转
-            runtimeService.createChangeActivityStateBuilder()
-                    .processInstanceId(processInstanceId)
-                    .moveActivityIdTo(nodeIdO, targetKey)
-                    .changeState();
         }
+
+
+
 
     }
 
