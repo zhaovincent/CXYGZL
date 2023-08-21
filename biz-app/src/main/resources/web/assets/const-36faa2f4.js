@@ -1,0 +1,1 @@
+let l=["87, 106, 149","255, 148, 62","50, 150, 250"],e=["发起人","审批人","抄送人"],a=[{value:1,label:"指定成员"},{value:2,label:"部门主管"},{value:3,label:"角色"},{value:4,label:"发起人自选"},{value:5,label:"发起人自己"},{value:7,label:"连续多级主管"},{value:8,label:"表单人员"},{value:9,label:"表单部门"}];export{l as b,e as p,a as s};

@@ -1,0 +1,1 @@
+import{a as t,c as o,a5 as r}from"./index-e01dade3.js";import{E as a}from"./el-alert-13b70c1a.js";import{_ as c}from"./_plugin-vue_export-helper-c27b6911.js";const n={},s={style:{padding:"30px"}};function l(_,i){const e=a;return t(),o("div",s,[r(e,{closable:!1,title:"菜单三级-2",type:"warning"})])}const d=c(n,[["render",l]]);export{d as default};

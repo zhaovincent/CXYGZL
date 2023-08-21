@@ -1,0 +1,1 @@
+import{aO as t}from"./index-e01dade3.js";function o(e){const a=new FormData;return a.append("file",e),t({url:"file/upload",method:"post",data:a,headers:{"Content-Type":"multipart/form-data"}})}function i(e){return t({url:"/api/v1/files",method:"delete",params:{filePath:e}})}export{i as d,o as u};

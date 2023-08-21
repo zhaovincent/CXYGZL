@@ -1,0 +1,1 @@
+import{K as e,ai as s}from"./index-e01dade3.js";var o=e([]);const r=s("flow",{state:()=>({step3:{},step1:{logo:"",name:"",flowId:"",groupId:void 0,admin:o,remark:""},step2:[]}),actions:{setStep3(t){this.step3=t},setStep2(t){this.step2=t}}});export{r as u};
