@@ -18,11 +18,14 @@ import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.AreaFormValue;
+import com.cxygzl.common.dto.flow.Condition;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.flow.SelectValue;
 import com.cxygzl.common.dto.third.UserFieldDto;
 import com.cxygzl.common.utils.AreaUtil;
 import com.cxygzl.core.cmd.ExpressCmd;
+import com.cxygzl.core.expression.condition.NodeExpressionStrategyFactory;
+import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.ManagementService;
@@ -229,9 +232,12 @@ public class ExpressionHandler {
      * @return
      */
     public boolean selectHandler(String key, DelegateExecution execution, String param, String symbol) {
+        return selectHandler(key,execution.getVariables(),param,symbol);
+    }
+    public boolean selectHandler(String key, Map<String,Object> execution, String param, String symbol) {
         List<SelectValue> paramObjList = JSON.parseArray(EscapeUtil.unescape(param), SelectValue.class);
         List<String> paramList = paramObjList.stream().map(w -> w.getKey()).collect(Collectors.toList());
-        Object value = execution.getVariable(key);
+        Object value = execution.get(key);
 
 
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
@@ -309,6 +315,19 @@ public class ExpressionHandler {
     }
 
     /**
+     * 处理表达式
+     * @param execution
+     * @param uniqueId
+     * @return
+     */
+    public boolean handle(DelegateExecution execution, String uniqueId) {
+        String s = NodeDataStoreFactory.getInstance().get(uniqueId, uniqueId);
+        Condition condition = JSON.parseObject(s, Condition.class);
+        Map<String, Object> variables = execution.getVariables();
+        return NodeExpressionStrategyFactory.handleSingleConditionResult(condition, variables);
+    }
+
+    /**
      * 字符串判断
      *
      * @param key   表单key
@@ -364,6 +383,7 @@ public class ExpressionHandler {
 
     /**
      * 不是所有的都是true
+     *
      * @param execution
      * @param keyArr
      * @return
@@ -374,7 +394,7 @@ public class ExpressionHandler {
 
             Boolean bool = MapUtil.getBool(variables, s);
             if (bool == null) {
-                 return true;
+                return true;
             }
 
             if (!bool) {
@@ -434,10 +454,13 @@ public class ExpressionHandler {
 
 
     public boolean deptCompare(String key, String param, String symbol, DelegateExecution execution) {
+        return deptCompare(key,param,symbol,execution.getVariables());
+    }
+    public boolean deptCompare(String key, String param, String symbol, Map<String,Object> paramMap) {
         param = EscapeUtil.unescape(param);
 
 
-        Object value = execution.getVariable(key);
+        Object value = paramMap.get(key);
 
         String jsonString = JSON.toJSONString(value);
         log.debug("表单值：key={} value={} symbol={}", key, jsonString, symbol);
@@ -497,12 +520,15 @@ public class ExpressionHandler {
      * @return
      */
     public boolean userCompare(String key, String param1, String symbol, DelegateExecution execution, String userKey) {
+        return userCompare(key,param1,symbol,execution.getVariables(),userKey);
+    }
+    public boolean userCompare(String key, String param1, String symbol, Map<String,Object> execution, String userKey) {
 
         param1 = EscapeUtil.unescape(param1);
         Object o = JSON.parseArray(param1, Object.class).get(0);
 
 
-        Object value = execution.getVariable(key);
+        Object value = execution.get(key);
 
         String jsonString = JSON.toJSONString(value);
         log.debug("表单值：key={} value={}   symbol={} userKey={} ", key, jsonString, symbol, userKey);

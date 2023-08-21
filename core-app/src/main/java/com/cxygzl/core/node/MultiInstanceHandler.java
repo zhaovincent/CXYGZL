@@ -45,7 +45,7 @@ public class MultiInstanceHandler {
         //执行人集合
         List<String> assignList = new ArrayList<>();
 
-        INodeDataStoreHandler nodeDataStoreHandler = NodeDataStoreFactory.getInstance();
+        IDataStoreHandler nodeDataStoreHandler = NodeDataStoreFactory.getInstance();
 
         ExecutionEntityImpl entity = (ExecutionEntityImpl) execution;
 

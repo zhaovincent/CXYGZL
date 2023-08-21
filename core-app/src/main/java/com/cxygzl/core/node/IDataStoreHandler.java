@@ -4,14 +4,22 @@ import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.CommonUtil;
 
 /**
- * 节点数据处理接口
+ * 数据处理接口
  */
-public interface INodeDataStoreHandler {
+public interface IDataStoreHandler {
     /**
      * 节点数据存储
      * @param flowId 流程id
      * @param nodeId 节点id
      * @param data 数据
+     */
+    void saveAll(String flowId, String nodeId, Object data);
+
+    /**
+     * 节点数据存储
+     * @param flowId
+     * @param nodeId
+     * @param data
      */
     void save(String flowId,String nodeId,Node data);
     /**
@@ -20,7 +28,6 @@ public interface INodeDataStoreHandler {
      * @param nodeId 节点id
      * @return
      */
-    @Deprecated
     String get(String flowId,String nodeId);
 
 

@@ -5,11 +5,11 @@ import org.springframework.core.env.Environment;
 
 public class NodeDataStoreFactory {
 
-    public static INodeDataStoreHandler getInstance() {
+    public static IDataStoreHandler getInstance() {
         Environment environment = SpringUtil.getBean(Environment.class);
         String mapNodeDataStore = environment.getProperty("node.data.store", "mapNodeDataStore");
-        INodeDataStoreHandler bean = SpringUtil.getBean(mapNodeDataStore,
-                INodeDataStoreHandler.class);
+        IDataStoreHandler bean = SpringUtil.getBean(mapNodeDataStore,
+                IDataStoreHandler.class);
         return bean;
     }
 

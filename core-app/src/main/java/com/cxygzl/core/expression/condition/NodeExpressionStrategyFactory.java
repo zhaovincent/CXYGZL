@@ -3,10 +3,12 @@ package com.cxygzl.core.expression.condition;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.dto.flow.Condition;
 import com.cxygzl.common.dto.flow.GroupCondition;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.core.node.NodeDataStoreFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -40,13 +42,51 @@ public class NodeExpressionStrategyFactory {
         STRATEGY_CONCURRENT_HASH_MAP.put(key, nodeConditionHandler);
     }
 
-
+    /**
+     * 返回表达式
+     *
+     * @param nodeConditionDto
+     * @return
+     */
     public static String handleSingleCondition(Condition nodeConditionDto) {
         NodeConditionStrategy nodeConditionHandler = getStrategy(nodeConditionDto.getKeyType());
         if (nodeConditionHandler == null) {
             return "(1==1)";
         }
-        return nodeConditionHandler.handle(nodeConditionDto);
+        return nodeConditionHandler.handleExpression(nodeConditionDto);
+    }
+
+    /**
+     * 返回表达式
+     *
+     * @param nodeConditionDto
+     * @return
+     */
+    public static String handleSingleConditionExpression(Condition nodeConditionDto) {
+        NodeConditionStrategy nodeConditionHandler = getStrategy(nodeConditionDto.getKeyType());
+        if (nodeConditionHandler == null) {
+            return "(1==1)";
+        }
+        String s = IdUtil.fastSimpleUUID();
+        NodeDataStoreFactory.getInstance().saveAll(s, s, nodeConditionDto);
+
+        return StrUtil.format("(expressionHandler.handle(execution,\"{}\"))", s);
+
+    }
+
+
+    /**
+     * 表达式结果处理
+     *
+     * @param condition 表达式对象
+     * @param paramMap  所有的参数
+     * @return
+     */
+    public static boolean handleSingleConditionResult(Condition condition, Map<String, Object> paramMap) {
+
+        NodeConditionStrategy nodeConditionHandler = getStrategy(condition.getKeyType());
+
+        return nodeConditionHandler.handleResult(condition, paramMap);
     }
 
     /**
@@ -55,13 +95,13 @@ public class NodeExpressionStrategyFactory {
      * @param groupDto
      * @return
      */
-    public static String handleGroupCondition(GroupCondition groupDto) {
+    public static String handleGroupConditionExpression(GroupCondition groupDto) {
 
         List<String> exps = new ArrayList<>();
 
 
         for (Condition condition : groupDto.getConditionList()) {
-            String singleExpression = handleSingleCondition(condition);
+            String singleExpression = handleSingleConditionExpression(condition);
             exps.add(singleExpression);
         }
         Boolean mode = groupDto.getMode();
@@ -91,7 +131,7 @@ public class NodeExpressionStrategyFactory {
             return "${1==1}";
         }
         for (GroupCondition group : groups) {
-            String s = handleGroupCondition(group);
+            String s = handleGroupConditionExpression(group);
             exps.add(s);
         }
 
@@ -162,11 +202,11 @@ public class NodeExpressionStrategyFactory {
 
 //        String join = StrUtil.format("!({})", CollUtil.join(expList, "||"));
 
-        String finalExp = (currentIndex+1==branchs.size())?"1==1":StrUtil.subBetween(handle(branchs.get(currentIndex)), "${", "}");
+        String finalExp = (currentIndex + 1 == branchs.size()) ? "1==1" : StrUtil.subBetween(handle(branchs.get(currentIndex)), "${", "}");
 
         String exp = StrUtil.format("${!({})&&({})}", CollUtil.join(expList, "||"), finalExp);
-        log.info(" 参数索引：{}  表达式：{}",currentIndex,exp);
-        return  exp;
+        log.info(" 参数索引：{}  表达式：{}", currentIndex, exp);
+        return exp;
     }
 
 }

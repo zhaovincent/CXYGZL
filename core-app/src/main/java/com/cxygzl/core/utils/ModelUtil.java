@@ -13,7 +13,7 @@ import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.expression.condition.NodeExpressionStrategyFactory;
 import com.cxygzl.core.listeners.*;
-import com.cxygzl.core.node.INodeDataStoreHandler;
+import com.cxygzl.core.node.IDataStoreHandler;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.servicetask.ApproveServiceTask;
 import com.cxygzl.core.servicetask.CopyServiceTask;
@@ -376,7 +376,7 @@ public class ModelUtil {
         node.setNodeName(StrUtil.format("{}[{}]", node.getNodeName(), RandomUtil.randomNumbers(5)));
 
         //存储节点数据
-        INodeDataStoreHandler nodeDataStoreHandler = NodeDataStoreFactory.getInstance();
+        IDataStoreHandler nodeDataStoreHandler = NodeDataStoreFactory.getInstance();
         nodeDataStoreHandler.save(flowId, node.getId(), node);
 
         //开始

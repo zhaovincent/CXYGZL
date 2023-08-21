@@ -3,14 +3,17 @@ package com.cxygzl.core.expression.condition.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.EscapeUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.flow.Condition;
+import com.cxygzl.core.expression.ExpressionHandler;
 import com.cxygzl.core.expression.condition.NodeConditionStrategy;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * 字符类型处理器
@@ -21,7 +24,7 @@ public class SelectUserNodeConditionStrategy implements NodeConditionStrategy, I
      * 抽象方法 处理表达式
      */
     @Override
-    public String handle(Condition condition) {
+    public String handleExpression(Condition condition) {
 
 
         String compare = condition.getExpression();
@@ -35,6 +38,30 @@ public class SelectUserNodeConditionStrategy implements NodeConditionStrategy, I
                 EscapeUtil.escape(JSON.toJSONString(list)),compare,condition.getUserKey());
 
 
+    }
+
+    /**
+     * 处理数据
+     *
+     * @param condition
+     * @param paramMap
+     * @return
+     */
+    @Override
+    public boolean handleResult(Condition condition, Map<String, Object> paramMap) {
+
+        String compare = condition.getExpression();
+        String id = condition.getKey();
+        Object value = condition.getValue();
+
+
+        ArrayList<Object> list = CollUtil.newArrayList(value);
+
+        ExpressionHandler bean = SpringUtil.getBean(ExpressionHandler.class);
+
+
+        return bean.userCompare( id,
+                EscapeUtil.escape(JSON.toJSONString(list)),compare,paramMap,condition.getUserKey());
     }
 
     @Override

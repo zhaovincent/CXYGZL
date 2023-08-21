@@ -8,7 +8,7 @@ import com.cxygzl.common.dto.ProcessNodeDataDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.CommonUtil;
-import com.cxygzl.core.node.INodeDataStoreHandler;
+import com.cxygzl.core.node.IDataStoreHandler;
 import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -17,13 +17,28 @@ import org.springframework.stereotype.Component;
 /**
  * 远程存储数据处理器
  */
-@Component("remoteNodeDataStore")
+@Component("remoteDateStore")
 @Slf4j
 @Lazy
-public class RemoteNodeDataStoreHandler implements INodeDataStoreHandler {
+public class RemoteDataStoreHandler implements IDataStoreHandler {
 
     private LRUCache<String, String> cache = CacheUtil.newLRUCache(1000);
 
+    /**
+     * 节点数据存储
+     *
+     * @param flowId 流程id
+     * @param nodeId 节点id
+     * @param data   数据
+     */
+    @Override
+    public void saveAll(String flowId, String nodeId, Object data) {
+        ProcessNodeDataDto processNodeDataDto = new ProcessNodeDataDto();
+        processNodeDataDto.setFlowId(flowId);
+        processNodeDataDto.setNodeId(nodeId);
+        processNodeDataDto.setData(CommonUtil.toJson(data));
+        BizHttpUtil.saveNodeOriData(processNodeDataDto);
+    }
 
     /**
      * 节点数据存储
@@ -35,13 +50,7 @@ public class RemoteNodeDataStoreHandler implements INodeDataStoreHandler {
     @Override
     public void save(String flowId, String nodeId, Node data) {
         log.debug("flowId={} nodeId={} data={}", flowId, nodeId, data);
-        ProcessNodeDataDto processNodeDataDto = new ProcessNodeDataDto();
-        processNodeDataDto.setFlowId(flowId);
-        processNodeDataDto.setNodeId(nodeId);
-        processNodeDataDto.setData(CommonUtil.toJson(data));
-
-
-        BizHttpUtil.saveNodeOriData(processNodeDataDto);
+        saveAll(flowId,nodeId,data);
 
     }
 
