@@ -1,6 +1,5 @@
 package com.cxygzl.common.utils;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -70,15 +69,25 @@ public class NodeUtil {
         if (StrUtil.equals(node.getId(), parentId)) {
             //找到排他分支了
             if (CollUtil.isNotEmpty(branchs)) {
+                boolean match = false;
                 for (Node branch : branchs) {
                     Node children = branch.getChildNode();
-                    if (StrUtil.equals(children.getId(), nodeId)) {
-                        node.setConditionNodes(null);
+                    node.setConditionNodes(null);
+
+//                    if (children == null) {
+//                        node.setConditionNodes(null);
+//                    node.setChildNode(childNode);
+//                    break;
+//                } else
+                    if (children != null && StrUtil.equals(children.getId(), nodeId)) {
+                        match = true;
                         //就是该分支
                         node.setChildNode(children);
 
-                        Node c = BeanUtil.copyProperties(children, Node.class);
+                        Node c = getFinalChildrenNode(children);
 
+//                        Node c = ObjectUtil.clone(children);
+//
                         List<Node> nList = new ArrayList<>();
                         while (true) {
                             if (isNode(c)) {
@@ -94,6 +103,7 @@ public class NodeUtil {
                     }
 
                 }
+
             }
         }
 
