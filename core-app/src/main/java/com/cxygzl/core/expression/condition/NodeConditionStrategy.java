@@ -15,7 +15,6 @@ public interface NodeConditionStrategy {
      * @param key
      */
     default void afterPropertiesSet(String key) {
-        NodeExpressionStrategyFactory.register(key, this);
         NodeExpressionResultStrategyFactory.register(key, this);
     }
 

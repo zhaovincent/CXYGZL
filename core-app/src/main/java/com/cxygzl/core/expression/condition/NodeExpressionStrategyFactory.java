@@ -14,47 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class NodeExpressionStrategyFactory {
 
-    private static final Map<String, NodeConditionStrategy> STRATEGY_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
 
-    /**
-     * 提供获取策略的方法
-     *
-     * @param key
-     * @return
-     */
-    public static NodeConditionStrategy getStrategy(String key) {
-        NodeConditionStrategy sendService = STRATEGY_CONCURRENT_HASH_MAP.get(key);
-        return sendService;
-    }
-
-    /**
-     * 在Bean属性初始化后执行该方法
-     *
-     * @param key                  批次类型枚举
-     * @param nodeConditionHandler 表达式处理接口
-     */
-    public static void register(String key, NodeConditionStrategy nodeConditionHandler) {
-        STRATEGY_CONCURRENT_HASH_MAP.put(key, nodeConditionHandler);
-    }
-
-    /**
-     * 返回表达式
-     *
-     * @param nodeConditionDto
-     * @return
-     */
-    public static String handleSingleCondition(Condition nodeConditionDto) {
-        NodeConditionStrategy nodeConditionHandler = getStrategy(nodeConditionDto.getKeyType());
-        if (nodeConditionHandler == null) {
-            return "(1==1)";
-        }
-        return nodeConditionHandler.handleExpression(nodeConditionDto);
-    }
 
     /**
      * 返回表达式
@@ -63,10 +27,6 @@ public class NodeExpressionStrategyFactory {
      * @return
      */
     public static String handleSingleConditionExpression(Condition nodeConditionDto) {
-        NodeConditionStrategy nodeConditionHandler = getStrategy(nodeConditionDto.getKeyType());
-        if (nodeConditionHandler == null) {
-            return "(1==1)";
-        }
         String s = IdUtil.fastSimpleUUID();
         NodeDataStoreFactory.getInstance().saveAll(s, s, nodeConditionDto);
 
@@ -188,7 +148,6 @@ public class NodeExpressionStrategyFactory {
             index++;
         }
 
-//        String join = StrUtil.format("!({})", CollUtil.join(expList, "||"));
 
         String finalExp = (currentIndex + 1 == branchs.size()) ? "1==1" : StrUtil.subBetween(handle(branchs.get(currentIndex)), "${", "}");
 
