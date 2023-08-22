@@ -69,36 +69,17 @@ public class NodeUtil {
         if (StrUtil.equals(node.getId(), parentId)) {
             //找到排他分支了
             if (CollUtil.isNotEmpty(branchs)) {
-                boolean match = false;
                 for (Node branch : branchs) {
                     Node children = branch.getChildNode();
                     node.setConditionNodes(null);
 
-//                    if (children == null) {
-//                        node.setConditionNodes(null);
-//                    node.setChildNode(childNode);
-//                    break;
-//                } else
                     if (children != null && StrUtil.equals(children.getId(), nodeId)) {
-                        match = true;
                         //就是该分支
                         node.setChildNode(children);
 
                         Node c = getFinalChildrenNode(children);
 
-//                        Node c = ObjectUtil.clone(children);
-//
-                        List<Node> nList = new ArrayList<>();
-                        while (true) {
-                            if (isNode(c)) {
-                                nList.add(c);
-                                c = c.getChildNode();
-                            } else {
-                                break;
-                            }
-                        }
-                        Node n = nList.get(nList.size() - 1);
-                        n.setChildNode(childNode);
+                        c.setChildNode(childNode);
                         break;
                     }
 
