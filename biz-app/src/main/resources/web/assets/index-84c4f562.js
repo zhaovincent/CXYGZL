@@ -1,1 +1,0 @@
-import{aH as t}from"./index-d5547550.js";function r(){return t({url:"/message/unreadNum",method:"get"})}function a(e){return t({url:"/message/queryList",method:"post",data:e})}function u(e){return t({url:"/message/delete",method:"delete",data:{id:e}})}function d(e){return t({url:"/message/read",method:"post",data:{id:e}})}export{u as d,r as g,a as q,d as r};

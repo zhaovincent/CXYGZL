@@ -126,7 +126,7 @@ public class LoginServiceImpl implements ILoginService {
     public R loginAtDingTalk(String authCode) {
 
 
-        String userId = DingTalkHttpUtil.getUserIdByCode(authCode).getData();
+        String userId = DingTalkHttpUtil.getUserIdByCodeAtMiniApp(authCode).getData();
 
 
         StpUtil.login(userId, LoginPlatEnum.DING_TALK.getType());
@@ -184,9 +184,10 @@ public class LoginServiceImpl implements ILoginService {
             if (weixinUser != null && StrUtil.isBlank(weixinUser.getUserId())) {
                 String phone = weixinUser.getPhone();
                 User user = userService.lambdaQuery().eq(User::getPhone, phone).one();
-                if(user==null){
-                    return R.fail("用户未注册，请联系管理员");
-
+                if (user == null) {
+//                    return R.fail("用户未注册，请联系管理员");
+                    Dict set = Dict.create().set("loginResult", 3);
+                    return R.success(set);
                 }
                 weixinUser.setUserId(String.valueOf(user.getId()));
                 weixinUserService.updateById(weixinUser);

@@ -18,4 +18,13 @@ public class ProcessInstanceRecordVO extends ProcessInstanceRecord {
      *  表单值显示
      */
     private List<Dict> formValueShowList;
+
+    /**
+     * 发起人名字
+     */
+    private String rootUserName;
+    /**
+     * 发起人头像
+     */
+    private String rootUserAvatarUrl;
 }

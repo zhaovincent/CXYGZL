@@ -143,6 +143,8 @@ public class ProcessCopyServiceImpl extends ServiceImpl<ProcessCopyMapper, Proce
                 .starterName(starterUser.getName())
                 .startTime(processInstanceRecord.getCreateTime())
                 .processInstanceStatus(processInstanceRecord.getStatus())
+                .processInstanceId(processInstanceRecord.getProcessInstanceId())
+                .flowId(processInstanceRecord.getFlowId())
                 .processInstanceResult(processInstanceRecord.getResult())
                 .build();
 

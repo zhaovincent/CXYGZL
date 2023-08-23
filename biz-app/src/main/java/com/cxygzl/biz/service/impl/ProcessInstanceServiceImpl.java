@@ -13,17 +13,18 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
-import com.cxygzl.biz.entity.*;
+import com.cxygzl.biz.entity.ProcessCopy;
+import com.cxygzl.biz.entity.ProcessInstanceRecord;
+import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.FormUtil;
 import com.cxygzl.biz.utils.NodeFormatUtil;
 import com.cxygzl.biz.utils.NodeImageUtil;
-import com.cxygzl.biz.vo.TaskDetailViewVO;
-import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.ProcessCopyVo;
 import com.cxygzl.biz.vo.ProcessInstanceRecordVO;
+import com.cxygzl.biz.vo.TaskDetailViewVO;
 import com.cxygzl.biz.vo.node.NodeImageVO;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.FormTypeEnum;
@@ -410,6 +411,8 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         List<ProcessInstanceRecordVO> processInstanceRecordVOList = BeanUtil.copyToList(records, ProcessInstanceRecordVO.class);
 
+        UserDto userDto = ApiStrategyFactory.getStrategy().getUser(userId);
+
         for (ProcessInstanceRecordVO record : processInstanceRecordVOList) {
             String formData = record.getFormData();
 
@@ -422,6 +425,8 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
             record.setFormValueShowList(formValueShowList);
             record.setFormData(null);
             record.setProcess(null);
+            record.setRootUserAvatarUrl(userDto.getAvatarUrl());
+            record.setRootUserName(userDto.getName());
         }
         Page page = BeanUtil.copyProperties(instanceRecordPage, Page.class);
         page.setRecords(processInstanceRecordVOList);

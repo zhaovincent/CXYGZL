@@ -77,7 +77,7 @@ dingtalk:
 
 ##流程的数据api开关
 api:
-  ori: local
+  ori: dingtalk
 
 version:
   admin: V2.0.8
@@ -85,8 +85,8 @@ version:
 wx:
   miniapp:
     configs:
-      - appid: wx16f582e2a9fe367ca
-        secret: 1fc126e751fbd1f0c75432decbd3fb615
+      - appid: wx6f582e2a9fe367ca
+        secret: fc126e751fbd1f0c75432decbd3fb615
         token: #微信小程序消息服务器配置的token
         aesKey: #微信小程序消息服务器配置的EncodingAESKey
         msgDataFormat: JSON

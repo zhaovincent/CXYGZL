@@ -44,5 +44,16 @@ public class DingTalkHttpUtil {
         return JSON.parseObject(s, new TypeReference<R<String>>() {
         });
     }
+    /**
+     * 小程序--根据code获取用户id
+     *
+     * @param authCode
+     * @return
+     */
+    public static R<String> getUserIdByCodeAtMiniApp(String authCode) {
+        String s = get("/user/getUserIdByCodeAtMiniApp?authCode=" + authCode);
+        return JSON.parseObject(s, new TypeReference<R<String>>() {
+        });
+    }
 
 }

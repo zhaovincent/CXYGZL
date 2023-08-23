@@ -1,1 +1,0 @@
-import{a as e,c as t,k as o}from"./index-d5547550.js";const n={viewBox:"0 0 1024 1024",width:"1.2em",height:"1.2em"},c=o("path",{fill:"currentColor",d:"m192 384l320 384l320-384z"},null,-1),s=[c];function r(_,a){return e(),t("svg",n,s)}const i={name:"ep-caret-bottom",render:r};export{i as _};
