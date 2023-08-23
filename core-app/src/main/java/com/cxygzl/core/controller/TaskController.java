@@ -334,7 +334,8 @@ public class TaskController {
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 ProcessInstanceConstant.TaskType.RESOLVE
         );
-       // runtimeService.setVariable(task.getExecutionId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
+        //不能搞 因为涉及多实例
+       // taskService.setVariable(task.getId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
 
         taskService.resolveTask(taskParamDto.getTaskId(), taskParamDto.getParamMap());
         return R.success();

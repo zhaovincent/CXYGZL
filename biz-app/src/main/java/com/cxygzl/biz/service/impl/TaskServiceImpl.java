@@ -80,7 +80,6 @@ public class TaskServiceImpl implements ITaskService {
         }
 
 
-
         List<ProcessExecution> processExecutionList = executionService.lambdaQuery()
                 .eq(ProcessExecution::getExecutionId, taskResultDto.getExecutionId())
                 .or()
@@ -88,23 +87,23 @@ public class TaskServiceImpl implements ITaskService {
                 .list();
 
         Set<String> executionIdSet = processExecutionList.stream().map(w -> w.getChildExecutionId()).collect(Collectors.toSet());
-        processExecutionList.forEach(rr->executionIdSet.add(rr.getExecutionId()));
+        processExecutionList.forEach(rr -> executionIdSet.add(rr.getExecutionId()));
 
-        ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
-                .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
-                .eq(ProcessNodeRecordAssignUser::getUserId, userId)
-                .eq(ProcessNodeRecordAssignUser::getFlowUniqueId, taskResultDto.getFlowUniqueId())
-                .in(ProcessNodeRecordAssignUser::getExecutionId, executionIdSet)
-                .one();
 
         //变量
         Map<String, Object> paramMap = taskResultDto.getVariableAll();
         Boolean taskExist = taskResultDto.getCurrentTask();
         if (!taskExist) {
             //任务已完成了
+            List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = processNodeRecordAssignUserService.lambdaQuery()
+                    .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
+                    .eq(ProcessNodeRecordAssignUser::getUserId, userId)
+                    .eq(ProcessNodeRecordAssignUser::getFlowUniqueId, taskResultDto.getFlowUniqueId())
+                    .in(ProcessNodeRecordAssignUser::getExecutionId, executionIdSet)
+                    .orderByDesc(ProcessNodeRecordAssignUser::getUpdateTime)
+                    .list();
 
-
-            String data = processNodeRecordAssignUser.getData();
+            String data = processNodeRecordAssignUserList.get(0).getData();
             if (StrUtil.isNotBlank(data)) {
                 Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
                 });
@@ -125,7 +124,6 @@ public class TaskServiceImpl implements ITaskService {
                 nodeDataService.getNodeData(flowId, nodeId).getData();
         Node node = CommonUtil.toObj(nodeDataJson, Node.class);
         Map<String, String> formPerms = node.getFormPerms();
-
 
 
         List<FormItemVO> formItemVOList = CommonUtil.toArray(oaForms.getFormItems(), FormItemVO.class);
@@ -221,10 +219,6 @@ public class TaskServiceImpl implements ITaskService {
         Object subProcessStarterNode =
                 paramMap.get(ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE);
         Object rejectStarterNode = paramMap.get(ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE);
-
-
-
-
 
 
         TaskDetailViewVO taskDetailViewVO = TaskDetailViewVO.builder()
@@ -383,7 +377,6 @@ public class TaskServiceImpl implements ITaskService {
         if (!r.isOk()) {
             return R.fail(r.getMsg());
         }
-
 
 
         return R.success();

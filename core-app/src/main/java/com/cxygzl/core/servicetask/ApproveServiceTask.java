@@ -78,9 +78,13 @@ public class ApproveServiceTask implements JavaDelegate {
                             ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE, true);
                 }
 
-
-                runtimeService.setVariable(execution.getId(), StrUtil.format("{}_parent_id", targetKey), nodeId);
                 runtimeService.setVariable(execution.getId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
+
+                if(!StrUtil.equals(END,targetKey)){
+                    //不是结束节点的时候 再添加变量
+                    runtimeService.setVariable(execution.getId(), StrUtil.format("{}_parent_id", targetKey), nodeId);
+
+                }
 
                 runtimeService.createChangeActivityStateBuilder()
                         .processInstanceId(processInstanceId)
