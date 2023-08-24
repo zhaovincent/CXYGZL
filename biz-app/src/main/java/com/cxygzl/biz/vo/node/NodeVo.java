@@ -17,7 +17,7 @@ public class NodeVo {
     /**
      * 用户列表
      */
-    private List<UserVo> userVoList;
+    private List<NodeFormatUserVo> nodeFormatUserVoList;
 
     /**
      * 显示

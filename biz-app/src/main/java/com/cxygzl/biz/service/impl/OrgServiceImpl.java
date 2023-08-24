@@ -17,7 +17,7 @@ import com.cxygzl.biz.utils.DataUtil;
 import com.cxygzl.biz.utils.DeptUtil;
 import com.cxygzl.biz.vo.OrgTreeVo;
 import com.cxygzl.biz.vo.UserFieldDataVo;
-import com.cxygzl.biz.vo.UserVO;
+import com.cxygzl.biz.vo.UserBizVO;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.dto.PageResultDto;
 import com.cxygzl.common.dto.R;
@@ -281,17 +281,17 @@ public class OrgServiceImpl implements IOrgService {
 
         MPJLambdaWrapper<User> lambdaQueryWrapper = new MPJLambdaWrapper<User>()
                 .selectAll(User.class)
-                .selectAs(Dept::getName, UserVO::getDeptName)
+                .selectAs(Dept::getName, UserBizVO::getDeptName)
                 .leftJoin(Dept.class, Dept::getId, User::getDeptId)
 
                 .eq(User::getId, userId);
-        UserVO userVO = userService.selectJoinOne(UserVO.class, lambdaQueryWrapper);
-        if (userVO != null) {
+        UserBizVO userBizVO = userService.selectJoinOne(UserBizVO.class, lambdaQueryWrapper);
+        if (userBizVO != null) {
             List<DeptDto> deptDtoList = ApiStrategyFactory.getStrategy().loadAllDept(null);
 
-            List<String> depIdRootList = DeptUtil.queryRootIdList(String.valueOf(userVO.getDeptId()), deptDtoList);
+            List<String> depIdRootList = DeptUtil.queryRootIdList(String.valueOf(userBizVO.getDeptId()), deptDtoList);
 
-            userVO.setDepIdList(CollUtil.reverse(depIdRootList));
+            userBizVO.setDepIdList(CollUtil.reverse(depIdRootList));
 
         }
         //添加扩展字段
@@ -307,11 +307,11 @@ public class OrgServiceImpl implements IOrgService {
         }
 
 
-        userVO.setUserFieldDataList(userFieldDataVos);
+        userBizVO.setUserFieldDataList(userFieldDataVos);
         List<UserRole> userRoleList = userRoleService.queryListByUserId(userId).getData();
-        userVO.setRoleIds(userRoleList.stream().map(w -> w.getRoleId()).collect(Collectors.toList()));
+        userBizVO.setRoleIds(userRoleList.stream().map(w -> w.getRoleId()).collect(Collectors.toList()));
 
-        return com.cxygzl.common.dto.R.success(userVO);
+        return com.cxygzl.common.dto.R.success(userBizVO);
     }
 
     /**

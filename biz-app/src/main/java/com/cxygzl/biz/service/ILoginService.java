@@ -1,6 +1,6 @@
 package com.cxygzl.biz.service;
 
-import com.cxygzl.biz.vo.UserVO;
+import com.cxygzl.biz.vo.UserBizVO;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.WeixinMiniAppQueryPhoneDto;
 
@@ -9,10 +9,10 @@ public interface ILoginService {
     /**
      * 登录
      *
-     * @param userVO
+     * @param userBizVO
      * @return
      */
-    R login(UserVO userVO);
+    R login(UserBizVO userBizVO);
 
     /**
      * token登录

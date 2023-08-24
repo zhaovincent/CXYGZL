@@ -1,6 +1,6 @@
 package com.cxygzl.biz.vo;
 
-import com.cxygzl.biz.vo.node.UserVo;
+import com.cxygzl.biz.vo.node.NodeFormatUserVo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,7 +26,7 @@ public class ProcessFormatNodeApproveDescVo {
     private Boolean sys;
     private String descTypeStr;
     private String showTimeStr;
-    private UserVo user;
+    private NodeFormatUserVo user;
 
     private Date date;
 

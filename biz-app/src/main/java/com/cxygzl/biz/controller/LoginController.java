@@ -2,7 +2,7 @@ package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.security.captcha.EasyCaptchaService;
 import com.cxygzl.biz.service.ILoginService;
-import com.cxygzl.biz.vo.UserVO;
+import com.cxygzl.biz.vo.UserBizVO;
 import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.WeixinMiniAppQueryPhoneDto;
@@ -43,7 +43,7 @@ public class LoginController {
      */
     @SneakyThrows
     @PostMapping("login")
-    public R login(@RequestBody UserVO user) {
+    public R login(@RequestBody UserBizVO user) {
 
         return loginService.login(user);
 

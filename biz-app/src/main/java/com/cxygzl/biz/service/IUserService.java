@@ -2,7 +2,7 @@ package com.cxygzl.biz.service;
 
 import com.cxygzl.biz.entity.User;
 import com.cxygzl.biz.vo.UserListQueryVO;
-import com.cxygzl.biz.vo.UserVO;
+import com.cxygzl.biz.vo.UserBizVO;
 import com.cxygzl.common.dto.R;
 import com.github.yulichang.base.MPJBaseService;
 
@@ -39,18 +39,18 @@ public interface IUserService extends MPJBaseService<User> {
     R getCurrentUserDetail();
     /**
      * 创建用户
-     * @param userVO
+     * @param userBizVO
      * @return
      */
-    Object createUser(UserVO userVO);
+    Object createUser(UserBizVO userBizVO);
 
     /**
      * 修改用户
      *
-     * @param userVO
+     * @param userBizVO
      * @return
      */
-    R editUser(UserVO userVO);
+    R editUser(UserBizVO userBizVO);
 
 
 

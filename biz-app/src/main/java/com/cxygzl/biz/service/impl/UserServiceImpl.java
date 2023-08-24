@@ -14,7 +14,8 @@ import com.cxygzl.biz.mapper.UserMapper;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.PinYinUtil;
 import com.cxygzl.biz.vo.UserListQueryVO;
-import com.cxygzl.biz.vo.UserVO;
+import com.cxygzl.biz.vo.UserBizVO;
+import com.cxygzl.biz.vo.third.UserDtoExtension;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.third.UserDto;
@@ -96,47 +97,47 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
 
 
 
-        com.cxygzl.biz.vo.third.UserVO userVO = BeanUtil.copyProperties(user, com.cxygzl.biz.vo.third.UserVO.class);
+        UserDtoExtension userDtoExtension = BeanUtil.copyProperties(user, UserDtoExtension.class);
 
 
 //        Set<String> roleKeySet = roleService.queryRoleKeyByUserId(userId).getData();
         Set<String> roleKeySet = roleService.list().stream().map(w->w.getKey()).collect(Collectors.toSet());;
 
 
-        userVO.setRoles(roleKeySet);
+        userDtoExtension.setRoles(roleKeySet);
         if(CollUtil.isNotEmpty(roleKeySet)){
-            userVO.setPerms(menuService.listRolePerms(roleKeySet).getData());
+            userDtoExtension.setPerms(menuService.listRolePerms(roleKeySet).getData());
 
         }else{
-            userVO.setPerms(new HashSet<>());
+            userDtoExtension.setPerms(new HashSet<>());
         }
 
 
-        return com.cxygzl.common.dto.R.success(userVO);
+        return com.cxygzl.common.dto.R.success(userDtoExtension);
     }
 
     /**
      * 创建用户
      *
-     * @param userVO
+     * @param userBizVO
      * @return
      */
     @Override
-    public Object createUser(UserVO userVO) {
+    public Object createUser(UserBizVO userBizVO) {
 
-        String phone = userVO.getPhone();
+        String phone = userBizVO.getPhone();
         Long count = this.lambdaQuery().eq(User::getPhone, phone).count();
         if (count > 0) {
             return com.cxygzl.common.dto.R.fail(StrUtil.format("手机号[{}]已注册", phone));
         }
 
-        userVO.setNickName(userVO.getName());
-        userVO.setPy(PinYinUtil.getFirstPinYin(userVO.getName()));
-        userVO.setPinyin(PinYinUtil.getAllPinyin(userVO.getName()));
-        this.save(userVO);
+        userBizVO.setNickName(userBizVO.getName());
+        userBizVO.setPy(PinYinUtil.getFirstPinYin(userBizVO.getName()));
+        userBizVO.setPinyin(PinYinUtil.getAllPinyin(userBizVO.getName()));
+        this.save(userBizVO);
 
         //额外的字段
-        Map<String, Object> fieldData = userVO.getFieldData();
+        Map<String, Object> fieldData = userBizVO.getFieldData();
         List<UserField> userFieldList = userFieldService.lambdaQuery().list();
         for (UserField userField : userFieldList) {
             String key = userField.getKey();
@@ -151,7 +152,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
             }
             UserFieldData userFieldData = new UserFieldData();
 
-            userFieldData.setUserId(userVO.getId());
+            userFieldData.setUserId(userBizVO.getId());
 
             userFieldData.setData(str);
             userFieldData.setKey(key);
@@ -160,11 +161,11 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
         }
 
         //保存角色
-        List<Long> roleIds = userVO.getRoleIds();
+        List<Long> roleIds = userBizVO.getRoleIds();
         for (Long roleId : roleIds) {
             UserRole entity = new UserRole();
 
-            entity.setUserId(userVO.getId());
+            entity.setUserId(userBizVO.getId());
             entity.setRoleId(roleId);
 
             userRoleService.save(entity);
@@ -177,32 +178,32 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
     /**
      * 修改用户
      *
-     * @param userVO
+     * @param userBizVO
      * @return
      */
     @Transactional
     @Override
-    public R editUser(UserVO userVO) {
+    public R editUser(UserBizVO userBizVO) {
 
 
-        String phone = userVO.getPhone();
-        Long count = this.lambdaQuery().eq(User::getPhone, phone).ne(User::getId, userVO.getId()).count();
+        String phone = userBizVO.getPhone();
+        Long count = this.lambdaQuery().eq(User::getPhone, phone).ne(User::getId, userBizVO.getId()).count();
         if (count > 0) {
             return com.cxygzl.common.dto.R.fail(StrUtil.format("手机号[{}]已注册", phone));
         }
 
-        userVO.setNickName(userVO.getName());
-        userVO.setPy(PinYinUtil.getFirstPinYin(userVO.getName()));
-        userVO.setPinyin(PinYinUtil.getAllPinyin(userVO.getName()));
-        this.updateById(userVO);
+        userBizVO.setNickName(userBizVO.getName());
+        userBizVO.setPy(PinYinUtil.getFirstPinYin(userBizVO.getName()));
+        userBizVO.setPinyin(PinYinUtil.getAllPinyin(userBizVO.getName()));
+        this.updateById(userBizVO);
 
         //删除所有的扩展字段
         LambdaQueryWrapper<UserFieldData> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(UserFieldData::getUserId, userVO.getId());
+        queryWrapper.eq(UserFieldData::getUserId, userBizVO.getId());
         userFieldDataService.remove(queryWrapper);
 
         //额外的字段
-        Map<String, Object> fieldData = userVO.getFieldData();
+        Map<String, Object> fieldData = userBizVO.getFieldData();
         List<UserField> userFieldList = userFieldService.lambdaQuery().list();
         for (UserField userField : userFieldList) {
             String key = userField.getKey();
@@ -217,7 +218,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
             }
             UserFieldData userFieldData = new UserFieldData();
 
-            userFieldData.setUserId(userVO.getId());
+            userFieldData.setUserId(userBizVO.getId());
 
             userFieldData.setData(str);
             userFieldData.setKey(key);
@@ -226,13 +227,13 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
         }
         //先删除用户角色
         LambdaQueryWrapper<UserRole> objectLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        userRoleService.remove(objectLambdaQueryWrapper.eq(UserRole::getUserId,userVO.getId()));
+        userRoleService.remove(objectLambdaQueryWrapper.eq(UserRole::getUserId, userBizVO.getId()));
         //保存角色
-        List<Long> roleIds = userVO.getRoleIds();
+        List<Long> roleIds = userBizVO.getRoleIds();
         for (Long roleId : roleIds) {
             UserRole entity = new UserRole();
 
-            entity.setUserId(userVO.getId());
+            entity.setUserId(userBizVO.getId());
             entity.setRoleId(roleId);
 
             userRoleService.save(entity);
@@ -255,7 +256,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
 
         MPJLambdaWrapper<User> lambdaQueryWrapper = new MPJLambdaWrapper<User>()
                 .selectAll(User.class)
-                .selectAs(Dept::getName, UserVO::getDeptName)
+                .selectAs(Dept::getName, UserBizVO::getDeptName)
                 .leftJoin(Dept.class, Dept::getId, User::getDeptId)
                 .like(StrUtil.isNotBlank(userListQueryVO.getName()), User::getName, userListQueryVO.getName())
                 .in(CollUtil.isNotEmpty(userListQueryVO.getDepIdList()), User::getDeptId, userListQueryVO.getDepIdList())
@@ -268,8 +269,8 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
                 .orderByDesc(User::getCreateTime);
 
 
-        Page<UserVO> objectPage = this.selectJoinListPage(new Page<>(userListQueryVO.getPageNum(),
-                userListQueryVO.getPageSize()), UserVO.class, lambdaQueryWrapper);
+        Page<UserBizVO> objectPage = this.selectJoinListPage(new Page<>(userListQueryVO.getPageNum(),
+                userListQueryVO.getPageSize()), UserBizVO.class, lambdaQueryWrapper);
 
 
         return com.cxygzl.common.dto.R.success(objectPage);

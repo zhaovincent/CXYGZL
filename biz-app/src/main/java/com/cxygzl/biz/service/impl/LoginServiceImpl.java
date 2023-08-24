@@ -17,7 +17,7 @@ import com.cxygzl.biz.service.ILoginService;
 import com.cxygzl.biz.service.IUserService;
 import com.cxygzl.biz.service.IWeixinUserService;
 import com.cxygzl.biz.utils.DingTalkHttpUtil;
-import com.cxygzl.biz.vo.UserVO;
+import com.cxygzl.biz.vo.UserBizVO;
 import com.cxygzl.common.constants.LoginPlatEnum;
 import com.cxygzl.common.constants.StatusEnum;
 import com.cxygzl.common.dto.R;
@@ -49,26 +49,26 @@ public class LoginServiceImpl implements ILoginService {
     /**
      * 登录
      *
-     * @param userVO
+     * @param userBizVO
      * @return
      */
     @Override
-    public R login(UserVO userVO) {
+    public R login(UserBizVO userBizVO) {
 
         Object cacheVerifyCode =
-                redisTemplate.opsForValue().get(SecurityConstants.VERIFY_CODE_CACHE_PREFIX + userVO.getVerifyCodeKey());
+                redisTemplate.opsForValue().get(SecurityConstants.VERIFY_CODE_CACHE_PREFIX + userBizVO.getVerifyCodeKey());
         if (cacheVerifyCode == null) {
             return com.cxygzl.common.dto.R.fail("验证码错误");
         } else {
             // 验证码比对
-            if (!StrUtil.equals(userVO.getVerifyCode(), Convert.toStr(cacheVerifyCode))) {
+            if (!StrUtil.equals(userBizVO.getVerifyCode(), Convert.toStr(cacheVerifyCode))) {
                 return com.cxygzl.common.dto.R.fail("验证码错误");
 
             }
         }
 
-        String phone = userVO.getPhone();
-        String password = userVO.getPassword();
+        String phone = userBizVO.getPhone();
+        String password = userBizVO.getPassword();
 
         User u = userService.lambdaQuery()
                 .eq(User::getPhone, phone)

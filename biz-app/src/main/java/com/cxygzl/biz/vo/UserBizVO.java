@@ -1,9 +1,7 @@
-package com.cxygzl.biz.vo.third;
+package com.cxygzl.biz.vo;
 
-import com.cxygzl.biz.vo.UserFieldDataVo;
-import com.cxygzl.common.dto.third.UserDto;
-import lombok.Getter;
-import lombok.Setter;
+import com.cxygzl.biz.entity.User;
+import lombok.*;
 
 import java.util.List;
 import java.util.Map;
@@ -11,11 +9,14 @@ import java.util.Set;
 
 @Getter
 @Setter
-public class UserVO extends UserDto {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserBizVO extends User {
 
     private String deptName;
 
-    private List<Long> depIdList;
+    private List<String> depIdList;
     private Set<String> roles;
     private Set<String> perms;
     //扩展字段

@@ -15,7 +15,7 @@ import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.vo.ProcessFormatNodeApproveDescVo;
 import com.cxygzl.biz.vo.node.NodeVo;
-import com.cxygzl.biz.vo.node.UserVo;
+import com.cxygzl.biz.vo.node.NodeFormatUserVo;
 import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
@@ -118,7 +118,7 @@ public class NodeFormatUtil {
         }
 
 
-        List<UserVo> userVoList = new ArrayList<>();
+        List<NodeFormatUserVo> nodeFormatUserVoList = new ArrayList<>();
         if (type == NodeTypeEnum.APPROVAL.getValue().intValue()) {
 
             Integer assignedType = node.getAssignedType();
@@ -132,12 +132,12 @@ public class NodeFormatUtil {
             // 用户列表
             if (StrUtil.isAllNotBlank(processInstanceId, node.getExecutionId())) {
 
-                List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = buildApproveDesc(node, processInstanceId, nodeVo, userVoList);
+                List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = buildApproveDesc(node, processInstanceId, nodeVo, nodeFormatUserVoList);
 
                 if (processNodeRecordAssignUserList.isEmpty()) {
                     if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF) {
                         //发起人自己
-                        userVoList.addAll(CollUtil.newArrayList(buildRootUser(processInstanceId)));
+                        nodeFormatUserVoList.addAll(CollUtil.newArrayList(buildRootUser(processInstanceId)));
                     }
                     if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF_SELECT) {
                         //发起人自选
@@ -149,8 +149,8 @@ public class NodeFormatUtil {
 
                         List<String> collect = nodeUserDtos.stream().map(w -> (w.getId())).collect(Collectors.toList());
                         for (String aLong : collect) {
-                            UserVo userVo = buildUser(aLong);
-                            userVoList.addAll(CollUtil.newArrayList(userVo));
+                            NodeFormatUserVo nodeFormatUserVo = buildUser(aLong);
+                            nodeFormatUserVoList.addAll(CollUtil.newArrayList(nodeFormatUserVo));
                         }
                     }
                 }
@@ -160,8 +160,8 @@ public class NodeFormatUtil {
                 //指定用户
 
                 List<NodeUser> nodeUserList = node.getNodeUserList();
-                List<UserVo> tempList = buildUser(nodeUserList);
-                userVoList.addAll(tempList);
+                List<NodeFormatUserVo> tempList = buildUser(nodeUserList);
+                nodeFormatUserVoList.addAll(tempList);
 
 
             } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.FORM_USER) {
@@ -176,7 +176,7 @@ public class NodeFormatUtil {
                         List<String> userIdList =
                                 nodeUserDtoList.stream().map(w -> (w.getId())).collect(Collectors.toList());
                         for (String aLong : userIdList) {
-                            userVoList.addAll(CollUtil.newArrayList(buildUser(aLong)));
+                            nodeFormatUserVoList.addAll(CollUtil.newArrayList(buildUser(aLong)));
                         }
                     }
                 }
@@ -184,7 +184,7 @@ public class NodeFormatUtil {
 
             } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF) {
                 //发起人自己
-                userVoList.addAll(CollUtil.newArrayList(buildUser(StpUtil.getLoginIdAsString())));
+                nodeFormatUserVoList.addAll(CollUtil.newArrayList(buildUser(StpUtil.getLoginIdAsString())));
             } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.LEADER) {
                 //制定主管
 
@@ -205,8 +205,8 @@ public class NodeFormatUtil {
 
                         List<String> leaderUserIdList = deptDto.getLeaderUserIdList();
                         for (String s : leaderUserIdList) {
-                            UserVo userVo = buildUser(s);
-                            userVoList.add(userVo);
+                            NodeFormatUserVo nodeFormatUserVo = buildUser(s);
+                            nodeFormatUserVoList.add(nodeFormatUserVo);
                         }
 
 
@@ -238,8 +238,8 @@ public class NodeFormatUtil {
 
                         List<String> leaderUserIdList = deptDto.getLeaderUserIdList();
                         for (String s : leaderUserIdList) {
-                            UserVo userVo = buildUser(s);
-                            userVoList.add(userVo);
+                            NodeFormatUserVo nodeFormatUserVo = buildUser(s);
+                            nodeFormatUserVoList.add(nodeFormatUserVo);
                         }
 
                         index++;
@@ -251,14 +251,14 @@ public class NodeFormatUtil {
         } else if (node.getType().intValue() == NodeTypeEnum.ROOT.getValue()) {
             //发起节点
             if (StrUtil.isBlank(processInstanceId)) {
-                UserVo userVo = buildUser(StpUtil.getLoginIdAsString());
+                NodeFormatUserVo nodeFormatUserVo = buildUser(StpUtil.getLoginIdAsString());
 
-                userVoList.addAll(CollUtil.newArrayList(userVo));
+                nodeFormatUserVoList.addAll(CollUtil.newArrayList(nodeFormatUserVo));
 
             } else {
 
 
-                buildApproveDesc(node, processInstanceId, nodeVo, userVoList);
+                buildApproveDesc(node, processInstanceId, nodeVo, nodeFormatUserVoList);
 
             }
         } else if (node.getType().intValue() == NodeTypeEnum.CC.getValue()) {
@@ -266,11 +266,11 @@ public class NodeFormatUtil {
 
             List<NodeUser> nodeUserList = node.getNodeUserList();
 
-            List<UserVo> tempList = buildUser(nodeUserList);
-            userVoList.addAll(tempList);
+            List<NodeFormatUserVo> tempList = buildUser(nodeUserList);
+            nodeFormatUserVoList.addAll(tempList);
 
         }
-        nodeVo.setUserVoList(userVoList);
+        nodeVo.setNodeFormatUserVoList(nodeFormatUserVoList);
 
 
         List<NodeVo> branchList = new ArrayList<>();
@@ -303,7 +303,7 @@ public class NodeFormatUtil {
         return list;
     }
 
-    private static List<ProcessNodeRecordAssignUser> buildApproveDesc(Node node, String processInstanceId, NodeVo nodeVo, List<UserVo> userVoList) {
+    private static List<ProcessNodeRecordAssignUser> buildApproveDesc(Node node, String processInstanceId, NodeVo nodeVo, List<NodeFormatUserVo> nodeFormatUserVoList) {
         IProcessExecutionService processExecutionService = SpringUtil.getBean(IProcessExecutionService.class);
         List<ProcessExecution> processExecutionList = processExecutionService.lambdaQuery()
                 .eq(ProcessExecution::getExecutionId, node.getExecutionId())
@@ -335,9 +335,9 @@ public class NodeFormatUtil {
                 List<SimpleApproveDescDto> simpleApproveDescDtoList = CoreHttpUtil.queryTaskComments(taskId).getData();
 
                 for (SimpleApproveDescDto simpleApproveDescDto : simpleApproveDescDtoList) {
-                    UserVo userVo = buildUser(simpleApproveDescDto.getUserId());
+                    NodeFormatUserVo nodeFormatUserVo = buildUser(simpleApproveDescDto.getUserId());
                     ProcessFormatNodeApproveDescVo descVo = ProcessFormatNodeApproveDescVo.builder()
-                            .user(userVo)
+                            .user(nodeFormatUserVo)
                             .desc(simpleApproveDescDto.getMessage())
                             .descType(simpleApproveDescDto.getType())
                             .sys(simpleApproveDescDto.getSys())
@@ -375,13 +375,13 @@ public class NodeFormatUtil {
             String userId = processInstanceRecord.getUserId();
 
 
-            UserVo userVo = buildUser((userId));
-            userVo.setShowTime(processInstanceRecord.getCreateTime());
-            userVo.setShowTimeStr(nodeDateShow(processInstanceRecord.getCreateTime()));
-            userVo.setStatus(NodeStatusEnum.YJS.getCode());
+            NodeFormatUserVo nodeFormatUserVo = buildUser((userId));
+            nodeFormatUserVo.setShowTime(processInstanceRecord.getCreateTime());
+            nodeFormatUserVo.setShowTimeStr(nodeDateShow(processInstanceRecord.getCreateTime()));
+            nodeFormatUserVo.setStatus(NodeStatusEnum.YJS.getCode());
 //            userVo.setOperType(w.getTaskType());
 
-            userVoList.add(userVo);
+            nodeFormatUserVoList.add(nodeFormatUserVo);
         }
 
         for (String userId : userIdSet) {
@@ -392,13 +392,13 @@ public class NodeFormatUtil {
             ProcessNodeRecordAssignUser w = list.get(list.size() - 1);
 
 
-            UserVo userVo = buildUser((userId));
-            userVo.setShowTime(w.getEndTime());
-            userVo.setShowTimeStr(nodeDateShow(w.getEndTime()));
-            userVo.setStatus(w.getStatus());
-            userVo.setOperType(w.getTaskType());
+            NodeFormatUserVo nodeFormatUserVo = buildUser((userId));
+            nodeFormatUserVo.setShowTime(w.getEndTime());
+            nodeFormatUserVo.setShowTimeStr(nodeDateShow(w.getEndTime()));
+            nodeFormatUserVo.setStatus(w.getStatus());
+            nodeFormatUserVo.setOperType(w.getTaskType());
 
-            userVoList.add(userVo);
+            nodeFormatUserVoList.add(nodeFormatUserVo);
         }
         return processNodeRecordAssignUserList;
     }
@@ -410,13 +410,13 @@ public class NodeFormatUtil {
      * @param processInstanceId
      * @return
      */
-    private static UserVo buildRootUser(String processInstanceId) {
+    private static NodeFormatUserVo buildRootUser(String processInstanceId) {
 
         IProcessInstanceRecordService processInstanceRecordService = SpringUtil.getBean(IProcessInstanceRecordService.class);
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
         String userId = processInstanceRecord.getUserId();
-        UserVo userVo = buildUser(userId);
-        return userVo;
+        NodeFormatUserVo nodeFormatUserVo = buildUser(userId);
+        return nodeFormatUserVo;
     }
 
     /**
@@ -425,7 +425,7 @@ public class NodeFormatUtil {
      * @param userId
      * @return
      */
-    private static UserVo buildUser(String userId) {
+    private static NodeFormatUserVo buildUser(String userId) {
 
         UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
 
@@ -433,14 +433,14 @@ public class NodeFormatUtil {
             return null;
         }
 
-        UserVo nodeUserDto = UserVo.builder().id(userId).name(user.getName())
+        NodeFormatUserVo nodeUserDto = NodeFormatUserVo.builder().id(userId).name(user.getName())
                 .avatar(user.getAvatarUrl())
                 .build();
         return nodeUserDto;
     }
 
-    private static List<UserVo> buildUser(List<NodeUser> nodeUserList) {
-        List<UserVo> userVoList = new ArrayList<>();
+    private static List<NodeFormatUserVo> buildUser(List<NodeUser> nodeUserList) {
+        List<NodeFormatUserVo> nodeFormatUserVoList = new ArrayList<>();
         //用户id
         List<String> userIdList = nodeUserList.stream().filter(w -> StrUtil.equals(w.getType(),
                 NodeUserTypeEnum.USER.getKey())).map(w -> (w.getId())).collect(Collectors.toList());
@@ -464,10 +464,10 @@ public class NodeFormatUtil {
         }
         {
             for (String aLong : userIdList) {
-                userVoList.addAll(CollUtil.newArrayList(buildUser(aLong)));
+                nodeFormatUserVoList.addAll(CollUtil.newArrayList(buildUser(aLong)));
             }
         }
-        return userVoList;
+        return nodeFormatUserVoList;
     }
 
 }

@@ -1,12 +1,10 @@
 package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.entity.User;
-import com.cxygzl.biz.security.captcha.EasyCaptchaService;
 import com.cxygzl.biz.service.IOrgService;
 import com.cxygzl.biz.service.IUserService;
 import com.cxygzl.biz.vo.UserListQueryVO;
-import com.cxygzl.biz.vo.UserVO;
-import com.cxygzl.common.config.NotWriteLogAnno;
+import com.cxygzl.biz.vo.UserBizVO;
 import com.cxygzl.common.dto.R;
 import lombok.SneakyThrows;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +30,7 @@ public class UserController {
      * @return
      */
     @PostMapping("create")
-    public Object create(@RequestBody UserVO user){
+    public Object create(@RequestBody UserBizVO user){
         return userService.createUser(user);
     }
     /**
@@ -41,7 +39,7 @@ public class UserController {
      * @return
      */
     @PutMapping("edit")
-    public R editUser(@RequestBody UserVO user){
+    public R editUser(@RequestBody UserBizVO user){
         return userService.editUser(user);
     }
 

@@ -11,7 +11,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserVo {
+public class NodeFormatUserVo {
 
     /**
      * 用户od
