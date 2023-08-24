@@ -270,7 +270,7 @@ public class NodeFormatUtil {
             nodeFormatUserVoList.addAll(tempList);
 
         }
-        nodeVo.setNodeFormatUserVoList(nodeFormatUserVoList);
+        nodeVo.setUserVoList(nodeFormatUserVoList);
 
 
         List<NodeVo> branchList = new ArrayList<>();

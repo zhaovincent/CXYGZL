@@ -241,13 +241,17 @@ public class LoginServiceImpl implements ILoginService {
 
                 SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
 
-                return R.success(tokenInfo);
+                Dict set = Dict.create().set("tokenInfo", tokenInfo).set("loginResult", 2);
+
+
+                return R.success(set);
             } else if (weixinUser != null) {
 
                 String phone = weixinUser.getPhone();
                 User user = userService.lambdaQuery().eq(User::getPhone, phone).one();
                 if (user == null) {
-                    return R.fail("用户未注册，请联系管理员");
+                    Dict set = Dict.create().set("loginResult", 3);
+                    return R.success(set);
 
                 }
                 weixinUser.setUserId(String.valueOf(user.getId()));
@@ -256,7 +260,9 @@ public class LoginServiceImpl implements ILoginService {
 
                 SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
 
-                return R.success(tokenInfo);
+                Dict set = Dict.create().set("tokenInfo", tokenInfo).set("loginResult", 2);
+
+                return R.success(set);
             }
 
 
@@ -287,13 +293,16 @@ public class LoginServiceImpl implements ILoginService {
 
 
             if (user == null) {
-                return R.fail("用户未注册，请联系管理员");
+                Dict set = Dict.create().set("loginResult", 3);
+                return R.success(set);
             }
             StpUtil.login(user.getId(), LoginPlatEnum.WX_MIN_APP.getType());
 
             SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
 
-            return R.success(tokenInfo);
+            Dict set = Dict.create().set("tokenInfo", tokenInfo).set("loginResult", 2);
+
+            return R.success(set);
         } finally {
             WxMaConfigHolder.remove();//清理ThreadLocal
         }

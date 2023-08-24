@@ -49,8 +49,8 @@ file:
   ##静态文件在磁盘位置，此处与nginx配置要一直
   dir: /tmp/cxygzl
   ##静态文件访问路径
-#  showUrl: https://dd.cxygzl.com/api/file/show
-  showUrl: http://127.0.0.1:${server.port}/file/show
+  showUrl: https://dd.cxygzl.com/api/file/show
+#  showUrl: http://127.0.0.1:${server.port}/file/show
 
 
 sa-token:

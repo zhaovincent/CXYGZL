@@ -1,6 +1,8 @@
 package com.cxygzl.biz.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
@@ -54,9 +56,19 @@ public class FileController {
 
         String format = StrUtil.format("{}-{}", IdUtil.fastSimpleUUID(), originalFilename);
 
-        FileUtil.writeBytes(file.getBytes(), StrUtil.format("{}/{}",fileDir, format));
+        //日期路径
+        String s = DateUtil.formatDate(new DateTime());
+        {
+            String formatted = StrUtil.format("{}/{}", fileDir, s);
+            if(!FileUtil.exist(formatted)){
+                FileUtil.mkdir(formatted);
+            }
+        }
 
-        return R.success(StrUtil.format("{}/{}",fileShowUrl,format));
+
+        FileUtil.writeBytes(file.getBytes(), StrUtil.format("{}/{}/{}",fileDir,s, format));
+
+        return R.success(StrUtil.format("{}/{}/{}",fileShowUrl,s,format));
     }
 
     /**
@@ -68,6 +80,18 @@ public class FileController {
     @NotWriteLogAnno(exclude = false,all = false,printResultLog = false,paramsExclude = "response")
     public void show(@PathVariable String key, HttpServletResponse response){
         String format = StrUtil.format("{}/{}", fileDir, key);
+        IoUtil.write(response.getOutputStream(),true,FileUtil.readBytes(format));
+    }
+
+    /**
+     * 显示文件
+     * @param key
+     */
+    @SneakyThrows
+    @GetMapping("/show/{s}/{key}")
+    @NotWriteLogAnno(exclude = false,all = false,printResultLog = false,paramsExclude = "response")
+    public void show(@PathVariable String key,@PathVariable String s, HttpServletResponse response){
+        String format = StrUtil.format("{}/{}/{}", fileDir,s, key);
         IoUtil.write(response.getOutputStream(),true,FileUtil.readBytes(format));
     }
 }

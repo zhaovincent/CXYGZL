@@ -49,6 +49,8 @@ public class LoginInterceptor implements WebMvcConfigurer {
                        "/js/*",
                        "*.ico",
                        "/api/file/show/*",
+                       "/api/file/show/*/*",
+                       "/file/show/*/*",
                        "/file/show/*"
                )
        ;
