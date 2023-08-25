@@ -176,8 +176,32 @@ public class NodeFormatUtil {
                         List<String> userIdList =
                                 nodeUserDtoList.stream().map(w -> (w.getId())).collect(Collectors.toList());
                         for (String aLong : userIdList) {
-                            nodeFormatUserVoList.addAll(CollUtil.newArrayList(buildUser(aLong)));
+                            nodeFormatUserVoList.add(buildUser(aLong));
                         }
+                    }
+                }
+
+
+            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.FORM_DEPT) {
+                //表单部门
+                String formUser = node.getFormUserId();
+
+                Object o = paramMap.get(formUser);
+                if (o != null) {
+                    String jsonString = JSON.toJSONString(o);
+                    if (StrUtil.isNotBlank(jsonString)) {
+                        List<NodeUser> nodeUserDtoList = JSON.parseArray(jsonString, NodeUser.class);
+                        List<String> deptIdList =
+                                nodeUserDtoList.stream().map(w -> (w.getId())).collect(Collectors.toList());
+
+                        if(CollUtil.isNotEmpty(deptIdList)){
+                            List<String> userIdList = ApiStrategyFactory.getStrategy().loadUserIdListByDeptIdList(deptIdList);
+                            for (String aLong : userIdList) {
+                                nodeFormatUserVoList.add(buildUser(aLong));
+                            }
+                        }
+
+
                     }
                 }
 
