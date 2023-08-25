@@ -28,7 +28,7 @@ public class ProcessDto {
 
     private String description;
 
-    private String mobile;
+    private String userId;
 
     private String processInstanceId;
 

@@ -357,19 +357,19 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     @Override
     public com.cxygzl.common.dto.R end(ProcessInstanceParamDto processInstanceParamDto) {
         processInstanceRecordService.lambdaUpdate()
-                .set(ProcessInstanceRecord::getResult,processInstanceParamDto.getResult())
+                .set(ProcessInstanceRecord::getResult, processInstanceParamDto.getResult())
                 .set(ProcessInstanceRecord::getEndTime, new Date())
                 .set(!processInstanceParamDto.getCancel(), ProcessInstanceRecord::getStatus,
                         NodeStatusEnum.YJS.getCode())
                 .set(processInstanceParamDto.getCancel(), ProcessInstanceRecord::getStatus, NodeStatusEnum.YCX.getCode())
                 .eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceParamDto.getProcessInstanceId())
-                .eq(ProcessInstanceRecord::getStatus,NodeStatusEnum.JXZ.getCode())
+                .eq(ProcessInstanceRecord::getStatus, NodeStatusEnum.JXZ.getCode())
                 .update(new ProcessInstanceRecord());
 
         //通知第三方
-        if(processInstanceParamDto.getCancel()){
+        if (processInstanceParamDto.getCancel()) {
             ApiStrategyFactory.getStrategy().stopProcessInstance(processInstanceParamDto);
-        }else{
+        } else {
             ApiStrategyFactory.getStrategy().completeProcessInstance(processInstanceParamDto);
         }
 
@@ -549,8 +549,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         NodeUtil.addEndNode(node);
 
 
-
-        NodeImageVO imageVO = NodeImageUtil.initPosition(node,procInsId );
+        NodeImageVO imageVO = NodeImageUtil.initPosition(node, procInsId);
 
         return com.cxygzl.common.dto.R.success(imageVO);
     }
@@ -570,7 +569,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         }
 
         String process = null;
-        if ( StrUtil.isNotBlank(processInstanceId)) {
+        if (StrUtil.isNotBlank(processInstanceId)) {
             ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
                     processInstanceId).one();
             flowId = processInstanceRecord.getFlowId();
@@ -604,9 +603,21 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 paramMap.putAll(variableMap);
             }
 
+        } else if (StrUtil.isNotBlank(processInstanceId)) {
+            ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
+                    processInstanceId).one();
+            //任务里没有
+            String formData = processInstanceRecord.getFormData();
+            Map<String, Object> map = JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
+            });
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (paramMap.get(key) == null) {
+                    paramMap.put(key, value);
+                }
+            }
         }
-
-
 
 
         if (StrUtil.isBlank(process)) {
@@ -629,7 +640,6 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      */
     @Override
     public R detail(String processInstanceId) {
-
 
 
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
@@ -700,7 +710,6 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
 
         }
-
 
 
         UserDto starterUser = ApiStrategyFactory.getStrategy().getUser(processInstanceRecord.getUserId());

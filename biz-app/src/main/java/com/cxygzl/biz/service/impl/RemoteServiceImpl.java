@@ -320,7 +320,7 @@ public class RemoteServiceImpl implements IRemoteService {
         ProcessDto processDto =
                 ProcessDto.builder()
                         .processInstanceId(processInstanceRecordParamDto.getProcessInstanceId())
-                        .mobile(processInstanceRecordParamDto.getUserId())
+                        .userId(processInstanceRecordParamDto.getUserId())
                         .flowId(process.getFlowId())
                         .formItemVOList(JSON.parseArray(process.getFormItems(), FormItemVO.class))
                         .valueMap(valueMap).build();

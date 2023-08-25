@@ -128,6 +128,9 @@ public class NodeFormatUtil {
             if (selfSelect) {
                 nodeVo.setMultiple(node.getMultiple());
             }
+            if(StrUtil.isNotBlank(processInstanceId)){
+                nodeVo.setSelectUser(false);
+            }
 
             // 用户列表
             if (StrUtil.isAllNotBlank(processInstanceId, node.getExecutionId())) {
@@ -156,6 +159,19 @@ public class NodeFormatUtil {
                 }
 
 
+            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF_SELECT) {
+                //发起人自选
+                Object variable = paramMap.get(StrUtil.format("{}_assignee_select", node.getId()));
+                if (variable == null) {
+                    variable = new ArrayList<>();
+                }
+                List<NodeUser> nodeUserDtos = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class);
+
+                List<String> collect = nodeUserDtos.stream().map(w -> (w.getId())).collect(Collectors.toList());
+                for (String aLong : collect) {
+                    NodeFormatUserVo nodeFormatUserVo = buildUser(aLong);
+                    nodeFormatUserVoList.add(nodeFormatUserVo);
+                }
             } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.USER) {
                 //指定用户
 
@@ -194,7 +210,7 @@ public class NodeFormatUtil {
                         List<String> deptIdList =
                                 nodeUserDtoList.stream().map(w -> (w.getId())).collect(Collectors.toList());
 
-                        if(CollUtil.isNotEmpty(deptIdList)){
+                        if (CollUtil.isNotEmpty(deptIdList)) {
                             List<String> userIdList = ApiStrategyFactory.getStrategy().loadUserIdListByDeptIdList(deptIdList);
                             for (String aLong : userIdList) {
                                 nodeFormatUserVoList.add(buildUser(aLong));
