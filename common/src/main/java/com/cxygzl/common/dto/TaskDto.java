@@ -91,5 +91,6 @@ public class TaskDto {
      */
     private List<String> selectUserNodeId;
 
+    private Integer processInstanceResult;
 
 }

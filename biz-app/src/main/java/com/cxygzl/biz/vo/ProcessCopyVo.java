@@ -14,4 +14,6 @@ public class ProcessCopyVo extends ProcessCopy {
      *  表单值显示
      */
     private List<Dict> formValueShowList;
+
+    private Integer processInstanceResult;
 }

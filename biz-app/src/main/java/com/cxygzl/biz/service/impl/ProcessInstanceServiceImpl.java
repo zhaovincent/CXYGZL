@@ -312,6 +312,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 record.setRootUserName(startUser.getName());
                 record.setRootUserAvatarUrl(startUser.getAvatarUrl());
                 record.setStartTime(processInstanceRecord.getCreateTime());
+                record.setProcessInstanceResult(processInstanceRecord.getResult());
             }
             Map<String, Object> paramMap = new LinkedHashMap<>();
             {
@@ -478,6 +479,9 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
             for (ProcessCopyVo record : processCopyVoList) {
 
+                ProcessInstanceRecord processInstanceRecord = processInstanceRecordList.stream().filter(w -> StrUtil.equals(w.getProcessInstanceId(),
+                        record.getProcessInstanceId())).findFirst().get();
+
 
                 UserDto startUser = startUserList.stream().filter(w -> w.getId()
                         .equals(record.getStartUserId())).findAny().orElse(null);
@@ -491,6 +495,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
                 record.setFormValueShowList(formValueShowList);
                 record.setFormData(null);
+                record.setProcessInstanceResult(processInstanceRecord.getResult());
 
             }
         }

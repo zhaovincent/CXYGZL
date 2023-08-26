@@ -113,6 +113,9 @@ public class LoginServiceImpl implements ILoginService {
     @Override
     public R loginByToken(String token) {
         String userId = ApiStrategyFactory.getStrategy().getUserIdByToken(token);
+        if(StrUtil.isBlank(userId)){
+            return R.fail("获取用户失败，请重试");
+        }
         StpUtil.login(userId, LoginPlatEnum.ADMIN.getType());
 
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
