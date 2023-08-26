@@ -55,14 +55,30 @@ public class LoginServiceImpl implements ILoginService {
     @Override
     public R login(UserBizVO userBizVO) {
 
+        return loginAtWeb(userBizVO, LoginPlatEnum.ADMIN);
+    }
+
+    /**
+     * h5登录
+     *
+     * @param userBizVO
+     * @return
+     */
+    @Override
+    public R loginAtH5(UserBizVO userBizVO) {
+
+        return loginAtWeb(userBizVO, LoginPlatEnum.H5);
+    }
+
+    private R loginAtWeb(UserBizVO userBizVO, LoginPlatEnum platform) {
         Object cacheVerifyCode =
                 redisTemplate.opsForValue().get(SecurityConstants.VERIFY_CODE_CACHE_PREFIX + userBizVO.getVerifyCodeKey());
         if (cacheVerifyCode == null) {
-            return com.cxygzl.common.dto.R.fail("验证码错误");
+            return R.fail("验证码错误");
         } else {
             // 验证码比对
             if (!StrUtil.equals(userBizVO.getVerifyCode(), Convert.toStr(cacheVerifyCode))) {
-                return com.cxygzl.common.dto.R.fail("验证码错误");
+                return R.fail("验证码错误");
 
             }
         }
@@ -81,11 +97,11 @@ public class LoginServiceImpl implements ILoginService {
         }
 
 
-        StpUtil.login(u.getId(), LoginPlatEnum.ADMIN.getType());
+        StpUtil.login(u.getId(), platform.getType());
 
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
 
-        return com.cxygzl.common.dto.R.success(tokenInfo);
+        return R.success(tokenInfo);
     }
 
     /**

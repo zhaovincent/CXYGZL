@@ -15,6 +15,13 @@ public interface ILoginService {
     R login(UserBizVO userBizVO);
 
     /**
+     * h5登录
+     * @param userBizVO
+     * @return
+     */
+    R loginAtH5(UserBizVO userBizVO);
+
+    /**
      * token登录
      *
      * @param token

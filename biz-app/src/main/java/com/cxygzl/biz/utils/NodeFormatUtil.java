@@ -137,26 +137,26 @@ public class NodeFormatUtil {
 
                 List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = buildApproveDesc(node, processInstanceId, nodeVo, nodeFormatUserVoList);
 
-                if (processNodeRecordAssignUserList.isEmpty()) {
-                    if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF) {
-                        //发起人自己
-                        nodeFormatUserVoList.addAll(CollUtil.newArrayList(buildRootUser(processInstanceId)));
-                    }
-                    if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF_SELECT) {
-                        //发起人自选
-                        Object variable = paramMap.get(StrUtil.format("{}_assignee_select", node.getId()));
-                        if (variable == null) {
-                            variable = new ArrayList<>();
-                        }
-                        List<NodeUser> nodeUserDtos = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class);
-
-                        List<String> collect = nodeUserDtos.stream().map(w -> (w.getId())).collect(Collectors.toList());
-                        for (String aLong : collect) {
-                            NodeFormatUserVo nodeFormatUserVo = buildUser(aLong);
-                            nodeFormatUserVoList.addAll(CollUtil.newArrayList(nodeFormatUserVo));
-                        }
-                    }
-                }
+//                if (processNodeRecordAssignUserList.isEmpty()) {
+//                    if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF) {
+//                        //发起人自己
+//                        nodeFormatUserVoList.addAll(CollUtil.newArrayList(buildRootUser(processInstanceId)));
+//                    }
+//                    if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF_SELECT) {
+//                        //发起人自选
+//                        Object variable = paramMap.get(StrUtil.format("{}_assignee_select", node.getId()));
+//                        if (variable == null) {
+//                            variable = new ArrayList<>();
+//                        }
+//                        List<NodeUser> nodeUserDtos = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class);
+//
+//                        List<String> collect = nodeUserDtos.stream().map(w -> (w.getId())).collect(Collectors.toList());
+//                        for (String aLong : collect) {
+//                            NodeFormatUserVo nodeFormatUserVo = buildUser(aLong);
+//                            nodeFormatUserVoList.addAll(CollUtil.newArrayList(nodeFormatUserVo));
+//                        }
+//                    }
+//                }
 
 
             } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF_SELECT) {

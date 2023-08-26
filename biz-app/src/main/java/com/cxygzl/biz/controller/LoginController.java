@@ -50,6 +50,20 @@ public class LoginController {
     }
 
     /**
+     * h5用户登录
+     *
+     * @param user
+     * @return
+     */
+    @SneakyThrows
+    @PostMapping("loginAtH5")
+    public R loginAtH5(@RequestBody UserBizVO user) {
+
+        return loginService.loginAtH5(user);
+
+    }
+
+    /**
      * 用户token自动登录
      *
      * @param token
