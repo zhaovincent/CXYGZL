@@ -25,4 +25,6 @@ sa-token:
   is-concurrent: true
 
 
-
+##流程的数据api开关
+api:
+  ori: dingtalk
