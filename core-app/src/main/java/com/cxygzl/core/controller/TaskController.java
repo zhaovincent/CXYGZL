@@ -10,7 +10,7 @@ import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
-import com.cxygzl.common.utils.NodeUtil;
+import com.cxygzl.core.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.*;
 import org.flowable.engine.task.Comment;

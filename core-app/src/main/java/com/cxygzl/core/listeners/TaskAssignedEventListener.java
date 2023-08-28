@@ -5,8 +5,8 @@ import com.cxygzl.common.constants.MessageTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
 import com.cxygzl.common.dto.third.MessageDto;
-import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.utils.BizHttpUtil;
+import com.cxygzl.core.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEntityEvent;
@@ -55,7 +55,7 @@ public class TaskAssignedEventListener implements FlowableEventListener {
 
                 String processDefinitionId = task.getProcessDefinitionId();
                 //流程id
-                String flowId = NodeUtil.getFlowId(processDefinitionId);
+                String flowId = com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
                 ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto = new ProcessNodeRecordAssignUserParamDto();
                 processNodeRecordAssignUserParamDto.setFlowId(flowId);
                 processNodeRecordAssignUserParamDto.setProcessInstanceId(processInstanceId);

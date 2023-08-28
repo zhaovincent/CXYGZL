@@ -9,8 +9,8 @@ import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.Node;
-import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.utils.ModelUtil;
+import com.cxygzl.core.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.BpmnAutoLayout;
 import org.flowable.bpmn.converter.BpmnXMLConverter;
@@ -38,7 +38,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_RESULT;
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.ENABLE_SKIP_EXPRESSION;
 
 /**
@@ -241,7 +240,8 @@ public class FlowController {
 
             String processDefinitionId = historicActivityInstance.getProcessDefinitionId();
             //流程id
-            String flowId = NodeUtil.getFlowId(processDefinitionId);
+            String flowId = com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
+
 
             TaskDto taskDto = new TaskDto();
             taskDto.setFlowId(flowId);

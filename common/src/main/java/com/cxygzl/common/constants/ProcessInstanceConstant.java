@@ -86,6 +86,8 @@ public class ProcessInstanceConstant {
 
         //流程唯一id
         public static final String FLOW_UNIQUE_ID ="flowUniqueId";
+        //流程id
+        public static final String FLOW_ID ="flowDefinitionId";
 
         //委派的状态
         public static final String PENDING ="PENDING";

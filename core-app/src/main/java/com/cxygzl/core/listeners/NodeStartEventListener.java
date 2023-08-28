@@ -6,9 +6,9 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
 import com.cxygzl.common.dto.flow.Node;
-import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.BizHttpUtil;
+import com.cxygzl.core.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
@@ -49,7 +49,7 @@ public class NodeStartEventListener implements FlowableEventListener {
             String processInstanceId = flowableActivityEvent.getProcessInstanceId();
 
             String processDefinitionId = flowableActivityEvent.getProcessDefinitionId();
-            String flowId = NodeUtil.getFlowId(processDefinitionId);
+            String flowId = com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
 
 
             saveStartEventContent(flowId, processInstanceId, activityId, activityName, flowableActivityEvent.getExecutionId());

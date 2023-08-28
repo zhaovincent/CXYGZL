@@ -53,16 +53,7 @@ public class ModelUtil {
         ArrayList<EventListener> eventListeners = new ArrayList<>();
 
         {
-            {
-                //流程实例监听器
-                EventListener eventListener = new EventListener();
 
-                eventListener.setImplementationType("class");
-                eventListener.setImplementation(FlowProcessEventListener.class.getCanonicalName());
-
-
-                eventListeners.add(eventListener);
-            }
             {
                 //流程开始
                 EventListener eventListener = new EventListener();

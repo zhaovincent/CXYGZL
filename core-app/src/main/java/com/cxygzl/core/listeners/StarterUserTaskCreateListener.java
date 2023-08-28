@@ -2,7 +2,6 @@ package com.cxygzl.core.listeners;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.TaskService;
 import org.flowable.task.service.delegate.DelegateTask;
@@ -27,7 +26,6 @@ public class StarterUserTaskCreateListener implements TaskListener {
         String nodeId = taskEntity.getTaskDefinitionKey();
         String processDefinitionId = taskEntity.getProcessDefinitionId();
         //流程id
-        String flowId = NodeUtil.getFlowId(processDefinitionId);
 
         if (StrUtil.isBlank(assignee)) {
 
