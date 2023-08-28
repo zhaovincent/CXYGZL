@@ -74,6 +74,13 @@ public interface ApiStrategy {
     UserDto getUser(String userId);
 
     /**
+     * 根据手机号获取用户
+     * @param phone
+     * @return
+     */
+    UserDto getUserByPhone(String phone);
+
+    /**
      * 根据名字搜索用户
      * 钉钉不提供
      *

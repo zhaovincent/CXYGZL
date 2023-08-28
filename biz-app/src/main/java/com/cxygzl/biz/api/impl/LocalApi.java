@@ -115,6 +115,20 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     }
 
     /**
+     * 根据手机号获取用户
+     *
+     * @param phone
+     * @return
+     */
+    @Override
+    public UserDto getUserByPhone(String phone) {
+        User user = userService.lambdaQuery().eq(User::getPhone, phone).one();
+
+        return BeanUtil.copyProperties(user, UserDto.class);
+
+    }
+
+    /**
      * 根据用户id获取用户
      *
      * @param userId

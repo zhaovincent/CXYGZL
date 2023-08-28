@@ -107,6 +107,17 @@ public class NetApi implements ApiStrategy, InitializingBean {
         return JSON.parseObject(post,UserDto.class);
     }
 
+    /**
+     * 根据手机号获取用户
+     *
+     * @param phone
+     * @return
+     */
+    @Override
+    public UserDto getUserByPhone(String phone) {
+        return null;
+    }
+
     @Override
     public List<UserDto> searchUser(String name) {
         String post = CoreHttpUtil.get( "/test/net/searchUser?name="+name);

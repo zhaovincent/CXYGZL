@@ -102,6 +102,19 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
         }).getData();
     }
 
+    /**
+     * 根据手机号获取用户
+     *
+     * @param phone
+     * @return
+     */
+    @Override
+    public UserDto getUserByPhone(String phone) {
+        String post = DingTalkHttpUtil.get("/remote/getUserByPhone?phone=" + phone);
+        return JSON.parseObject(post, new TypeReference<R<UserDto>>() {
+        }).getData();
+    }
+
     @Override
     public List<UserDto> searchUser(String name) {
         String post = DingTalkHttpUtil.get("/remote/searchUser?name=" + name);

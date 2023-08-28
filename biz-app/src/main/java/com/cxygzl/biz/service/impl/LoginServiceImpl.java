@@ -22,6 +22,7 @@ import com.cxygzl.common.constants.LoginPlatEnum;
 import com.cxygzl.common.constants.StatusEnum;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.WeixinMiniAppQueryPhoneDto;
+import com.cxygzl.common.dto.third.UserDto;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -202,7 +203,9 @@ public class LoginServiceImpl implements ILoginService {
             }
             if (weixinUser != null && StrUtil.isBlank(weixinUser.getUserId())) {
                 String phone = weixinUser.getPhone();
-                User user = userService.lambdaQuery().eq(User::getPhone, phone).one();
+
+                UserDto user = ApiStrategyFactory.getStrategy().getUserByPhone(phone);
+
                 if (user == null) {
 //                    return R.fail("用户未注册，请联系管理员");
                     Dict set = Dict.create().set("loginResult", 3);
@@ -267,7 +270,9 @@ public class LoginServiceImpl implements ILoginService {
             } else if (weixinUser != null) {
 
                 String phone = weixinUser.getPhone();
-                User user = userService.lambdaQuery().eq(User::getPhone, phone).one();
+
+                UserDto user = ApiStrategyFactory.getStrategy().getUserByPhone(phone);
+
                 if (user == null) {
                     Dict set = Dict.create().set("loginResult", 3);
                     return R.success(set);
@@ -292,7 +297,9 @@ public class LoginServiceImpl implements ILoginService {
 
             String phoneNumber = phoneNoInfo.getPurePhoneNumber();
 
-            User user = userService.lambdaQuery().eq(User::getPhone, phoneNumber).one();
+            UserDto user = ApiStrategyFactory.getStrategy().getUserByPhone(phoneNumber);
+
+
 
             if (weixinUser != null) {
                 if (user != null) {
