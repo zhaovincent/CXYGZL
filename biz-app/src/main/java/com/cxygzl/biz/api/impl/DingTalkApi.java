@@ -39,6 +39,19 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     }
 
     /**
+     * 根据用户id查询角色id集合
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<String> loadRoleIdListByUserId(String userId) {
+        String post = DingTalkHttpUtil.get( "/remote/loadRoleIdListByUserId?userId="+userId);
+        return JSON.parseObject(post, new TypeReference<R<List<String>>>() {
+        }).getData();
+    }
+
+    /**
      * 获取所有的角色
      *
      * @return

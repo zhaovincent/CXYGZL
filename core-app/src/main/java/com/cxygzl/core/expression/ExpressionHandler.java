@@ -214,7 +214,7 @@ public class ExpressionHandler {
 
 
     private Boolean compare(String symbol, Dict value) {
-       return  DataUtil.expression(symbol, value);
+        return DataUtil.expression(symbol, value);
     }
 
 
@@ -225,9 +225,10 @@ public class ExpressionHandler {
      * @return
      */
     public boolean selectHandler(String key, DelegateExecution execution, String param, String symbol) {
-        return selectHandler(key,execution.getVariables(),param,symbol);
+        return selectHandler(key, execution.getVariables(), param, symbol);
     }
-    public boolean selectHandler(String key, Map<String,Object> execution, String param, String symbol) {
+
+    public boolean selectHandler(String key, Map<String, Object> execution, String param, String symbol) {
         List<SelectValue> paramObjList = JSON.parseArray(EscapeUtil.unescape(param), SelectValue.class);
         List<String> paramList = paramObjList.stream().map(w -> w.getKey()).collect(Collectors.toList());
         Object value = execution.get(key);
@@ -248,13 +249,13 @@ public class ExpressionHandler {
             return false;
         }
         List<SelectValue> list = Convert.toList(SelectValue.class, value);
-        return selectHandler(key, list.stream().map(w -> w.getKey()).collect(Collectors.toList()), paramList, symbol);
+        return selectHandler(list.stream().map(w -> w.getKey()).collect(Collectors.toList()), paramList, symbol);
     }
 
-    public boolean selectHandler(String key, Object value, List<String> paramList, String symbol) {
+    public boolean selectHandler(Object value, List<String> paramList, String symbol) {
 
 
-        log.debug("表单值：key={} value={}  symbol={}", key, JSON.toJSONString(value), symbol);
+        log.debug("表单值：value={}  symbol={}", JSON.toJSONString(value), symbol);
         log.debug("条件  参数：{}", JSON.toJSONString(paramList));
 
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
@@ -294,7 +295,9 @@ public class ExpressionHandler {
 
             return intersection.size() == paramList.size();
         }
-        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_IN)) {
+
+
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_CONTAIN)) {
             List<String> intersection =
                     paramList.stream().filter(item -> valueList.contains(item)).collect(Collectors.toList());
             return intersection.size() < paramList.size();
@@ -309,6 +312,7 @@ public class ExpressionHandler {
 
     /**
      * 处理表达式
+     *
      * @param execution
      * @param uniqueId
      * @return
@@ -399,6 +403,7 @@ public class ExpressionHandler {
 
     /**
      * 没有一个是true
+     *
      * @param execution
      * @param keyArr
      * @return
@@ -469,9 +474,10 @@ public class ExpressionHandler {
 
 
     public boolean deptCompare(String key, String param, String symbol, DelegateExecution execution) {
-        return deptCompare(key,param,symbol,execution.getVariables());
+        return deptCompare(key, param, symbol, execution.getVariables());
     }
-    public boolean deptCompare(String key, String param, String symbol, Map<String,Object> paramMap) {
+
+    public boolean deptCompare(String key, String param, String symbol, Map<String, Object> paramMap) {
         param = EscapeUtil.unescape(param);
 
 
@@ -535,9 +541,10 @@ public class ExpressionHandler {
      * @return
      */
     public boolean userCompare(String key, String param1, String symbol, DelegateExecution execution, String userKey) {
-        return userCompare(key,param1,symbol,execution.getVariables(),userKey);
+        return userCompare(key, param1, symbol, execution.getVariables(), userKey);
     }
-    public boolean userCompare(String key, String param1, String symbol, Map<String,Object> execution, String userKey) {
+
+    public boolean userCompare(String key, String param1, String symbol, Map<String, Object> execution, String userKey) {
 
         param1 = EscapeUtil.unescape(param1);
         Object o = JSON.parseArray(param1, Object.class).get(0);
@@ -599,6 +606,19 @@ public class ExpressionHandler {
 
             return inCompare(symbol, (nodeUserDto.getId()), userIdList);
         }
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.ROLE, userKey)) {
+            // 角色
+
+            //参数
+            List<NodeUser> paramList = JSON.parseArray(JSON.toJSONString(o), NodeUser.class);
+            //当前用户
+            String userId = nodeUserDto.getId();
+
+            List<String> roleIdList = BizHttpUtil.queryRoleIdListByUserId(userId);
+
+            return selectHandler(roleIdList, paramList.stream().map(w -> w.getId()).collect(Collectors.toList()), symbol);
+
+        }
         Map<String, Object> userInfo = BizHttpUtil.queryUserInfo(nodeUserDto.getId()).getData();
         log.debug("查询到的用户信息:{}", JSONUtil.toJsonStr(userInfo));
         //查询变量属性
@@ -629,7 +649,7 @@ public class ExpressionHandler {
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.SINGLE_SELECT.getType())) {
             List<SelectValue> selectValueList = BeanUtil.copyToList(Convert.toList(o), SelectValue.class);
 
-            return selectHandler(userKey, (userValue == null || StrUtil.isBlankIfStr(userValue)) ? new ArrayList<>() :
+            return selectHandler((userValue == null || StrUtil.isBlankIfStr(userValue)) ? new ArrayList<>() :
                             CollUtil.newArrayList(userValue),
                     CollUtil.isEmpty(selectValueList) ? null :
                             selectValueList.stream().map(w -> w.getKey()).collect(Collectors.toList()), symbol);

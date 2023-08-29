@@ -227,6 +227,8 @@ public class ProcessInstanceConstant {
         public static final String INTERSECTION="intersection";
         //范围
         public static final String RANGE="range";
+        //角色
+        public static final String ROLE="role";
         //不为空
         public static final String NOT_EMPTY="notempty";
         //空

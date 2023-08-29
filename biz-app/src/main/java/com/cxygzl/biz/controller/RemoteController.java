@@ -21,6 +21,20 @@ public class RemoteController {
     @Resource
     private IRemoteService remoteService;
 
+    /**
+     * 根据用户id查询角色id集合
+     * @param userId
+     * @return
+     */
+    /**
+     * 根据用户id查询角色id集合
+     * @param userId
+     * @return
+     */
+    @GetMapping("queryRoleIdListByUserId")
+    public R<List<String>> queryRoleIdListByUserId(String userId){
+        return remoteService.queryRoleIdListByUserId(userId);
+    }
 
     /**
      * 根据部门id获取部门列表

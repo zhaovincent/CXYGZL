@@ -49,6 +49,17 @@ public class NetApi implements ApiStrategy, InitializingBean {
     }
 
     /**
+     * 根据用户id查询角色id集合
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<String> loadRoleIdListByUserId(String userId) {
+        return null;
+    }
+
+    /**
      * 获取所有的角色
      *
      * @return

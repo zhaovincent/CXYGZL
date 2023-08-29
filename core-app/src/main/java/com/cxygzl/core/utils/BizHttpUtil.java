@@ -128,6 +128,17 @@ public class BizHttpUtil {
     }
 
     /**
+     * 根据用户id查询角色id集合
+     *
+     * @param userId
+     */
+    public static List<String> queryRoleIdListByUserId(String userId) {
+        String s = get("/remote/queryRoleIdListByUserId?userId=" + userId);
+        return JSON.parseObject(s, new TypeReference<R<List<String>>>() {
+        }).getData();
+    }
+
+    /**
      * 根据部门id集合查询所有的用户id集合
      *
      * @param deptIdList

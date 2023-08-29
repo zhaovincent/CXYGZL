@@ -31,6 +31,13 @@ public interface ApiStrategy {
      */
     List<String> loadUserIdListByRoleIdList(List<String> roleIdList);
 
+    /**
+     * 根据用户id查询角色id集合
+     * @param userId
+     * @return
+     */
+    List<String> loadRoleIdListByUserId(String userId);
+
 
     /**
      * 获取所有的角色

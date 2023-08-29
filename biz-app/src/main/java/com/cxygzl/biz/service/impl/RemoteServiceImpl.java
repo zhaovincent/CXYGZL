@@ -57,6 +57,18 @@ public class RemoteServiceImpl implements IRemoteService {
     private IMessageService messageService;
 
     /**
+     * 根据用户id查询角色id集合
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public R<List<String>> queryRoleIdListByUserId(String userId) {
+        List<String> list = ApiStrategyFactory.getStrategy().loadRoleIdListByUserId(userId);
+        return R.success(list);
+    }
+
+    /**
      * 根据部门id获取部门列表
      *
      * @param deptIdList

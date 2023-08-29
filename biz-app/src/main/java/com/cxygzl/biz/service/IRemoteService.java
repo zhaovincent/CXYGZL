@@ -14,6 +14,13 @@ import java.util.Map;
  */
 public interface IRemoteService {
     /**
+     * 根据用户id查询角色id集合
+     * @param userId
+     * @return
+     */
+    R<List<String>> queryRoleIdListByUserId(String userId);
+
+    /**
      * 根据部门id获取部门列表
      * @param deptIdList
      * @return

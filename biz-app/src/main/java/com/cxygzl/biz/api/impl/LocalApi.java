@@ -54,6 +54,19 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     }
 
     /**
+     * 根据用户id查询角色id集合
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<String> loadRoleIdListByUserId(String userId) {
+        List<UserRole> userRoleList = userRoleService.lambdaQuery().eq(UserRole::getUserId, userId).list();
+        Set<String> roleIdSet = userRoleList.stream().map(w -> String.valueOf(w.getRoleId())).collect(Collectors.toSet());
+        return CollUtil.newArrayList(roleIdSet);
+    }
+
+    /**
      * 获取所有的角色
      *
      * @return
