@@ -80,6 +80,18 @@ public class BizHttpUtil {
     }
 
     /**
+     * 查询部门列表
+     *
+     * @param deptIdList
+     */
+    public static List<DeptDto> queryDeptList(List<String> deptIdList) {
+        String post = post(deptIdList, "/remote/queryDeptList");
+        R<List<DeptDto>> listR = JSON.parseObject(post, new TypeReference<R<List<DeptDto>>>() {
+        });
+        return listR.getData();
+    }
+
+    /**
      * 保存消息
      *
      * @param messageDto

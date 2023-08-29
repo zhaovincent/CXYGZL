@@ -128,7 +128,7 @@ public class NodeFormatUtil {
             if (selfSelect) {
                 nodeVo.setMultiple(node.getMultiple());
             }
-            if(StrUtil.isNotBlank(processInstanceId)){
+            if (StrUtil.isNotBlank(processInstanceId)) {
                 nodeVo.setSelectUser(false);
             }
 
@@ -211,14 +211,66 @@ public class NodeFormatUtil {
                                 nodeUserDtoList.stream().map(w -> (w.getId())).collect(Collectors.toList());
 
                         if (CollUtil.isNotEmpty(deptIdList)) {
-                            List<String> userIdList = ApiStrategyFactory.getStrategy().loadUserIdListByDeptIdList(deptIdList);
-                            for (String aLong : userIdList) {
-                                nodeFormatUserVoList.add(buildUser(aLong));
+
+                            String deptUserType = node.getDeptUserType();
+                            if (!ProcessInstanceConstant.AssignedTypeFormDeptUserTypeClass.LEADER.equals(deptUserType)) {
+                                List<String> userIdList = ApiStrategyFactory.getStrategy().loadUserIdListByDeptIdList(deptIdList);
+                                for (String aLong : userIdList) {
+                                    long count = nodeFormatUserVoList.stream()
+                                            .filter(w -> StrUtil.equals(aLong, w.getId())).count();
+                                    if (count > 0) {
+                                        continue;
+                                    }
+                                    nodeFormatUserVoList.add(buildUser(aLong));
+                                }
+                            } else {
+                                List<DeptDto> deptDtoList = SpringUtil.getBean(IRemoteService.class).queryDeptList(deptIdList).getData();
+                                for (DeptDto deptDto : deptDtoList) {
+                                    List<String> leaderUserIdList = deptDto.getLeaderUserIdList();
+                                    for (String s : leaderUserIdList) {
+                                        long count = nodeFormatUserVoList.stream()
+                                                .filter(w -> StrUtil.equals(s, w.getId())).count();
+                                        if (count > 0) {
+                                            continue;
+                                        }
+                                        nodeFormatUserVoList.add(buildUser(s));
+                                    }
+                                }
                             }
+
+
                         }
 
 
                     }
+                }
+
+
+            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.FIXED_DEPT_LEADER) {
+                //指定部门主管
+
+                List<NodeUser> nodeUserDtoList = node.getNodeUserList();
+                List<String> deptIdList =
+                        nodeUserDtoList.stream().map(w -> (w.getId())).collect(Collectors.toList());
+
+                if (CollUtil.isNotEmpty(deptIdList)) {
+
+                    {
+                        List<DeptDto> deptDtoList = SpringUtil.getBean(IRemoteService.class).queryDeptList(deptIdList).getData();
+                        for (DeptDto deptDto : deptDtoList) {
+                            List<String> leaderUserIdList = deptDto.getLeaderUserIdList();
+                            for (String s : leaderUserIdList) {
+                                long count = nodeFormatUserVoList.stream()
+                                        .filter(w -> StrUtil.equals(s, w.getId())).count();
+                                if (count > 0) {
+                                    continue;
+                                }
+                                nodeFormatUserVoList.add(buildUser(s));
+                            }
+                        }
+                    }
+
+
                 }
 
 

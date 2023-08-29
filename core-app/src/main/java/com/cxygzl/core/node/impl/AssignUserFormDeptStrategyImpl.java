@@ -7,15 +7,14 @@ import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.core.node.AssignUserStrategy;
 import com.cxygzl.core.utils.BizHttpUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -30,10 +29,13 @@ public class AssignUserFormDeptStrategyImpl implements InitializingBean, AssignU
     public List<String> handle(Node node, NodeUser rootUser, Map<String, Object> variables) {
 
 
-        List<String> assignList=new ArrayList<>();
+        Set<String> assignList=new HashSet<>();
         //表单值
 
         Object variable = variables.get(node.getFormUserId());
+
+        String deptUserType = node.getDeptUserType();
+
         if (variable == null) {
 
         } else if (StrUtil.isBlankIfStr(variable)) {
@@ -48,16 +50,27 @@ public class AssignUserFormDeptStrategyImpl implements InitializingBean, AssignU
 
             if (CollUtil.isNotEmpty(deptIdList)) {
 
-                R<List<String>> r= BizHttpUtil.queryUserIdListByDepIdList(deptIdList);
+                if(!ProcessInstanceConstant.AssignedTypeFormDeptUserTypeClass.LEADER.equals(deptUserType)){
+                    //人员
+                    R<List<String>> r= BizHttpUtil.queryUserIdListByDepIdList(deptIdList);
 
-                List<String> data = r.getData();
-                if (CollUtil.isNotEmpty(data)) {
-                    assignList.addAll(data);
+                    List<String> data = r.getData();
+                    if (CollUtil.isNotEmpty(data)) {
+                        assignList.addAll(data);
+                    }
+                }else{
+                    //主管
+                    List<DeptDto> deptDtoList = BizHttpUtil.queryDeptList(deptIdList);
+                    for (DeptDto deptDto : deptDtoList) {
+                        assignList.addAll(deptDto.getLeaderUserIdList());
+                    }
                 }
+
+
             }
 
         }
-        return assignList;
+        return new ArrayList<>(assignList);
     }
 
     @Override

@@ -57,6 +57,19 @@ public class RemoteServiceImpl implements IRemoteService {
     private IMessageService messageService;
 
     /**
+     * 根据部门id获取部门列表
+     *
+     * @param deptIdList
+     * @return
+     */
+    @Override
+    public R<List<DeptDto>> queryDeptList(List<String> deptIdList) {
+        List<com.cxygzl.common.dto.third.DeptDto> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
+        List<DeptDto> collect = allDept.stream().filter(w -> deptIdList.contains(w.getId())).collect(Collectors.toList());
+        return R.success(collect);
+    }
+
+    /**
      * 保存待办任务
      *
      * @param messageDto

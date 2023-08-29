@@ -36,6 +36,9 @@ public class ProcessInstanceConstant {
      */
     public static final int MULTIPLE_MODE_ALL_SORT=3;
 
+    /**
+     * 审批人员类型
+     */
     public static class AssignedTypeClass{
         //指定用户
         public static final int USER=1;
@@ -45,6 +48,8 @@ public class ProcessInstanceConstant {
         public static final int FORM_USER=8;
         //表单部门
         public static final int FORM_DEPT=9;
+        //指定部门主管
+        public static final int FIXED_DEPT_LEADER=10;
         //指定主管
         public static final int LEADER=2;
         //连续多级主管
@@ -53,6 +58,20 @@ public class ProcessInstanceConstant {
         public static final int SELF_SELECT=4;
         //角色
         public static final int ROLE=3;
+    }
+
+    /**
+     * 审批人是表单部门时  用户类型
+     */
+    public static class AssignedTypeFormDeptUserTypeClass{
+        /**
+         * 部门人员
+         */
+        public static final String ALL_USER="allUser";
+        /**
+         * 主管
+         */
+        public static final String LEADER="leader";
     }
 
     /**

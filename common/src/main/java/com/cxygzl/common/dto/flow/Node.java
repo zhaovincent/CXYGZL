@@ -68,6 +68,8 @@ public class Node  implements Cloneable, Serializable {
 
     private String nodeId;
 
+    private String deptUserType;
+
 
     private Map<String,String> formPerms;
 
