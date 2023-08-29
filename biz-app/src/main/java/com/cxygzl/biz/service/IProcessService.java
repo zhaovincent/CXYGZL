@@ -16,10 +16,12 @@ import com.cxygzl.common.dto.R;
 public interface IProcessService extends IService<Process> {
     /**
      * 获取详细数据
+     *
      * @param flowId
+     * @param handleForm
      * @return
      */
-    R<ProcessVO> getDetail(String flowId);
+    R<ProcessVO> getDetail(String flowId,boolean handleForm);
 
 
     Process getByFlowId(String flowId);

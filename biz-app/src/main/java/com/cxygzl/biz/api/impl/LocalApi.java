@@ -140,6 +140,21 @@ public class LocalApi implements ApiStrategy, InitializingBean {
         return BeanUtil.copyProperties(user, UserDto.class);
     }
 
+    /**
+     * 获取部门数据
+     *
+     * @param deptId
+     * @return
+     */
+    @Override
+    public DeptDto getDept(String deptId) {
+        Dept dept = deptService.getById(deptId);
+        DeptDto deptDto = BeanUtil.copyProperties(dept, DeptDto.class);
+        deptDto.setLeaderUserIdList(CollUtil.newArrayList(String.valueOf(dept.getLeaderUserId())));
+
+        return deptDto;
+    }
+
     @Override
     public List<UserDto> searchUser(String name) {
         List<User> userList = userService.lambdaQuery().and(k ->

@@ -39,6 +39,7 @@ public class FormItemVO {
         private Object options;
         private Boolean self;
         private Boolean multi;
+        private Boolean defaultRoot;
         private Object oriForm;
         private Integer minLength;
         private Integer maxLength;

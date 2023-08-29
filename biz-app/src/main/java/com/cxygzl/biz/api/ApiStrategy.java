@@ -74,6 +74,13 @@ public interface ApiStrategy {
     UserDto getUser(String userId);
 
     /**
+     * 获取部门数据
+     * @param deptId
+     * @return
+     */
+    DeptDto getDept(String deptId);
+
+    /**
      * 根据手机号获取用户
      * @param phone
      * @return

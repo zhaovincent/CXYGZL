@@ -90,6 +90,19 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     }
 
     /**
+     * 获取部门数据
+     *
+     * @param deptId
+     * @return
+     */
+    @Override
+    public DeptDto getDept(String deptId) {
+        String post = DingTalkHttpUtil.get("/remote/getDept?deptId=" + deptId);
+        return JSON.parseObject(post, new TypeReference<R<DeptDto>>() {
+        }).getData();
+    }
+
+    /**
      * 根据用户id获取用户
      *
      * @param userId

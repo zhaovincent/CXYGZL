@@ -21,8 +21,8 @@ public class ProcessController {
      * @return
      */
     @GetMapping("getDetail")
-    public R<ProcessVO> getDetail(String flowId) {
-        return processService.getDetail(flowId);
+    public R<ProcessVO> getDetail(String flowId,boolean handleForm) {
+        return processService.getDetail(flowId,handleForm );
     }
 
     /**

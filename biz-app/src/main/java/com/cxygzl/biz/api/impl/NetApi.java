@@ -108,6 +108,17 @@ public class NetApi implements ApiStrategy, InitializingBean {
     }
 
     /**
+     * 获取部门数据
+     *
+     * @param deptId
+     * @return
+     */
+    @Override
+    public DeptDto getDept(String deptId) {
+        return null;
+    }
+
+    /**
      * 根据手机号获取用户
      *
      * @param phone
