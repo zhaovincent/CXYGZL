@@ -5,6 +5,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
 import com.cxygzl.common.dto.flow.Node;
 
 import java.util.ArrayList;
@@ -19,7 +20,8 @@ public class NodeUtil {
      * @param executionId
      * @param flowUniqueId
      */
-    public static void handleNodeAddExecutionIdFlowUniqueId(Node node, String nodeId, String executionId, String flowUniqueId) {
+    public static void handleNodeAddExecutionIdFlowUniqueId(Node node, String nodeId, String executionId,
+                                                            String flowUniqueId) {
 
         if (!isNode(node)) {
             return;
@@ -69,9 +71,10 @@ public class NodeUtil {
         if (StrUtil.equals(node.getId(), parentId)) {
             //找到排他分支了
             if (CollUtil.isNotEmpty(branchs)) {
+
+                node.setConditionNodes(null);
                 for (Node branch : branchs) {
                     Node children = branch.getChildNode();
-                    node.setConditionNodes(null);
 
                     if (children != null && StrUtil.equals(children.getId(), nodeId)) {
                         //就是该分支
@@ -104,6 +107,82 @@ public class NodeUtil {
         }
 
         handleExclusiveGatewayAsLine(childNode, parentId, nodeId);
+
+    }
+
+    /**
+     * 处理包容网关 删除没用执行的节点
+     *
+     * @param node
+     * @param gatewayNodeId
+     * @param nodeId
+     */
+    public static void handleInclusiveGatewayAsLine(Node node, String gatewayNodeId, String executionId,
+                                                    String flowUniqueId,
+                                                    List<ProcessNodeRecordParamDto> processNodeRecordParamDtoList) {
+
+        if (!isNode(node)) {
+            return;
+        }
+        Node childNode = node.getChildNode();
+
+        List<Node> branchList=new ArrayList<>();
+
+        List<Node> branchs = node.getConditionNodes();
+
+        if (StrUtil.equals(node.getId(), gatewayNodeId) && StrUtil.equals(node.getExecutionId(), executionId) && StrUtil.equals(node.getFlowUniqueId(), flowUniqueId)) {
+            //找到排他分支了
+            if (CollUtil.isNotEmpty(branchs)) {
+
+                for (Node branch : branchs) {
+
+                    Node children = branch.getChildNode();
+                    if (children == null) {
+                        //iterator.remove();
+                    } else {
+                        String id = children.getId();
+                        String executionId1 = children.getExecutionId();
+                        String flowUniqueId1 = children.getFlowUniqueId();
+
+
+                        long count = processNodeRecordParamDtoList.stream()
+                                .filter(w -> StrUtil.equals(w.getNodeId(), id))
+                                .filter(w -> StrUtil.equals(w.getFlowUniqueId(), flowUniqueId1))
+                                .filter(w -> StrUtil.equals(w.getExecutionId(), executionId1)).count();
+                        if (count == 0) {
+                          //  iterator.remove();
+                        }else{
+                            branchList.add(branch);
+                        }
+
+
+                    }
+
+                }
+
+
+            }
+        }else if(branchs!=null){
+            branchList.addAll(branchs);
+        }
+
+        node.setConditionNodes(branchList);
+
+        Integer type = node.getType();
+
+        if (NodeTypeEnum.getByValue(type).getBranch() && CollUtil.isNotEmpty(branchList)) {
+
+            //条件分支
+            for (Node branch : branchList) {
+                Node children = branch.getChildNode();
+
+                handleInclusiveGatewayAsLine(children, gatewayNodeId, executionId, flowUniqueId, processNodeRecordParamDtoList);
+
+
+            }
+        }
+
+        handleInclusiveGatewayAsLine(childNode, gatewayNodeId, executionId, flowUniqueId, processNodeRecordParamDtoList);
 
     }
 

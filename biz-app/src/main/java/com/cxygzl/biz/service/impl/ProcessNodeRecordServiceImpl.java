@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -62,6 +63,7 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
 
         }
 
+
         this.save(processNodeRecord);
 
         String flowId = processNodeRecordParamDto.getFlowId();
@@ -101,8 +103,41 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
         }
 
         //设置executionId
-        NodeUtil.handleNodeAddExecutionIdFlowUniqueId(currentProcessRootNode, nodeId, processNodeRecordParamDto.getExecutionId(), processNodeRecordParamDto.getFlowUniqueId());
+        NodeUtil.handleNodeAddExecutionIdFlowUniqueId(currentProcessRootNode,
+                nodeId,
+                processNodeRecordParamDto.getExecutionId(),
+                processNodeRecordParamDto.getFlowUniqueId());
         processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
+
+        //判断是聚合网关--处理条件分支和包容分支 删除没用执行的
+        if (StrUtil.endWith(processNodeRecordParamDto.getNodeId(), "_merge_gateway")) {
+            Node node = processNodeDataService.getNode(processNodeRecordParamDto.getFlowId(),
+                    StrUtil.replace(processNodeRecordParamDto.getNodeId(), "_merge_gateway", "")).getData();
+
+            if (node.getType().intValue() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue()) {
+                //排他
+                NodeUtil.handleExclusiveGatewayAsLine(currentProcessRootNode,node.getId(), null);
+                processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
+            }
+            if (node.getType().intValue() == NodeTypeEnum.INCLUSIVE_GATEWAY.getValue()) {
+                //包容
+
+                //找到所有的执行节点
+                List<ProcessNodeRecord> processNodeRecordList = this.lambdaQuery().eq(ProcessNodeRecord::getProcessInstanceId,
+                        processInstanceRecord.getProcessInstanceId()).orderByDesc(ProcessNodeRecord::getCreateTime).list();
+
+                List<ProcessNodeRecordParamDto> processNodeRecordParamDtos = BeanUtil.copyToList(processNodeRecordList, ProcessNodeRecordParamDto.class);
+
+                //找到当前这个节点
+                ProcessNodeRecord p = processNodeRecordList.stream().filter(w -> StrUtil.equals(w.getNodeId(), node.getId())).findFirst().get();
+
+                NodeUtil.handleInclusiveGatewayAsLine(currentProcessRootNode,node.getId(), p.getExecutionId(),p.getFlowUniqueId(),
+                        processNodeRecordParamDtos);
+                processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
+
+            }
+
+        }
 
         processInstanceRecordService.updateById(processInstanceRecord);
 
@@ -141,7 +176,7 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
      */
     @Override
     public R cancelNodeEvent(ProcessNodeRecordParamDto processNodeRecordParamDto) {
-        log.info("节点取消：{}-{}",processNodeRecordParamDto.getNodeId(),processNodeRecordParamDto.getNodeName());
+        log.info("节点取消：{}-{}", processNodeRecordParamDto.getNodeId(), processNodeRecordParamDto.getNodeName());
         String processInstanceId = processNodeRecordParamDto.getProcessInstanceId();
         String nodeId = processNodeRecordParamDto.getNodeId();
         this.lambdaUpdate().set(ProcessNodeRecord::getStatus, NodeStatusEnum.YCX.getCode())

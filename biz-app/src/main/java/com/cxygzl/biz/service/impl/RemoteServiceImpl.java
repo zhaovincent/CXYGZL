@@ -337,7 +337,6 @@ public class RemoteServiceImpl implements IRemoteService {
         processInstanceRecordService.save(entity);
 
 
-
         //调用接口通知其他
         String formData = processInstanceRecordParamDto.getFormData();
         Map<String, Object> valueMap = JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
@@ -363,12 +362,18 @@ public class RemoteServiceImpl implements IRemoteService {
     @Override
     public R endNodeEvent(ProcessNodeRecordParamDto recordParamDto) {
         //处理任务
-        ProcessNodeRecord processNodeRecord = processNodeRecordService.lambdaQuery()
-
+        List<ProcessNodeRecord> processNodeRecordList = processNodeRecordService.lambdaQuery()
                 .eq(ProcessNodeRecord::getProcessInstanceId, recordParamDto.getProcessInstanceId())
                 .eq(ProcessNodeRecord::getStatus, NodeStatusEnum.JXZ.getCode())
-                .eq(ProcessNodeRecord::getNodeId, recordParamDto.getNodeId()).one();
-        if (processNodeRecord != null) {
+                .eq(ProcessNodeRecord::getNodeId, recordParamDto.getNodeId()).list();
+        if (!processNodeRecordList.isEmpty()) {
+            ProcessNodeRecord processNodeRecord = null;
+            if (processNodeRecordList.size() == 1) {
+                processNodeRecord = processNodeRecordList.get(0);
+            } else {
+                processNodeRecord = processNodeRecordList.stream().filter(w -> StrUtil.equals(w.getExecutionId(),
+                        recordParamDto.getExecutionId())).findAny().orElse(null);
+            }
 
             List<ProcessExecution> processExecutionList = processExecutionService.lambdaQuery().eq(ProcessExecution::getExecutionId,
                     processNodeRecord.getExecutionId()).list();
@@ -382,8 +387,8 @@ public class RemoteServiceImpl implements IRemoteService {
                             .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
                             .eq(ProcessNodeRecordAssignUser::getNodeId, recordParamDto.getNodeId())
                             .in(ProcessNodeRecordAssignUser::getExecutionId, collect).list();
-                    if(CollUtil.isNotEmpty(list)){
-                        List<TaskParamDto> taskParamDtoList=new ArrayList<>();
+                    if (CollUtil.isNotEmpty(list)) {
+                        List<TaskParamDto> taskParamDtoList = new ArrayList<>();
                         for (ProcessNodeRecordAssignUser processNodeRecordAssignUser : list) {
                             TaskParamDto taskParamDto = new TaskParamDto();
                             taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
@@ -392,7 +397,7 @@ public class RemoteServiceImpl implements IRemoteService {
                             taskParamDtoList.add(taskParamDto);
                         }
 
-                        ApiStrategyFactory.getStrategy().handleTask(taskParamDtoList,ProcessInstanceConstant.TaskType.CANCEL);
+                        ApiStrategyFactory.getStrategy().handleTask(taskParamDtoList, ProcessInstanceConstant.TaskType.CANCEL);
                     }
 
 

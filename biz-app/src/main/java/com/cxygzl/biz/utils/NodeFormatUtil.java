@@ -32,6 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.cxygzl.common.constants.ProcessInstanceConstant.DEFAULT_EMPTY_ASSIGN;
+
 /**
  * 节点格式化显示工具
  */
@@ -135,29 +137,7 @@ public class NodeFormatUtil {
             // 用户列表
             if (StrUtil.isAllNotBlank(processInstanceId, node.getExecutionId())) {
 
-                List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = buildApproveDesc(node, processInstanceId, nodeVo, nodeFormatUserVoList);
-
-//                if (processNodeRecordAssignUserList.isEmpty()) {
-//                    if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF) {
-//                        //发起人自己
-//                        nodeFormatUserVoList.addAll(CollUtil.newArrayList(buildRootUser(processInstanceId)));
-//                    }
-//                    if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF_SELECT) {
-//                        //发起人自选
-//                        Object variable = paramMap.get(StrUtil.format("{}_assignee_select", node.getId()));
-//                        if (variable == null) {
-//                            variable = new ArrayList<>();
-//                        }
-//                        List<NodeUser> nodeUserDtos = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class);
-//
-//                        List<String> collect = nodeUserDtos.stream().map(w -> (w.getId())).collect(Collectors.toList());
-//                        for (String aLong : collect) {
-//                            NodeFormatUserVo nodeFormatUserVo = buildUser(aLong);
-//                            nodeFormatUserVoList.addAll(CollUtil.newArrayList(nodeFormatUserVo));
-//                        }
-//                    }
-//                }
-
+                buildApproveDesc(node, processInstanceId, nodeVo, nodeFormatUserVoList);
 
             } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF_SELECT) {
                 //发起人自选
@@ -382,6 +362,7 @@ public class NodeFormatUtil {
                 p.setPlaceholder(branch.getPlaceHolder());
                 branchList.add(p);
             }
+
         }
         nodeVo.setBranch(branchList);
 
@@ -409,6 +390,7 @@ public class NodeFormatUtil {
         IProcessNodeRecordAssignUserService processNodeRecordAssignUserService = SpringUtil.getBean(IProcessNodeRecordAssignUserService.class);
         List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = processNodeRecordAssignUserService
                 .lambdaQuery()
+                .ne(ProcessNodeRecordAssignUser::getUserId,DEFAULT_EMPTY_ASSIGN)
                 .eq(!StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER), ProcessNodeRecordAssignUser::getNodeId, node.getId())
                 .like(StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER),
                         ProcessNodeRecordAssignUser::getNodeId, ProcessInstanceConstant.VariableKey.STARTER)

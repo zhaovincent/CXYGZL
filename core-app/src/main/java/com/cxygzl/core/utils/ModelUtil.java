@@ -709,6 +709,7 @@ public class ModelUtil {
         InclusiveGateway gateway = new InclusiveGateway();
         gateway.setId(StrUtil.format("{}_merge_gateway", node.getId()));
         gateway.setName(StrUtil.format("{}_合并网关", node.getNodeName()));
+
         flowElementList.add(gateway);
 
         return flowElementList;
