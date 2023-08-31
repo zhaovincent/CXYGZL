@@ -367,9 +367,9 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         //通知第三方
         if (processInstanceParamDto.getCancel()) {
-            ApiStrategyFactory.getStrategy().stopProcessInstance(processInstanceParamDto);
+            ApiStrategyFactory.getStrategy().stopProcessInstance(BeanUtil.copyProperties(processInstanceParamDto,com.cxygzl.common.dto.third.ProcessInstanceParamDto.class));
         } else {
-            ApiStrategyFactory.getStrategy().completeProcessInstance(processInstanceParamDto);
+            ApiStrategyFactory.getStrategy().completeProcessInstance(BeanUtil.copyProperties(processInstanceParamDto,com.cxygzl.common.dto.third.ProcessInstanceParamDto.class));
         }
 
         return com.cxygzl.common.dto.R.success();

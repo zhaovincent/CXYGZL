@@ -9,8 +9,6 @@ import com.cxygzl.biz.service.IUserRoleService;
 import com.cxygzl.biz.service.IUserService;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.common.dto.LoginUrlDto;
-import com.cxygzl.common.dto.ProcessInstanceParamDto;
-import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.third.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -176,7 +174,7 @@ public class NetApi implements ApiStrategy, InitializingBean {
      * @param processDto
      */
     @Override
-    public void createProcess(ProcessDto processDto) {
+    public void createProcess(CreateProcessDto processDto) {
 
     }
 
@@ -186,7 +184,7 @@ public class NetApi implements ApiStrategy, InitializingBean {
      * @param processDto
      */
     @Override
-    public void startProcess(ProcessDto processDto) {
+    public void startProcess(StartProcessDto processDto) {
 
     }
 
@@ -196,7 +194,7 @@ public class NetApi implements ApiStrategy, InitializingBean {
      * @param processInstanceParamDto
      */
     @Override
-    public void completeProcessInstance(ProcessInstanceParamDto processInstanceParamDto) {
+    public void completeProcessInstance(com.cxygzl.common.dto.third.ProcessInstanceParamDto processInstanceParamDto) {
 
     }
 

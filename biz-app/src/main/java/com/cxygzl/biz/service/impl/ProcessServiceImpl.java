@@ -27,7 +27,7 @@ import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.third.DeptDto;
-import com.cxygzl.common.dto.third.ProcessDto;
+import com.cxygzl.common.dto.third.CreateProcessDto;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.common.utils.NodeUtil;
@@ -307,7 +307,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         }
 
         //创建第三方对接流程
-        ApiStrategyFactory.getStrategy().createProcess(ProcessDto.builder().oriFlowId(processVO.getFlowId()).flowId(flowId).name(processVO.getName()).description(processVO.getRemark()).formItemVOList(JSON.parseArray(processVO.getFormItems(), FormItemVO.class)).build());
+        ApiStrategyFactory.getStrategy().createProcess(CreateProcessDto.builder().oriFlowId(processVO.getFlowId()).flowId(flowId).name(processVO.getName()).description(processVO.getRemark()).formItemVOList(JSON.parseArray(processVO.getFormItems(), FormItemVO.class)).build());
 
         return com.cxygzl.common.dto.R.success();
     }

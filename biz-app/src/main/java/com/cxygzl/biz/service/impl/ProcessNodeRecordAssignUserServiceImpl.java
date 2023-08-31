@@ -10,7 +10,7 @@ import com.cxygzl.biz.mapper.ProcessNodeRecordAssignUserMapper;
 import com.cxygzl.biz.service.IProcessNodeRecordAssignUserService;
 import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
 import com.cxygzl.common.dto.R;
-import com.cxygzl.common.dto.TaskParamDto;
+import com.cxygzl.common.dto.third.TaskParamDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -55,8 +55,8 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
                 this.updateById(processNodeRecordAssignUser);
 
                 //处理任务
-                List<TaskParamDto> taskParamDtoList=new ArrayList<>();
-                TaskParamDto taskParamDto = new TaskParamDto();
+                List<com.cxygzl.common.dto.third.TaskParamDto> taskParamDtoList=new ArrayList<>();
+                com.cxygzl.common.dto.third.TaskParamDto taskParamDto = new com.cxygzl.common.dto.third.TaskParamDto();
                 taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
                 taskParamDto.setUserId(processNodeRecordAssignUser.getUserId());
                 taskParamDto.setTaskId(processNodeRecordAssignUser.getTaskId());
@@ -76,7 +76,7 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
         this.save(processNodeRecordAssignUser);
 
         //添加待办
-        TaskParamDto taskParamDto = new TaskParamDto();
+        com.cxygzl.common.dto.third.TaskParamDto taskParamDto = new TaskParamDto();
         taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
         taskParamDto.setNodeId(processNodeRecordAssignUser.getNodeId());
         taskParamDto.setTaskId(processNodeRecordAssignUser.getTaskId());
@@ -109,7 +109,7 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
         this.updateById(processNodeRecordAssignUser);
 
         //通知第三方
-        TaskParamDto taskParamDto = new TaskParamDto();
+        com.cxygzl.common.dto.third.TaskParamDto taskParamDto = new com.cxygzl.common.dto.third.TaskParamDto();
         taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
         taskParamDto.setUserId(processNodeRecordAssignUser.getUserId());
         taskParamDto.setTaskId(processNodeRecordAssignUser.getTaskId());
@@ -147,8 +147,8 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
 
 
             //处理任务
-        List<TaskParamDto> taskParamDtoList=new ArrayList<>();
-        TaskParamDto taskParamDto = new TaskParamDto();
+        List<com.cxygzl.common.dto.third.TaskParamDto> taskParamDtoList=new ArrayList<>();
+        com.cxygzl.common.dto.third.TaskParamDto taskParamDto = new com.cxygzl.common.dto.third.TaskParamDto();
         taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
         taskParamDto.setUserId(processNodeRecordAssignUser.getUserId());
         taskParamDto.setTaskId(processNodeRecordAssignUser.getTaskId());

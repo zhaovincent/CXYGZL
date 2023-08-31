@@ -14,10 +14,12 @@ import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.DataUtil;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.dto.ProcessInstanceParamDto;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.third.MessageDto;
+import com.cxygzl.common.dto.third.TaskParamDto;
 import com.cxygzl.common.dto.third.*;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -341,8 +343,8 @@ public class RemoteServiceImpl implements IRemoteService {
         String formData = processInstanceRecordParamDto.getFormData();
         Map<String, Object> valueMap = JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
         });
-        ProcessDto processDto =
-                ProcessDto.builder()
+        StartProcessDto processDto =
+                StartProcessDto.builder()
                         .processInstanceId(processInstanceRecordParamDto.getProcessInstanceId())
                         .userId(processInstanceRecordParamDto.getUserId())
                         .flowId(process.getFlowId())

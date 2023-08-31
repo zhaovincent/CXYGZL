@@ -18,22 +18,28 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 @Data
-public class ProcessDto {
-
+public class StartProcessDto {
+    /**
+     * 流程id
+     */
     private String flowId;
 
-    private String oriFlowId;
 
-    private String name;
-
-    private String description;
-
+    /**
+     * 流程发起人
+     */
     private String userId;
-
+    /**
+     * 流程实例id
+     */
     private String processInstanceId;
-
+    /**
+     * 值对象集合
+     */
     private Map<String,Object> valueMap;
-
+    /**
+     * 表单集合
+     */
     private List<FormItemVO> formItemVOList;
 
 }

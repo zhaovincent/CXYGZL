@@ -7,8 +7,6 @@ import com.cxygzl.biz.api.ApiStrategy;
 import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.common.dto.LoginUrlDto;
-import com.cxygzl.common.dto.ProcessInstanceParamDto;
-import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.third.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -222,7 +220,7 @@ public class LocalApi implements ApiStrategy, InitializingBean {
      * @param processDto
      */
     @Override
-    public void createProcess(ProcessDto processDto) {
+    public void createProcess(CreateProcessDto processDto) {
 
     }
 
@@ -232,7 +230,7 @@ public class LocalApi implements ApiStrategy, InitializingBean {
      * @param processDto
      */
     @Override
-    public void startProcess(ProcessDto processDto) {
+    public void startProcess(StartProcessDto processDto) {
 
     }
 
@@ -242,7 +240,7 @@ public class LocalApi implements ApiStrategy, InitializingBean {
      * @param processInstanceParamDto
      */
     @Override
-    public void completeProcessInstance(ProcessInstanceParamDto processInstanceParamDto) {
+    public void completeProcessInstance(com.cxygzl.common.dto.third.ProcessInstanceParamDto processInstanceParamDto) {
 
     }
 
@@ -262,7 +260,7 @@ public class LocalApi implements ApiStrategy, InitializingBean {
      * @param taskParamDtoList
      */
     @Override
-    public void addWaitTask(List<TaskParamDto> taskParamDtoList) {
+    public void addWaitTask(List<com.cxygzl.common.dto.third.TaskParamDto> taskParamDtoList) {
 
     }
 

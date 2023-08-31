@@ -12,7 +12,9 @@ import java.util.Map;
 @Data
 public class TaskParamDto {
 
-
+    /**
+     * 实例id
+     */
     private String processInstanceId;
     private Boolean approveResult;
     private String approveDesc;

@@ -1,5 +1,6 @@
 package com.cxygzl.common.dto.third;
 
+import com.cxygzl.common.constants.MessageTypeEnum;
 import lombok.*;
 
 import java.io.Serializable;
@@ -19,13 +20,10 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class MessageDto   implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
-
-
 
     /**
      * 类型
+     * {@link MessageTypeEnum}
      */
     private String type;
 
@@ -58,6 +56,12 @@ public class MessageDto   implements Serializable {
      * 消息头
      */
     private String title;
+    /**
+     * 流程id
+     */
     private String flowId;
+    /**
+     *  流程实例id
+     */
     private String processInstanceId;
 }

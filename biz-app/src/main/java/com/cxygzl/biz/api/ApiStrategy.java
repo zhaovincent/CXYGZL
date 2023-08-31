@@ -1,15 +1,15 @@
 package com.cxygzl.biz.api;
 
+import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.LoginUrlDto;
-import com.cxygzl.common.dto.ProcessInstanceParamDto;
-import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.third.*;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * 节点单个条件处理器
+ * API接口
+ * 用来扩展数据：对接已存在的组织架构、角色等数据
  */
 public interface ApiStrategy {
 
@@ -96,7 +96,6 @@ public interface ApiStrategy {
 
     /**
      * 根据名字搜索用户
-     * 钉钉不提供
      *
      * @param name
      * @return
@@ -131,21 +130,21 @@ public interface ApiStrategy {
      *
      * @param processDto
      */
-    void createProcess(ProcessDto processDto);
+    void createProcess(CreateProcessDto processDto);
 
     /**
      * 发起流程
      *
      * @param processDto
      */
-    void startProcess(ProcessDto processDto);
+    void startProcess(StartProcessDto processDto);
 
     /**
      * 完成流程实例
      *
      * @param processInstanceParamDto
      */
-    void completeProcessInstance(ProcessInstanceParamDto processInstanceParamDto);
+    void completeProcessInstance(com.cxygzl.common.dto.third.ProcessInstanceParamDto processInstanceParamDto);
 
     /**
      * 终止流程
@@ -159,19 +158,20 @@ public interface ApiStrategy {
      *
      * @param taskParamDtoList
      */
-    void addWaitTask(List<TaskParamDto> taskParamDtoList);
+    void addWaitTask(List<com.cxygzl.common.dto.third.TaskParamDto> taskParamDtoList);
 
 
     /**
      * 处理任务
      *
      * @param taskParamDtoList
-     * @param taskType
+     * @param taskType 任务类型 {@link ProcessInstanceConstant.TaskType}
      */
     void handleTask(List<TaskParamDto> taskParamDtoList, String taskType);
 
     /**
      * 重新拉取数据
+     * 现在用来钉钉同步数据使用 其他业务视情况决定是否启用
      */
     void loadRemoteData();
 
@@ -184,14 +184,15 @@ public interface ApiStrategy {
 
     /**
      * 获取登录参数
-     *
+     * 钉钉扫码登录使用
+     * 其他业务视情况决定是否启用
      * @return
      */
     Object getLoginParam();
 
     /**
      * 发送消息
-     *
+     *  业务行对接消息
      * @param messageDto
      */
     void sendMsg(MessageDto messageDto);

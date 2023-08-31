@@ -5,9 +5,7 @@ import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategy;
 import com.cxygzl.biz.utils.DingTalkHttpUtil;
 import com.cxygzl.common.dto.LoginUrlDto;
-import com.cxygzl.common.dto.ProcessInstanceParamDto;
 import com.cxygzl.common.dto.R;
-import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.third.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -179,7 +177,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      * @param processDto
      */
     @Override
-    public void createProcess(ProcessDto processDto) {
+    public void createProcess(CreateProcessDto processDto) {
         DingTalkHttpUtil.post(processDto, "/remote/createProcess");
     }
 
@@ -189,7 +187,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      * @param processDto
      */
     @Override
-    public void startProcess(ProcessDto processDto) {
+    public void startProcess(StartProcessDto processDto) {
         DingTalkHttpUtil.post(processDto, "/remote/startProcess");
 
     }
@@ -200,7 +198,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      * @param processInstanceParamDto
      */
     @Override
-    public void completeProcessInstance(ProcessInstanceParamDto processInstanceParamDto) {
+    public void completeProcessInstance(com.cxygzl.common.dto.third.ProcessInstanceParamDto processInstanceParamDto) {
         DingTalkHttpUtil.post(processInstanceParamDto, "/processInstance/complete");
     }
 
@@ -220,7 +218,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
      * @param taskParamDtoList
      */
     @Override
-    public void addWaitTask(List<TaskParamDto> taskParamDtoList) {
+    public void addWaitTask(List<com.cxygzl.common.dto.third.TaskParamDto> taskParamDtoList) {
         DingTalkHttpUtil.post(taskParamDtoList, "/processInstance/addWaitTask");
     }
 
