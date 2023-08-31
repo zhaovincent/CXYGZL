@@ -11,8 +11,18 @@ import lombok.NoArgsConstructor;
 @Data
 public class FlowSettingDto {
 
+    /**
+     * 前置通知
+     */
     private HttpSetting frontNotify;
+    /**
+     * 后置通知
+     */
     private HttpSetting backNotify;
+    /**
+     * 前置检查
+     */
+    private HttpSetting frontCheck;
 
 
 }

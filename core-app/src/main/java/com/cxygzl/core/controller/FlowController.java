@@ -1,14 +1,22 @@
 package com.cxygzl.core.controller;
 
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.Header;
+import cn.hutool.http.HttpRequest;
 import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
+import com.cxygzl.common.dto.flow.HttpSetting;
+import com.cxygzl.common.dto.flow.HttpSettingData;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.ModelUtil;
 import com.cxygzl.core.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +41,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.ENABLE_SKIP_EXPRESSION;
 
@@ -85,22 +90,101 @@ public class FlowController {
     /**
      * 启动
      *
-     * @param key
+     * @param processInstanceParamDto
      * @return
      */
     @PostMapping("/start")
     public R start(@RequestBody ProcessInstanceParamDto processInstanceParamDto) {
+        String flowId = processInstanceParamDto.getFlowId();
+        {
+            //前置检查
+            R r = frontCheck(processInstanceParamDto);
+            if(!r.isOk()){
+                return r;
+            }
+        }
         Authentication.setAuthenticatedUserId(processInstanceParamDto.getStartUserId());
         Map<String, Object> paramMap = processInstanceParamDto.getParamMap();
         //支持自动跳过
-        paramMap.put(ENABLE_SKIP_EXPRESSION,true);
+        paramMap.put(ENABLE_SKIP_EXPRESSION, true);
 
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(processInstanceParamDto.getFlowId(),
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(flowId,
                 paramMap);
 
         String processInstanceId = processInstance.getProcessInstanceId();
         return R.success(processInstanceId);
 
+    }
+
+    /**
+     * 前置检查
+     * @param processInstanceParamDto
+     * @return
+     */
+    private R frontCheck(ProcessInstanceParamDto processInstanceParamDto) {
+        String flowId = processInstanceParamDto.getFlowId();
+        Map<String, Object> paramMap = processInstanceParamDto.getParamMap();
+        //前置检查
+        FlowSettingDto flowSettingDto = BizHttpUtil.queryProcessSetting(flowId).getData();
+
+        if (flowSettingDto != null) {
+            HttpSetting frontCheck = flowSettingDto.getFrontCheck();
+            if (frontCheck != null && frontCheck.getEnable()) {
+
+                Map<String, String> headerParamMap = new HashMap<>();
+                {
+                    List<HttpSettingData> headerSetting = frontCheck.getHeader();
+                    for (HttpSettingData httpSettingData : headerSetting) {
+                        if (httpSettingData.getValueMode()) {
+                            headerParamMap.put(httpSettingData.getField(), httpSettingData.getValue());
+                        } else {
+                            Object object = paramMap.get(httpSettingData.getValue());
+                            headerParamMap.put(httpSettingData.getField(), object == null ? null : (object instanceof String ? Convert.toStr(object) : JSON.toJSONString(object)));
+                        }
+                    }
+
+                }
+
+
+                Map<String, Object> bodyMap = new HashMap<>();
+                {
+                    //存入默认值
+                    bodyMap.put("flowId", flowId);
+                    List<HttpSettingData> bodySetting = frontCheck.getBody();
+                    for (HttpSettingData httpSettingData : bodySetting) {
+                        if (httpSettingData.getValueMode()) {
+                            bodyMap.put(httpSettingData.getField(), httpSettingData.getValue());
+                        } else {
+                            bodyMap.put(httpSettingData.getField(), JSON.toJSONString(paramMap.get(httpSettingData.getValue())));
+                        }
+                    }
+
+                }
+
+                log.info("前置检查url：{} 请求头：{} 请求体：{} ", frontCheck.getUrl(), JSON.toJSONString(headerParamMap), JSON.toJSONString(bodyMap));
+
+                String result = null;
+                try {
+                    result = HttpRequest.post(frontCheck.getUrl())
+                            .header(Header.USER_AGENT, "CXYGZL")//头信息，多个头信息多次调用此方法即可
+                            .headerMap(headerParamMap, true)
+                            .body(JSON.toJSONString(bodyMap))
+                            .timeout(10000)//超时，毫秒
+                            .execute().body();
+                    log.info("  返回值:{}", result);
+                } catch (Exception e) {
+                    log.error("前置检查事件异常", e);
+                }
+
+                if (StrUtil.isNotBlank(result)) {
+                    R r = JSON.parseObject(result, new TypeReference<R>() {
+                    });
+                    return r;
+                }
+
+            }
+        }
+        return R.success();
     }
 
 
