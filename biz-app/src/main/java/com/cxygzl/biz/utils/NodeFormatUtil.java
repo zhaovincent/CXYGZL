@@ -317,6 +317,24 @@ public class NodeFormatUtil {
                         index++;
                     }
                 }
+            } else if (assignedType == ProcessInstanceConstant.AssignedTypeClass.ROLE) {
+
+                //角色
+                List<NodeUser> nodeUserList = node.getNodeUserList();
+
+                List<String> roleIdList = nodeUserList.stream().map(w -> w.getId()).collect(Collectors.toList());
+                //去获取主管
+
+                IRemoteService remoteService = SpringUtil.getBean(IRemoteService.class);
+
+                List<String> userIdList = remoteService.queryUserIdListByRoleIdList(roleIdList).getData();
+
+
+                for (String s : userIdList) {
+                    NodeFormatUserVo nodeFormatUserVo = buildUser(s);
+                    nodeFormatUserVoList.add(nodeFormatUserVo);
+                }
+
             }
 
 
@@ -390,7 +408,7 @@ public class NodeFormatUtil {
         IProcessNodeRecordAssignUserService processNodeRecordAssignUserService = SpringUtil.getBean(IProcessNodeRecordAssignUserService.class);
         List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = processNodeRecordAssignUserService
                 .lambdaQuery()
-                .ne(ProcessNodeRecordAssignUser::getUserId,DEFAULT_EMPTY_ASSIGN)
+                .ne(ProcessNodeRecordAssignUser::getUserId, DEFAULT_EMPTY_ASSIGN)
                 .eq(!StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER), ProcessNodeRecordAssignUser::getNodeId, node.getId())
                 .like(StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER),
                         ProcessNodeRecordAssignUser::getNodeId, ProcessInstanceConstant.VariableKey.STARTER)
