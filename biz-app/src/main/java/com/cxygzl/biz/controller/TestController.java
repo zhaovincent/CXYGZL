@@ -3,6 +3,7 @@ package com.cxygzl.biz.controller;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONObject;
+import com.cxygzl.common.dto.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +13,15 @@ import java.util.List;
 @RestController
 @RequestMapping("test")
 public class TestController {
+
+
+
+    @PostMapping("check")
+    public Object check(@RequestBody String s,@RequestHeader(required = false) String b){
+        log.info("收到前置检查：{} {}",s,b);
+        return R.success("参数校验失败");
+    }
+
 
     @PostMapping("notify")
     public Object notify(@RequestBody String s,@RequestHeader(required = false) String b){
