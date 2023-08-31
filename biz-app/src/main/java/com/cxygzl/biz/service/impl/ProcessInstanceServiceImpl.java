@@ -12,10 +12,8 @@ import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
+import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.entity.Process;
-import com.cxygzl.biz.entity.ProcessCopy;
-import com.cxygzl.biz.entity.ProcessInstanceRecord;
-import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.FormUtil;
@@ -631,8 +629,14 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         }
         Node nodeDto = JSON.parseObject(process, Node.class);
 
+        //查询所有的节点
+        List<ProcessNodeRecordParamDto> processNodeRecordParamDtoList = new ArrayList<>();
+        if (StrUtil.isNotBlank(processInstanceId)) {
+            List<ProcessNodeRecord> list = processNodeRecordService.lambdaQuery().eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId).list();
+            processNodeRecordParamDtoList.addAll(BeanUtil.copyToList(list, ProcessNodeRecordParamDto.class));
+        }
         List<NodeVo> processNodeShowDtos = NodeFormatUtil.formatProcessNodeShow(nodeDto,
-                processInstanceId, paramMap);
+                processInstanceId, paramMap, processNodeRecordParamDtoList);
 
         return com.cxygzl.common.dto.R.success(processNodeShowDtos);
     }

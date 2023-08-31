@@ -22,6 +22,8 @@ import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
+import static com.cxygzl.common.constants.ProcessInstanceConstant.MERGE_GATEWAY_FLAG;
+
 /**
  * <p>
  * 流程节点记录 服务实现类
@@ -84,7 +86,7 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
             if (parentNode.getType().intValue() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue()) {
 
                 //处理排他分支为线性
-                NodeUtil.handleExclusiveGatewayAsLine(currentProcessRootNode, parentNode.getId(), nodeId);
+                NodeUtil.handleExclusiveGatewayAsLine(currentProcessRootNode, parentNode.getId(), nodeId,null );
                 processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
             }
         }
@@ -110,13 +112,13 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
         processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
 
         //判断是聚合网关--处理条件分支和包容分支 删除没用执行的
-        if (StrUtil.endWith(processNodeRecordParamDto.getNodeId(), "_merge_gateway")) {
+        if (StrUtil.endWith(processNodeRecordParamDto.getNodeId(), MERGE_GATEWAY_FLAG)) {
             Node node = processNodeDataService.getNode(processNodeRecordParamDto.getFlowId(),
-                    StrUtil.replace(processNodeRecordParamDto.getNodeId(), "_merge_gateway", "")).getData();
+                    StrUtil.replace(processNodeRecordParamDto.getNodeId(), MERGE_GATEWAY_FLAG, "")).getData();
 
             if (node.getType().intValue() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue()) {
                 //排他
-                NodeUtil.handleExclusiveGatewayAsLine(currentProcessRootNode,node.getId(), null);
+                NodeUtil.handleExclusiveGatewayAsLine(currentProcessRootNode,node.getId(), null,null );
                 processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
             }
             if (node.getType().intValue() == NodeTypeEnum.INCLUSIVE_GATEWAY.getValue()) {
@@ -132,7 +134,7 @@ public class ProcessNodeRecordServiceImpl extends ServiceImpl<ProcessNodeRecordM
                 ProcessNodeRecord p = processNodeRecordList.stream().filter(w -> StrUtil.equals(w.getNodeId(), node.getId())).findFirst().get();
 
                 NodeUtil.handleInclusiveGatewayAsLine(currentProcessRootNode,node.getId(), p.getExecutionId(),p.getFlowUniqueId(),
-                        processNodeRecordParamDtos);
+                        processNodeRecordParamDtos, null);
                 processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
 
             }

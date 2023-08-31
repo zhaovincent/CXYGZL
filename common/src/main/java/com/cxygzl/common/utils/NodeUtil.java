@@ -58,8 +58,9 @@ public class NodeUtil {
      * @param node
      * @param parentId
      * @param nodeId
+     * @param parentNode
      */
-    public static void handleExclusiveGatewayAsLine(Node node, String parentId, String nodeId) {
+    public static void handleExclusiveGatewayAsLine(Node node, String parentId, String nodeId, Node parentNode) {
 
         if (!isNode(node)) {
             return;
@@ -78,7 +79,7 @@ public class NodeUtil {
 
                     if (children != null && StrUtil.equals(children.getId(), nodeId)) {
                         //就是该分支
-                        node.setChildNode(children);
+                        parentNode.setChildNode(children);
 
                         Node c = getFinalChildrenNode(children);
 
@@ -100,33 +101,34 @@ public class NodeUtil {
             for (Node branch : branchs) {
                 Node children = branch.getChildNode();
 
-                handleExclusiveGatewayAsLine(children, parentId, nodeId);
+                handleExclusiveGatewayAsLine(children, parentId, nodeId, node);
 
 
             }
         }
 
-        handleExclusiveGatewayAsLine(childNode, parentId, nodeId);
+        handleExclusiveGatewayAsLine(childNode, parentId, nodeId, node);
 
     }
 
     /**
      * 处理包容网关 删除没用执行的节点
      *
+     * @param nodeId
      * @param node
      * @param gatewayNodeId
-     * @param nodeId
+     * @param parentNode
      */
     public static void handleInclusiveGatewayAsLine(Node node, String gatewayNodeId, String executionId,
                                                     String flowUniqueId,
-                                                    List<ProcessNodeRecordParamDto> processNodeRecordParamDtoList) {
+                                                    List<ProcessNodeRecordParamDto> processNodeRecordParamDtoList, Node parentNode) {
 
         if (!isNode(node)) {
             return;
         }
         Node childNode = node.getChildNode();
 
-        List<Node> branchList=new ArrayList<>();
+        List<Node> branchList = new ArrayList<>();
 
         List<Node> branchs = node.getConditionNodes();
 
@@ -150,8 +152,8 @@ public class NodeUtil {
                                 .filter(w -> StrUtil.equals(w.getFlowUniqueId(), flowUniqueId1))
                                 .filter(w -> StrUtil.equals(w.getExecutionId(), executionId1)).count();
                         if (count == 0) {
-                          //  iterator.remove();
-                        }else{
+                            //  iterator.remove();
+                        } else {
                             branchList.add(branch);
                         }
 
@@ -162,11 +164,25 @@ public class NodeUtil {
 
 
             }
-        }else if(branchs!=null){
+        } else if (branchs != null) {
             branchList.addAll(branchs);
         }
 
         node.setConditionNodes(branchList);
+
+        if (branchList.size() == 1) {
+            //只有一个分支执行了
+
+            Node children = branchList.get(0).getChildNode();
+
+            //就是该分支
+            parentNode.setChildNode(children);
+
+            Node c = getFinalChildrenNode(children);
+
+            c.setChildNode(childNode);
+
+        }
 
         Integer type = node.getType();
 
@@ -176,13 +192,13 @@ public class NodeUtil {
             for (Node branch : branchList) {
                 Node children = branch.getChildNode();
 
-                handleInclusiveGatewayAsLine(children, gatewayNodeId, executionId, flowUniqueId, processNodeRecordParamDtoList);
+                handleInclusiveGatewayAsLine(children, gatewayNodeId, executionId, flowUniqueId, processNodeRecordParamDtoList, node);
 
 
             }
         }
 
-        handleInclusiveGatewayAsLine(childNode, gatewayNodeId, executionId, flowUniqueId, processNodeRecordParamDtoList);
+        handleInclusiveGatewayAsLine(childNode, gatewayNodeId, executionId, flowUniqueId, processNodeRecordParamDtoList, node);
 
     }
 

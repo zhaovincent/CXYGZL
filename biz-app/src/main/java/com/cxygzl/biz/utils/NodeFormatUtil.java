@@ -20,6 +20,7 @@ import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.SimpleApproveDescDto;
 import com.cxygzl.common.dto.flow.Node;
@@ -62,11 +63,12 @@ public class NodeFormatUtil {
      * @param node
      * @param processInstanceId
      * @param paramMap
+     * @param processNodeRecordParamDtoList
      */
     public static List<NodeVo> formatProcessNodeShow(Node node,
 
                                                      String processInstanceId,
-                                                     Map<String, Object> paramMap) {
+                                                     Map<String, Object> paramMap, List<ProcessNodeRecordParamDto> processNodeRecordParamDtoList) {
         List<NodeVo> list = new ArrayList();
 
         if (!NodeUtil.isNode(node)) {
@@ -370,15 +372,38 @@ public class NodeFormatUtil {
         if (NodeTypeEnum.getByValue(type).getBranch() && CollUtil.isNotEmpty(branchs)) {
             //条件分支
 
+                //判断当前分支是否执行了
+                boolean executed = processNodeRecordParamDtoList.stream()
+                        .filter(w -> StrUtil.equals(w.getNodeId(), node.getId()))
+                        .filter(w -> StrUtil.equals(w.getFlowUniqueId(), node.getFlowUniqueId()))
+                        .filter(w -> StrUtil.equals(w.getExecutionId(), node.getExecutionId()))
+                        .count()>0;
+
+
             for (Node branch : branchs) {
                 Node children = branch.getChildNode();
-                List<NodeVo> processNodeShowDtos = formatProcessNodeShow(children, processInstanceId, paramMap);
+                if (children == null) {
+                    continue;
+                }
 
-                NodeVo p = new NodeVo();
-                p.setChildren(processNodeShowDtos);
 
-                p.setPlaceholder(branch.getPlaceHolder());
-                branchList.add(p);
+                    long count = processNodeRecordParamDtoList.stream()
+                            .filter(w -> StrUtil.equals(w.getNodeId(), children.getId()))
+                            .filter(w -> StrUtil.equals(w.getFlowUniqueId(), children.getFlowUniqueId()))
+                            .filter(w -> StrUtil.equals(w.getExecutionId(), children.getExecutionId()))
+                            .count();
+
+                 if(!executed||(count>0)){
+
+                     List<NodeVo> processNodeShowDtos = formatProcessNodeShow(children, processInstanceId, paramMap, processNodeRecordParamDtoList);
+
+                     NodeVo p = new NodeVo();
+                     p.setChildren(processNodeShowDtos);
+
+                     p.setPlaceholder(branch.getPlaceHolder());
+                     branchList.add(p);
+                 }
+
             }
 
         }
@@ -387,7 +412,7 @@ public class NodeFormatUtil {
 
         list.add(nodeVo);
 
-        List<NodeVo> next = formatProcessNodeShow(node.getChildNode(), processInstanceId, paramMap);
+        List<NodeVo> next = formatProcessNodeShow(node.getChildNode(), processInstanceId, paramMap, processNodeRecordParamDtoList);
         list.addAll(next);
 
 

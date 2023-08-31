@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.cxygzl.common.constants.ProcessInstanceConstant.MERGE_GATEWAY_FLAG;
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.*;
 
 /**
@@ -670,7 +671,7 @@ public class ModelUtil {
      * @return
      */
     private static List<FlowElement> buildParallelGatewayNode(Node node) {
-        node.setTailId(StrUtil.format("{}_merge_gateway", node.getId()));
+        node.setTailId(StrUtil.format("{}{}", node.getId(),MERGE_GATEWAY_FLAG));
         List<FlowElement> flowElementList = new ArrayList<>();
 
         ParallelGateway inclusiveGateway = new ParallelGateway();
@@ -680,7 +681,7 @@ public class ModelUtil {
 
         //合并网关
         ParallelGateway parallelGateway = new ParallelGateway();
-        parallelGateway.setId(StrUtil.format("{}_merge_gateway", node.getId()));
+        parallelGateway.setId(StrUtil.format("{}{}", node.getId(),MERGE_GATEWAY_FLAG));
         parallelGateway.setName(StrUtil.format("{}_合并网关", node.getNodeName()));
         flowElementList.add(parallelGateway);
 
@@ -695,7 +696,7 @@ public class ModelUtil {
      */
     private static List<FlowElement> buildInclusiveGatewayNode(Node node) {
 
-        node.setTailId(StrUtil.format("{}_merge_gateway", node.getId()));
+        node.setTailId(StrUtil.format("{}{}", node.getId(),MERGE_GATEWAY_FLAG));
 
         List<FlowElement> flowElementList = new ArrayList<>();
 
@@ -707,7 +708,7 @@ public class ModelUtil {
 
         //合并网关
         InclusiveGateway gateway = new InclusiveGateway();
-        gateway.setId(StrUtil.format("{}_merge_gateway", node.getId()));
+        gateway.setId(StrUtil.format("{}{}", node.getId(),MERGE_GATEWAY_FLAG));
         gateway.setName(StrUtil.format("{}_合并网关", node.getNodeName()));
 
         flowElementList.add(gateway);
