@@ -1196,29 +1196,6 @@ CREATE TABLE `process_node_record`  (
                                         INDEX `idx_id`(`id` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 3790 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程节点记录' ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for process_node_record_approve_desc
--- ----------------------------
-DROP TABLE IF EXISTS `process_node_record_approve_desc`;
-CREATE TABLE `process_node_record_approve_desc`  (
-                                                     `id` bigint NOT NULL COMMENT 'id',
-                                                     `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                                     `create_time` datetime NOT NULL COMMENT '创建时间',
-                                                     `update_time` datetime NOT NULL COMMENT '更新时间',
-                                                     `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
-                                                     `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程实例id',
-                                                     `node_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-                                                     `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT ' 用户id',
-                                                     `execution_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '执行id',
-                                                     `task_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT ' 任务id',
-                                                     `approve_desc` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '审批意见',
-                                                     `node_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT ' 节点名称',
-                                                     `desc_date` datetime NULL DEFAULT NULL COMMENT '评论时间',
-                                                     `desc_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '消息id',
-                                                     `desc_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '类型',
-                                                     PRIMARY KEY (`id`) USING BTREE,
-                                                     INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1344 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程节点记录-执行人-审批意见' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for process_node_record_assign_user
@@ -1248,32 +1225,6 @@ CREATE TABLE `process_node_record_assign_user`  (
                                                     INDEX `idx_id`(`id` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1512 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程节点记录-执行人' ROW_FORMAT = DYNAMIC;
 
--- ----------------------------
--- Table structure for process_oper_record
--- ----------------------------
-DROP TABLE IF EXISTS `process_oper_record`;
-CREATE TABLE `process_oper_record`  (
-                                        `id` bigint NOT NULL COMMENT 'id',
-                                        `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
-                                        `create_time` datetime NOT NULL COMMENT '创建时间',
-                                        `update_time` datetime NOT NULL COMMENT '更新时间',
-                                        `flow_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程id',
-                                        `process_instance_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '流程实例id',
-                                        `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '表单数据',
-                                        `node_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-                                        `task_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '任务id',
-                                        `node_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '节点名字',
-                                        `status` int NOT NULL COMMENT '任务状态',
-                                        `start_time` datetime NOT NULL COMMENT '开始时间',
-                                        `end_time` datetime NULL DEFAULT NULL COMMENT '结束时间',
-                                        `execution_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '执行id',
-                                        `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
-                                        `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '用户id',
-                                        `parent_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '上级id',
-                                        `task_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '任务类型',
-                                        PRIMARY KEY (`id`) USING BTREE,
-                                        INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3293 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程操作记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for process_starter

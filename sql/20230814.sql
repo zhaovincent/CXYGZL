@@ -28,14 +28,10 @@ ALTER TABLE `process_node_data`
 ALTER TABLE `process_node_record`
     MODIFY COLUMN `id` bigint NOT NULL COMMENT 'id' FIRST;
 
-ALTER TABLE `process_node_record_approve_desc`
-    MODIFY COLUMN `id` bigint NOT NULL COMMENT 'id' FIRST;
 
 ALTER TABLE `process_node_record_assign_user`
     MODIFY COLUMN `id` bigint NOT NULL COMMENT 'id' FIRST;
 
-ALTER TABLE `process_oper_record`
-    MODIFY COLUMN `id` bigint NOT NULL COMMENT 'id' FIRST;
 
 ALTER TABLE `process_starter`
     MODIFY COLUMN `id` bigint NOT NULL COMMENT 'id' FIRST;
