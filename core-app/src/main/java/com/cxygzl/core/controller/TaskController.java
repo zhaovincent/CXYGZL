@@ -2,8 +2,6 @@ package com.cxygzl.core.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.lang.Dict;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
@@ -11,6 +9,7 @@ import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.core.utils.NodeUtil;
+import com.cxygzl.core.vo.TaskCommentDto;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.*;
 import org.flowable.engine.task.Comment;
@@ -96,38 +95,17 @@ public class TaskController {
         }
 
 
-        Map<String, Object> variableMap = new HashMap<>();
-
-        {
-            TaskQuery taskQuery = taskService.createTaskQuery();
-
-            Task task = taskQuery.taskId(taskId).singleResult();
-            if (task == null) {
-                HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().taskId(taskId).singleResult();
-                if (historicTaskInstance == null) {
-                    return R.fail("任务不存在");
-                }
-                List<HistoricVariableInstance> list = historyService.createHistoricVariableInstanceQuery()
-                        .processInstanceId(historicTaskInstance.getProcessInstanceId())
-                        .list();
-
-                for (HistoricVariableInstance historicVariableInstance : list) {
-                    variableMap.put(historicVariableInstance.getVariableName(), historicVariableInstance.getValue());
-                }
-            } else {
-                variableMap.putAll(taskService.getVariables(taskId));
-            }
-        }
-
 
         List<SimpleApproveDescDto> simpleApproveDescDtoList = new ArrayList<>();
         for (Comment comment : taskComments) {
             String id = comment.getId();
             Date time = comment.getTime();
             String fullMessage = comment.getFullMessage();
+            TaskCommentDto taskCommentDto = JSON.parseObject(fullMessage, TaskCommentDto.class);
 
-            String userId = MapUtil.getStr(variableMap, "user_id_" + id);
-            Boolean isSys = MapUtil.getBool(variableMap, "sys_" + id, true);
+
+            String userId = taskCommentDto.getUserId();
+            Boolean isSys = taskCommentDto.getSys();
 
 
             SimpleApproveDescDto simpleApproveDescDto = new SimpleApproveDescDto();
@@ -227,7 +205,7 @@ public class TaskController {
         taskResultDto.setDelegate(Convert.toBool(delegateVariable, false));
         taskResultDto.setVariableAll(variableAll);
         taskResultDto.setProcessInstanceId(processInstanceId);
-        taskResultDto.setFrontJoinTask(delegationState == null ? false : StrUtil.equals(delegationState.toString(),ProcessInstanceConstant.VariableKey.PENDING));
+        taskResultDto.setFrontJoinTask(delegationState == null ? false : StrUtil.equals(delegationState.toString(), ProcessInstanceConstant.VariableKey.PENDING));
         taskResultDto.setFlowUniqueId(flowUniqueId);
 
         return R.success(taskResultDto);
@@ -335,7 +313,7 @@ public class TaskController {
                 ProcessInstanceConstant.TaskType.RESOLVE
         );
         //不能搞 因为涉及多实例
-       // taskService.setVariable(task.getId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
+        // taskService.setVariable(task.getId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
 
         taskService.resolveTask(taskParamDto.getTaskId(), taskParamDto.getParamMap());
         return R.success();
@@ -429,20 +407,19 @@ public class TaskController {
     }
 
     private void saveUserCommentToTask(Task task, String type, String desc, String userId, String descTitle) {
+
+        TaskCommentDto taskCommentDto = TaskCommentDto.builder().content(desc).title(descTitle).sys(false).userId(userId).build();
         Comment comment = taskService.addComment(task.getId(), task.getProcessInstanceId(),
-                type, JSON.toJSONString(Dict.create().set("content", desc).set("title", descTitle)));
-        String id = comment.getId();
-        taskService.setVariable(task.getId(), StrUtil.format("user_id_{}", id), userId);
-        taskService.setVariable(task.getId(), StrUtil.format("sys_{}", id), false);
+                type, JSON.toJSONString(taskCommentDto));
+
 
     }
 
     private void saveSysCommentToTask(Task task, String type, String desc, String userId) {
+        TaskCommentDto taskCommentDto = TaskCommentDto.builder().content(desc).sys(true).userId(userId).build();
+
         Comment comment = taskService.addComment(task.getId(), task.getProcessInstanceId(),
-                type, JSON.toJSONString(Dict.create().set("content", desc)));
-        String id = comment.getId();
-        taskService.setVariable(task.getId(), StrUtil.format("sys_{}", id), true);
-        taskService.setVariable(task.getId(), StrUtil.format("user_id_{}", id), userId);
+                type, JSON.toJSONString(taskCommentDto));
 
 
     }

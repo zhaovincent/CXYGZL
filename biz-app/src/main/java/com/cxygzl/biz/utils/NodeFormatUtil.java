@@ -360,11 +360,11 @@ public class NodeFormatUtil {
 
             List<NodeFormatUserVo> tempList = buildUser(nodeUserList);
             //如果当前节点已执行  则用户为已执行
-            if(StrUtil.isAllNotBlank(node.getExecutionId(),node.getFlowUniqueId()))
-            for (NodeFormatUserVo nodeFormatUserVo : tempList) {
-                nodeFormatUserVo.setStatus(NodeStatusEnum.YJS.getCode());
+            if (StrUtil.isAllNotBlank(node.getExecutionId(), node.getFlowUniqueId()))
+                for (NodeFormatUserVo nodeFormatUserVo : tempList) {
+                    nodeFormatUserVo.setStatus(NodeStatusEnum.YJS.getCode());
 
-            }
+                }
             nodeFormatUserVoList.addAll(tempList);
 
         }
@@ -378,12 +378,12 @@ public class NodeFormatUtil {
         if (NodeTypeEnum.getByValue(type).getBranch() && CollUtil.isNotEmpty(branchs)) {
             //条件分支
 
-                //判断当前分支是否执行了
-                boolean executed = processNodeRecordParamDtoList.stream()
-                        .filter(w -> StrUtil.equals(w.getNodeId(), node.getId()))
-                        .filter(w -> StrUtil.equals(w.getFlowUniqueId(), node.getFlowUniqueId()))
-                        .filter(w -> StrUtil.equals(w.getExecutionId(), node.getExecutionId()))
-                        .count()>0;
+            //判断当前分支是否执行了
+            boolean executed = processNodeRecordParamDtoList.stream()
+                    .filter(w -> StrUtil.equals(w.getNodeId(), node.getId()))
+                    .filter(w -> StrUtil.equals(w.getFlowUniqueId(), node.getFlowUniqueId()))
+                    .filter(w -> StrUtil.equals(w.getExecutionId(), node.getExecutionId()))
+                    .count() > 0;
 
 
             for (Node branch : branchs) {
@@ -393,22 +393,22 @@ public class NodeFormatUtil {
                 }
 
 
-                    long count = processNodeRecordParamDtoList.stream()
-                            .filter(w -> StrUtil.equals(w.getNodeId(), children.getId()))
-                            .filter(w -> StrUtil.equals(w.getFlowUniqueId(), children.getFlowUniqueId()))
-                            .filter(w -> StrUtil.equals(w.getExecutionId(), children.getExecutionId()))
-                            .count();
+                long count = processNodeRecordParamDtoList.stream()
+                        .filter(w -> StrUtil.equals(w.getNodeId(), children.getId()))
+                        .filter(w -> StrUtil.equals(w.getFlowUniqueId(), children.getFlowUniqueId()))
+                        .filter(w -> StrUtil.equals(w.getExecutionId(), children.getExecutionId()))
+                        .count();
 
-                 if(!executed||(count>0)){
+                if (!executed || (count > 0)) {
 
-                     List<NodeVo> processNodeShowDtos = formatProcessNodeShow(children, processInstanceId, paramMap, processNodeRecordParamDtoList);
+                    List<NodeVo> processNodeShowDtos = formatProcessNodeShow(children, processInstanceId, paramMap, processNodeRecordParamDtoList);
 
-                     NodeVo p = new NodeVo();
-                     p.setChildren(processNodeShowDtos);
+                    NodeVo p = new NodeVo();
+                    p.setChildren(processNodeShowDtos);
 
-                     p.setPlaceholder(branch.getPlaceHolder());
-                     branchList.add(p);
-                 }
+                    p.setPlaceholder(branch.getPlaceHolder());
+                    branchList.add(p);
+                }
 
             }
 
@@ -456,6 +456,9 @@ public class NodeFormatUtil {
 
             for (String taskId : taskIdList) {
                 List<SimpleApproveDescDto> simpleApproveDescDtoList = CoreHttpUtil.queryTaskComments(taskId).getData();
+                if (simpleApproveDescDtoList == null) {
+                    simpleApproveDescDtoList = new ArrayList<>();
+                }
 
                 for (SimpleApproveDescDto simpleApproveDescDto : simpleApproveDescDtoList) {
                     NodeFormatUserVo nodeFormatUserVo = buildUser(simpleApproveDescDto.getUserId());
