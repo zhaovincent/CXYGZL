@@ -21,9 +21,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_NODE_RESULT;
@@ -43,7 +41,7 @@ public class MultiInstanceHandler {
      */
     public List<String> resolveAssignee(DelegateExecution execution) {
         //执行人集合
-        List<String> assignList = new ArrayList<>();
+        Set<String> assignSet = new LinkedHashSet<>();
 
         IDataStoreHandler nodeDataStoreHandler = NodeDataStoreFactory.getInstance();
 
@@ -88,6 +86,7 @@ public class MultiInstanceHandler {
                     {
                         //去获取主管
 
+
                         R<List<com.cxygzl.common.dto.third.DeptDto>> r = BizHttpUtil.queryParentDepListByUserId(rootUserId);
 
                         List<com.cxygzl.common.dto.third.DeptDto> deptDtoList = r.getData();
@@ -96,12 +95,7 @@ public class MultiInstanceHandler {
                                 DeptDto deptDto = deptDtoList.get(0);
                                 List<String> leaderUserIdList = deptDto.getLeaderUserIdList();
                                 if (CollUtil.isNotEmpty(leaderUserIdList)) {
-                                    for (String s : leaderUserIdList) {
-                                        if (userIdList.contains(s)) {
-                                            continue;
-                                        }
-                                        userIdList.add(s);
-                                    }
+                                    userIdList.addAll(leaderUserIdList);
                                 }
                             }
                         }
@@ -110,7 +104,7 @@ public class MultiInstanceHandler {
                 }
             }
 
-            assignList.addAll(userIdList);
+            assignSet.addAll(userIdList);
 
         } else {
             //默认值
@@ -119,16 +113,16 @@ public class MultiInstanceHandler {
             List<NodeUser> nodeUserDtos = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class);
             if (CollUtil.isNotEmpty(nodeUserDtos)) {
                 List<String> collect = nodeUserDtos.stream().map(w -> String.valueOf(w.getId())).collect(Collectors.toList());
-                assignList.addAll(collect);
+                assignSet.addAll(collect);
             }
 
         }
 
-        if (CollUtil.isEmpty(assignList)) {
-            assignList.add(ProcessInstanceConstant.DEFAULT_EMPTY_ASSIGN);
+        if (CollUtil.isEmpty(assignSet)) {
+            assignSet.add(ProcessInstanceConstant.DEFAULT_EMPTY_ASSIGN);
         }
 
-        return assignList;
+        return new ArrayList<>(assignSet);
 
     }
 
