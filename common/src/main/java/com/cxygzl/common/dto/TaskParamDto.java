@@ -42,6 +42,7 @@ public class TaskParamDto {
      */
     private String targetUserId;
     private List<String> targetUserIdList;
+    private List<String> targetExecutionIdList;
     private List<String> targetUserNameList;
     private String targetUserName;
     /**

@@ -55,6 +55,13 @@ public interface ITaskService {
     R addAssignee(TaskParamDto taskParamDto);
 
     /**
+     * 减少执行人
+     * @param taskParamDto
+     * @return
+     */
+    R delAssignee(TaskParamDto taskParamDto);
+
+    /**
      * 结束流程
      * @param taskParamDto
      * @return

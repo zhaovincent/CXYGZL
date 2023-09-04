@@ -8,6 +8,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
+import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessExecution;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
@@ -364,19 +365,86 @@ public class TaskServiceImpl implements ITaskService {
                     .eq(ProcessNodeRecordAssignUser::getNodeId, processNodeRecordAssignUser.getNodeId())
                     .in(ProcessNodeRecordAssignUser::getUserId, targetUserIdList)
                     .list();
-            if(CollUtil.isNotEmpty(list)){
+            if (CollUtil.isNotEmpty(list)) {
                 Set<String> uidSet = list.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
 
-                List<String> userNameList=new ArrayList<>();
+                List<String> userNameList = new ArrayList<>();
                 for (String s : uidSet) {
                     UserDto user = ApiStrategyFactory.getStrategy().getUser(s);
                     userNameList.add(user.getName());
                 }
-                return R.fail(StrUtil.format("当前任务的执行人已经包含用户：{}，请勿再次添加",CollUtil.join(userNameList,",")));
+                return R.fail(StrUtil.format("当前任务的执行人已经包含用户：{}，请勿再次添加", CollUtil.join(userNameList, ",")));
             }
 
         }
-        List<String> targetUserNameList=new ArrayList<>();
+        List<String> targetUserNameList = new ArrayList<>();
+        for (String s : targetUserIdList) {
+            UserDto user = ApiStrategyFactory.getStrategy().getUser(s);
+            targetUserNameList.add(user.getName());
+        }
+        taskParamDto.setTargetUserNameList(targetUserNameList);
+
+        String post = CoreHttpUtil.addAssignee(taskParamDto);
+        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
+        });
+        if (!r.isOk()) {
+            return R.fail(r.getMsg());
+        }
+
+
+        return R.success();
+    }
+
+    /**
+     * 减少执行人
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @Override
+    public R delAssignee(TaskParamDto taskParamDto) {
+        taskParamDto.setUserId(StpUtil.getLoginIdAsString());
+
+        List<String> targetUserIdList = taskParamDto.getTargetUserIdList();
+        if (targetUserIdList.contains(StpUtil.getLoginIdAsString())) {
+            return R.fail("不能删除当前用户");
+        }
+        //判断当前用户是否已经存在了
+        String taskId = taskParamDto.getTaskId();
+
+        {
+            ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
+                    .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
+                    .eq(ProcessNodeRecordAssignUser::getUserId, StpUtil.getLoginIdAsString())
+                    .one();
+
+            List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
+                    .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processNodeRecordAssignUser.getProcessInstanceId())
+                    .eq(ProcessNodeRecordAssignUser::getFlowUniqueId, processNodeRecordAssignUser.getFlowUniqueId())
+                    .eq(ProcessNodeRecordAssignUser::getNodeId, processNodeRecordAssignUser.getNodeId())
+                    .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
+                    .in(ProcessNodeRecordAssignUser::getUserId, targetUserIdList)
+                    .list();
+            if (list.size() != targetUserIdList.size()) {
+                List<String> userNameList = new ArrayList<>();
+
+                for (String s : targetUserIdList) {
+                    boolean b = list.stream().anyMatch(w -> StrUtil.equals(w.getUserId(), s));
+                    if(b){
+                        continue;
+                    }
+                    UserDto user = ApiStrategyFactory.getStrategy().getUser(s);
+                    userNameList.add(user.getName());
+                }
+
+                return R.fail(StrUtil.format("用户：{}的任务非进行中，不能减签",CollUtil.join(userNameList,",")));
+            }
+
+            List<String> executionIdList = list.stream().map(w -> w.getExecutionId()).collect(Collectors.toList());
+
+            taskParamDto.setTargetExecutionIdList(executionIdList);
+        }
+        List<String> targetUserNameList = new ArrayList<>();
         for (String s : targetUserIdList) {
             UserDto user = ApiStrategyFactory.getStrategy().getUser(s);
             targetUserNameList.add(user.getName());

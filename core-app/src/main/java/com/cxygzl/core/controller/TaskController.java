@@ -397,6 +397,46 @@ public class TaskController {
         return R.success();
     }
 
+    /**
+     * 删除执行人
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @PostMapping("delAssignee")
+    public R delAssignee(@RequestBody TaskParamDto taskParamDto) {
+
+        Task task = taskService.createTaskQuery().taskId(taskParamDto.getTaskId()).singleResult();
+        if (task == null) {
+            return R.fail("任务不存在");
+        }
+
+        taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
+                ProcessInstanceConstant.TaskType.DEDUCT_ASSIGNEE
+        );
+        String userId = taskParamDto.getUserId();
+        String targetUserName = CollUtil.join(taskParamDto.getTargetUserNameList(),",");
+        if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
+            saveUserCommentToTask(task, ApproveDescTypeEnum.DEDUCT_ASSIGNEE.getType(), taskParamDto.getApproveDesc(), userId,
+                    StrUtil.format("减签任务:[{}]并添加了评论",
+                            targetUserName
+                    ));
+
+        } else {
+            saveSysCommentToTask(task, ApproveDescTypeEnum.DEDUCT_ASSIGNEE.getType(), StrUtil.format("减签任务:{}",
+                    targetUserName
+            ), userId);
+        }
+
+        List<String> targetExecutionIdList = taskParamDto.getTargetExecutionIdList();
+        for (String s : targetExecutionIdList) {
+            runtimeService.deleteMultiInstanceExecution(s,false);
+
+        }
+
+        return R.success();
+    }
+
 
     /**
      * 退回
