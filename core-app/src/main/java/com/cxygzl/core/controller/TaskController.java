@@ -282,6 +282,8 @@ public class TaskController {
         );
 
 
+
+
         taskService.delegateTask(taskParamDto.getTaskId(), taskParamDto.getTargetUserId());
         return R.success();
     }
@@ -349,6 +351,48 @@ public class TaskController {
         }
 
         taskService.setAssignee(taskParamDto.getTaskId(), taskParamDto.getTargetUserId());
+
+        return R.success();
+    }
+
+
+    /**
+     * 添加执行人
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @PostMapping("addAssignee")
+    public R addAssignee(@RequestBody TaskParamDto taskParamDto) {
+
+        Task task = taskService.createTaskQuery().taskId(taskParamDto.getTaskId()).singleResult();
+        if (task == null) {
+            return R.fail("任务不存在");
+        }
+
+        taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
+                ProcessInstanceConstant.TaskType.ADD_ASSIGNEE
+        );
+        String userId = taskParamDto.getUserId();
+        String targetUserName = CollUtil.join(taskParamDto.getTargetUserNameList(),",");
+        if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
+            saveUserCommentToTask(task, ApproveDescTypeEnum.ADD_ASSIGNEE.getType(), taskParamDto.getApproveDesc(), userId,
+                    StrUtil.format("加签任务给:[{}]并添加了评论",
+                            targetUserName
+                    ));
+
+        } else {
+            saveSysCommentToTask(task, ApproveDescTypeEnum.ADD_ASSIGNEE.getType(), StrUtil.format("加签任务给:{}",
+                    targetUserName
+            ), userId);
+        }
+
+        List<String> targetUserIdList = taskParamDto.getTargetUserIdList();
+        for (String s : targetUserIdList) {
+            runtimeService.addMultiInstanceExecution(task.getTaskDefinitionKey(),task.getProcessInstanceId(),
+                    Collections.singletonMap(StrUtil.format("{}_assignee_temp",task.getTaskDefinitionKey()),s)
+            );
+        }
 
         return R.success();
     }

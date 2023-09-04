@@ -8,8 +8,10 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
-import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.entity.Process;
+import com.cxygzl.biz.entity.ProcessExecution;
+import com.cxygzl.biz.entity.ProcessInstanceRecord;
+import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.FormUtil;
@@ -29,10 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -329,6 +328,62 @@ public class TaskServiceImpl implements ITaskService {
         UserDto user = ApiStrategyFactory.getStrategy().getUser(taskParamDto.getTargetUserId());
         taskParamDto.setTargetUserName(user.getName());
         String post = CoreHttpUtil.setAssignee(taskParamDto);
+        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
+        });
+        if (!r.isOk()) {
+            return R.fail(r.getMsg());
+        }
+
+
+        return R.success();
+    }
+
+    /**
+     * 添加执行人
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @Override
+    public R addAssignee(TaskParamDto taskParamDto) {
+        taskParamDto.setUserId(StpUtil.getLoginIdAsString());
+
+        List<String> targetUserIdList = taskParamDto.getTargetUserIdList();
+        //判断当前用户是否已经存在了
+        String taskId = taskParamDto.getTaskId();
+
+        {
+            ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
+                    .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
+                    .eq(ProcessNodeRecordAssignUser::getUserId, StpUtil.getLoginIdAsString())
+                    .one();
+
+            List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
+                    .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processNodeRecordAssignUser.getProcessInstanceId())
+                    .eq(ProcessNodeRecordAssignUser::getFlowUniqueId, processNodeRecordAssignUser.getFlowUniqueId())
+                    .eq(ProcessNodeRecordAssignUser::getNodeId, processNodeRecordAssignUser.getNodeId())
+                    .in(ProcessNodeRecordAssignUser::getUserId, targetUserIdList)
+                    .list();
+            if(CollUtil.isNotEmpty(list)){
+                Set<String> uidSet = list.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
+
+                List<String> userNameList=new ArrayList<>();
+                for (String s : uidSet) {
+                    UserDto user = ApiStrategyFactory.getStrategy().getUser(s);
+                    userNameList.add(user.getName());
+                }
+                return R.fail(StrUtil.format("当前任务的执行人已经包含用户：{}，请勿再次添加",CollUtil.join(userNameList,",")));
+            }
+
+        }
+        List<String> targetUserNameList=new ArrayList<>();
+        for (String s : targetUserIdList) {
+            UserDto user = ApiStrategyFactory.getStrategy().getUser(s);
+            targetUserNameList.add(user.getName());
+        }
+        taskParamDto.setTargetUserNameList(targetUserNameList);
+
+        String post = CoreHttpUtil.addAssignee(taskParamDto);
         com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
         });
         if (!r.isOk()) {

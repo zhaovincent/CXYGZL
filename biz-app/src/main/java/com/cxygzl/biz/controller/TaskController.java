@@ -90,6 +90,20 @@ public class TaskController {
 
     }
 
+    /**
+     * 加签
+     *
+     * @param completeParamDto
+     * @return
+     */
+    @SneakyThrows
+    @PostMapping("addAssignee")
+    public R addAssignee(@RequestBody TaskParamDto completeParamDto) {
+
+        return taskService.addAssignee(completeParamDto);
+
+    }
+
 
     /**
      * 结束流程

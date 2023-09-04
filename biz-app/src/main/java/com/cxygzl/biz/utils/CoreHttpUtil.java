@@ -172,6 +172,18 @@ public class CoreHttpUtil {
     }
 
     /**
+     * 加签
+     *
+     * @param jsonObject
+     * @return
+     */
+    public static String addAssignee(TaskParamDto jsonObject) {
+
+        return post(jsonObject, "/task/addAssignee");
+
+    }
+
+    /**
      * 终止流程
      *
      * @param jsonObject

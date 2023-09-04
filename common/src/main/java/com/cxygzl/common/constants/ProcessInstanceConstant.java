@@ -143,6 +143,10 @@ public class ProcessInstanceConstant {
         public static final String BACK_JOIN = "backJoin";
         //任务取消了
         public static final String CANCEL = "cancel";
+        //加签
+        public static final String ADD_ASSIGNEE = "addAssignee";
+        //减签
+        public static final String DEDUCT_ASSIGNEE = "deductAssignee";
 
     }
 
