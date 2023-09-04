@@ -18,3 +18,16 @@ node:
     store: remoteNodeDataStore
 biz:
   url: http://127.0.0.1:26859
+
+#  不需要表单引擎 idm引擎
+flowable:
+  common:
+    app:
+      idm-url: /a.html
+      idm-admin:
+        user: a
+        password: a
+  form:
+    enabled: false
+  idm:
+    enabled: false

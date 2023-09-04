@@ -32,6 +32,7 @@ public class Node {
     private Integer multipleMode;
     private Integer deptLeaderLevel;
     private String formUserId;
+    private String deptUserType;
     private String formUserName;
     private List<NodeUser> nodeUserList;
     private List<Node> conditionNodes;

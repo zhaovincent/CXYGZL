@@ -1,6 +1,7 @@
 package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.service.IMessageService;
+import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.dto.MessageDto;
 import com.cxygzl.common.dto.R;
 import lombok.SneakyThrows;
@@ -23,6 +24,7 @@ public class MessageController {
      * 未读数量
      */
     @SneakyThrows
+    @NotWriteLogAnno(printResultLog = false)
     @GetMapping("/unreadNum")
     public R<Long> queryUnreadNum() {
         return messageService.queryUnreadNum();

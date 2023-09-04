@@ -65,7 +65,19 @@ public class ProcessInstanceConstant {
         //角色
         public static final int ROLE=3;
     }
-
+    /**
+     * 审批人是表单部门时  用户类型
+     */
+    public static class AssignedTypeFormDeptUserTypeClass {
+        /**
+         * 部门人员
+         */
+        public static final String ALL_USER = "allUser";
+        /**
+         * 主管
+         */
+        public static final String LEADER = "leader";
+    }
     /**
      * 变量key
      */
