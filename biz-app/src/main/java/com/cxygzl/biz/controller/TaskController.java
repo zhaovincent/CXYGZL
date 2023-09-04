@@ -104,6 +104,20 @@ public class TaskController {
 
     }
 
+    /**
+     * 减签
+     *
+     * @param completeParamDto
+     * @return
+     */
+    @SneakyThrows
+    @PostMapping("delAssignee")
+    public R delAssignee(@RequestBody TaskParamDto completeParamDto) {
+
+        return taskService.delAssignee(completeParamDto);
+
+    }
+
 
     /**
      * 结束流程

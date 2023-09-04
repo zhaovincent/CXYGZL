@@ -85,6 +85,16 @@ public class ModelUtil {
 
                 eventListeners.add(eventListener);
             }
+            {
+                //实体删除
+                EventListener eventListener = new EventListener();
+
+                eventListener.setImplementationType("class");
+                eventListener.setImplementation(EntityDeleteEventListener.class.getCanonicalName());
+
+
+                eventListeners.add(eventListener);
+            }
 
             {
                 //节点结束

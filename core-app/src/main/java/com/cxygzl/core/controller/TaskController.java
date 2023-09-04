@@ -412,18 +412,18 @@ public class TaskController {
         }
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
-                ProcessInstanceConstant.TaskType.DEDUCT_ASSIGNEE
+                ProcessInstanceConstant.TaskType.DEL_ASSIGNEE
         );
         String userId = taskParamDto.getUserId();
         String targetUserName = CollUtil.join(taskParamDto.getTargetUserNameList(),",");
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            saveUserCommentToTask(task, ApproveDescTypeEnum.DEDUCT_ASSIGNEE.getType(), taskParamDto.getApproveDesc(), userId,
+            saveUserCommentToTask(task, ApproveDescTypeEnum.DEL_ASSIGNEE.getType(), taskParamDto.getApproveDesc(), userId,
                     StrUtil.format("减签任务:[{}]并添加了评论",
                             targetUserName
                     ));
 
         } else {
-            saveSysCommentToTask(task, ApproveDescTypeEnum.DEDUCT_ASSIGNEE.getType(), StrUtil.format("减签任务:{}",
+            saveSysCommentToTask(task, ApproveDescTypeEnum.DEL_ASSIGNEE.getType(), StrUtil.format("减签任务:{}",
                     targetUserName
             ), userId);
         }

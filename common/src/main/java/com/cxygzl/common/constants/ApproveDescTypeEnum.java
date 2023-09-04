@@ -20,7 +20,7 @@ public enum ApproveDescTypeEnum {
     REFUSE("refuseDesc","拒绝"),
     BACK_JOIN("backJoinDesc","转办"),
     ADD_ASSIGNEE("addAssigneeDesc","加签"),
-    DEDUCT_ASSIGNEE("deductAssigneeDesc","减签"),
+    DEL_ASSIGNEE("delAssigneeDesc","减签"),
     FRONT_JOIN("frontJoinDesc","委派"),
     REJECT("rejectDesc","驳回"),
 

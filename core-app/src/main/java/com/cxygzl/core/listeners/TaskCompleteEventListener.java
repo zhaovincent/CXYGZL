@@ -67,7 +67,7 @@ public class TaskCompleteEventListener implements FlowableEventListener {
 
             processNodeRecordAssignUserParamDto.setExecutionId(task.getExecutionId());
 
-            BizHttpUtil.taskEndEvent(processNodeRecordAssignUserParamDto);
+            BizHttpUtil.taskCompletedEvent(processNodeRecordAssignUserParamDto);
 
         }
 

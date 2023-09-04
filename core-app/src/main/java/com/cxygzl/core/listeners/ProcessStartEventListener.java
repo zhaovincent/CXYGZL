@@ -39,6 +39,8 @@ public class ProcessStartEventListener implements FlowableEventListener {
     @Override
     public void onEvent(FlowableEvent event) {
 
+        log.info("事件类型：{} {}",event.getType(),event.getClass().getCanonicalName());
+
 
 
         if (event.getType().toString().equals(FlowableEngineEventType.PROCESS_STARTED.toString())) {

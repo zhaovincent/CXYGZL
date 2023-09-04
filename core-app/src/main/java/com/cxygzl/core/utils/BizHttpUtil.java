@@ -238,6 +238,16 @@ public class BizHttpUtil {
     }
 
     /**
+     * 任务完成事件
+     *
+     * @param processNodeRecordAssignUserParamDto
+     * @return
+     */
+    public static void taskCompletedEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
+        post(processNodeRecordAssignUserParamDto, "/remote/taskCompletedEvent");
+    }
+
+    /**
      * 任务结束事件
      *
      * @param processNodeRecordAssignUserParamDto
@@ -247,15 +257,6 @@ public class BizHttpUtil {
         post(processNodeRecordAssignUserParamDto, "/remote/taskEndEvent");
     }
 
-    /**
-     * 任务取消事件
-     *
-     * @param processNodeRecordAssignUserParamDto
-     * @return
-     */
-    public static void taskCancelEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        post(processNodeRecordAssignUserParamDto, "/remote/taskCancelEvent");
-    }
 
     /**
      * 保存抄送数据

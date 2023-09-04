@@ -184,6 +184,18 @@ public class CoreHttpUtil {
     }
 
     /**
+     * 减签
+     *
+     * @param jsonObject
+     * @return
+     */
+    public static String delAssignee(TaskParamDto jsonObject) {
+
+        return post(jsonObject, "/task/delAssignee");
+
+    }
+
+    /**
      * 终止流程
      *
      * @param jsonObject

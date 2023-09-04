@@ -451,7 +451,7 @@ public class TaskServiceImpl implements ITaskService {
         }
         taskParamDto.setTargetUserNameList(targetUserNameList);
 
-        String post = CoreHttpUtil.addAssignee(taskParamDto);
+        String post = CoreHttpUtil.delAssignee(taskParamDto);
         com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
         });
         if (!r.isOk()) {

@@ -146,7 +146,7 @@ public class ProcessInstanceConstant {
         //加签
         public static final String ADD_ASSIGNEE = "addAssignee";
         //减签
-        public static final String DEDUCT_ASSIGNEE = "deductAssignee";
+        public static final String DEL_ASSIGNEE = "delAssignee";
 
     }
 

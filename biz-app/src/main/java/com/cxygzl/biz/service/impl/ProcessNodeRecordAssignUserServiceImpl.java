@@ -8,6 +8,7 @@ import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
 import com.cxygzl.biz.mapper.ProcessNodeRecordAssignUserMapper;
 import com.cxygzl.biz.service.IProcessNodeRecordAssignUserService;
+import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.third.TaskParamDto;
@@ -94,7 +95,7 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
      * @return
      */
     @Override
-    public R taskEndEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
+    public R taskCompletedEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
         ProcessNodeRecordAssignUser processNodeRecordAssignUser = this.lambdaQuery()
                 .eq(ProcessNodeRecordAssignUser::getTaskId, processNodeRecordAssignUserParamDto.getTaskId())
                 .eq(ProcessNodeRecordAssignUser::getUserId, processNodeRecordAssignUserParamDto.getUserId())
@@ -121,41 +122,38 @@ public class ProcessNodeRecordAssignUserServiceImpl extends ServiceImpl<ProcessN
     }
 
     /**
-     * 驳回任务
+     * 任务结束
      *
      * @param processNodeRecordAssignUserParamDto
      * @return
      */
     @Override
-    public R taskCancelEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        log.info("任务撤销:{} - {} -{}", processNodeRecordAssignUserParamDto.getNodeName(),
-                processNodeRecordAssignUserParamDto.getUserId(), processNodeRecordAssignUserParamDto.getTaskType());
+    public R taskEndEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
         ProcessNodeRecordAssignUser processNodeRecordAssignUser = this.lambdaQuery()
+                .eq(ProcessNodeRecordAssignUser::getTaskId, processNodeRecordAssignUserParamDto.getTaskId())
+                .eq(ProcessNodeRecordAssignUser::getUserId, processNodeRecordAssignUserParamDto.getUserId())
                 .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processNodeRecordAssignUserParamDto.getProcessInstanceId())
                 .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
-                .eq(ProcessNodeRecordAssignUser::getExecutionId, processNodeRecordAssignUserParamDto.getExecutionId())
                 .one();
-        if (processNodeRecordAssignUser == null) {
-            return R.success();
+        if(processNodeRecordAssignUser!=null) {
+            processNodeRecordAssignUser.setStatus(NodeStatusEnum.YCX.getCode());
+            processNodeRecordAssignUser.setEndTime(new Date());
+            processNodeRecordAssignUser.setData(processNodeRecordAssignUserParamDto.getData());
+            processNodeRecordAssignUser.setLocalData(processNodeRecordAssignUserParamDto.getLocalData());
+            processNodeRecordAssignUser.setTaskType(processNodeRecordAssignUserParamDto.getTaskType());
+            this.updateById(processNodeRecordAssignUser);
+
+            //通知第三方
+            com.cxygzl.common.dto.third.TaskParamDto taskParamDto = new com.cxygzl.common.dto.third.TaskParamDto();
+            taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
+            taskParamDto.setUserId(processNodeRecordAssignUser.getUserId());
+            taskParamDto.setTaskId(processNodeRecordAssignUser.getTaskId());
+
+            ApiStrategyFactory.getStrategy().handleTask(CollUtil.newArrayList(taskParamDto), processNodeRecordAssignUser.getTaskType());
         }
-        processNodeRecordAssignUser.setStatus(NodeStatusEnum.YCX.getCode());
-        processNodeRecordAssignUser.setEndTime(new Date());
-        processNodeRecordAssignUser.setData(processNodeRecordAssignUserParamDto.getData());
-        processNodeRecordAssignUser.setLocalData(processNodeRecordAssignUserParamDto.getLocalData());
-        processNodeRecordAssignUser.setTaskType(processNodeRecordAssignUserParamDto.getTaskType());
-        this.updateById(processNodeRecordAssignUser);
-
-
-            //处理任务
-        List<com.cxygzl.common.dto.third.TaskParamDto> taskParamDtoList=new ArrayList<>();
-        com.cxygzl.common.dto.third.TaskParamDto taskParamDto = new com.cxygzl.common.dto.third.TaskParamDto();
-        taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
-        taskParamDto.setUserId(processNodeRecordAssignUser.getUserId());
-        taskParamDto.setTaskId(processNodeRecordAssignUser.getTaskId());
-        taskParamDtoList.add(taskParamDto);
-        ApiStrategyFactory.getStrategy().handleTask(taskParamDtoList,processNodeRecordAssignUser.getTaskType());
 
         return R.success();
     }
+
 
 }

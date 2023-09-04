@@ -219,21 +219,22 @@ public class RemoteController {
      * @param processNodeRecordAssignUserParamDto
      * @return
      */
+    @PostMapping("taskCompletedEvent")
+    public R taskCompletedEvent(@RequestBody ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
+        return remoteService.taskCompletedEvent(processNodeRecordAssignUserParamDto);
+    }
+
+    /**
+     * 任务结束
+     *
+     * @param processNodeRecordAssignUserParamDto
+     * @return
+     */
     @PostMapping("taskEndEvent")
     public R taskEndEvent(@RequestBody ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
         return remoteService.taskEndEvent(processNodeRecordAssignUserParamDto);
     }
 
-    /**
-     * 任务取消事件
-     *
-     * @param processNodeRecordAssignUserParamDto
-     * @return
-     */
-    @PostMapping("taskCancelEvent")
-    public R taskCancelEvent(@RequestBody ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        return remoteService.taskCancelEvent(processNodeRecordAssignUserParamDto);
-    }
 
     /**
      * 实例结束

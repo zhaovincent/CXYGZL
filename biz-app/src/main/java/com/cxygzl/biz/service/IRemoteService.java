@@ -141,14 +141,15 @@ public interface IRemoteService {
      * @param processNodeRecordAssignUserParamDto
      * @return
      */
-    R taskEndEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto);
+    R taskCompletedEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto);
 
     /**
-     * 任务取消了--驳回
+     * 任务结束
      * @param processNodeRecordAssignUserParamDto
      * @return
      */
-    R taskCancelEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto);
+    R taskEndEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto);
+
 
     /**
      * 实例结束
