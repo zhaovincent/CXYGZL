@@ -10,7 +10,7 @@ import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.node.NodeDataStoreFactory;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.TaskService;
 import org.flowable.task.service.delegate.DelegateTask;
@@ -52,7 +52,7 @@ public class ApprovalCreateListener implements TaskListener {
             if (StrUtil.equals(handler, ProcessInstanceConstant.USER_TASK_NOBODY_HANDLER_TO_ADMIN)) {
                 //指派给管理员
 
-                R<String> longR  = CoreHttpUtil.queryProcessAdmin(flowId);
+                R<String> longR  = BizHttpUtil.queryProcessAdmin(flowId);
 
                 String adminId = longR.getData();
 

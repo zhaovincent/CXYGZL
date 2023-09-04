@@ -13,6 +13,12 @@ import java.util.Map;
  */
 public interface IRemoteService {
     /**
+     * 根据部门id获取部门列表
+     * @param deptIdList
+     * @return
+     */
+    R<List<DeptDto>> queryDeptList(List<String> deptIdList);
+    /**
      * 保存待办任务
      * @param messageDto
      * @return

@@ -13,7 +13,7 @@ import org.springframework.core.env.Environment;
 
 import java.util.List;
 
-public class CoreHttpUtil {
+public class BizHttpUtil {
 
     private static TLogHutoolhttpInterceptor tLogHutoolhttpInterceptor = new TLogHutoolhttpInterceptor();
 
@@ -125,6 +125,17 @@ public class CoreHttpUtil {
         R<List<com.cxygzl.common.dto.third.DeptDto>> r = JSON.parseObject(s, new TypeReference<R<List<DeptDto>>>() {
         });
         return r;
+    }
+    /**
+     * 查询部门列表
+     *
+     * @param deptIdList
+     */
+    public static List<DeptDto> queryDeptList(List<String> deptIdList) {
+        String post = post(deptIdList, "/remote/queryDeptList");
+        R<List<DeptDto>> listR = JSON.parseObject(post, new TypeReference<R<List<DeptDto>>>() {
+        });
+        return listR.getData();
     }
 
     /**

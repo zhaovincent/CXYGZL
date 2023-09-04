@@ -5,7 +5,7 @@ import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.core.node.AssignUserStrategy;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +35,7 @@ public class AssignUserRoleStrategyImpl implements InitializingBean, AssignUserS
         List<String> roleIdList = nodeUserList.stream().map(w -> w.getId()).collect(Collectors.toList());
 
 
-        R<List<String>> r = CoreHttpUtil.queryUserIdListByRoleIdList(roleIdList);
+        R<List<String>> r = BizHttpUtil.queryUserIdListByRoleIdList(roleIdList);
 
         List<String> data = r.getData();
 

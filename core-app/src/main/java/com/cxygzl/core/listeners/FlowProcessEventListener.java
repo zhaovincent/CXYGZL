@@ -14,7 +14,7 @@ import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.node.NodeDataStoreFactory;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEntityEvent;
@@ -78,7 +78,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
 
                     .type(MessageTypeEnum.TODO_TASK.getType())
                     .readed(false).build();
-            CoreHttpUtil.saveMessage(messageDto);
+            BizHttpUtil.saveMessage(messageDto);
         }
         if (event.getType().toString().equals(FlowableEngineEventType.ACTIVITY_STARTED.toString())) {
             //节点开始执行
@@ -109,7 +109,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
             }
             processNodeRecordParamDto.setNodeName(activityName);
             processNodeRecordParamDto.setExecutionId(flowableActivityEvent.getExecutionId());
-            CoreHttpUtil.startNodeEvent(processNodeRecordParamDto);
+            BizHttpUtil.startNodeEvent(processNodeRecordParamDto);
 
         }
 
@@ -139,7 +139,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
 //            processNodeRecordParamDto.setNodeType(nodeDto.getType());
             processNodeRecordParamDto.setNodeName(activityName);
 
-            CoreHttpUtil.endNodeEvent(processNodeRecordParamDto);
+            BizHttpUtil.endNodeEvent(processNodeRecordParamDto);
         }
         if (event.getType().toString().equals(FlowableEngineEventType.ACTIVITY_COMPLETED.toString())) {
             //节点完成执行
@@ -164,7 +164,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
 //            processNodeRecordParamDto.setNodeType(nodeDto.getType());
             processNodeRecordParamDto.setNodeName(activityName);
 
-            CoreHttpUtil.endNodeEvent(processNodeRecordParamDto);
+            BizHttpUtil.endNodeEvent(processNodeRecordParamDto);
 
         }
 
@@ -208,7 +208,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
             ProcessInstanceParamDto processInstanceParamDto = new ProcessInstanceParamDto();
             processInstanceParamDto.setProcessInstanceId(processInstanceId);
             processInstanceParamDto.setResult(finalResult);
-            CoreHttpUtil.endProcessEvent(processInstanceParamDto);
+            BizHttpUtil.endProcessEvent(processInstanceParamDto);
 
         }
 
@@ -244,7 +244,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
             processNodeRecordAssignUserParamDto.setApproveDesc(Convert.toStr(task.getVariableLocal("approveDesc")));
             processNodeRecordAssignUserParamDto.setExecutionId(task.getExecutionId());
 
-            CoreHttpUtil.taskEndEvent(processNodeRecordAssignUserParamDto);
+            BizHttpUtil.taskEndEvent(processNodeRecordAssignUserParamDto);
 
         }
         if (event.getType().toString().equals(FlowableEngineEventType.TASK_ASSIGNED.toString())) {
@@ -280,7 +280,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
             processNodeRecordAssignUserParamDto.setApproveDesc(Convert.toStr(task.getVariableLocal("approveDesc")));
             processNodeRecordAssignUserParamDto.setExecutionId(task.getExecutionId());
 
-            CoreHttpUtil.startAssignUser(processNodeRecordAssignUserParamDto);
+            BizHttpUtil.startAssignUser(processNodeRecordAssignUserParamDto);
 
 
         }
@@ -309,7 +309,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
                 processInstanceRecordParamDto.setFlowId(flowId);
                 processInstanceRecordParamDto.setProcessInstanceId(processInstanceId);
                 processInstanceRecordParamDto.setFormData(JSON.toJSONString(variables));
-                CoreHttpUtil.createProcessEvent(processInstanceRecordParamDto);
+                BizHttpUtil.createProcessEvent(processInstanceRecordParamDto);
             }
 
 

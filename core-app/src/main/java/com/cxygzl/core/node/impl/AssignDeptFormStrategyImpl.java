@@ -7,7 +7,7 @@ import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.core.node.AssignUserStrategy;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +43,7 @@ public class AssignDeptFormStrategyImpl implements InitializingBean, AssignUserS
 
             List<String> deptIdList = nodeUserDtoList.stream().map(w -> String.valueOf(w.getId())).collect(Collectors.toList());
 
-            List<String> userIdList = CoreHttpUtil.queryUserIdListByDepIdList(deptIdList).getData();
+            List<String> userIdList = BizHttpUtil.queryUserIdListByDepIdList(deptIdList).getData();
 
             assignList.addAll(userIdList);
 

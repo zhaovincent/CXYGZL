@@ -54,6 +54,8 @@ public class ProcessInstanceConstant {
         public static final int FORM_USER=8;
         //表单部门
         public static final int FORM_DEPT=9;
+        //指定部门主管
+        public static final int FIXED_DEPT_LEADER = 10;
         //指定主管
         public static final int LEADER=2;
         //连续多级主管

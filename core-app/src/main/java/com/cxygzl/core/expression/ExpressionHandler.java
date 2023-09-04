@@ -13,7 +13,7 @@ import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.flow.SelectValue;
-import com.cxygzl.core.utils.CoreHttpUtil;
+import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.core.Configuration;
 import org.beetl.core.GroupTemplate;
@@ -337,7 +337,7 @@ public class ExpressionHandler {
 
 
         if(CollUtil.isNotEmpty(deptIdList)) {
-            R<List<String>> r = CoreHttpUtil.queryUserIdListByDepIdList(deptIdList);
+            R<List<String>> r = BizHttpUtil.queryUserIdListByDepIdList(deptIdList);
             List<String> data = r.getData();
             for (String datum : data) {
 

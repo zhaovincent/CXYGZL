@@ -19,6 +19,16 @@ import java.util.Map;
 public class RemoteController {
     @Resource
     private IRemoteService remoteService;
+
+    /**
+     * 根据部门id获取部门列表
+     * @param deptIdList
+     * @return
+     */
+    @PostMapping("queryDeptList")
+    public R<List<DeptDto>> queryDeptList(@RequestBody List<String> deptIdList){
+        return remoteService.queryDeptList(deptIdList);
+    }
     /**
      * 保存待办任务
      *
