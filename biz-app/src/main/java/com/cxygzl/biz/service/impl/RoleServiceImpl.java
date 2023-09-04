@@ -51,7 +51,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
      * @return
      */
     @Override
-    public com.cxygzl.common.dto.R<Set<String>> queryRoleKeyByUserId(long userId) {
+    public com.cxygzl.common.dto.R<Set<String>> queryRoleKeyByUserId(String userId) {
         List<UserRole> userRoleList = userRoleService.queryListByUserId(userId).getData();
         if(CollUtil.isEmpty(userRoleList)){
             return com.cxygzl.common.dto.R.success(CollUtil.newHashSet());

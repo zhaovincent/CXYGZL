@@ -27,7 +27,7 @@ public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> i
      * @return
      */
     @Override
-    public R<List<UserRole>> queryListByUserId(long userId) {
+    public R<List<UserRole>> queryListByUserId(String userId) {
         List<UserRole> userRoleList = this.lambdaQuery().eq(UserRole::getUserId, userId).list();
         return R.success(userRoleList);
     }

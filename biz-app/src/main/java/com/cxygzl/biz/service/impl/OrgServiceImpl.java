@@ -308,7 +308,7 @@ public class OrgServiceImpl implements IOrgService {
 
 
         userBizVO.setUserFieldDataList(userFieldDataVos);
-        List<UserRole> userRoleList = userRoleService.queryListByUserId(userId).getData();
+        List<UserRole> userRoleList = userRoleService.queryListByUserId(String.valueOf(userId)).getData();
         userBizVO.setRoleIds(userRoleList.stream().map(w -> w.getRoleId()).collect(Collectors.toList()));
 
         return com.cxygzl.common.dto.R.success(userBizVO);

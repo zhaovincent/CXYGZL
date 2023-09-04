@@ -21,6 +21,6 @@ public interface IUserRoleService extends IService<UserRole> {
      * @param userId
      * @return
      */
-    R<List<UserRole>> queryListByUserId(long userId);
+    R<List<UserRole>> queryListByUserId(String userId);
 
 }

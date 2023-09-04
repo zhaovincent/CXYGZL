@@ -24,7 +24,7 @@ public interface IRoleService extends IService<Role> {
      * @param userId
      * @return
      */
-    R<Set<String>> queryRoleKeyByUserId(long userId);
+    R<Set<String>> queryRoleKeyByUserId(String userId);
 
     /**
      * 查询列表
