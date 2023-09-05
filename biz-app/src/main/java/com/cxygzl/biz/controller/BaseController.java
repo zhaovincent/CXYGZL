@@ -55,4 +55,14 @@ public class BaseController {
     public R formatStartNodeShow(@RequestBody NodeFormatParamVo nodeFormatParamVo) {
         return baseService.formatStartNodeShow(nodeFormatParamVo);
     }
+    /**
+     * 查询头部显示数据
+     *
+     * @param nodeFormatParamVo
+     * @return
+     */
+    @PostMapping("queryHeaderShow")
+    public R queryHeaderShow(@RequestBody NodeFormatParamVo nodeFormatParamVo) {
+        return baseService.queryHeaderShow(nodeFormatParamVo);
+    }
 }

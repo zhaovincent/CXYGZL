@@ -5,6 +5,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
+import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.TypeReference;
@@ -22,6 +23,7 @@ import com.cxygzl.common.dto.IndexPageStatistics;
 import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -48,6 +50,7 @@ public class BaseServiceImpl implements IBaseService {
     private IProcessNodeRecordService processNodeRecordService;
     @Resource
     private IProcessNodeRecordAssignUserService processNodeRecordAssignUserService;
+
     /**
      * 首页数据
      *
@@ -149,7 +152,7 @@ public class BaseServiceImpl implements IBaseService {
 
         }
 
-        boolean disableSelectUser=true;
+        boolean disableSelectUser = true;
 
         //处理参数
         Map<String, Object> paramMap = nodeFormatParamVo.getParamMap();
@@ -184,7 +187,7 @@ public class BaseServiceImpl implements IBaseService {
             Object subProcessStarterNode =
                     paramMap.get(ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE);
             Object rejectStarterNode = paramMap.get(ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE);
-            disableSelectUser=!(Convert.toBool(subProcessStarterNode, false) && rejectStarterNode == null);
+            disableSelectUser = !(Convert.toBool(subProcessStarterNode, false) && rejectStarterNode == null);
 
         } else if (StrUtil.isNotBlank(processInstanceId)) {
             ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
@@ -200,8 +203,8 @@ public class BaseServiceImpl implements IBaseService {
                     paramMap.put(key, value);
                 }
             }
-        }else{
-            disableSelectUser=false;
+        } else {
+            disableSelectUser = false;
         }
 
 
@@ -219,7 +222,7 @@ public class BaseServiceImpl implements IBaseService {
             processNodeRecordParamDtoList.addAll(BeanUtil.copyToList(list, ProcessNodeRecordParamDto.class));
         }
         List<NodeVo> processNodeShowDtos = NodeFormatUtil.formatProcessNodeShow(nodeDto,
-                processInstanceId, paramMap, processNodeRecordParamDtoList,disableSelectUser );
+                processInstanceId, paramMap, processNodeRecordParamDtoList, disableSelectUser);
 
         NodeFormatResultVo nodeFormatResultVo = NodeFormatResultVo.builder()
                 .processNodeShowDtoList(processNodeShowDtos)
@@ -228,5 +231,33 @@ public class BaseServiceImpl implements IBaseService {
                 .build();
 
         return com.cxygzl.common.dto.R.success(nodeFormatResultVo);
+    }
+
+    /**
+     * 查询头部显示数据
+     *
+     * @param nodeFormatParamVo
+     * @return
+     */
+    @Override
+    public R queryHeaderShow(NodeFormatParamVo nodeFormatParamVo) {
+        String taskId = nodeFormatParamVo.getTaskId();
+        String flowId = nodeFormatParamVo.getFlowId();
+        String processInstanceId = nodeFormatParamVo.getProcessInstanceId();
+
+        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery()
+                .eq(ProcessInstanceRecord::getProcessInstanceId,
+                        processInstanceId).one();
+        String starterUserId = processInstanceRecord.getUserId();
+        UserDto starterUser = ApiStrategyFactory.getStrategy().getUser(starterUserId);
+
+        Dict set = Dict.create()
+                .set("processInstanceResult", processInstanceRecord.getResult())
+                .set("starterName", starterUser.getName())
+                .set("starterAvatarUrl", starterUser.getAvatarUrl())
+                .set("processName", processInstanceRecord.getName())
+                .set("startTime", processInstanceRecord.getCreateTime());
+
+        return R.success(set);
     }
 }

@@ -30,4 +30,11 @@ public interface IBaseService {
      * @return
      */
     R formatStartNodeShow(NodeFormatParamVo nodeFormatParamVo);
+
+    /**
+     * 查询头部显示数据
+     * @param nodeFormatParamVo
+     * @return
+     */
+    R queryHeaderShow(NodeFormatParamVo nodeFormatParamVo);
 }
