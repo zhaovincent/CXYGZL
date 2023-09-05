@@ -2,6 +2,7 @@ package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.service.IBaseService;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
+import com.cxygzl.biz.vo.QueryFormListParamVo;
 import com.cxygzl.common.dto.R;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,7 +63,7 @@ public class BaseController {
      * @return
      */
     @PostMapping("queryHeaderShow")
-    public R queryHeaderShow(@RequestBody NodeFormatParamVo nodeFormatParamVo) {
+    public R queryHeaderShow(@RequestBody QueryFormListParamVo nodeFormatParamVo) {
         return baseService.queryHeaderShow(nodeFormatParamVo);
     }
 }

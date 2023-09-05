@@ -2,8 +2,8 @@ package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.service.IFormService;
 import com.cxygzl.biz.vo.FormRemoteSelectOptionParamVo;
+import com.cxygzl.biz.vo.QueryFormListParamVo;
 import com.cxygzl.common.dto.R;
-import com.cxygzl.common.dto.TaskDto;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,7 +39,7 @@ public class FormController {
      * @return
      */
     @PostMapping("getFormList")
-    public R getFormList(@RequestBody TaskDto taskDto, boolean handleForm) {
+    public R getFormList(@RequestBody QueryFormListParamVo taskDto, boolean handleForm) {
         return formService.getFormList(taskDto, handleForm);
     }
 }

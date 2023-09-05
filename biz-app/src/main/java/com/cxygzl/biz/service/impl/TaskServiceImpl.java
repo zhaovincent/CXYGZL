@@ -98,7 +98,9 @@ public class TaskServiceImpl implements ITaskService {
             List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = processNodeRecordAssignUserService.lambdaQuery()
                     .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
                     .eq(ProcessNodeRecordAssignUser::getUserId, userId)
-                    .eq(ProcessNodeRecordAssignUser::getFlowUniqueId, taskResultDto.getFlowUniqueId())
+                    .eq(StrUtil.isNotBlank(taskResultDto.getFlowUniqueId()),
+                            ProcessNodeRecordAssignUser::getFlowUniqueId,
+                            taskResultDto.getFlowUniqueId())
                     .in(ProcessNodeRecordAssignUser::getExecutionId, executionIdSet)
                     .orderByDesc(ProcessNodeRecordAssignUser::getUpdateTime)
                     .list();

@@ -10,13 +10,14 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
-import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.entity.Process;
+import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.NodeFormatUtil;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.NodeFormatResultVo;
+import com.cxygzl.biz.vo.QueryFormListParamVo;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.IndexPageStatistics;
@@ -176,18 +177,25 @@ public class BaseServiceImpl implements IBaseService {
                 }
                 variableMap.putAll(paramMap);
                 paramMap.putAll(variableMap);
+
+
+
+
             } else {
                 Map<String, Object> variableMap = r.getData();
                 variableMap.putAll(paramMap);
                 paramMap.putAll(variableMap);
+
+
+                //判断是不是子流程的发起人任务
+
+                Object subProcessStarterNode =
+                        paramMap.get(ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE);
+                Object rejectStarterNode = paramMap.get(ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE);
+                disableSelectUser = !(Convert.toBool(subProcessStarterNode, false) && rejectStarterNode == null);
+
             }
 
-            //判断是不是子流程的发起人任务
-
-            Object subProcessStarterNode =
-                    paramMap.get(ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE);
-            Object rejectStarterNode = paramMap.get(ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE);
-            disableSelectUser = !(Convert.toBool(subProcessStarterNode, false) && rejectStarterNode == null);
 
         } else if (StrUtil.isNotBlank(processInstanceId)) {
             ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
@@ -240,10 +248,25 @@ public class BaseServiceImpl implements IBaseService {
      * @return
      */
     @Override
-    public R queryHeaderShow(NodeFormatParamVo nodeFormatParamVo) {
+    public R queryHeaderShow(QueryFormListParamVo nodeFormatParamVo) {
         String taskId = nodeFormatParamVo.getTaskId();
         String flowId = nodeFormatParamVo.getFlowId();
+        Long ccId = nodeFormatParamVo.getCcId();
         String processInstanceId = nodeFormatParamVo.getProcessInstanceId();
+
+        if (ccId != null) {
+
+            ProcessCopy processCopy = processCopyService.getById(ccId);
+            processInstanceId=processCopy.getProcessInstanceId();
+
+        } else if (StrUtil.isAllBlank(processInstanceId, taskId)) {
+            //没有流程实例 没有任务
+
+
+
+        }
+
+
 
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery()
                 .eq(ProcessInstanceRecord::getProcessInstanceId,

@@ -1,8 +1,8 @@
 package com.cxygzl.biz.service;
 
 import com.cxygzl.biz.vo.FormRemoteSelectOptionParamVo;
+import com.cxygzl.biz.vo.QueryFormListParamVo;
 import com.cxygzl.common.dto.R;
-import com.cxygzl.common.dto.TaskDto;
 
 /**
  * 表单服务
@@ -23,6 +23,6 @@ public interface IFormService {
      * @param handleForm
      * @return
      */
-    R getFormList(TaskDto taskDto,boolean handleForm);
+    R getFormList(QueryFormListParamVo taskDto, boolean handleForm);
 
 }

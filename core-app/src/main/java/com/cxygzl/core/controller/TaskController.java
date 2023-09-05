@@ -162,8 +162,11 @@ public class TaskController {
                 processInstanceId = historicTaskInstance.getProcessInstanceId();
                 executionId = historicTaskInstance.getExecutionId();
                 processDefinitionId = historicTaskInstance.getProcessDefinitionId();
-                HistoricVariableInstance historicVariableInstance = historyService.createHistoricVariableInstanceQuery().taskId(taskId).variableName(FLOW_UNIQUE_ID).singleResult();
-                flowUniqueId = Convert.toStr(historicVariableInstance.getValue());
+                HistoricVariableInstance historicVariableInstance = historyService.createHistoricVariableInstanceQuery()
+                        .processInstanceId(processInstanceId)
+                        .taskId(taskId)
+                        .variableName(FLOW_UNIQUE_ID).singleResult();
+                flowUniqueId =historicVariableInstance==null?null:Convert.toStr(historicVariableInstance.getValue());
             } else {
                 processDefinitionId = task.getProcessDefinitionId();
                 taskDefinitionKey = task.getTaskDefinitionKey();

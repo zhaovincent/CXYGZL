@@ -1,6 +1,7 @@
 package com.cxygzl.biz.service;
 
 import com.cxygzl.biz.vo.NodeFormatParamVo;
+import com.cxygzl.biz.vo.QueryFormListParamVo;
 import com.cxygzl.common.dto.R;
 
 public interface IBaseService {
@@ -36,5 +37,5 @@ public interface IBaseService {
      * @param nodeFormatParamVo
      * @return
      */
-    R queryHeaderShow(NodeFormatParamVo nodeFormatParamVo);
+    R queryHeaderShow(QueryFormListParamVo nodeFormatParamVo);
 }
