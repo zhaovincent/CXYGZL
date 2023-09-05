@@ -64,11 +64,14 @@ public class NodeFormatUtil {
      * @param processInstanceId
      * @param paramMap
      * @param processNodeRecordParamDtoList
+     * @param disableSelectUser
      */
     public static List<NodeVo> formatProcessNodeShow(Node node,
-
                                                      String processInstanceId,
-                                                     Map<String, Object> paramMap, List<ProcessNodeRecordParamDto> processNodeRecordParamDtoList) {
+                                                     Map<String, Object> paramMap,
+                                                     List<ProcessNodeRecordParamDto> processNodeRecordParamDtoList,
+                                                     Boolean disableSelectUser
+                                                     ) {
         List<NodeVo> list = new ArrayList();
 
         if (!NodeUtil.isNode(node)) {
@@ -132,9 +135,7 @@ public class NodeFormatUtil {
             if (selfSelect) {
                 nodeVo.setMultiple(node.getMultiple());
             }
-            if (StrUtil.isNotBlank(processInstanceId)) {
-                nodeVo.setSelectUser(false);
-            }
+
 
             // 用户列表
             if (StrUtil.isAllNotBlank(processInstanceId, node.getExecutionId())) {
@@ -401,7 +402,7 @@ public class NodeFormatUtil {
 
                 if (!executed || (count > 0)) {
 
-                    List<NodeVo> processNodeShowDtos = formatProcessNodeShow(children, processInstanceId, paramMap, processNodeRecordParamDtoList);
+                    List<NodeVo> processNodeShowDtos = formatProcessNodeShow(children, processInstanceId, paramMap, processNodeRecordParamDtoList, disableSelectUser);
 
                     NodeVo p = new NodeVo();
                     p.setChildren(processNodeShowDtos);
@@ -418,7 +419,7 @@ public class NodeFormatUtil {
 
         list.add(nodeVo);
 
-        List<NodeVo> next = formatProcessNodeShow(node.getChildNode(), processInstanceId, paramMap, processNodeRecordParamDtoList);
+        List<NodeVo> next = formatProcessNodeShow(node.getChildNode(), processInstanceId, paramMap, processNodeRecordParamDtoList, disableSelectUser);
         list.addAll(next);
 
 

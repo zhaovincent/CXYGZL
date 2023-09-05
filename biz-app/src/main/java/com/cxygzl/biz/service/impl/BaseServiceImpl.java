@@ -1,22 +1,36 @@
 package com.cxygzl.biz.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
-import com.cxygzl.biz.entity.ProcessCopy;
-import com.cxygzl.biz.entity.ProcessInstanceRecord;
-import com.cxygzl.biz.service.IBaseService;
-import com.cxygzl.biz.service.IProcessCopyService;
-import com.cxygzl.biz.service.IProcessInstanceRecordService;
+import com.cxygzl.biz.entity.*;
+import com.cxygzl.biz.entity.Process;
+import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
+import com.cxygzl.biz.utils.NodeFormatUtil;
+import com.cxygzl.biz.vo.NodeFormatParamVo;
+import com.cxygzl.biz.vo.NodeFormatResultVo;
+import com.cxygzl.biz.vo.node.NodeVo;
+import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.IndexPageStatistics;
+import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -27,6 +41,13 @@ public class BaseServiceImpl implements IBaseService {
     @Resource
     private IProcessInstanceRecordService processInstanceRecordService;
 
+
+    @Resource
+    private IProcessService processService;
+    @Resource
+    private IProcessNodeRecordService processNodeRecordService;
+    @Resource
+    private IProcessNodeRecordAssignUserService processNodeRecordAssignUserService;
     /**
      * 首页数据
      *
@@ -102,5 +123,110 @@ public class BaseServiceImpl implements IBaseService {
     public R loadRemoteData() {
         ApiStrategyFactory.getStrategy().loadRemoteData();
         return R.success();
+    }
+
+    /**
+     * 格式化流程显示
+     *
+     * @param nodeFormatParamVo
+     * @return
+     */
+    @Override
+    public R formatStartNodeShow(NodeFormatParamVo nodeFormatParamVo) {
+
+        String flowId = nodeFormatParamVo.getFlowId();
+        String processInstanceId = nodeFormatParamVo.getProcessInstanceId();
+        if (StrUtil.isAllBlank(flowId, processInstanceId)) {
+            return com.cxygzl.common.dto.R.success(new ArrayList<>());
+        }
+
+        String process = null;
+        if (StrUtil.isNotBlank(processInstanceId)) {
+            ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
+                    processInstanceId).one();
+            flowId = processInstanceRecord.getFlowId();
+            process = processInstanceRecord.getProcess();
+
+        }
+
+        boolean disableSelectUser=true;
+
+        //处理参数
+        Map<String, Object> paramMap = nodeFormatParamVo.getParamMap();
+        if (StrUtil.isNotBlank(nodeFormatParamVo.getTaskId())) {
+            String s = CoreHttpUtil.queryTaskVariables(nodeFormatParamVo.getTaskId(), null);
+            com.cxygzl.common.dto.R<Map<String, Object>> r = com.alibaba.fastjson2.JSON.parseObject(s,
+                    new TypeReference<R<Map<String, Object>>>() {
+                    });
+            if (!r.isOk()) {
+
+                List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
+                        .eq(ProcessNodeRecordAssignUser::getTaskId, nodeFormatParamVo.getTaskId())
+                        .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
+                        .list();
+
+                String data = list.get(0).getData();
+                Map<String, Object> variableMap = com.alibaba.fastjson2.JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
+                });
+                if (variableMap == null) {
+                    variableMap = new HashMap<>();
+                }
+                variableMap.putAll(paramMap);
+                paramMap.putAll(variableMap);
+            } else {
+                Map<String, Object> variableMap = r.getData();
+                variableMap.putAll(paramMap);
+                paramMap.putAll(variableMap);
+            }
+
+            //判断是不是子流程的发起人任务
+
+            Object subProcessStarterNode =
+                    paramMap.get(ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE);
+            Object rejectStarterNode = paramMap.get(ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE);
+            disableSelectUser=!(Convert.toBool(subProcessStarterNode, false) && rejectStarterNode == null);
+
+        } else if (StrUtil.isNotBlank(processInstanceId)) {
+            ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
+                    processInstanceId).one();
+            //任务里没有
+            String formData = processInstanceRecord.getFormData();
+            Map<String, Object> map = com.alibaba.fastjson2.JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
+            });
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (paramMap.get(key) == null) {
+                    paramMap.put(key, value);
+                }
+            }
+        }else{
+            disableSelectUser=false;
+        }
+
+
+        if (StrUtil.isBlank(process)) {
+            Process oaForms = processService.getByFlowId(flowId);
+            process = oaForms.getProcess();
+        }
+        Node nodeDto = com.alibaba.fastjson2.JSON.parseObject(process, Node.class);
+
+
+        //查询所有的节点
+        List<ProcessNodeRecordParamDto> processNodeRecordParamDtoList = new ArrayList<>();
+        if (StrUtil.isNotBlank(processInstanceId)) {
+            List<ProcessNodeRecord> list = processNodeRecordService.lambdaQuery().eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId).list();
+            processNodeRecordParamDtoList.addAll(BeanUtil.copyToList(list, ProcessNodeRecordParamDto.class));
+        }
+        List<NodeVo> processNodeShowDtos = NodeFormatUtil.formatProcessNodeShow(nodeDto,
+                processInstanceId, paramMap, processNodeRecordParamDtoList,disableSelectUser );
+
+        NodeFormatResultVo nodeFormatResultVo = NodeFormatResultVo.builder()
+                .processNodeShowDtoList(processNodeShowDtos)
+                .selectUserNodeIdList(NodeUtil.selectUserNodeId(nodeDto))
+                .disableSelectUser(disableSelectUser)
+                .build();
+
+        return com.cxygzl.common.dto.R.success(nodeFormatResultVo);
     }
 }

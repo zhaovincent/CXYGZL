@@ -1,11 +1,9 @@
 package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.service.IBaseService;
+import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.common.dto.R;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -47,4 +45,14 @@ public class BaseController {
         return baseService.loadRemoteData();
     }
 
+    /**
+     * 格式化流程显示
+     *
+     * @param nodeFormatParamVo
+     * @return
+     */
+    @PostMapping("formatStartNodeShow")
+    public R formatStartNodeShow(@RequestBody NodeFormatParamVo nodeFormatParamVo) {
+        return baseService.formatStartNodeShow(nodeFormatParamVo);
+    }
 }

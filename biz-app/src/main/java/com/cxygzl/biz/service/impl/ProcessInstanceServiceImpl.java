@@ -636,7 +636,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
             processNodeRecordParamDtoList.addAll(BeanUtil.copyToList(list, ProcessNodeRecordParamDto.class));
         }
         List<NodeVo> processNodeShowDtos = NodeFormatUtil.formatProcessNodeShow(nodeDto,
-                processInstanceId, paramMap, processNodeRecordParamDtoList);
+                processInstanceId, paramMap, processNodeRecordParamDtoList,null );
 
         return com.cxygzl.common.dto.R.success(processNodeShowDtos);
     }
