@@ -162,11 +162,13 @@ public class BaseServiceImpl implements IBaseService {
         //处理参数
         Map<String, Object> paramMap = nodeFormatParamVo.getParamMap();
         if (StrUtil.isNotBlank(nodeFormatParamVo.getTaskId())) {
-            String s = CoreHttpUtil.queryTaskVariables(nodeFormatParamVo.getTaskId(), null);
-            com.cxygzl.common.dto.R<Map<String, Object>> r = com.alibaba.fastjson2.JSON.parseObject(s,
-                    new TypeReference<R<Map<String, Object>>>() {
-                    });
-            if (!r.isOk()) {
+
+
+            R<TaskResultDto> r = CoreHttpUtil.queryTask(nodeFormatParamVo.getTaskId(), StpUtil.getLoginIdAsString());
+
+
+            TaskResultDto taskResultDto = r.getData();
+            if (!r.isOk() || !taskResultDto.getCurrentTask()) {
 
                 List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
                         .eq(ProcessNodeRecordAssignUser::getTaskId, nodeFormatParamVo.getTaskId())
@@ -184,17 +186,19 @@ public class BaseServiceImpl implements IBaseService {
 
 
             } else {
-                Map<String, Object> variableMap = r.getData();
+                Map<String, Object> variableMap = taskResultDto.getVariableAll();
                 variableMap.putAll(paramMap);
                 paramMap.putAll(variableMap);
 
 
+                String nodeId = taskResultDto.getNodeId();
                 //判断是不是子流程的发起人任务
 
                 Object subProcessStarterNode =
                         paramMap.get(ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE);
                 Object rejectStarterNode = paramMap.get(ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE);
-                disableSelectUser = !(Convert.toBool(subProcessStarterNode, false) && rejectStarterNode == null);
+                disableSelectUser =
+                        (!StrUtil.startWith(nodeId,ProcessInstanceConstant.VariableKey.STARTER)) || (!(Convert.toBool(subProcessStarterNode, false) && rejectStarterNode == null));
 
             }
 
@@ -236,7 +240,7 @@ public class BaseServiceImpl implements IBaseService {
 
         NodeFormatResultVo nodeFormatResultVo = NodeFormatResultVo.builder()
                 .processNodeShowDtoList(processNodeShowDtos)
-                .selectUserNodeIdList(NodeUtil.selectUserNodeId(nodeDto))
+                .selectUserNodeIdList(disableSelectUser?new ArrayList<>():NodeUtil.selectUserNodeId(nodeDto))
                 .disableSelectUser(disableSelectUser)
                 .build();
 

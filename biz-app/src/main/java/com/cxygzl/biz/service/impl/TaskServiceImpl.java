@@ -366,6 +366,7 @@ public class TaskServiceImpl implements ITaskService {
                     .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processNodeRecordAssignUser.getProcessInstanceId())
                     .eq(ProcessNodeRecordAssignUser::getFlowUniqueId, processNodeRecordAssignUser.getFlowUniqueId())
                     .eq(ProcessNodeRecordAssignUser::getNodeId, processNodeRecordAssignUser.getNodeId())
+                    .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
                     .in(ProcessNodeRecordAssignUser::getUserId, targetUserIdList)
                     .list();
             if (CollUtil.isNotEmpty(list)) {
@@ -376,7 +377,7 @@ public class TaskServiceImpl implements ITaskService {
                     UserDto user = ApiStrategyFactory.getStrategy().getUser(s);
                     userNameList.add(user.getName());
                 }
-                return R.fail(StrUtil.format("当前任务的执行人已经包含用户：{}，请勿再次添加", CollUtil.join(userNameList, ",")));
+                return R.fail(StrUtil.format("{}，已经是该任务执行人，不能被加签", CollUtil.join(userNameList, ",")));
             }
 
         }
