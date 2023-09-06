@@ -306,7 +306,7 @@ public class FormServiceImpl implements IFormService {
             List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = processNodeRecordAssignUserService.lambdaQuery()
                     .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
                     .eq(ProcessNodeRecordAssignUser::getUserId, userId)
-                    .eq(StrUtil.isNotBlank( taskResultDto.getFlowUniqueId()),
+                    .eq(StrUtil.isNotBlank(taskResultDto.getFlowUniqueId()),
                             ProcessNodeRecordAssignUser::getFlowUniqueId, taskResultDto.getFlowUniqueId())
                     .in(ProcessNodeRecordAssignUser::getExecutionId, executionIdSet)
                     .orderByDesc(ProcessNodeRecordAssignUser::getUpdateTime)
@@ -319,8 +319,6 @@ public class FormServiceImpl implements IFormService {
                 paramMap.putAll(collect);
 
             }
-        } else {
-
         }
 
 
@@ -329,9 +327,8 @@ public class FormServiceImpl implements IFormService {
         if (StrUtil.startWith(nodeId, ProcessInstanceConstant.VariableKey.STARTER)) {
             nodeId = ProcessInstanceConstant.VariableKey.STARTER;
         }
-        String nodeDataJson =
-                nodeDataService.getNodeData(flowId, nodeId).getData();
-        Node node = CommonUtil.toObj(nodeDataJson, Node.class);
+
+        Node node = nodeDataService.getNode(flowId, nodeId).getData();
         Map<String, String> formPerms = node.getFormPerms();
 
 

@@ -16,6 +16,10 @@ public class HttpUtil {
 
 
     private static TLogHutoolhttpInterceptor tLogHutoolhttpInterceptor = new TLogHutoolhttpInterceptor();
+    /**
+     * 请求超时时间
+     */
+    public static final int TIME_OUT=60000;
 
 
     public static String post(Object object, String url, String baseUrl) {
@@ -33,10 +37,12 @@ public class HttpUtil {
         String result = null;
         try {
             result = HttpRequest.post(url)
-                    .header(Header.USER_AGENT, ProcessInstanceConstant.VariableKey.SYS_CODE)//头信息，多个头信息多次调用此方法即可
+                    //头信息，多个头信息多次调用此方法即可
+                    .header(Header.USER_AGENT, ProcessInstanceConstant.VariableKey.SYS_CODE)
                     .headerMap(headerParamMap, true)
                     .body(JSON.toJSONString(bodyMap))
-                    .timeout(60000)//超时，毫秒
+                    //超时，毫秒
+                    .timeout(TIME_OUT)
                     .addInterceptor(tLogHutoolhttpInterceptor)
                     .execute().body();
             log.info("  返回值:{}", result);
@@ -51,7 +57,7 @@ public class HttpUtil {
 
         return HttpRequest
                 .get(StrUtil.format("{}{}", baseUrl, url))
-                .timeout(60000)
+                .timeout(TIME_OUT)
                 .addInterceptor(tLogHutoolhttpInterceptor).execute().body();
 
 
