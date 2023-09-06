@@ -28,6 +28,7 @@ public class ProcessCopyController {
      * @param id
      * @return
      */
+    @Deprecated
     @GetMapping("querySingleDetail")
     public R querySingleDetail(long id) {
         return processCopyService.querySingleDetail(id);

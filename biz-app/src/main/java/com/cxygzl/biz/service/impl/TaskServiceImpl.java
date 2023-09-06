@@ -58,6 +58,7 @@ public class TaskServiceImpl implements ITaskService {
      * @param view
      * @return
      */
+    @Deprecated
     @Override
     public R queryTask(String taskId, boolean view) {
 

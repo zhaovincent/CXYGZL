@@ -24,6 +24,7 @@ public class TaskController {
      * @param taskId
      * @return
      */
+    @Deprecated
     @SneakyThrows
     @GetMapping("queryTask")
     public R queryTask(String taskId,boolean view) {

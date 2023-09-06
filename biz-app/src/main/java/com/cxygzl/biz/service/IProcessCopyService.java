@@ -18,6 +18,7 @@ public interface IProcessCopyService extends IService<ProcessCopy> {
      * @param id
      * @return
      */
+    @Deprecated
     R querySingleDetail(long id);
 
 }

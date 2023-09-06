@@ -14,6 +14,7 @@ public interface ITaskService {
      * @param view
      * @return
      */
+    @Deprecated
     R queryTask(String taskId,boolean view);
 
     /**
