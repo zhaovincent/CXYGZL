@@ -335,6 +335,8 @@ public class BaseServiceImpl implements IBaseService {
                 .set("processInstanceId", taskResultDto.getProcessInstanceId())
                 .set("nodeId", nodeId)
                 .set("node", node)
+                .set("frontJoinTask", taskResultDto.getFrontJoinTask())
+
                 .set("taskExist", taskExist)
                 .set("process", CommonUtil.toObj(process, Node.class));
 

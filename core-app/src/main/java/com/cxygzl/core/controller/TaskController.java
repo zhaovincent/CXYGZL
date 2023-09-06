@@ -285,7 +285,8 @@ public class TaskController {
         );
 
 
-
+        //设置变量
+        taskService.setVariables(taskParamDto.getTaskId(),taskParamDto.getParamMap());
 
         taskService.delegateTask(taskParamDto.getTaskId(), taskParamDto.getTargetUserId());
         return R.success();
@@ -353,6 +354,8 @@ public class TaskController {
             ), taskParamDto.getUserId());
         }
 
+        //设置变量
+        taskService.setVariables(taskParamDto.getTaskId(),taskParamDto.getParamMap());
         taskService.setAssignee(taskParamDto.getTaskId(), taskParamDto.getTargetUserId());
 
         return R.success();
@@ -372,6 +375,8 @@ public class TaskController {
         if (task == null) {
             return R.fail("任务不存在");
         }
+
+        taskService.setVariables(task.getId(),taskParamDto.getParamMap());
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 ProcessInstanceConstant.TaskType.ADD_ASSIGNEE
@@ -413,6 +418,7 @@ public class TaskController {
         if (task == null) {
             return R.fail("任务不存在");
         }
+        taskService.setVariables(task.getId(),taskParamDto.getParamMap());
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 ProcessInstanceConstant.TaskType.DEL_ASSIGNEE
@@ -470,6 +476,7 @@ public class TaskController {
             runtimeService.setVariable(task.getExecutionId(),
                     ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE, true);
         }
+        runtimeService.setVariables(task.getExecutionId(),taskParamDto.getParamMap());
         runtimeService.setVariable(task.getExecutionId(), StrUtil.format("{}_parent_id", targetKey), task.getTaskDefinitionKey());
         runtimeService.setVariable(task.getExecutionId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
         runtimeService.setVariableLocal(task.getExecutionId(), ProcessInstanceConstant.VariableKey.TASK_TYPE, ProcessInstanceConstant.TaskType.REJECT);
