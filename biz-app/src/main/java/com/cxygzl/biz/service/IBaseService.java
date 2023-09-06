@@ -8,18 +8,21 @@ public interface IBaseService {
 
     /**
      * 首页数据
+     *
      * @return
      */
     R index();
 
     /**
      * 获取所有地区数据
+     *
      * @return
      */
     R areaList();
 
     /**
      * 同步数据
+     *
      * @return
      */
     R loadRemoteData();
@@ -34,8 +37,16 @@ public interface IBaseService {
 
     /**
      * 查询头部显示数据
+     *
      * @param nodeFormatParamVo
      * @return
      */
     R queryHeaderShow(QueryFormListParamVo nodeFormatParamVo);
+
+    /**
+     * 获取任务操作列表
+     * @param taskId
+     * @return
+     */
+    R queryTaskOperData(String taskId);
 }

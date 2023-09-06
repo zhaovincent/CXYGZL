@@ -56,6 +56,7 @@ public class BaseController {
     public R formatStartNodeShow(@RequestBody NodeFormatParamVo nodeFormatParamVo) {
         return baseService.formatStartNodeShow(nodeFormatParamVo);
     }
+
     /**
      * 查询头部显示数据
      *
@@ -65,5 +66,16 @@ public class BaseController {
     @PostMapping("queryHeaderShow")
     public R queryHeaderShow(@RequestBody QueryFormListParamVo nodeFormatParamVo) {
         return baseService.queryHeaderShow(nodeFormatParamVo);
+    }
+
+    /**
+     * 获取任务操作列表
+     *
+     * @param taskId
+     * @return
+     */
+    @GetMapping("queryTaskOperData")
+    public R queryTaskOperData(String taskId) {
+        return baseService.queryTaskOperData(taskId);
     }
 }

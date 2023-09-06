@@ -23,8 +23,10 @@ import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.IndexPageStatistics;
 import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.TaskResultDto;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.third.UserDto;
+import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -44,6 +46,8 @@ public class BaseServiceImpl implements IBaseService {
     @Resource
     private IProcessInstanceRecordService processInstanceRecordService;
 
+    @Resource
+    private IProcessNodeDataService processNodeDataService;
 
     @Resource
     private IProcessService processService;
@@ -179,8 +183,6 @@ public class BaseServiceImpl implements IBaseService {
                 paramMap.putAll(variableMap);
 
 
-
-
             } else {
                 Map<String, Object> variableMap = r.getData();
                 variableMap.putAll(paramMap);
@@ -257,15 +259,13 @@ public class BaseServiceImpl implements IBaseService {
         if (ccId != null) {
 
             ProcessCopy processCopy = processCopyService.getById(ccId);
-            processInstanceId=processCopy.getProcessInstanceId();
+            processInstanceId = processCopy.getProcessInstanceId();
 
         } else if (StrUtil.isAllBlank(processInstanceId, taskId)) {
             //没有流程实例 没有任务
 
 
-
         }
-
 
 
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery()
@@ -280,6 +280,63 @@ public class BaseServiceImpl implements IBaseService {
                 .set("starterAvatarUrl", starterUser.getAvatarUrl())
                 .set("processName", processInstanceRecord.getName())
                 .set("startTime", processInstanceRecord.getCreateTime());
+
+        return R.success(set);
+    }
+
+    /**
+     * 获取任务操作数据
+     *
+     * @param taskId
+     * @return
+     */
+    @Override
+    public R queryTaskOperData(String taskId) {
+        String userId = StpUtil.getLoginIdAsString();
+
+
+        com.cxygzl.common.dto.R<TaskResultDto> r = CoreHttpUtil.queryTask(taskId, userId);
+
+        if (!r.isOk()) {
+            return R.fail(r.getMsg());
+        }
+
+        TaskResultDto taskResultDto = r.getData();
+        Boolean taskExist = taskResultDto.getCurrentTask();
+        if (!taskExist) {
+            Dict set = Dict.create()
+
+                    .set("processInstanceId", taskResultDto.getProcessInstanceId())
+
+                    .set("taskExist", taskExist);
+
+            return R.success(set);
+
+        }
+
+        String flowId = taskResultDto.getFlowId();
+        Process oaForms = processService.getByFlowId(flowId);
+        if (oaForms == null) {
+            return R.fail("流程不存在");
+        }
+        //当前节点数据
+        String nodeId = taskResultDto.getNodeId();
+        if (StrUtil.startWith(nodeId, ProcessInstanceConstant.VariableKey.STARTER)) {
+            nodeId = ProcessInstanceConstant.VariableKey.STARTER;
+        }
+        String nodeDataJson =
+                processNodeDataService.getNodeData(flowId, nodeId).getData();
+        Node node = CommonUtil.toObj(nodeDataJson, Node.class);
+        List operList = node.getOperList();
+        String process = oaForms.getProcess();
+
+        Dict set = Dict.create()
+                .set("operList", operList)
+                .set("processInstanceId", taskResultDto.getProcessInstanceId())
+                .set("nodeId", nodeId)
+                .set("node", node)
+                .set("taskExist", taskExist)
+                .set("process", CommonUtil.toObj(process, Node.class));
 
         return R.success(set);
     }
