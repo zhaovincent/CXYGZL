@@ -138,7 +138,7 @@ public class FormServiceImpl implements IFormService {
             node = JSON.parseObject(process.getProcess(), Node.class);
         }
         HttpSetting dynamicFormConfig = node.getDynamicFormConfig();
-        if (dynamicFormConfig != null) {
+        if (dynamicFormConfig != null&&StrUtil.isNotBlank(dynamicFormConfig.getUrl())) {
             handleForm(dynamicFormConfig, taskDto.getParamMap(), formItemVOList, taskDto.getFlowId(), null);
         }
 

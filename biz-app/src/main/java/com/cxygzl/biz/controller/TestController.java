@@ -1,7 +1,10 @@
 package com.cxygzl.biz.controller;
 
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.dto.R;
@@ -21,21 +24,31 @@ public class TestController {
     @PostMapping("dynamicForm")
     public Object dynamicForm(@RequestBody String s,@RequestHeader(required = false) String b){
         log.info("收到动态表单数据：{} {}",s,b);
-        com.alibaba.fastjson2.JSONObject jsonObject = JSON.parseObject(s);
-
         HashMap<Object, Object> data = new HashMap<>();
-        if("666".equals(jsonObject.getString("aa"))){
-            data.put("a",11);
+        com.alibaba.fastjson2.JSONObject jsonObject = JSON.parseObject(s);
+        String startDateTime = jsonObject.getString("startDateTime");
+        String endDateTime = jsonObject.getString("endDateTime");
+        if(StrUtil.isBlank(startDateTime)){
+                data.put("hourPerm","H");
+                data.put("endDatePerm","H");
+                data.put("endDateRequire",false);
+        }else if(StrUtil.isBlank(endDateTime)){
+            data.put("hourPerm","H");
+            data.put("endDatePerm","E");
+            data.put("endDateRequire",true);
+            data.put("endDateMin", DateUtil.parseDateTime(startDateTime));
+        }else{
+            data.put("hourPerm","R");
+            data.put("hourNum",DateUtil.between(DateUtil.parseDateTime(startDateTime)
+            ,DateUtil.parseDateTime(endDateTime),
+                    DateUnit.HOUR
+            ));
+            data.put("endDatePerm","E");
+            data.put("endDateRequire",true);
+            data.put("endDateMin", DateUtil.parseDateTime(startDateTime));
         }
-        if("777".equals(jsonObject.getString("aa"))){
-            data.put("a",22);
-        }
-        if("888".equals(jsonObject.getString("aa"))){
-            data.put("b",true);
-        }
-        if("999".equals(jsonObject.getString("aa"))){
-            data.put("b",false);
-        }
+
+
         return  (data);
     }
 
