@@ -25,7 +25,16 @@ public class TestController {
 
         HashMap<Object, Object> data = new HashMap<>();
         if("666".equals(jsonObject.getString("aa"))){
-            data.put("abc",123456789);
+            data.put("a",11);
+        }
+        if("777".equals(jsonObject.getString("aa"))){
+            data.put("a",22);
+        }
+        if("888".equals(jsonObject.getString("aa"))){
+            data.put("b",true);
+        }
+        if("999".equals(jsonObject.getString("aa"))){
+            data.put("b",false);
         }
         return  (data);
     }
