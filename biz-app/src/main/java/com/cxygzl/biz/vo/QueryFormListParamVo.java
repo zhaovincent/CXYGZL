@@ -1,7 +1,9 @@
 package com.cxygzl.biz.vo;
 
+import com.cxygzl.common.dto.flow.FormItemVO;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -29,4 +31,10 @@ public class QueryFormListParamVo {
      * 抄送id
      */
     private Long ccId;
+    private String formUniqueId;
+    private String nodeId;
+    /**
+     * 表单列表
+     */
+    private List<FormItemVO> formItemVOList;
 }

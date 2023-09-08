@@ -25,4 +25,11 @@ public interface IFormService {
      */
     R getFormList(QueryFormListParamVo taskDto, boolean handleForm);
 
+    /**
+     * 动态表单
+     * @param taskDto
+     * @return
+     */
+    R dynamicFormList(QueryFormListParamVo taskDto);
+
 }

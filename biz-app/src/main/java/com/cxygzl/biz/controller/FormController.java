@@ -42,4 +42,14 @@ public class FormController {
     public R getFormList(@RequestBody QueryFormListParamVo taskDto, boolean handleForm) {
         return formService.getFormList(taskDto, handleForm);
     }
+    /**
+     * 动态表单
+     *
+     * @param taskDto
+     * @return
+     */
+    @PostMapping("dynamicFormList")
+    public R dynamicFormList(@RequestBody QueryFormListParamVo taskDto) {
+        return formService.dynamicFormList(taskDto);
+    }
 }

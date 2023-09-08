@@ -3,11 +3,13 @@ package com.cxygzl.biz.controller;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONObject;
+import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.dto.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 @Slf4j
 @RestController
@@ -15,6 +17,18 @@ import java.util.List;
 public class TestController {
 
 
+
+    @PostMapping("dynamicForm")
+    public Object dynamicForm(@RequestBody String s,@RequestHeader(required = false) String b){
+        log.info("收到动态表单数据：{} {}",s,b);
+        com.alibaba.fastjson2.JSONObject jsonObject = JSON.parseObject(s);
+
+        HashMap<Object, Object> data = new HashMap<>();
+        if("666".equals(jsonObject.getString("aa"))){
+            data.put("abc",123456789);
+        }
+        return  (data);
+    }
 
     @PostMapping("check")
     public Object check(@RequestBody String s,@RequestHeader(required = false) String b){

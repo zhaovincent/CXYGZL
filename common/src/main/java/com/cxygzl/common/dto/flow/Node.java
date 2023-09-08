@@ -86,6 +86,10 @@ public class Node  implements Cloneable, Serializable {
     private List<GroupCondition> conditionList;
 
     private HttpSetting httpSetting;
+    /**
+     * 动态表单配置
+     */
+    private HttpSetting dynamicFormConfig;
 
     private Object value;
 

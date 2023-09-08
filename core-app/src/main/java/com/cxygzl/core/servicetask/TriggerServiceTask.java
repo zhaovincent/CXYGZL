@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.flow.HttpSetting;
 import com.cxygzl.common.dto.flow.HttpSettingData;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.utils.HttpUtil;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.delegate.DelegateExecution;
@@ -41,7 +42,7 @@ public class TriggerServiceTask implements JavaDelegate {
         String result = null;
         try {
 
-            result = com.cxygzl.core.utils.HttpUtil.flowExtenstionHttpRequest(backNotify, variables, flowId, processInstanceId);
+            result =  HttpUtil.flowExtenstionHttpRequest(backNotify, variables, flowId, processInstanceId);
 
             log.info(" 返回值:{}", result);
         } catch (Exception e) {

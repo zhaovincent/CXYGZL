@@ -4,9 +4,11 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.Process;
@@ -21,9 +23,7 @@ import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskResultDto;
-import com.cxygzl.common.dto.flow.FormItemVO;
-import com.cxygzl.common.dto.flow.Node;
-import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.dto.flow.*;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.CommonUtil;
@@ -114,6 +114,68 @@ public class FormServiceImpl implements IFormService {
 
 
         return R.success(formItemVOList);
+    }
+
+    /**
+     * 动态表单
+     *
+     * @param taskDto
+     * @return
+     */
+    @Override
+    public R dynamicFormList(QueryFormListParamVo taskDto) {
+        List<FormItemVO> formItemVOList = taskDto.getFormItemVOList();
+
+        Process process = processService.getByFlowId(taskDto.getFlowId());
+        if (process == null) {
+            return R.fail("流程不存在");
+        }
+        String nodeId = taskDto.getNodeId();
+        Node node = null;
+        if (StrUtil.isNotBlank(nodeId)) {
+            node = nodeDataService.getNode(taskDto.getFlowId(), taskDto.getNodeId()).getData();
+        } else {
+            node = JSON.parseObject(process.getProcess(), Node.class);
+        }
+        HttpSetting dynamicFormConfig = node.getDynamicFormConfig();
+        if (dynamicFormConfig != null) {
+            handleForm(dynamicFormConfig, taskDto.getParamMap(), formItemVOList, taskDto.getFlowId(), null);
+        }
+
+        return R.success(formItemVOList);
+    }
+
+    private void handleForm(HttpSetting dynamicFormConfig, Map<String, Object> paramMap, List<FormItemVO> formItemVOList, String flowId, String processInstanceId) {
+        String result = com.cxygzl.common.utils.HttpUtil.flowExtenstionHttpRequest(dynamicFormConfig,
+                paramMap,
+                flowId,
+                processInstanceId);
+        JSONObject jsonObject = JSON.parseObject(result);
+        if(jsonObject.isEmpty()){
+            return;
+        }
+        for (FormItemVO formItemVO : formItemVOList) {
+            List<HttpSettingData> resultConfigList = dynamicFormConfig.getResult();
+            for (HttpSettingData httpSettingData : resultConfigList) {
+                if (!StrUtil.equals(httpSettingData.getValue(), formItemVO.getId())) {
+                    continue;
+                }
+                String field = httpSettingData.getField();
+                Object o = jsonObject.get(field);
+                if (o == null) {
+                    continue;
+                }
+                String contentConfig = httpSettingData.getContentConfig();
+                if(StrUtil.equalsAny(contentConfig,"perm","required")){
+                    ReflectUtil.setFieldValue(formItemVO, contentConfig,o);
+
+                }else{
+                    ReflectUtil.setFieldValue(formItemVO.getProps(), contentConfig,o);
+
+                }
+            }
+        }
+
     }
 
     private List<FormItemVO> getCCFormList(long ccId) {
