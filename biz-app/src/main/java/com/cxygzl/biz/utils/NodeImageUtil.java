@@ -6,8 +6,8 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.cxygzl.biz.constants.NodeStatusEnum;
-import com.cxygzl.biz.entity.ProcessNodeRecord;
-import com.cxygzl.biz.service.IProcessNodeRecordService;
+import com.cxygzl.biz.entity.ProcessInstanceNodeRecord;
+import com.cxygzl.biz.service.IProcessInstanceNodeRecordService;
 import com.cxygzl.biz.vo.node.NodeImageVO;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
@@ -86,11 +86,11 @@ public class NodeImageUtil {
             edges.add(edge);
         }
 
-        IProcessNodeRecordService processNodeRecordService = SpringUtil.getBean(IProcessNodeRecordService.class);
+        IProcessInstanceNodeRecordService processNodeRecordService = SpringUtil.getBean(IProcessInstanceNodeRecordService.class);
         //获取所有执行的节点
-        List<ProcessNodeRecord> processNodeRecordList = processNodeRecordService.lambdaQuery()
-                .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId)
-                .in(ProcessNodeRecord::getStatus, CollUtil.newArrayList(NodeStatusEnum.JXZ.getCode(),
+        List<ProcessInstanceNodeRecord> processNodeRecordList = processNodeRecordService.lambdaQuery()
+                .eq(ProcessInstanceNodeRecord::getProcessInstanceId, processInstanceId)
+                .in(ProcessInstanceNodeRecord::getStatus, CollUtil.newArrayList(NodeStatusEnum.JXZ.getCode(),
                         NodeStatusEnum.YJS.getCode(),
                         NodeStatusEnum.YCX.getCode()
                 ))
@@ -101,23 +101,23 @@ public class NodeImageUtil {
         return NodeImageVO.builder().nodes(nodeShowList).edges(edges).build();
     }
 
-    public static List<NodeImageVO.Node> getNodeShowList(Node node, List<ProcessNodeRecord> processNodeRecordList) {
+    public static List<NodeImageVO.Node> getNodeShowList(Node node, List<ProcessInstanceNodeRecord> processNodeRecordList) {
         List<NodeImageVO.Node> list = new ArrayList<>();
         if (!NodeUtil.isNode(node)) {
             return list;
         }
 
         //找到执行的节点
-        List<ProcessNodeRecord> runNodeList = processNodeRecordList.stream()
+        List<ProcessInstanceNodeRecord> runNodeList = processNodeRecordList.stream()
                 .filter(w ->
                         StrUtil.equals(w.getNodeId(), node.getId())
                                 ||
                                 (StrUtil.startWith(node.getId(), ProcessInstanceConstant.VariableKey.STARTER)
                                         && w.getNodeId().startsWith(ProcessInstanceConstant.VariableKey.STARTER)
                                 )
-                ).sorted(new Comparator<ProcessNodeRecord>() {
+                ).sorted(new Comparator<ProcessInstanceNodeRecord>() {
                     @Override
-                    public int compare(ProcessNodeRecord o1, ProcessNodeRecord o2) {
+                    public int compare(ProcessInstanceNodeRecord o1, ProcessInstanceNodeRecord o2) {
                         long l1 = o1.getCreateTime().getTime();
                         long l2 = o2.getCreateTime().getTime();
                         return l1 > l2 ? 1 : -1;

@@ -8,7 +8,7 @@ import java.util.List;
  * 流程节点记录
  */
 @Data
-public class ProcessNodeRecordParamDto {
+public class ProcessInstanceNodeRecordParamDto {
 
 
     /**

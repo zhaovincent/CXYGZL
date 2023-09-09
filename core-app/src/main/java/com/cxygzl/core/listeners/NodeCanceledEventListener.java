@@ -1,6 +1,6 @@
 package com.cxygzl.core.listeners;
 
-import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
+import com.cxygzl.common.dto.ProcessInstanceNodeRecordParamDto;
 import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
@@ -61,17 +61,17 @@ public class NodeCanceledEventListener implements FlowableEventListener {
 
             {
                 //节点取消了
-                ProcessNodeRecordParamDto processNodeRecordParamDto = new ProcessNodeRecordParamDto();
+                ProcessInstanceNodeRecordParamDto processInstanceNodeRecordParamDto = new ProcessInstanceNodeRecordParamDto();
 
-                processNodeRecordParamDto.setProcessInstanceId(processInstanceId);
-
-
-                processNodeRecordParamDto.setExecutionId(executionId);
-                processNodeRecordParamDto.setNodeId(activityId);
-                processNodeRecordParamDto.setNodeName(activityName);
+                processInstanceNodeRecordParamDto.setProcessInstanceId(processInstanceId);
 
 
-                BizHttpUtil.cancelNodeEvent(processNodeRecordParamDto);
+                processInstanceNodeRecordParamDto.setExecutionId(executionId);
+                processInstanceNodeRecordParamDto.setNodeId(activityId);
+                processInstanceNodeRecordParamDto.setNodeName(activityName);
+
+
+                BizHttpUtil.cancelNodeEvent(processInstanceNodeRecordParamDto);
             }
         }
     }

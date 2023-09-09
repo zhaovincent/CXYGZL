@@ -5,7 +5,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
-import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
+import com.cxygzl.common.dto.ProcessInstanceNodeRecordParamDto;
 import com.cxygzl.common.dto.flow.Node;
 
 import java.util.ArrayList;
@@ -121,7 +121,7 @@ public class NodeUtil {
      */
     public static void handleInclusiveGatewayAsLine(Node node, String gatewayNodeId, String executionId,
                                                     String flowUniqueId,
-                                                    List<ProcessNodeRecordParamDto> processNodeRecordParamDtoList, Node parentNode) {
+                                                    List<ProcessInstanceNodeRecordParamDto> processInstanceNodeRecordParamDtoList, Node parentNode) {
 
         if (!isNode(node)) {
             return;
@@ -147,7 +147,7 @@ public class NodeUtil {
                         String flowUniqueId1 = children.getFlowUniqueId();
 
 
-                        long count = processNodeRecordParamDtoList.stream()
+                        long count = processInstanceNodeRecordParamDtoList.stream()
                                 .filter(w -> StrUtil.equals(w.getNodeId(), id))
                                 .filter(w -> StrUtil.equals(w.getFlowUniqueId(), flowUniqueId1))
                                 .filter(w -> StrUtil.equals(w.getExecutionId(), executionId1)).count();
@@ -192,13 +192,13 @@ public class NodeUtil {
             for (Node branch : branchList) {
                 Node children = branch.getChildNode();
 
-                handleInclusiveGatewayAsLine(children, gatewayNodeId, executionId, flowUniqueId, processNodeRecordParamDtoList, node);
+                handleInclusiveGatewayAsLine(children, gatewayNodeId, executionId, flowUniqueId, processInstanceNodeRecordParamDtoList, node);
 
 
             }
         }
 
-        handleInclusiveGatewayAsLine(childNode, gatewayNodeId, executionId, flowUniqueId, processNodeRecordParamDtoList, node);
+        handleInclusiveGatewayAsLine(childNode, gatewayNodeId, executionId, flowUniqueId, processInstanceNodeRecordParamDtoList, node);
 
     }
 

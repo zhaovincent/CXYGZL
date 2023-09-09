@@ -1,13 +1,13 @@
 package com.cxygzl.biz.vo;
 
 import cn.hutool.core.lang.Dict;
-import com.cxygzl.biz.entity.ProcessCopy;
+import com.cxygzl.biz.entity.ProcessInstanceCopy;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class ProcessCopyVo extends ProcessCopy {
+public class ProcessInstanceCopyVo extends ProcessInstanceCopy {
 
     private String startUserName;
     /**

@@ -3,7 +3,7 @@ package com.cxygzl.core.listeners;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.MessageTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
-import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
+import com.cxygzl.common.dto.ProcessInstanceAssignUserRecordParamDto;
 import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.NodeUtil;
@@ -56,27 +56,27 @@ public class TaskAssignedEventListener implements FlowableEventListener {
                 String processDefinitionId = task.getProcessDefinitionId();
                 //流程id
                 String flowId = com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
-                ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto = new ProcessNodeRecordAssignUserParamDto();
-                processNodeRecordAssignUserParamDto.setFlowId(flowId);
-                processNodeRecordAssignUserParamDto.setProcessInstanceId(processInstanceId);
+                ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto = new ProcessInstanceAssignUserRecordParamDto();
+                processInstanceAssignUserRecordParamDto.setFlowId(flowId);
+                processInstanceAssignUserRecordParamDto.setProcessInstanceId(processInstanceId);
               //  processNodeRecordAssignUserParamDto.setParentExecutionId();
 //        processNodeRecordAssignUserParamDto.setData();
-                processNodeRecordAssignUserParamDto.setNodeId(taskDefinitionKey);
-                processNodeRecordAssignUserParamDto.setUserId((assignee));
-                processNodeRecordAssignUserParamDto.setTaskId(task.getId());
-                processNodeRecordAssignUserParamDto.setNodeName(task.getName());
-                processNodeRecordAssignUserParamDto.setFlowUniqueId(
+                processInstanceAssignUserRecordParamDto.setNodeId(taskDefinitionKey);
+                processInstanceAssignUserRecordParamDto.setUserId((assignee));
+                processInstanceAssignUserRecordParamDto.setTaskId(task.getId());
+                processInstanceAssignUserRecordParamDto.setNodeName(task.getName());
+                processInstanceAssignUserRecordParamDto.setFlowUniqueId(
                         task.getVariable(ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID,String.class));
 
                 String taskType = task.getVariableLocal(ProcessInstanceConstant.VariableKey.TASK_TYPE, String.class);
 
-                processNodeRecordAssignUserParamDto.setTaskType(taskType);
-                processNodeRecordAssignUserParamDto.setExecutionId(task.getExecutionId());
+                processInstanceAssignUserRecordParamDto.setTaskType(taskType);
+                processInstanceAssignUserRecordParamDto.setExecutionId(task.getExecutionId());
 
 
 
 
-                BizHttpUtil.startAssignUser(processNodeRecordAssignUserParamDto);
+                BizHttpUtil.startAssignUser(processInstanceAssignUserRecordParamDto);
 
             }
             {

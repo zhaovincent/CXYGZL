@@ -47,7 +47,7 @@ public interface IRemoteService {
      * @param copyDto
      * @return
      */
-    R saveCC(ProcessCopyDto copyDto);
+    R saveCC(ProcessInstanceCopyDto copyDto);
 
     /**
      * 检查是否是所有的父级
@@ -97,14 +97,14 @@ public interface IRemoteService {
      * @param recordParamDto
      * @return
      */
-    R startNodeEvent(ProcessNodeRecordParamDto recordParamDto);
+    R startNodeEvent(ProcessInstanceNodeRecordParamDto recordParamDto);
 
     /**
      * 记录父子执行id
      * @param recordParamDto
      * @return
      */
-    R saveParentChildExecution(ProcessNodeRecordParamDto recordParamDto);
+    R saveParentChildExecution(ProcessInstanceNodeRecordParamDto recordParamDto);
 
     /**
      * 流程创建了
@@ -120,35 +120,35 @@ public interface IRemoteService {
      * @param recordParamDto
      * @return
      */
-    R endNodeEvent(ProcessNodeRecordParamDto recordParamDto);
+    R endNodeEvent(ProcessInstanceNodeRecordParamDto recordParamDto);
 
     /**
      * 节点取消
      * @param recordParamDto
      * @return
      */
-    R cancelNodeEvent(ProcessNodeRecordParamDto recordParamDto);
+    R cancelNodeEvent(ProcessInstanceNodeRecordParamDto recordParamDto);
 
     /**
      * 开始设置执行人
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
-    R startAssignUser(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto);
+    R startAssignUser(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto);
 
     /**
      * 任务结束事件
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
-    R taskCompletedEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto);
+    R taskCompletedEvent(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto);
 
     /**
      * 任务结束
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
-    R taskEndEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto);
+    R taskEndEvent(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto);
 
 
     /**

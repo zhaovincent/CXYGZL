@@ -2,7 +2,7 @@ package com.cxygzl.core.listeners;
 
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
-import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
+import com.cxygzl.common.dto.ProcessInstanceNodeRecordParamDto;
 import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -50,16 +50,16 @@ public class NodeEndEventListener implements FlowableEventListener {
             String processDefinitionId = flowableActivityEvent.getProcessDefinitionId();
             String flowId = com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
 
-            ProcessNodeRecordParamDto processNodeRecordParamDto = new ProcessNodeRecordParamDto();
-            processNodeRecordParamDto.setFlowId(flowId);
-            processNodeRecordParamDto.setExecutionId(flowableActivityEvent.getExecutionId());
-            processNodeRecordParamDto.setProcessInstanceId(processInstanceId);
-            processNodeRecordParamDto.setData(JSON.toJSONString(variables));
-            processNodeRecordParamDto.setNodeId(activityId);
+            ProcessInstanceNodeRecordParamDto processInstanceNodeRecordParamDto = new ProcessInstanceNodeRecordParamDto();
+            processInstanceNodeRecordParamDto.setFlowId(flowId);
+            processInstanceNodeRecordParamDto.setExecutionId(flowableActivityEvent.getExecutionId());
+            processInstanceNodeRecordParamDto.setProcessInstanceId(processInstanceId);
+            processInstanceNodeRecordParamDto.setData(JSON.toJSONString(variables));
+            processInstanceNodeRecordParamDto.setNodeId(activityId);
 //            processNodeRecordParamDto.setNodeType(nodeDto.getType());
-            processNodeRecordParamDto.setNodeName(activityName);
+            processInstanceNodeRecordParamDto.setNodeName(activityName);
 
-            BizHttpUtil.endNodeEvent(processNodeRecordParamDto);
+            BizHttpUtil.endNodeEvent(processInstanceNodeRecordParamDto);
 
 
         }
@@ -77,16 +77,16 @@ public class NodeEndEventListener implements FlowableEventListener {
             String processDefinitionId = flowableActivityEvent.getProcessDefinitionId();
             String flowId = NodeUtil.getFlowId(processDefinitionId);
 
-            ProcessNodeRecordParamDto processNodeRecordParamDto = new ProcessNodeRecordParamDto();
-            processNodeRecordParamDto.setFlowId(flowId);
-            processNodeRecordParamDto.setExecutionId(flowableActivityEvent.getExecutionId());
-            processNodeRecordParamDto.setProcessInstanceId(processInstanceId);
-            processNodeRecordParamDto.setData(JSON.toJSONString(variables));
-            processNodeRecordParamDto.setNodeId(activityId);
+            ProcessInstanceNodeRecordParamDto processInstanceNodeRecordParamDto = new ProcessInstanceNodeRecordParamDto();
+            processInstanceNodeRecordParamDto.setFlowId(flowId);
+            processInstanceNodeRecordParamDto.setExecutionId(flowableActivityEvent.getExecutionId());
+            processInstanceNodeRecordParamDto.setProcessInstanceId(processInstanceId);
+            processInstanceNodeRecordParamDto.setData(JSON.toJSONString(variables));
+            processInstanceNodeRecordParamDto.setNodeId(activityId);
 //            processNodeRecordParamDto.setNodeType(nodeDto.getType());
-            processNodeRecordParamDto.setNodeName(activityName);
+            processInstanceNodeRecordParamDto.setNodeName(activityName);
 
-            BizHttpUtil.endNodeEvent(processNodeRecordParamDto);
+            BizHttpUtil.endNodeEvent(processInstanceNodeRecordParamDto);
 
         }
 

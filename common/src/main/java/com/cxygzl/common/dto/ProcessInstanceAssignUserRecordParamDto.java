@@ -6,7 +6,7 @@ import lombok.Data;
  * 流程节点记录-执行人
  */
 @Data
-public class ProcessNodeRecordAssignUserParamDto {
+public class ProcessInstanceAssignUserRecordParamDto {
 
 
     /**

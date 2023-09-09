@@ -1,6 +1,6 @@
 package com.cxygzl.biz.mapper;
 
-import com.cxygzl.biz.entity.ProcessExecution;
+import com.cxygzl.biz.entity.ProcessInstanceExecution;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author Vincent
  * @since 2023-08-09
  */
-public interface ProcessExecutionMapper extends BaseMapper<ProcessExecution> {
+public interface ProcessInstanceExecutionMapper extends BaseMapper<ProcessInstanceExecution> {
 
 }

@@ -6,7 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
-import com.cxygzl.common.dto.ProcessCopyDto;
+import com.cxygzl.common.dto.ProcessInstanceCopyDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
@@ -66,17 +66,17 @@ public class CopyServiceTask implements JavaDelegate {
 
         for (String userIds : userIdList) {
             //发送抄送任务
-            ProcessCopyDto processCopyDto = new ProcessCopyDto();
-            processCopyDto.setNodeTime(new Date());
-            processCopyDto.setStartUserId((rootUser.getId()));
-            processCopyDto.setFlowId(flowId);
-            processCopyDto.setProcessInstanceId(execution.getProcessInstanceId());
-            processCopyDto.setNodeId(nodeId);
-            processCopyDto.setNodeName(node.getNodeName());
-            processCopyDto.setFormData(JSON.toJSONString(variables));
-            processCopyDto.setUserId((userIds));
+            ProcessInstanceCopyDto processInstanceCopyDto = new ProcessInstanceCopyDto();
+            processInstanceCopyDto.setNodeTime(new Date());
+            processInstanceCopyDto.setStartUserId((rootUser.getId()));
+            processInstanceCopyDto.setFlowId(flowId);
+            processInstanceCopyDto.setProcessInstanceId(execution.getProcessInstanceId());
+            processInstanceCopyDto.setNodeId(nodeId);
+            processInstanceCopyDto.setNodeName(node.getNodeName());
+            processInstanceCopyDto.setFormData(JSON.toJSONString(variables));
+            processInstanceCopyDto.setUserId((userIds));
 
-            BizHttpUtil.saveCC(processCopyDto);
+            BizHttpUtil.saveCC(processInstanceCopyDto);
         }
 
 

@@ -17,8 +17,8 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain = true)
-@TableName("`process_execution`")
-public class ProcessExecution  extends BaseEntity {
+@TableName("`process_instance_execution`")
+public class ProcessInstanceExecution extends BaseEntity {
 
 
     /**

@@ -48,7 +48,7 @@ public class BizHttpUtil {
      *
      * @param nodeRecordParamDto
      */
-    public static void startNodeEvent(ProcessNodeRecordParamDto nodeRecordParamDto) {
+    public static void startNodeEvent(ProcessInstanceNodeRecordParamDto nodeRecordParamDto) {
         post(nodeRecordParamDto, "/remote/startNodeEvent");
     }
 
@@ -57,7 +57,7 @@ public class BizHttpUtil {
      *
      * @param nodeRecordParamDto
      */
-    public static void saveParentChildExecution(ProcessNodeRecordParamDto nodeRecordParamDto) {
+    public static void saveParentChildExecution(ProcessInstanceNodeRecordParamDto nodeRecordParamDto) {
         post(nodeRecordParamDto, "/remote/saveParentChildExecution");
     }
 
@@ -66,7 +66,7 @@ public class BizHttpUtil {
      *
      * @param nodeRecordParamDto
      */
-    public static void endNodeEvent(ProcessNodeRecordParamDto nodeRecordParamDto) {
+    public static void endNodeEvent(ProcessInstanceNodeRecordParamDto nodeRecordParamDto) {
         post(nodeRecordParamDto, "/remote/endNodeEvent");
     }
 
@@ -75,7 +75,7 @@ public class BizHttpUtil {
      *
      * @param nodeRecordParamDto
      */
-    public static void cancelNodeEvent(ProcessNodeRecordParamDto nodeRecordParamDto) {
+    public static void cancelNodeEvent(ProcessInstanceNodeRecordParamDto nodeRecordParamDto) {
         post(nodeRecordParamDto, "/remote/cancelNodeEvent");
     }
 
@@ -230,31 +230,31 @@ public class BizHttpUtil {
     /**
      * 节点开始指派用户了
      *
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
-    public static void startAssignUser(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        post(processNodeRecordAssignUserParamDto, "/remote/startAssignUser");
+    public static void startAssignUser(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
+        post(processInstanceAssignUserRecordParamDto, "/remote/startAssignUser");
     }
 
     /**
      * 任务完成事件
      *
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
-    public static void taskCompletedEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        post(processNodeRecordAssignUserParamDto, "/remote/taskCompletedEvent");
+    public static void taskCompletedEvent(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
+        post(processInstanceAssignUserRecordParamDto, "/remote/taskCompletedEvent");
     }
 
     /**
      * 任务结束事件
      *
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
-    public static void taskEndEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        post(processNodeRecordAssignUserParamDto, "/remote/taskEndEvent");
+    public static void taskEndEvent(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
+        post(processInstanceAssignUserRecordParamDto, "/remote/taskEndEvent");
     }
 
 
@@ -264,7 +264,7 @@ public class BizHttpUtil {
      * @param processCopyDto
      * @return
      */
-    public static void saveCC(ProcessCopyDto processCopyDto) {
+    public static void saveCC(ProcessInstanceCopyDto processCopyDto) {
         post(processCopyDto, "/remote/savecc");
     }
 

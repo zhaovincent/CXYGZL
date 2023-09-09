@@ -3,7 +3,7 @@ package com.cxygzl.core.listeners;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
-import com.cxygzl.common.dto.ProcessNodeRecordAssignUserParamDto;
+import com.cxygzl.common.dto.ProcessInstanceAssignUserRecordParamDto;
 import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -47,27 +47,27 @@ public class TaskCompleteEventListener implements FlowableEventListener {
             String processDefinitionId = task.getProcessDefinitionId();
             //流程id
             String flowId = NodeUtil.getFlowId(processDefinitionId);
-            ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto = new ProcessNodeRecordAssignUserParamDto();
-            processNodeRecordAssignUserParamDto.setFlowId(flowId);
-            processNodeRecordAssignUserParamDto.setProcessInstanceId(processInstanceId);
+            ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto = new ProcessInstanceAssignUserRecordParamDto();
+            processInstanceAssignUserRecordParamDto.setFlowId(flowId);
+            processInstanceAssignUserRecordParamDto.setProcessInstanceId(processInstanceId);
          //   processNodeRecordAssignUserParamDto.setParentExecutionId();
-            processNodeRecordAssignUserParamDto.setData(JSON.toJSONString(taskService.getVariables(task.getId())));
-            processNodeRecordAssignUserParamDto.setLocalData(JSON.toJSONString(taskService.getVariablesLocal(task.getId())));
-            processNodeRecordAssignUserParamDto.setNodeId(nodeId);
-            processNodeRecordAssignUserParamDto.setUserId((assignee));
-            processNodeRecordAssignUserParamDto.setTaskId(task.getId());
-            processNodeRecordAssignUserParamDto.setNodeName(task.getName());
-            processNodeRecordAssignUserParamDto.setFlowUniqueId(task.getVariableLocal(ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID,String.class));
+            processInstanceAssignUserRecordParamDto.setData(JSON.toJSONString(taskService.getVariables(task.getId())));
+            processInstanceAssignUserRecordParamDto.setLocalData(JSON.toJSONString(taskService.getVariablesLocal(task.getId())));
+            processInstanceAssignUserRecordParamDto.setNodeId(nodeId);
+            processInstanceAssignUserRecordParamDto.setUserId((assignee));
+            processInstanceAssignUserRecordParamDto.setTaskId(task.getId());
+            processInstanceAssignUserRecordParamDto.setNodeName(task.getName());
+            processInstanceAssignUserRecordParamDto.setFlowUniqueId(task.getVariableLocal(ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID,String.class));
             String taskType = task.getVariableLocal(ProcessInstanceConstant.VariableKey.TASK_TYPE, String.class);
             //RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
-            processNodeRecordAssignUserParamDto.setTaskType(taskType);
+            processInstanceAssignUserRecordParamDto.setTaskType(taskType);
 
 
 
 
-            processNodeRecordAssignUserParamDto.setExecutionId(task.getExecutionId());
+            processInstanceAssignUserRecordParamDto.setExecutionId(task.getExecutionId());
 
-            BizHttpUtil.taskCompletedEvent(processNodeRecordAssignUserParamDto);
+            BizHttpUtil.taskCompletedEvent(processInstanceAssignUserRecordParamDto);
 
         }
 

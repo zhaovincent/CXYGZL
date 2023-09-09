@@ -21,7 +21,7 @@ import com.cxygzl.biz.vo.QueryFormListParamVo;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.IndexPageStatistics;
-import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
+import com.cxygzl.common.dto.ProcessInstanceNodeRecordParamDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskResultDto;
 import com.cxygzl.common.dto.flow.Node;
@@ -42,7 +42,7 @@ import java.util.Map;
 public class BaseServiceImpl implements IBaseService {
 
     @Resource
-    private IProcessCopyService processCopyService;
+    private IProcessInstanceCopyService processCopyService;
     @Resource
     private IProcessInstanceRecordService processInstanceRecordService;
 
@@ -52,9 +52,9 @@ public class BaseServiceImpl implements IBaseService {
     @Resource
     private IProcessService processService;
     @Resource
-    private IProcessNodeRecordService processNodeRecordService;
+    private IProcessInstanceNodeRecordService processNodeRecordService;
     @Resource
-    private IProcessNodeRecordAssignUserService processNodeRecordAssignUserService;
+    private IProcessInstanceAssignUserRecordService processNodeRecordAssignUserService;
 
     /**
      * 首页数据
@@ -67,7 +67,7 @@ public class BaseServiceImpl implements IBaseService {
         String userId = StpUtil.getLoginIdAsString();
 
 
-        Long coypNum = processCopyService.lambdaQuery().eq(ProcessCopy::getUserId, userId).count();
+        Long coypNum = processCopyService.lambdaQuery().eq(ProcessInstanceCopy::getUserId, userId).count();
 
         Long startendNum = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getUserId, userId).count();
 
@@ -170,9 +170,9 @@ public class BaseServiceImpl implements IBaseService {
             TaskResultDto taskResultDto = r.getData();
             if (!r.isOk() || !taskResultDto.getCurrentTask()) {
 
-                List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
-                        .eq(ProcessNodeRecordAssignUser::getTaskId, nodeFormatParamVo.getTaskId())
-                        .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
+                List<ProcessInstanceAssignUserRecord> list = processNodeRecordAssignUserService.lambdaQuery()
+                        .eq(ProcessInstanceAssignUserRecord::getTaskId, nodeFormatParamVo.getTaskId())
+                        .orderByDesc(ProcessInstanceAssignUserRecord::getEndTime)
                         .list();
 
                 String data = list.get(0).getData();
@@ -230,13 +230,13 @@ public class BaseServiceImpl implements IBaseService {
 
 
         //查询所有的节点
-        List<ProcessNodeRecordParamDto> processNodeRecordParamDtoList = new ArrayList<>();
+        List<ProcessInstanceNodeRecordParamDto> processInstanceNodeRecordParamDtoList = new ArrayList<>();
         if (StrUtil.isNotBlank(processInstanceId)) {
-            List<ProcessNodeRecord> list = processNodeRecordService.lambdaQuery().eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId).list();
-            processNodeRecordParamDtoList.addAll(BeanUtil.copyToList(list, ProcessNodeRecordParamDto.class));
+            List<ProcessInstanceNodeRecord> list = processNodeRecordService.lambdaQuery().eq(ProcessInstanceNodeRecord::getProcessInstanceId, processInstanceId).list();
+            processInstanceNodeRecordParamDtoList.addAll(BeanUtil.copyToList(list, ProcessInstanceNodeRecordParamDto.class));
         }
         List<NodeVo> processNodeShowDtos = NodeFormatUtil.formatProcessNodeShow(nodeDto,
-                processInstanceId, paramMap, processNodeRecordParamDtoList, disableSelectUser);
+                processInstanceId, paramMap, processInstanceNodeRecordParamDtoList, disableSelectUser);
 
         NodeFormatResultVo nodeFormatResultVo = NodeFormatResultVo.builder()
                 .processNodeShowDtoList(processNodeShowDtos)
@@ -262,7 +262,7 @@ public class BaseServiceImpl implements IBaseService {
 
         if (ccId != null) {
 
-            ProcessCopy processCopy = processCopyService.getById(ccId);
+            ProcessInstanceCopy processCopy = processCopyService.getById(ccId);
             processInstanceId = processCopy.getProcessInstanceId();
 
         } else if (StrUtil.isAllBlank(processInstanceId, taskId)) {

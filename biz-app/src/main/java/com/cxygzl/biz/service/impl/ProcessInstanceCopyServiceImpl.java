@@ -1,9 +1,9 @@
 package com.cxygzl.biz.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.cxygzl.biz.entity.ProcessCopy;
-import com.cxygzl.biz.mapper.ProcessCopyMapper;
-import com.cxygzl.biz.service.IProcessCopyService;
+import com.cxygzl.biz.entity.ProcessInstanceCopy;
+import com.cxygzl.biz.mapper.ProcessInstanceCopyMapper;
+import com.cxygzl.biz.service.IProcessInstanceCopyService;
 import com.cxygzl.biz.service.IProcessInstanceRecordService;
 import com.cxygzl.biz.service.IProcessNodeDataService;
 import com.cxygzl.biz.service.IProcessService;
@@ -20,7 +20,7 @@ import javax.annotation.Resource;
  * @since 2023-05-20
  */
 @Service
-public class ProcessCopyServiceImpl extends ServiceImpl<ProcessCopyMapper, ProcessCopy> implements IProcessCopyService {
+public class ProcessInstanceCopyServiceImpl extends ServiceImpl<ProcessInstanceCopyMapper, ProcessInstanceCopy> implements IProcessInstanceCopyService {
     @Resource
     private IProcessService processService;
     @Resource

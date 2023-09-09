@@ -189,8 +189,8 @@ CREATE TABLE `process`  (
 -- ----------------------------
 -- Table structure for process_copy
 -- ----------------------------
-DROP TABLE IF EXISTS `process_copy`;
-CREATE TABLE `process_copy`  (
+DROP TABLE IF EXISTS `process_instance_copy`;
+CREATE TABLE `process_instance_copy`  (
                                  `id` bigint NOT NULL COMMENT 'id',
                                  `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
                                  `create_time` datetime NOT NULL COMMENT '创建时间',
@@ -209,7 +209,7 @@ CREATE TABLE `process_copy`  (
                                  `user_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '抄送人id',
                                  PRIMARY KEY (`id`) USING BTREE,
                                  INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 89 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程抄送数据' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程抄送数据' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of process_copy
@@ -218,8 +218,8 @@ CREATE TABLE `process_copy`  (
 -- ----------------------------
 -- Table structure for process_execution
 -- ----------------------------
-DROP TABLE IF EXISTS `process_execution`;
-CREATE TABLE `process_execution`  (
+DROP TABLE IF EXISTS `process_instance_execution`;
+CREATE TABLE `process_instance_execution`  (
                                       `id` bigint NOT NULL COMMENT 'id',
                                       `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
                                       `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
@@ -228,7 +228,7 @@ CREATE TABLE `process_execution`  (
                                       `child_execution_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT ' 子级执行id',
                                       PRIMARY KEY (`id`) USING BTREE,
                                       INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 223 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程-执行id关系' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程-执行id关系' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of process_execution
@@ -307,8 +307,8 @@ CREATE TABLE `process_node_data`  (
 -- ----------------------------
 -- Table structure for process_node_record
 -- ----------------------------
-DROP TABLE IF EXISTS `process_node_record`;
-CREATE TABLE `process_node_record`  (
+DROP TABLE IF EXISTS `process_instance_node_record`;
+CREATE TABLE `process_instance_node_record`  (
                                         `id` bigint NOT NULL COMMENT 'id',
                                         `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
                                         `create_time` datetime NOT NULL COMMENT '创建时间',
@@ -327,7 +327,7 @@ CREATE TABLE `process_node_record`  (
                                         `flow_unique_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '流转唯一标识',
                                         PRIMARY KEY (`id`) USING BTREE,
                                         INDEX `idx_id`(`id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3790 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程节点记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '流程节点记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of process_node_record
@@ -336,8 +336,8 @@ CREATE TABLE `process_node_record`  (
 -- ----------------------------
 -- Table structure for process_node_record_assign_user
 -- ----------------------------
-DROP TABLE IF EXISTS `process_node_record_assign_user`;
-CREATE TABLE `process_node_record_assign_user`  (
+DROP TABLE IF EXISTS `process_instance_assign_user_record`;
+CREATE TABLE `process_instance_assign_user_record`  (
                                                     `id` bigint NOT NULL COMMENT 'id',
                                                     `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
                                                     `create_time` datetime NOT NULL COMMENT '创建时间',

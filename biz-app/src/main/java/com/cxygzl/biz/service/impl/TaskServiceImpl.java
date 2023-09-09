@@ -2,31 +2,18 @@ package com.cxygzl.biz.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.convert.Convert;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
-import com.cxygzl.biz.entity.Process;
-import com.cxygzl.biz.entity.ProcessExecution;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
-import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
+import com.cxygzl.biz.entity.ProcessInstanceAssignUserRecord;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
-import com.cxygzl.biz.utils.FormUtil;
-import com.cxygzl.biz.vo.TaskDetailViewVO;
-import com.cxygzl.common.constants.FormTypeEnum;
-import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskParamDto;
-import com.cxygzl.common.dto.TaskResultDto;
-import com.cxygzl.common.dto.flow.FormItemVO;
-import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.third.UserDto;
-import com.cxygzl.common.utils.CommonUtil;
-import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,15 +28,15 @@ public class TaskServiceImpl implements ITaskService {
     @Resource
     private IProcessService processService;
     @Resource
-    private IProcessNodeRecordService processNodeRecordService;
+    private IProcessInstanceNodeRecordService processNodeRecordService;
     @Resource
     private IProcessNodeDataService nodeDataService;
     @Resource
-    private IProcessNodeRecordAssignUserService processNodeRecordAssignUserService;
+    private IProcessInstanceAssignUserRecordService processNodeRecordAssignUserService;
     @Resource
     private IProcessInstanceRecordService processInstanceRecordService;
     @Resource
-    private IProcessExecutionService executionService;
+    private IProcessInstanceExecutionService executionService;
 
     /**
      * 完成任务
@@ -156,17 +143,17 @@ public class TaskServiceImpl implements ITaskService {
         String taskId = taskParamDto.getTaskId();
 
         {
-            ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
-                    .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
-                    .eq(ProcessNodeRecordAssignUser::getUserId, StpUtil.getLoginIdAsString())
+            ProcessInstanceAssignUserRecord processInstanceAssignUserRecord = processNodeRecordAssignUserService.lambdaQuery()
+                    .eq(ProcessInstanceAssignUserRecord::getTaskId, taskId)
+                    .eq(ProcessInstanceAssignUserRecord::getUserId, StpUtil.getLoginIdAsString())
                     .one();
 
-            List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
-                    .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processNodeRecordAssignUser.getProcessInstanceId())
-                    .eq(ProcessNodeRecordAssignUser::getFlowUniqueId, processNodeRecordAssignUser.getFlowUniqueId())
-                    .eq(ProcessNodeRecordAssignUser::getNodeId, processNodeRecordAssignUser.getNodeId())
-                    .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
-                    .in(ProcessNodeRecordAssignUser::getUserId, targetUserIdList)
+            List<ProcessInstanceAssignUserRecord> list = processNodeRecordAssignUserService.lambdaQuery()
+                    .eq(ProcessInstanceAssignUserRecord::getProcessInstanceId, processInstanceAssignUserRecord.getProcessInstanceId())
+                    .eq(ProcessInstanceAssignUserRecord::getFlowUniqueId, processInstanceAssignUserRecord.getFlowUniqueId())
+                    .eq(ProcessInstanceAssignUserRecord::getNodeId, processInstanceAssignUserRecord.getNodeId())
+                    .eq(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.JXZ.getCode())
+                    .in(ProcessInstanceAssignUserRecord::getUserId, targetUserIdList)
                     .list();
             if (CollUtil.isNotEmpty(list)) {
                 Set<String> uidSet = list.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
@@ -216,17 +203,17 @@ public class TaskServiceImpl implements ITaskService {
         String taskId = taskParamDto.getTaskId();
 
         {
-            ProcessNodeRecordAssignUser processNodeRecordAssignUser = processNodeRecordAssignUserService.lambdaQuery()
-                    .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
-                    .eq(ProcessNodeRecordAssignUser::getUserId, StpUtil.getLoginIdAsString())
+            ProcessInstanceAssignUserRecord processInstanceAssignUserRecord = processNodeRecordAssignUserService.lambdaQuery()
+                    .eq(ProcessInstanceAssignUserRecord::getTaskId, taskId)
+                    .eq(ProcessInstanceAssignUserRecord::getUserId, StpUtil.getLoginIdAsString())
                     .one();
 
-            List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
-                    .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processNodeRecordAssignUser.getProcessInstanceId())
-                    .eq(ProcessNodeRecordAssignUser::getFlowUniqueId, processNodeRecordAssignUser.getFlowUniqueId())
-                    .eq(ProcessNodeRecordAssignUser::getNodeId, processNodeRecordAssignUser.getNodeId())
-                    .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
-                    .in(ProcessNodeRecordAssignUser::getUserId, targetUserIdList)
+            List<ProcessInstanceAssignUserRecord> list = processNodeRecordAssignUserService.lambdaQuery()
+                    .eq(ProcessInstanceAssignUserRecord::getProcessInstanceId, processInstanceAssignUserRecord.getProcessInstanceId())
+                    .eq(ProcessInstanceAssignUserRecord::getFlowUniqueId, processInstanceAssignUserRecord.getFlowUniqueId())
+                    .eq(ProcessInstanceAssignUserRecord::getNodeId, processInstanceAssignUserRecord.getNodeId())
+                    .eq(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.JXZ.getCode())
+                    .in(ProcessInstanceAssignUserRecord::getUserId, targetUserIdList)
                     .list();
             if (list.size() != targetUserIdList.size()) {
                 List<String> userNameList = new ArrayList<>();

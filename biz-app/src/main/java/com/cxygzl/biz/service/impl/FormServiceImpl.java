@@ -45,17 +45,17 @@ public class FormServiceImpl implements IFormService {
     private IProcessService processService;
 
     @Resource
-    private IProcessExecutionService executionService;
+    private IProcessInstanceExecutionService executionService;
     @Resource
     private IProcessNodeDataService nodeDataService;
 
     @Resource
-    private IProcessNodeRecordAssignUserService processNodeRecordAssignUserService;
+    private IProcessInstanceAssignUserRecordService processNodeRecordAssignUserService;
 
     @Resource
     private IProcessInstanceRecordService processInstanceRecordService;
     @Resource
-    private IProcessCopyService processCopyService;
+    private IProcessInstanceCopyService processCopyService;
 
     /**
      * 远程请求下拉选项
@@ -231,7 +231,7 @@ public class FormServiceImpl implements IFormService {
 
     private List<FormItemVO> getCCFormList(long ccId) {
 
-        ProcessCopy processCopy = processCopyService.getById(ccId);
+        ProcessInstanceCopy processCopy = processCopyService.getById(ccId);
 
         String flowId = processCopy.getFlowId();
         Process oaForms = processService.getByFlowId(flowId);
@@ -401,10 +401,10 @@ public class FormServiceImpl implements IFormService {
         Process oaForms = processService.getByFlowId(flowId);
 
 
-        List<ProcessExecution> processExecutionList = executionService.lambdaQuery()
-                .eq(ProcessExecution::getExecutionId, taskResultDto.getExecutionId())
+        List<ProcessInstanceExecution> processExecutionList = executionService.lambdaQuery()
+                .eq(ProcessInstanceExecution::getExecutionId, taskResultDto.getExecutionId())
                 .or()
-                .eq(ProcessExecution::getChildExecutionId, taskResultDto.getExecutionId())
+                .eq(ProcessInstanceExecution::getChildExecutionId, taskResultDto.getExecutionId())
                 .list();
 
         Set<String> executionIdSet = processExecutionList.stream().map(w -> w.getChildExecutionId()).collect(Collectors.toSet());
@@ -416,16 +416,16 @@ public class FormServiceImpl implements IFormService {
         Boolean taskExist = taskResultDto.getCurrentTask();
         if (!taskExist) {
             //任务已完成了
-            List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = processNodeRecordAssignUserService.lambdaQuery()
-                    .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
-                    .eq(ProcessNodeRecordAssignUser::getUserId, userId)
+            List<ProcessInstanceAssignUserRecord> processInstanceAssignUserRecordList = processNodeRecordAssignUserService.lambdaQuery()
+                    .eq(ProcessInstanceAssignUserRecord::getTaskId, taskId)
+                    .eq(ProcessInstanceAssignUserRecord::getUserId, userId)
                     .eq(StrUtil.isNotBlank(taskResultDto.getFlowUniqueId()),
-                            ProcessNodeRecordAssignUser::getFlowUniqueId, taskResultDto.getFlowUniqueId())
-                    .in(ProcessNodeRecordAssignUser::getExecutionId, executionIdSet)
-                    .orderByDesc(ProcessNodeRecordAssignUser::getUpdateTime)
+                            ProcessInstanceAssignUserRecord::getFlowUniqueId, taskResultDto.getFlowUniqueId())
+                    .in(ProcessInstanceAssignUserRecord::getExecutionId, executionIdSet)
+                    .orderByDesc(ProcessInstanceAssignUserRecord::getUpdateTime)
                     .list();
 
-            String data = processNodeRecordAssignUserList.get(0).getData();
+            String data = processInstanceAssignUserRecordList.get(0).getData();
             if (StrUtil.isNotBlank(data)) {
                 Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
                 });

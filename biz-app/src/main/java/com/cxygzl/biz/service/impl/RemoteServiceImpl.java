@@ -39,15 +39,15 @@ public class RemoteServiceImpl implements IRemoteService {
     @Resource
     private IProcessInstanceRecordService processInstanceRecordService;
     @Resource
-    private IProcessNodeRecordService processNodeRecordService;
+    private IProcessInstanceNodeRecordService processNodeRecordService;
     @Resource
-    private IProcessExecutionService processExecutionService;
+    private IProcessInstanceExecutionService processExecutionService;
     @Resource
-    private IProcessNodeRecordAssignUserService processNodeRecordAssignUserService;
+    private IProcessInstanceAssignUserRecordService processNodeRecordAssignUserService;
     @Resource
     private IProcessInstanceService processInstanceService;
     @Resource
-    private IProcessCopyService processCopyService;
+    private IProcessInstanceCopyService processCopyService;
     @Resource
     private IProcessService processService;
     @Resource
@@ -120,7 +120,7 @@ public class RemoteServiceImpl implements IRemoteService {
      * @return
      */
     @Override
-    public R saveCC(ProcessCopyDto copyDto) {
+    public R saveCC(ProcessInstanceCopyDto copyDto) {
 
         String processInstanceId = copyDto.getProcessInstanceId();
 
@@ -138,14 +138,14 @@ public class RemoteServiceImpl implements IRemoteService {
                     index--;
                 }
 
-                ProcessCopy processCopy = BeanUtil.copyProperties(copyDto, ProcessCopy.class);
-                processCopy.setGroupId(Long.valueOf(processInstanceRecord.getGroupId()));
-                processCopy.setGroupName(processInstanceRecord.getGroupName());
-                processCopy.setProcessName(processInstanceRecord.getName());
-                processCopy.setStartTime(processInstanceRecord.getCreateTime());
+                ProcessInstanceCopy processInstanceCopy = BeanUtil.copyProperties(copyDto, ProcessInstanceCopy.class);
+                processInstanceCopy.setGroupId(Long.valueOf(processInstanceRecord.getGroupId()));
+                processInstanceCopy.setGroupName(processInstanceRecord.getGroupName());
+                processInstanceCopy.setProcessName(processInstanceRecord.getName());
+                processInstanceCopy.setStartTime(processInstanceRecord.getCreateTime());
 
 
-                processCopyService.save(processCopy);
+                processCopyService.save(processInstanceCopy);
             } catch (Exception e) {
                 log.error("Error:", e);
             }
@@ -273,7 +273,7 @@ public class RemoteServiceImpl implements IRemoteService {
      * @return
      */
     @Override
-    public R startNodeEvent(ProcessNodeRecordParamDto recordParamDto) {
+    public R startNodeEvent(ProcessInstanceNodeRecordParamDto recordParamDto) {
         return processNodeRecordService.start(recordParamDto);
     }
 
@@ -284,7 +284,7 @@ public class RemoteServiceImpl implements IRemoteService {
      * @return
      */
     @Override
-    public R saveParentChildExecution(ProcessNodeRecordParamDto recordParamDto) {
+    public R saveParentChildExecution(ProcessInstanceNodeRecordParamDto recordParamDto) {
 
         List<String> childExecutionId = recordParamDto.getChildExecutionId();
         if (CollUtil.isNotEmpty(childExecutionId)) {
@@ -292,12 +292,12 @@ public class RemoteServiceImpl implements IRemoteService {
 
             for (String s : childExecutionId) {
                 Long count = processExecutionService.lambdaQuery()
-                        .eq(ProcessExecution::getExecutionId, recordParamDto.getExecutionId())
-                        .eq(ProcessExecution::getChildExecutionId, s).count();
+                        .eq(ProcessInstanceExecution::getExecutionId, recordParamDto.getExecutionId())
+                        .eq(ProcessInstanceExecution::getChildExecutionId, s).count();
                 if (count > 0) {
                     continue;
                 }
-                ProcessExecution entity = new ProcessExecution();
+                ProcessInstanceExecution entity = new ProcessInstanceExecution();
                 entity.setChildExecutionId(s);
                 entity.setExecutionId(recordParamDto.getExecutionId());
                 processExecutionService.save(entity);
@@ -362,14 +362,14 @@ public class RemoteServiceImpl implements IRemoteService {
      * @return
      */
     @Override
-    public R endNodeEvent(ProcessNodeRecordParamDto recordParamDto) {
+    public R endNodeEvent(ProcessInstanceNodeRecordParamDto recordParamDto) {
         //处理任务
-        List<ProcessNodeRecord> processNodeRecordList = processNodeRecordService.lambdaQuery()
-                .eq(ProcessNodeRecord::getProcessInstanceId, recordParamDto.getProcessInstanceId())
-                .eq(ProcessNodeRecord::getStatus, NodeStatusEnum.JXZ.getCode())
-                .eq(ProcessNodeRecord::getNodeId, recordParamDto.getNodeId()).list();
+        List<ProcessInstanceNodeRecord> processNodeRecordList = processNodeRecordService.lambdaQuery()
+                .eq(ProcessInstanceNodeRecord::getProcessInstanceId, recordParamDto.getProcessInstanceId())
+                .eq(ProcessInstanceNodeRecord::getStatus, NodeStatusEnum.JXZ.getCode())
+                .eq(ProcessInstanceNodeRecord::getNodeId, recordParamDto.getNodeId()).list();
         if (!processNodeRecordList.isEmpty()) {
-            ProcessNodeRecord processNodeRecord = null;
+            ProcessInstanceNodeRecord processNodeRecord = null;
             if (processNodeRecordList.size() == 1) {
                 processNodeRecord = processNodeRecordList.get(0);
             } else {
@@ -377,7 +377,7 @@ public class RemoteServiceImpl implements IRemoteService {
                         recordParamDto.getExecutionId())).findAny().orElse(null);
             }
 
-            List<ProcessExecution> processExecutionList = processExecutionService.lambdaQuery().eq(ProcessExecution::getExecutionId,
+            List<ProcessInstanceExecution> processExecutionList = processExecutionService.lambdaQuery().eq(ProcessInstanceExecution::getExecutionId,
                     processNodeRecord.getExecutionId()).list();
             if (!processExecutionList.isEmpty()) {
 
@@ -385,17 +385,17 @@ public class RemoteServiceImpl implements IRemoteService {
 
                 {
                     //处理
-                    List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery().eq(ProcessNodeRecordAssignUser::getProcessInstanceId, recordParamDto.getProcessInstanceId())
-                            .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
-                            .eq(ProcessNodeRecordAssignUser::getNodeId, recordParamDto.getNodeId())
-                            .in(ProcessNodeRecordAssignUser::getExecutionId, collect).list();
+                    List<ProcessInstanceAssignUserRecord> list = processNodeRecordAssignUserService.lambdaQuery().eq(ProcessInstanceAssignUserRecord::getProcessInstanceId, recordParamDto.getProcessInstanceId())
+                            .eq(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.JXZ.getCode())
+                            .eq(ProcessInstanceAssignUserRecord::getNodeId, recordParamDto.getNodeId())
+                            .in(ProcessInstanceAssignUserRecord::getExecutionId, collect).list();
                     if (CollUtil.isNotEmpty(list)) {
                         List<TaskParamDto> taskParamDtoList = new ArrayList<>();
-                        for (ProcessNodeRecordAssignUser processNodeRecordAssignUser : list) {
+                        for (ProcessInstanceAssignUserRecord processInstanceAssignUserRecord : list) {
                             TaskParamDto taskParamDto = new TaskParamDto();
-                            taskParamDto.setProcessInstanceId(processNodeRecordAssignUser.getProcessInstanceId());
-                            taskParamDto.setUserId(processNodeRecordAssignUser.getUserId());
-                            taskParamDto.setTaskId(processNodeRecordAssignUser.getTaskId());
+                            taskParamDto.setProcessInstanceId(processInstanceAssignUserRecord.getProcessInstanceId());
+                            taskParamDto.setUserId(processInstanceAssignUserRecord.getUserId());
+                            taskParamDto.setTaskId(processInstanceAssignUserRecord.getTaskId());
                             taskParamDtoList.add(taskParamDto);
                         }
 
@@ -406,13 +406,13 @@ public class RemoteServiceImpl implements IRemoteService {
                 }
 
                 processNodeRecordAssignUserService.lambdaUpdate()
-                        .set(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.YCX.getCode())
-                        .set(ProcessNodeRecordAssignUser::getTaskType, ProcessInstanceConstant.TaskType.CANCEL)
-                        .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, recordParamDto.getProcessInstanceId())
-                        .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
-                        .eq(ProcessNodeRecordAssignUser::getNodeId, recordParamDto.getNodeId())
-                        .in(ProcessNodeRecordAssignUser::getExecutionId, collect)
-                        .update(new ProcessNodeRecordAssignUser());
+                        .set(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.YCX.getCode())
+                        .set(ProcessInstanceAssignUserRecord::getTaskType, ProcessInstanceConstant.TaskType.CANCEL)
+                        .eq(ProcessInstanceAssignUserRecord::getProcessInstanceId, recordParamDto.getProcessInstanceId())
+                        .eq(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.JXZ.getCode())
+                        .eq(ProcessInstanceAssignUserRecord::getNodeId, recordParamDto.getNodeId())
+                        .in(ProcessInstanceAssignUserRecord::getExecutionId, collect)
+                        .update(new ProcessInstanceAssignUserRecord());
 
             }
 
@@ -428,31 +428,31 @@ public class RemoteServiceImpl implements IRemoteService {
      * @return
      */
     @Override
-    public R cancelNodeEvent(ProcessNodeRecordParamDto recordParamDto) {
+    public R cancelNodeEvent(ProcessInstanceNodeRecordParamDto recordParamDto) {
 
 
         //处理任务
-        ProcessNodeRecord processNodeRecord = processNodeRecordService.lambdaQuery()
+        ProcessInstanceNodeRecord processInstanceNodeRecord = processNodeRecordService.lambdaQuery()
 
-                .eq(ProcessNodeRecord::getProcessInstanceId, recordParamDto.getProcessInstanceId())
-                .eq(ProcessNodeRecord::getStatus, NodeStatusEnum.JXZ.getCode())
-                .eq(ProcessNodeRecord::getNodeId, recordParamDto.getNodeId()).one();
-        if (processNodeRecord != null) {
+                .eq(ProcessInstanceNodeRecord::getProcessInstanceId, recordParamDto.getProcessInstanceId())
+                .eq(ProcessInstanceNodeRecord::getStatus, NodeStatusEnum.JXZ.getCode())
+                .eq(ProcessInstanceNodeRecord::getNodeId, recordParamDto.getNodeId()).one();
+        if (processInstanceNodeRecord != null) {
 
-            List<ProcessExecution> processExecutionList = processExecutionService.lambdaQuery().eq(ProcessExecution::getExecutionId,
-                    processNodeRecord.getExecutionId()).list();
-            if (!processExecutionList.isEmpty()) {
+            List<ProcessInstanceExecution> processInstanceExecutionList = processExecutionService.lambdaQuery().eq(ProcessInstanceExecution::getExecutionId,
+                    processInstanceNodeRecord.getExecutionId()).list();
+            if (!processInstanceExecutionList.isEmpty()) {
 
-                List<String> collect = processExecutionList.stream().map(w -> w.getChildExecutionId()).collect(Collectors.toList());
+                List<String> collect = processInstanceExecutionList.stream().map(w -> w.getChildExecutionId()).collect(Collectors.toList());
 
                 processNodeRecordAssignUserService.lambdaUpdate()
-                        .set(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.YCX.getCode())
-                        .set(ProcessNodeRecordAssignUser::getTaskType, ProcessInstanceConstant.TaskType.CANCEL)
-                        .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, recordParamDto.getProcessInstanceId())
-                        .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.JXZ.getCode())
-                        .eq(ProcessNodeRecordAssignUser::getNodeId, recordParamDto.getNodeId())
-                        .in(ProcessNodeRecordAssignUser::getExecutionId, collect)
-                        .update(new ProcessNodeRecordAssignUser());
+                        .set(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.YCX.getCode())
+                        .set(ProcessInstanceAssignUserRecord::getTaskType, ProcessInstanceConstant.TaskType.CANCEL)
+                        .eq(ProcessInstanceAssignUserRecord::getProcessInstanceId, recordParamDto.getProcessInstanceId())
+                        .eq(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.JXZ.getCode())
+                        .eq(ProcessInstanceAssignUserRecord::getNodeId, recordParamDto.getNodeId())
+                        .in(ProcessInstanceAssignUserRecord::getExecutionId, collect)
+                        .update(new ProcessInstanceAssignUserRecord());
             }
 
 
@@ -466,34 +466,34 @@ public class RemoteServiceImpl implements IRemoteService {
     /**
      * 开始设置执行人
      *
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
     @Override
-    public R startAssignUser(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        return processNodeRecordAssignUserService.addAssignUser(processNodeRecordAssignUserParamDto);
+    public R startAssignUser(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
+        return processNodeRecordAssignUserService.addAssignUser(processInstanceAssignUserRecordParamDto);
     }
 
     /**
      * 任务结束事件
      *
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
     @Override
-    public R taskCompletedEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        return processNodeRecordAssignUserService.taskCompletedEvent(processNodeRecordAssignUserParamDto);
+    public R taskCompletedEvent(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
+        return processNodeRecordAssignUserService.taskCompletedEvent(processInstanceAssignUserRecordParamDto);
     }
 
     /**
      * 任务结束
      *
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
     @Override
-    public R taskEndEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        return processNodeRecordAssignUserService.taskEndEvent(processNodeRecordAssignUserParamDto);
+    public R taskEndEvent(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
+        return processNodeRecordAssignUserService.taskEndEvent(processInstanceAssignUserRecordParamDto);
     }
 
 

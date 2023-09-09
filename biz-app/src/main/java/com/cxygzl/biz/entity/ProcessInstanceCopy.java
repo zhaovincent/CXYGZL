@@ -19,8 +19,8 @@ import java.util.Date;
 @Getter
 @Setter
 @Accessors(chain = true)
-@TableName("`process_copy`")
-public class ProcessCopy  extends BaseEntity {
+@TableName("`process_instance_copy`")
+public class ProcessInstanceCopy extends BaseEntity {
 
 
 

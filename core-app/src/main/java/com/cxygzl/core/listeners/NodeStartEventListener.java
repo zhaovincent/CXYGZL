@@ -4,7 +4,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
-import com.cxygzl.common.dto.ProcessNodeRecordParamDto;
+import com.cxygzl.common.dto.ProcessInstanceNodeRecordParamDto;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.BizHttpUtil;
@@ -72,10 +72,10 @@ public class NodeStartEventListener implements FlowableEventListener {
                     if (childExecutionIdList.contains(execution.getId())) {
 
                         //记录父子级关系
-                        ProcessNodeRecordParamDto processNodeRecordParamDto = new ProcessNodeRecordParamDto();
-                        processNodeRecordParamDto.setExecutionId(parent.getId());
-                        processNodeRecordParamDto.setChildExecutionId(childExecutionIdList);
-                        BizHttpUtil.saveParentChildExecution(processNodeRecordParamDto);
+                        ProcessInstanceNodeRecordParamDto processInstanceNodeRecordParamDto = new ProcessInstanceNodeRecordParamDto();
+                        processInstanceNodeRecordParamDto.setExecutionId(parent.getId());
+                        processInstanceNodeRecordParamDto.setChildExecutionId(childExecutionIdList);
+                        BizHttpUtil.saveParentChildExecution(processInstanceNodeRecordParamDto);
 
 
                         return;
@@ -105,22 +105,22 @@ public class NodeStartEventListener implements FlowableEventListener {
 
 
         Node node = NodeDataStoreFactory.getInstance().getNode(flowId, activityId);
-        ProcessNodeRecordParamDto processNodeRecordParamDto = new ProcessNodeRecordParamDto();
-        processNodeRecordParamDto.setFlowId(flowId);
-        processNodeRecordParamDto.setProcessInstanceId(processInstanceId);
+        ProcessInstanceNodeRecordParamDto processInstanceNodeRecordParamDto = new ProcessInstanceNodeRecordParamDto();
+        processInstanceNodeRecordParamDto.setFlowId(flowId);
+        processInstanceNodeRecordParamDto.setProcessInstanceId(processInstanceId);
 //            processNodeRecordParamDto.setChildExecutionId(childExecutionIdList);
-        processNodeRecordParamDto.setData(JSON.toJSONString(processVariables));
-        processNodeRecordParamDto.setNodeId(activityId);
-        processNodeRecordParamDto.setParentNodeId(MapUtil.getStr(processVariables, StrUtil.format("{}_parent_id", activityId)));
-        processNodeRecordParamDto.setFlowUniqueId(MapUtil.getStr(processVariables, FLOW_UNIQUE_ID));
+        processInstanceNodeRecordParamDto.setData(JSON.toJSONString(processVariables));
+        processInstanceNodeRecordParamDto.setNodeId(activityId);
+        processInstanceNodeRecordParamDto.setParentNodeId(MapUtil.getStr(processVariables, StrUtil.format("{}_parent_id", activityId)));
+        processInstanceNodeRecordParamDto.setFlowUniqueId(MapUtil.getStr(processVariables, FLOW_UNIQUE_ID));
         if (node != null) {
 
-            processNodeRecordParamDto.setNodeType((node.getType()));
+            processInstanceNodeRecordParamDto.setNodeType((node.getType()));
 
         }
-        processNodeRecordParamDto.setNodeName(activityName);
-        processNodeRecordParamDto.setExecutionId(executionId);
-        BizHttpUtil.startNodeEvent(processNodeRecordParamDto);
+        processInstanceNodeRecordParamDto.setNodeName(activityName);
+        processInstanceNodeRecordParamDto.setExecutionId(executionId);
+        BizHttpUtil.startNodeEvent(processInstanceNodeRecordParamDto);
 
 
         //清除变量

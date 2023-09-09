@@ -100,8 +100,8 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
         UserDtoExtension userDtoExtension = BeanUtil.copyProperties(user, UserDtoExtension.class);
 
 
-        Set<String> roleKeySet = roleService.queryRoleKeyByUserId(userId).getData();
-//        Set<String> roleKeySet = roleService.list().stream().map(w->w.getKey()).collect(Collectors.toSet());;
+//        Set<String> roleKeySet = roleService.queryRoleKeyByUserId(userId).getData();
+        Set<String> roleKeySet = roleService.list().stream().map(w->w.getKey()).collect(Collectors.toSet());;
 
 
         userDtoExtension.setRoles(roleKeySet);

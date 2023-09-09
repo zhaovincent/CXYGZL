@@ -1,6 +1,6 @@
 package com.cxygzl.biz.mapper;
 
-import com.cxygzl.biz.entity.ProcessCopy;
+import com.cxygzl.biz.entity.ProcessInstanceCopy;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author Vincent
  * @since 2023-05-20
  */
-public interface ProcessCopyMapper extends BaseMapper<ProcessCopy> {
+public interface ProcessInstanceCopyMapper extends BaseMapper<ProcessInstanceCopy> {
 
 }
