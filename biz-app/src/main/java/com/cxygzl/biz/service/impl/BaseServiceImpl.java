@@ -161,7 +161,18 @@ public class BaseServiceImpl implements IBaseService {
 
         //处理参数
         Map<String, Object> paramMap = nodeFormatParamVo.getParamMap();
-        if (StrUtil.isNotBlank(nodeFormatParamVo.getTaskId())) {
+        if (StrUtil.isNotBlank(nodeFormatParamVo.getCcId())) {
+
+            ProcessInstanceCopy processInstanceCopy = processCopyService.getById(nodeFormatParamVo.getCcId());
+            Map<String, Object> variableMap = com.alibaba.fastjson2.JSON.parseObject(processInstanceCopy.getFormData(),
+                    new TypeReference<Map<String, Object>>() {
+            });
+            if (variableMap == null) {
+                variableMap = new HashMap<>();
+            }
+
+            paramMap.putAll(variableMap);
+        } else if (StrUtil.isNotBlank(nodeFormatParamVo.getTaskId())) {
 
 
             R<TaskResultDto> r = CoreHttpUtil.queryTask(nodeFormatParamVo.getTaskId(), StpUtil.getLoginIdAsString());
@@ -181,7 +192,7 @@ public class BaseServiceImpl implements IBaseService {
                 if (variableMap == null) {
                     variableMap = new HashMap<>();
                 }
-                variableMap.putAll(paramMap);
+
                 paramMap.putAll(variableMap);
 
 
@@ -198,7 +209,7 @@ public class BaseServiceImpl implements IBaseService {
                         paramMap.get(ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE);
                 Object rejectStarterNode = paramMap.get(ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE);
                 disableSelectUser =
-                        (!StrUtil.startWith(nodeId,ProcessInstanceConstant.VariableKey.STARTER)) || (!(Convert.toBool(subProcessStarterNode, false) && rejectStarterNode == null));
+                        (!StrUtil.startWith(nodeId, ProcessInstanceConstant.VariableKey.STARTER)) || (!(Convert.toBool(subProcessStarterNode, false) && rejectStarterNode == null));
 
             }
 
@@ -240,7 +251,7 @@ public class BaseServiceImpl implements IBaseService {
 
         NodeFormatResultVo nodeFormatResultVo = NodeFormatResultVo.builder()
                 .processNodeShowDtoList(processNodeShowDtos)
-                .selectUserNodeIdList(disableSelectUser?new ArrayList<>():NodeUtil.selectUserNodeId(nodeDto))
+                .selectUserNodeIdList(disableSelectUser ? new ArrayList<>() : NodeUtil.selectUserNodeId(nodeDto))
                 .disableSelectUser(disableSelectUser)
                 .build();
 

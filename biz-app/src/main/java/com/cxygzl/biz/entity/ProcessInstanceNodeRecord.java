@@ -19,7 +19,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Accessors(chain = true)
-@TableName("`process_node_record`")
+@TableName("`process_instance_node_record`")
 public class ProcessInstanceNodeRecord extends BaseEntity {
 
 
