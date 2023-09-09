@@ -32,13 +32,19 @@ public class TestController {
                 data.put("hourPerm","H");
                 data.put("endDatePerm","H");
                 data.put("endDateRequire",false);
+            data.put("hourRequire",false);
+
         }else if(StrUtil.isBlank(endDateTime)){
             data.put("hourPerm","H");
             data.put("endDatePerm","E");
             data.put("endDateRequire",true);
+            data.put("hourRequire",false);
+
             data.put("endDateMin", DateUtil.parseDateTime(startDateTime));
         }else{
             data.put("hourPerm","R");
+            data.put("hourRequire",true);
+
             data.put("hourNum",DateUtil.between(DateUtil.parseDateTime(startDateTime)
             ,DateUtil.parseDateTime(endDateTime),
                     DateUnit.HOUR

@@ -18,20 +18,6 @@ public class TaskController {
     @Resource
     private ITaskService taskService;
 
-    /**
-     * 查询任务
-     *
-     * @param taskId
-     * @return
-     */
-    @Deprecated
-    @SneakyThrows
-    @GetMapping("queryTask")
-    public R queryTask(String taskId,boolean view) {
-
-        return taskService.queryTask(taskId,view );
-
-    }
 
     /**
      * 完成任务

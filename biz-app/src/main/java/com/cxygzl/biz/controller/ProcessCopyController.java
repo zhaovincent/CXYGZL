@@ -1,8 +1,6 @@
 package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.service.IProcessCopyService;
-import com.cxygzl.common.dto.R;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,16 +20,6 @@ public class ProcessCopyController {
     @Resource
     private IProcessCopyService processCopyService;
 
-    /**
-     * 查询单个抄送详细信息
-     *
-     * @param id
-     * @return
-     */
-    @Deprecated
-    @GetMapping("querySingleDetail")
-    public R querySingleDetail(long id) {
-        return processCopyService.querySingleDetail(id);
-    }
+
 
 }

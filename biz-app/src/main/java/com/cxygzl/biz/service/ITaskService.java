@@ -7,15 +7,6 @@ import com.cxygzl.common.dto.TaskParamDto;
  * 任务处理
  */
 public interface ITaskService {
-    /**
-     * 查询任务
-     *
-     * @param taskId
-     * @param view
-     * @return
-     */
-    @Deprecated
-    R queryTask(String taskId,boolean view);
 
     /**
      * 完成任务

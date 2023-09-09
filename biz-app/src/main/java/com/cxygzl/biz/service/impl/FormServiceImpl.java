@@ -124,34 +124,85 @@ public class FormServiceImpl implements IFormService {
      */
     @Override
     public R dynamicFormList(QueryFormListParamVo taskDto) {
-        List<FormItemVO> formItemVOList = taskDto.getFormItemVOList();
+        String flowId = taskDto.getFlowId();
+        String processInstanceId = taskDto.getProcessInstanceId();
+        String taskId = taskDto.getTaskId();
+        Long ccId = taskDto.getCcId();
 
-        Process process = processService.getByFlowId(taskDto.getFlowId());
+
+        Process process = processService.getByFlowId(flowId);
         if (process == null) {
             return R.fail("流程不存在");
         }
+        List<FormItemVO> formItemVOList = taskDto.getFormItemVOList();
+
+
+        if (ccId != null) {
+            return R.success(formItemVOList);
+
+
+        }
+
+
         String nodeId = taskDto.getNodeId();
-        Node node = null;
-        if (StrUtil.isNotBlank(nodeId)) {
-            node = nodeDataService.getNode(taskDto.getFlowId(), taskDto.getNodeId()).getData();
-        } else {
-            node = JSON.parseObject(process.getProcess(), Node.class);
-        }
-        HttpSetting dynamicFormConfig = node.getDynamicFormConfig();
-        if (dynamicFormConfig != null&&StrUtil.isNotBlank(dynamicFormConfig.getUrl())) {
-            handleForm(dynamicFormConfig, taskDto.getParamMap(), formItemVOList, taskDto.getFlowId(), null);
-        }
+
+        handleDynamicForm(nodeId, process.getProcess(), taskDto.getParamMap(), formItemVOList, flowId, processInstanceId,
+                taskId);
+
 
         return R.success(formItemVOList);
     }
 
-    private void handleForm(HttpSetting dynamicFormConfig, Map<String, Object> paramMap, List<FormItemVO> formItemVOList, String flowId, String processInstanceId) {
+    /**
+     * 处理动态表单
+     *
+     * @param dynamicFormConfig
+     * @param paramMap
+     * @param formItemVOList
+     * @param flowId
+     * @param processInstanceId
+     */
+    private void handleDynamicForm(String nodeId, String process, Map<String, Object> paramMap,
+                                   List<FormItemVO> formItemVOList, String flowId, String processInstanceId, String taskId) {
+
+        Node node = null;
+        if (StrUtil.isNotBlank(nodeId)) {
+            node = nodeDataService.getNode(flowId, nodeId).getData();
+        } else {
+            node = JSON.parseObject(process, Node.class);
+        }
+        HttpSetting dynamicFormConfig = node.getDynamicFormConfig();
+        if ( dynamicFormConfig == null ||dynamicFormConfig.getEnable()==null||
+                !dynamicFormConfig.getEnable() ||StrUtil.isBlank(dynamicFormConfig.getUrl())) {
+            return;
+        }
+
+
+        if (StrUtil.isNotBlank(taskId)) {
+            String userId = StpUtil.getLoginIdAsString();
+
+
+            com.cxygzl.common.dto.R<TaskResultDto> r = CoreHttpUtil.queryTask(taskId, userId);
+
+            TaskResultDto taskResultDto = r.getData();
+
+            if (!taskResultDto.getCurrentTask()) {
+                return;
+            }
+
+        } else if (StrUtil.isNotBlank(processInstanceId)) {
+            return;
+        }
+
+
+
+
         String result = com.cxygzl.common.utils.HttpUtil.flowExtenstionHttpRequest(dynamicFormConfig,
                 paramMap,
                 flowId,
                 processInstanceId);
         JSONObject jsonObject = JSON.parseObject(result);
-        if(jsonObject.isEmpty()){
+        if (jsonObject.isEmpty()) {
             return;
         }
         for (FormItemVO formItemVO : formItemVOList) {
@@ -166,11 +217,11 @@ public class FormServiceImpl implements IFormService {
                     continue;
                 }
                 String contentConfig = httpSettingData.getContentConfig();
-                if(StrUtil.equalsAny(contentConfig,"perm","required")){
-                    ReflectUtil.setFieldValue(formItemVO, contentConfig,o);
+                if (StrUtil.equalsAny(contentConfig, "perm", "required")) {
+                    ReflectUtil.setFieldValue(formItemVO, contentConfig, o);
 
-                }else{
-                    ReflectUtil.setFieldValue(formItemVO.getProps(), contentConfig,o);
+                } else {
+                    ReflectUtil.setFieldValue(formItemVO.getProps(), contentConfig, o);
 
                 }
             }

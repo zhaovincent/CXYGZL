@@ -2,7 +2,6 @@ package com.cxygzl.biz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.cxygzl.biz.entity.ProcessCopy;
-import com.cxygzl.common.dto.R;
 
 /**
  * <p>
@@ -13,12 +12,6 @@ import com.cxygzl.common.dto.R;
  * @since 2023-05-20
  */
 public interface IProcessCopyService extends IService<ProcessCopy> {
-    /**
-     * 查询单个抄送详细信息
-     * @param id
-     * @return
-     */
-    @Deprecated
-    R querySingleDetail(long id);
+
 
 }
