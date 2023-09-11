@@ -48,6 +48,8 @@ public class ProcessInstanceConstant {
         public static final int USER = 1;
         //发起人自己
         public static final int SELF = 5;
+        //系统自动拒绝
+        public static final int SYSTEM_REFUSE = 11;
         //表单人员
         public static final int FORM_USER = 8;
         //表单部门

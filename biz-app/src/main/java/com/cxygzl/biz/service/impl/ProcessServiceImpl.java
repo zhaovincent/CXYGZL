@@ -220,6 +220,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         NodeUtil.handleParentId(node, null);
         com.cxygzl.biz.utils.NodeUtil.handleStarterNode(node, JSON.parseArray(processVO.getFormItems(), FormItemVO.class));
         com.cxygzl.biz.utils.NodeUtil.handleApproveForm(node, JSON.parseArray(processVO.getFormItems(), FormItemVO.class));
+        com.cxygzl.biz.utils.NodeUtil.handleApprove(node);
 
 
         com.cxygzl.common.dto.R<String> r = CoreHttpUtil.createFlow(node, StpUtil.getLoginIdAsString());
