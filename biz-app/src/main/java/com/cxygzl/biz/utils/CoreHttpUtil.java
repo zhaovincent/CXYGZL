@@ -249,17 +249,7 @@ public class CoreHttpUtil {
 
     }
 
-    /**
-     * 显示图片
-     *
-     * @param procInsId
-     * @return
-     */
-    public static String showImg(String procInsId) {
 
-        return get("/flow/showImg?procInsId=" + procInsId);
-
-    }
 
     /**
      * 查询任务

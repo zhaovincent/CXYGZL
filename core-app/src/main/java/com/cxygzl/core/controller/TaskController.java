@@ -95,7 +95,6 @@ public class TaskController {
         }
 
 
-
         List<SimpleApproveDescDto> simpleApproveDescDtoList = new ArrayList<>();
         for (Comment comment : taskComments) {
             String id = comment.getId();
@@ -145,15 +144,16 @@ public class TaskController {
         String taskDefinitionKey = null;
         String executionId = null;
         String flowUniqueId = null;
+        String assignee = null;
 
         boolean taskExist = true;
 
         {
             TaskQuery taskQuery = taskService.createTaskQuery();
 
-            Task task = taskQuery.taskId(taskId).taskAssignee(userId).singleResult();
+            Task task = taskQuery.taskId(taskId).singleResult();
             if (task == null) {
-                HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().taskId(taskId).taskAssignee(userId).singleResult();
+                HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().taskId(taskId).singleResult();
                 if (historicTaskInstance == null) {
                     return R.fail("任务不存在");
                 }
@@ -161,18 +161,20 @@ public class TaskController {
                 taskDefinitionKey = historicTaskInstance.getTaskDefinitionKey();
                 processInstanceId = historicTaskInstance.getProcessInstanceId();
                 executionId = historicTaskInstance.getExecutionId();
+                assignee = historicTaskInstance.getAssignee();
                 processDefinitionId = historicTaskInstance.getProcessDefinitionId();
                 HistoricVariableInstance historicVariableInstance = historyService.createHistoricVariableInstanceQuery()
                         .processInstanceId(processInstanceId)
                         .taskId(taskId)
                         .variableName(FLOW_UNIQUE_ID).singleResult();
-                flowUniqueId =historicVariableInstance==null?null:Convert.toStr(historicVariableInstance.getValue());
+                flowUniqueId = historicVariableInstance == null ? null : Convert.toStr(historicVariableInstance.getValue());
             } else {
                 processDefinitionId = task.getProcessDefinitionId();
                 taskDefinitionKey = task.getTaskDefinitionKey();
                 delegationState = task.getDelegationState();
                 processInstanceId = task.getProcessInstanceId();
                 executionId = task.getExecutionId();
+                assignee = task.getAssignee();
                 delegateVariable = taskService.getVariableLocal(taskId, "delegate");
 
                 flowUniqueId = taskService.getVariable(taskId, FLOW_UNIQUE_ID, String.class);
@@ -195,15 +197,14 @@ public class TaskController {
             Map<String, Object> variables = taskService.getVariables(taskId);
             variableAll.putAll(variables);
 
-        } else {
-
         }
 
 
         TaskResultDto taskResultDto = new TaskResultDto();
         taskResultDto.setFlowId(flowId);
+        taskResultDto.setUserId(assignee);
         taskResultDto.setNodeId(taskDefinitionKey);
-        taskResultDto.setCurrentTask(taskExist);
+        taskResultDto.setCurrentTask(taskExist && StrUtil.equals(userId, assignee));
         taskResultDto.setExecutionId(executionId);
         taskResultDto.setDelegate(Convert.toBool(delegateVariable, false));
         taskResultDto.setVariableAll(variableAll);
@@ -286,7 +287,7 @@ public class TaskController {
 
 
         //设置变量
-        taskService.setVariables(taskParamDto.getTaskId(),taskParamDto.getParamMap());
+        taskService.setVariables(taskParamDto.getTaskId(), taskParamDto.getParamMap());
 
         taskService.delegateTask(taskParamDto.getTaskId(), taskParamDto.getTargetUserId());
         return R.success();
@@ -355,7 +356,7 @@ public class TaskController {
         }
 
         //设置变量
-        taskService.setVariables(taskParamDto.getTaskId(),taskParamDto.getParamMap());
+        taskService.setVariables(taskParamDto.getTaskId(), taskParamDto.getParamMap());
         taskService.setAssignee(taskParamDto.getTaskId(), taskParamDto.getTargetUserId());
 
         return R.success();
@@ -376,13 +377,13 @@ public class TaskController {
             return R.fail("任务不存在");
         }
 
-        taskService.setVariables(task.getId(),taskParamDto.getParamMap());
+        taskService.setVariables(task.getId(), taskParamDto.getParamMap());
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 ProcessInstanceConstant.TaskType.ADD_ASSIGNEE
         );
         String userId = taskParamDto.getUserId();
-        String targetUserName = CollUtil.join(taskParamDto.getTargetUserNameList(),",");
+        String targetUserName = CollUtil.join(taskParamDto.getTargetUserNameList(), ",");
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
             saveUserCommentToTask(task, ApproveDescTypeEnum.ADD_ASSIGNEE.getType(), taskParamDto.getApproveDesc(), userId,
                     StrUtil.format("加签任务给:[{}]并添加了评论",
@@ -397,8 +398,8 @@ public class TaskController {
 
         List<String> targetUserIdList = taskParamDto.getTargetUserIdList();
         for (String s : targetUserIdList) {
-            runtimeService.addMultiInstanceExecution(task.getTaskDefinitionKey(),task.getProcessInstanceId(),
-                    Collections.singletonMap(StrUtil.format("{}_assignee_temp",task.getTaskDefinitionKey()),s)
+            runtimeService.addMultiInstanceExecution(task.getTaskDefinitionKey(), task.getProcessInstanceId(),
+                    Collections.singletonMap(StrUtil.format("{}_assignee_temp", task.getTaskDefinitionKey()), s)
             );
         }
 
@@ -418,13 +419,13 @@ public class TaskController {
         if (task == null) {
             return R.fail("任务不存在");
         }
-        taskService.setVariables(task.getId(),taskParamDto.getParamMap());
+        taskService.setVariables(task.getId(), taskParamDto.getParamMap());
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 ProcessInstanceConstant.TaskType.DEL_ASSIGNEE
         );
         String userId = taskParamDto.getUserId();
-        String targetUserName = CollUtil.join(taskParamDto.getTargetUserNameList(),",");
+        String targetUserName = CollUtil.join(taskParamDto.getTargetUserNameList(), ",");
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
             saveUserCommentToTask(task, ApproveDescTypeEnum.DEL_ASSIGNEE.getType(), taskParamDto.getApproveDesc(), userId,
                     StrUtil.format("减签任务:[{}]并添加了评论",
@@ -439,7 +440,7 @@ public class TaskController {
 
         List<String> targetExecutionIdList = taskParamDto.getTargetExecutionIdList();
         for (String s : targetExecutionIdList) {
-            runtimeService.deleteMultiInstanceExecution(s,false);
+            runtimeService.deleteMultiInstanceExecution(s, false);
 
         }
 
@@ -476,7 +477,7 @@ public class TaskController {
             runtimeService.setVariable(task.getExecutionId(),
                     ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE, true);
         }
-        runtimeService.setVariables(task.getExecutionId(),taskParamDto.getParamMap());
+        runtimeService.setVariables(task.getExecutionId(), taskParamDto.getParamMap());
         runtimeService.setVariable(task.getExecutionId(), StrUtil.format("{}_parent_id", targetKey), task.getTaskDefinitionKey());
         runtimeService.setVariable(task.getExecutionId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
         runtimeService.setVariableLocal(task.getExecutionId(), ProcessInstanceConstant.VariableKey.TASK_TYPE, ProcessInstanceConstant.TaskType.REJECT);

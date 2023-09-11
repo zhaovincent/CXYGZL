@@ -172,8 +172,8 @@ public class FormServiceImpl implements IFormService {
             node = JSON.parseObject(process, Node.class);
         }
         HttpSetting dynamicFormConfig = node.getDynamicFormConfig();
-        if ( dynamicFormConfig == null ||dynamicFormConfig.getEnable()==null||
-                !dynamicFormConfig.getEnable() ||StrUtil.isBlank(dynamicFormConfig.getUrl())) {
+        if (dynamicFormConfig == null || dynamicFormConfig.getEnable() == null ||
+                !dynamicFormConfig.getEnable() || StrUtil.isBlank(dynamicFormConfig.getUrl())) {
             return;
         }
 
@@ -193,8 +193,6 @@ public class FormServiceImpl implements IFormService {
         } else if (StrUtil.isNotBlank(processInstanceId)) {
             return;
         }
-
-
 
 
         String result = com.cxygzl.common.utils.HttpUtil.flowExtenstionHttpRequest(dynamicFormConfig,
@@ -413,8 +411,8 @@ public class FormServiceImpl implements IFormService {
 
         //变量
         Map<String, Object> paramMap = taskResultDto.getVariableAll();
-        Boolean taskExist = taskResultDto.getCurrentTask();
-        if (!taskExist) {
+        Boolean currentTask = taskResultDto.getCurrentTask();
+        if (!currentTask) {
             //任务已完成了
             List<ProcessInstanceAssignUserRecord> processInstanceAssignUserRecordList = processNodeRecordAssignUserService.lambdaQuery()
                     .eq(ProcessInstanceAssignUserRecord::getTaskId, taskId)
@@ -456,7 +454,7 @@ public class FormServiceImpl implements IFormService {
 
             if (StrUtil.isNotBlank(perm)) {
 
-                formItemVO.setPerm((!taskExist) ? (ProcessInstanceConstant.FormPermClass.EDIT.equals(perm) ?
+                formItemVO.setPerm((!currentTask) ? (ProcessInstanceConstant.FormPermClass.EDIT.equals(perm) ?
                         ProcessInstanceConstant.FormPermClass.READ : perm) : perm);
 
             } else {
@@ -486,7 +484,7 @@ public class FormServiceImpl implements IFormService {
 
                         String permSub = formPerms.get(itemVO.getId());
                         if (StrUtil.isNotBlank(permSub)) {
-                            itemVO.setPerm((!taskExist) ? (ProcessInstanceConstant.FormPermClass.EDIT.equals(permSub) ?
+                            itemVO.setPerm((!currentTask) ? (ProcessInstanceConstant.FormPermClass.EDIT.equals(permSub) ?
                                     ProcessInstanceConstant.FormPermClass.READ : permSub)
                                     : permSub
                             );

@@ -17,6 +17,7 @@ public class TaskResultDto {
      * 流程id
      */
     private String flowId;
+    private String userId;
 
 
 

@@ -12,6 +12,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ResultCode {
 
+    EXCEPTION(500, "系统异常"),
     LOGIN_USER_NOTFOUND(400, "用户不存在"),
 
     LOGIN_USER_FAIL(401, "用户名或密码错误"),

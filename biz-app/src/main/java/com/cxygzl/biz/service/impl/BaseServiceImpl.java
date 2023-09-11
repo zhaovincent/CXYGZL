@@ -161,12 +161,15 @@ public class BaseServiceImpl implements IBaseService {
 
         //处理参数
         Map<String, Object> paramMap = nodeFormatParamVo.getParamMap();
+        if (paramMap == null) {
+            paramMap = new HashMap<>();
+        }
         if (StrUtil.isNotBlank(nodeFormatParamVo.getCcId())) {
 
             ProcessInstanceCopy processInstanceCopy = processCopyService.getById(nodeFormatParamVo.getCcId());
             Map<String, Object> variableMap = com.alibaba.fastjson2.JSON.parseObject(processInstanceCopy.getFormData(),
                     new TypeReference<Map<String, Object>>() {
-            });
+                    });
             if (variableMap == null) {
                 variableMap = new HashMap<>();
             }
@@ -317,13 +320,13 @@ public class BaseServiceImpl implements IBaseService {
         }
 
         TaskResultDto taskResultDto = r.getData();
-        Boolean taskExist = taskResultDto.getCurrentTask();
-        if (!taskExist) {
+        Boolean currentTask = taskResultDto.getCurrentTask();
+        if (!currentTask) {
             Dict set = Dict.create()
 
                     .set("processInstanceId", taskResultDto.getProcessInstanceId())
 
-                    .set("taskExist", taskExist);
+                    .set("taskExist", false);
 
             return R.success(set);
 
@@ -352,7 +355,7 @@ public class BaseServiceImpl implements IBaseService {
                 .set("node", node)
                 .set("frontJoinTask", taskResultDto.getFrontJoinTask())
 
-                .set("taskExist", taskExist)
+                .set("taskExist", currentTask)
                 .set("process", CommonUtil.toObj(process, Node.class));
 
         return R.success(set);
