@@ -35,7 +35,7 @@ public class ApprovalCreateListener implements TaskListener {
         String nodeId = taskEntity.getTaskDefinitionKey();
         String processDefinitionId = taskEntity.getProcessDefinitionId();
         //流程id
-        String flowId = NodeUtil.getFlowId(processDefinitionId);
+        String flowId =com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
 
         if (StrUtil.isBlank(assignee) || StrUtil.equals(ProcessInstanceConstant.DEFAULT_EMPTY_ASSIGN, assignee)) {
 

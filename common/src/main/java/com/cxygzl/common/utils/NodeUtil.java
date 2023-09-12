@@ -30,9 +30,7 @@ public class NodeUtil {
         }
 
     }
-    public static String getFlowId(String processDefinitionId){
-        return StrUtil.subBefore(processDefinitionId, ":", false);
-    }
+
 
 
     public static boolean isNode(Node childNode) {

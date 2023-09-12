@@ -64,7 +64,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
             String processInstanceId = taskEntity.getProcessInstanceId();
             String processDefinitionId = taskEntity.getProcessDefinitionId();
 
-            String flowId = NodeUtil.getFlowId(processDefinitionId);
+            String flowId =com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
 
             String taskId = taskEntity.getId();
             String assignee = taskEntity.getAssignee();
@@ -92,7 +92,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
             String processInstanceId = flowableActivityEvent.getProcessInstanceId();
 
             String processDefinitionId = flowableActivityEvent.getProcessDefinitionId();
-            String flowId = NodeUtil.getFlowId(processDefinitionId);
+            String flowId =com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
 
             Node node = NodeDataStoreFactory.getInstance().getNode(flowId, activityId);
 
@@ -128,7 +128,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
             String processInstanceId = flowableActivityEvent.getProcessInstanceId();
 
             String processDefinitionId = flowableActivityEvent.getProcessDefinitionId();
-            String flowId = NodeUtil.getFlowId(processDefinitionId);
+            String flowId =com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
 
             ProcessNodeRecordParamDto processNodeRecordParamDto = new ProcessNodeRecordParamDto();
             processNodeRecordParamDto.setFlowId(flowId);
@@ -153,7 +153,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
             String processInstanceId = flowableActivityEvent.getProcessInstanceId();
 
             String processDefinitionId = flowableActivityEvent.getProcessDefinitionId();
-            String flowId = NodeUtil.getFlowId(processDefinitionId);
+            String flowId =com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
 
             ProcessNodeRecordParamDto processNodeRecordParamDto = new ProcessNodeRecordParamDto();
             processNodeRecordParamDto.setFlowId(flowId);
@@ -230,7 +230,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
 
             String processDefinitionId = task.getProcessDefinitionId();
             //流程id
-            String flowId = NodeUtil.getFlowId(processDefinitionId);
+            String flowId =com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
             ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto = new ProcessNodeRecordAssignUserParamDto();
             processNodeRecordAssignUserParamDto.setFlowId(flowId);
             processNodeRecordAssignUserParamDto.setProcessInstanceId(processInstanceId);
@@ -267,7 +267,7 @@ public class FlowProcessEventListener implements FlowableEventListener {
 
             String processDefinitionId = task.getProcessDefinitionId();
             //流程id
-            String flowId = NodeUtil.getFlowId(processDefinitionId);
+            String flowId =com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
             ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto = new ProcessNodeRecordAssignUserParamDto();
             processNodeRecordAssignUserParamDto.setFlowId(flowId);
             processNodeRecordAssignUserParamDto.setProcessInstanceId(processInstanceId);

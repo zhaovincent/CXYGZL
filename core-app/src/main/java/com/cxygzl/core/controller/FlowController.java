@@ -2,7 +2,6 @@ package com.cxygzl.core.controller;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -10,7 +9,6 @@ import cn.hutool.json.JSONUtil;
 import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.Node;
-import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.utils.ModelUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.BpmnAutoLayout;
@@ -245,7 +243,7 @@ public class FlowController {
 
             String processDefinitionId = historicActivityInstance.getProcessDefinitionId();
             //流程id
-            String flowId = NodeUtil.getFlowId(processDefinitionId);
+            String flowId = com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
 
             TaskDto taskDto = new TaskDto();
             taskDto.setFlowId(flowId);
@@ -306,7 +304,7 @@ public class FlowController {
 
             String processDefinitionId = task.getProcessDefinitionId();
             //流程id
-            String flowId = NodeUtil.getFlowId(processDefinitionId);
+            String flowId =com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
 
             TaskDto taskDto = new TaskDto();
             taskDto.setFlowId(flowId);

@@ -125,7 +125,7 @@ public class TaskController {
 
 
         //流程id
-        String flowId = NodeUtil.getFlowId(processDefinitionId);
+        String flowId =com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
 
         Map<String, Object> variableAll=new HashMap<>();
 
