@@ -4,9 +4,9 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.*;
+import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.CommonUtil;
 import com.yomahub.tlog.hutoolhttp.TLogHutoolhttpInterceptor;
 import org.springframework.core.env.Environment;
@@ -77,12 +77,12 @@ public class CoreHttpUtil {
     /**
      * 创建流程
      *
-     * @param jsonObject
+     * @param node
      * @return
      */
-    public static R<String> createFlow(JSONObject jsonObject, String userId) {
+    public static R<String> createFlow(Node node, String userId) {
 
-        String post = post(jsonObject, "/flow/create?userId=" + userId);
+        String post = post(node, "/flow/create?userId=" + userId);
         R<String> r = JSON.parseObject(post, R.class);
         return r;
 

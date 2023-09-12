@@ -17,7 +17,7 @@ public class NodeUtil {
      */
     public static void addEndNode(Node node) {
 
-        Node children = node.getChildren();
+        Node children = node.getChildNode();
         if (isNode(children)) {
             addEndNode(children);
         } else {
@@ -26,7 +26,7 @@ public class NodeUtil {
             end.setType(NodeTypeEnum.END.getValue());
             end.setName("结束节点");
             end.setParentId(node.getId());
-            node.setChildren(end);
+            node.setChildNode(end);
         }
 
     }
@@ -77,13 +77,13 @@ public class NodeUtil {
             //条件分支
             List<Node> branchs = node.getConditionNodes();
             for (Node branch : branchs) {
-                Node children = branch.getChildren();
+                Node children = branch.getChildNode();
                 List<String> strings = selectUserNodeId(children);
                 list.addAll(strings);
             }
         }
 
-        List<String> next = selectUserNodeId(node.getChildren());
+        List<String> next = selectUserNodeId(node.getChildNode());
         list.addAll(next);
         return list;
     }

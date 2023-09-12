@@ -94,14 +94,14 @@ public class ModelUtil {
         }
 
         //子节点
-        Node children = nodeDto.getChildren();
+        Node children = nodeDto.getChildNode();
 
         if (NodeTypeEnum.getByValue(nodeDto.getType()).getBranch()) {
 
             //条件分支
             List<Node> branchs = nodeDto.getConditionNodes();
             for (Node branch : branchs) {
-                buildAllNode(process, branch.getChildren(),
+                buildAllNode(process, branch.getChildNode(),
                         flowId);
 
 
@@ -139,12 +139,12 @@ public class ModelUtil {
         }
 
         //子节点
-        Node children = nodeDto.getChildren();
+        Node children = nodeDto.getChildNode();
         if (NodeTypeEnum.getByValue(nodeDto.getType()).getBranch()  ) {
             //条件分支
             List<Node> branchs = nodeDto.getConditionNodes();
             for (Node branch : branchs) {
-                buildAllNodeInnerSequence(process, branch.getChildren(),
+                buildAllNodeInnerSequence(process, branch.getChildNode(),
                         flowId);
 
 
@@ -178,7 +178,7 @@ public class ModelUtil {
         }
 
         //子节点
-        Node children = nodeDto.getChildren();
+        Node children = nodeDto.getChildNode();
         if (NodeTypeEnum.getByValue(nodeDto.getType()).getBranch()    ) {
 //            children = children.getChildren();
             //条件分支
@@ -188,7 +188,7 @@ public class ModelUtil {
             for (Node branch : branchs) {
 
 
-                buildAllNodeOuterSequence(process, branch.getChildren(), nodeDto.getTailId());
+                buildAllNodeOuterSequence(process, branch.getChildNode(), nodeDto.getTailId());
 
                 String expression = null;
 
@@ -205,7 +205,7 @@ public class ModelUtil {
 
 
                 //添加连线
-                if (!NodeUtil.isNode(branch.getChildren())) {
+                if (!NodeUtil.isNode(branch.getChildNode())) {
                     //当前分支 没有其他节点了  所有就是网关和网关后面节点直接连线
 
                     SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getId(), nodeDto.getTailId(),
@@ -215,9 +215,9 @@ public class ModelUtil {
                     process.addFlowElement(sequenceFlow);
                 } else {
 
-                    SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getId(), branch.getChildren().getHeadId(),
+                    SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getId(), branch.getChildNode().getHeadId(),
                             expression,
-                            StrUtil.format("{}->{}", nodeDto.getName(), branch.getChildren().getName())
+                            StrUtil.format("{}->{}", nodeDto.getName(), branch.getChildNode().getName())
                     );
                     process.addFlowElement(sequenceFlow);
                 }

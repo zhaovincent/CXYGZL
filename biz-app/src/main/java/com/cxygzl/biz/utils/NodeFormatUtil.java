@@ -268,7 +268,7 @@ public class NodeFormatUtil {
             List<Node> branchs = node.getConditionNodes();
 
             for (Node branch : branchs) {
-                Node children = branch.getChildren();
+                Node children = branch.getChildNode();
                 List<NodeVo> processNodeShowDtos = formatProcessNodeShow(children, completeNodeSet, continueNodeSet, processInstanceId, paramMap);
 
                 NodeVo p = new NodeVo();
@@ -283,7 +283,7 @@ public class NodeFormatUtil {
 
         list.add(nodeVo);
 
-        List<NodeVo> next = formatProcessNodeShow(node.getChildren(), completeNodeSet, continueNodeSet, processInstanceId, paramMap);
+        List<NodeVo> next = formatProcessNodeShow(node.getChildNode(), completeNodeSet, continueNodeSet, processInstanceId, paramMap);
         list.addAll(next);
 
 

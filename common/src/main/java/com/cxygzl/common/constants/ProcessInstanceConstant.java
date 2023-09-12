@@ -48,6 +48,8 @@ public class ProcessInstanceConstant {
     public static class AssignedTypeClass{
         //指定用户
         public static final int USER=1;
+        //系统自动拒绝
+        public static final int SYSTEM_REFUSE=11;
         //发起人自己
         public static final int SELF=5;
         //表单人员

@@ -24,8 +24,7 @@ public class Node {
 
     private Boolean error;
 
-    @JsonProperty("childNode")
-    private Node children;
+    private Node childNode;
 
     private Integer assignedType;
     private Boolean multiple;

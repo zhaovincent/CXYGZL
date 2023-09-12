@@ -114,27 +114,37 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
     /**
      * 创建流程
      *
-     * @param process
+     * @param processVO
      * @return
      */
     @Override
-    public R create(Process process) {
+    public R create(Process processVO) {
 
-        String processStr = process.getProcess();
+        String processStr = processVO.getProcess();
 
-        R<String> r = CoreHttpUtil.createFlow(JSON.parseObject(processStr), StpUtil.getLoginIdAsString());
+
+
+        Node node = JSON.parseObject(processStr, Node.class);
+        com.cxygzl.biz.utils.NodeUtil.handleStarterNode(node, JSON.parseArray(processVO.getFormItems(), FormItemVO.class));
+        com.cxygzl.biz.utils.NodeUtil.handleApproveForm(node, JSON.parseArray(processVO.getFormItems(), FormItemVO.class));
+        com.cxygzl.biz.utils.NodeUtil.handleApprove(node);
+
+
+
+
+        R<String> r = CoreHttpUtil.createFlow(node, StpUtil.getLoginIdAsString());
         if (!r.isOk()) {
             return R.fail(r.getMsg());
         }
         String flowId = r.getData();
 
 
-        NodeUser nodeUser = CommonUtil.toArray(process.getAdmin(), NodeUser.class).get(0);
+        NodeUser nodeUser = CommonUtil.toArray(processVO.getAdmin(), NodeUser.class).get(0);
 
-        if (StrUtil.isNotBlank(process.getFlowId())) {
+        if (StrUtil.isNotBlank(processVO.getFlowId())) {
 
-            Process oldProcess = this.getByFlowId(process.getFlowId());
-            this.hide(process.getFlowId());
+            Process oldProcess = this.getByFlowId(processVO.getFlowId());
+            this.hide(processVO.getFlowId());
             //修改所有的管理员
             this.lambdaUpdate().set(Process::getAdminId, nodeUser.getId()).eq(Process::getUniqueId,
                     oldProcess.getUniqueId()).update(new Process());
@@ -165,19 +175,19 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
         Process p = new Process();
         p.setFlowId(flowId);
-        p.setName(process.getName());
-        p.setLogo(process.getLogo());
-        p.setSettings(process.getSettings());
-        p.setGroupId(process.getGroupId());
-        p.setFormItems(process.getFormItems());
+        p.setName(processVO.getName());
+        p.setLogo(processVO.getLogo());
+        p.setSettings(processVO.getSettings());
+        p.setGroupId(processVO.getGroupId());
+        p.setFormItems(processVO.getFormItems());
         p.setProcess(processStr);
-        p.setRemark(process.getRemark());
+        p.setRemark(processVO.getRemark());
         p.setSort(0);
         p.setHidden(false);
         p.setStop(false);
         p.setAdminId(nodeUser.getId());
         p.setUniqueId(IdUtil.fastSimpleUUID());
-        p.setAdmin(process.getAdmin());
+        p.setAdmin(processVO.getAdmin());
         p.setRangeShow(stringBuilder.toString());
 
 
