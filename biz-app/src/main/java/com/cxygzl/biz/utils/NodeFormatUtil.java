@@ -55,7 +55,7 @@ public class NodeFormatUtil {
             return list;
         }
 
-        String name = node.getName();
+        String name = node.getNodeName();
         Integer type = node.getType();
 
 

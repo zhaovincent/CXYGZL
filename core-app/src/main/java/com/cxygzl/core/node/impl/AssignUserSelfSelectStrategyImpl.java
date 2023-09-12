@@ -32,7 +32,7 @@ public class AssignUserSelfSelectStrategyImpl implements InitializingBean, Assig
         List<String> assignList = new ArrayList<>();
 
         Object variable = variables.get(StrUtil.format("{}_assignee_select", node.getId()));
-        log.info("{}-发起人自选参数:{}", node.getName(), variable);
+        log.info("{}-发起人自选参数:{}", node.getNodeName(), variable);
         if (variable == null) {
             return assignList;
         }

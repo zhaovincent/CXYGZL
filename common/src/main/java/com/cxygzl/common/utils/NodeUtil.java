@@ -24,7 +24,7 @@ public class NodeUtil {
             Node end = new Node();
             end.setId("end");
             end.setType(NodeTypeEnum.END.getValue());
-            end.setName("结束节点");
+            end.setNodeName("结束节点");
             end.setParentId(node.getId());
             node.setChildNode(end);
         }

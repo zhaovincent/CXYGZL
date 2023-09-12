@@ -1,6 +1,5 @@
 package com.cxygzl.common.dto.flow;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -19,8 +18,7 @@ public class Node {
 
     private Integer type;
 
-    @JsonProperty(value = "nodeName")
-    private String name;
+    private String nodeName;
 
     private Boolean error;
 
