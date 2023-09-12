@@ -54,7 +54,7 @@ public class BizHttpUtil {
      *
      * @param nodeRecordParamDto
      */
-    public static void startNodeEvent(ProcessNodeRecordParamDto nodeRecordParamDto) {
+    public static void startNodeEvent(ProcessInstanceNodeRecordParamDto nodeRecordParamDto) {
         post(nodeRecordParamDto, "/remote/startNodeEvent");
     }
 
@@ -63,7 +63,7 @@ public class BizHttpUtil {
      *
      * @param nodeRecordParamDto
      */
-    public static void endNodeEvent(ProcessNodeRecordParamDto nodeRecordParamDto) {
+    public static void endNodeEvent(ProcessInstanceNodeRecordParamDto nodeRecordParamDto) {
         post(nodeRecordParamDto, "/remote/endNodeEvent");
     }
 
@@ -169,31 +169,31 @@ public class BizHttpUtil {
     /**
      * 节点开始指派用户了
      *
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
-    public static void startAssignUser(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        post(processNodeRecordAssignUserParamDto, "/remote/startAssignUser");
+    public static void startAssignUser(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
+        post(processInstanceAssignUserRecordParamDto, "/remote/startAssignUser");
     }
 
     /**
      * 任务结束事件
      *
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
-    public static void taskEndEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        post(processNodeRecordAssignUserParamDto, "/remote/taskEndEvent");
+    public static void taskEndEvent(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
+        post(processInstanceAssignUserRecordParamDto, "/remote/taskEndEvent");
     }
 
     /**
      * 保存抄送数据
      *
-     * @param processCopyDto
+     * @param processInstanceCopyDto
      * @return
      */
-    public static void saveCC(ProcessCopyDto processCopyDto) {
-        post(processCopyDto, "/remote/savecc");
+    public static void saveCC(ProcessInstanceCopyDto processInstanceCopyDto) {
+        post(processInstanceCopyDto, "/remote/savecc");
     }
 
     /**

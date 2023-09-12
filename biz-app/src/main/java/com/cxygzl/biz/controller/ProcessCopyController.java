@@ -1,6 +1,6 @@
 package com.cxygzl.biz.controller;
 
-import com.cxygzl.biz.service.IProcessCopyService;
+import com.cxygzl.biz.service.IProcessInstanceCopyService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +19,7 @@ import javax.annotation.Resource;
 @RequestMapping(value = {"processCopy","api/processCopy"})
 public class ProcessCopyController {
     @Resource
-    private IProcessCopyService processCopyService;
+    private IProcessInstanceCopyService processCopyService;
 
     /**
      * 查询单个抄送详细信息

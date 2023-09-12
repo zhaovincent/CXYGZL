@@ -1,6 +1,6 @@
 package com.cxygzl.biz.service;
 
-import com.cxygzl.biz.entity.ProcessCopy;
+import com.cxygzl.biz.entity.ProcessInstanceCopy;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author Vincent
  * @since 2023-05-20
  */
-public interface IProcessCopyService extends IService<ProcessCopy> {
+public interface IProcessInstanceCopyService extends IService<ProcessInstanceCopy> {
     /**
      * 查询单个抄送详细信息
      * @param id

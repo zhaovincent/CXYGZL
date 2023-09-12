@@ -36,13 +36,13 @@ public class RemoteServiceImpl implements IRemoteService {
     @Resource
     private DeptMapper deptMapper;
     @Resource
-    private IProcessNodeRecordService processNodeRecordService;
+    private IProcessInstanceNodeRecordService processNodeRecordService;
     @Resource
-    private IProcessNodeRecordAssignUserService processNodeRecordAssignUserService;
+    private IProcessInstanceAssignUserRecordService processNodeRecordAssignUserService;
     @Resource
     private IProcessInstanceService processInstanceService;
     @Resource
-    private IProcessCopyService processCopyService;
+    private IProcessInstanceCopyService processCopyService;
     @Resource
     private IProcessService processService;
     @Resource
@@ -97,7 +97,7 @@ public class RemoteServiceImpl implements IRemoteService {
      * @return
      */
     @Override
-    public R saveCC(ProcessCopyDto copyDto) {
+    public R saveCC(ProcessInstanceCopyDto copyDto) {
 
         String processInstanceId = copyDto.getProcessInstanceId();
 
@@ -115,15 +115,15 @@ public class RemoteServiceImpl implements IRemoteService {
                     index--;
                 }
 
-                ProcessCopy processCopy = BeanUtil.copyProperties(copyDto, ProcessCopy.class);
-                processCopy.setGroupId(Long.valueOf(processInstanceRecord.getGroupId()));
-                processCopy.setGroupName(processInstanceRecord.getGroupName());
-                processCopy.setProcessName(processInstanceRecord.getName());
-                processCopy.setStartTime(processInstanceRecord.getCreateTime());
+                ProcessInstanceCopy processInstanceCopy = BeanUtil.copyProperties(copyDto, ProcessInstanceCopy.class);
+                processInstanceCopy.setGroupId(Long.valueOf(processInstanceRecord.getGroupId()));
+                processInstanceCopy.setGroupName(processInstanceRecord.getGroupName());
+                processInstanceCopy.setProcessName(processInstanceRecord.getName());
+                processInstanceCopy.setStartTime(processInstanceRecord.getCreateTime());
 
 
 
-                processCopyService.save(processCopy);
+                processCopyService.save(processInstanceCopy);
             } catch (Exception e) {
                 log.error("Error:", e);
             }
@@ -239,7 +239,7 @@ public class RemoteServiceImpl implements IRemoteService {
      * @return
      */
     @Override
-    public R startNodeEvent(ProcessNodeRecordParamDto recordParamDto) {
+    public R startNodeEvent(ProcessInstanceNodeRecordParamDto recordParamDto) {
         return processNodeRecordService.start(recordParamDto);
     }
 
@@ -280,30 +280,30 @@ public class RemoteServiceImpl implements IRemoteService {
      * @return
      */
     @Override
-    public R endNodeEvent(ProcessNodeRecordParamDto recordParamDto) {
+    public R endNodeEvent(ProcessInstanceNodeRecordParamDto recordParamDto) {
         return processNodeRecordService.complete(recordParamDto);
     }
 
     /**
      * 开始设置执行人
      *
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
     @Override
-    public R startAssignUser(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        return processNodeRecordAssignUserService.addAssignUser(processNodeRecordAssignUserParamDto);
+    public R startAssignUser(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
+        return processNodeRecordAssignUserService.addAssignUser(processInstanceAssignUserRecordParamDto);
     }
 
     /**
      * 任务结束事件
      *
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
     @Override
-    public R taskEndEvent(ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        return processNodeRecordAssignUserService.completeTaskEvent(processNodeRecordAssignUserParamDto);
+    public R taskEndEvent(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
+        return processNodeRecordAssignUserService.completeTaskEvent(processInstanceAssignUserRecordParamDto);
     }
 
     /**

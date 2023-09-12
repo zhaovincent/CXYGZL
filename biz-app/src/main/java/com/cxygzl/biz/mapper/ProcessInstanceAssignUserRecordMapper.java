@@ -1,6 +1,6 @@
 package com.cxygzl.biz.mapper;
 
-import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
+import com.cxygzl.biz.entity.ProcessInstanceAssignUserRecord;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author cxygzl
  * @since 2023-05-10
  */
-public interface ProcessNodeRecordAssignUserMapper extends BaseMapper<ProcessNodeRecordAssignUser> {
+public interface ProcessInstanceAssignUserRecordMapper extends BaseMapper<ProcessInstanceAssignUserRecord> {
 
 }

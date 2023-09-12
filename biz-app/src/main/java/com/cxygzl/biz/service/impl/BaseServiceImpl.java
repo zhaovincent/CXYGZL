@@ -1,10 +1,10 @@
 package com.cxygzl.biz.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
-import com.cxygzl.biz.entity.ProcessCopy;
+import com.cxygzl.biz.entity.ProcessInstanceCopy;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.service.IBaseService;
-import com.cxygzl.biz.service.IProcessCopyService;
+import com.cxygzl.biz.service.IProcessInstanceCopyService;
 import com.cxygzl.biz.service.IProcessInstanceRecordService;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.common.dto.IndexPageStatistics;
@@ -19,7 +19,7 @@ import javax.annotation.Resource;
 public class BaseServiceImpl implements IBaseService {
 
     @Resource
-    private IProcessCopyService processCopyService;
+    private IProcessInstanceCopyService processCopyService;
     @Resource
     private IProcessInstanceRecordService processInstanceRecordService;
 
@@ -34,7 +34,7 @@ public class BaseServiceImpl implements IBaseService {
         String userId = StpUtil.getLoginIdAsString();
 
 
-        Long coypNum = processCopyService.lambdaQuery().eq(ProcessCopy::getUserId, userId).count();
+        Long coypNum = processCopyService.lambdaQuery().eq(ProcessInstanceCopy::getUserId, userId).count();
 
         Long startendNum = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getUserId, userId).count();
 

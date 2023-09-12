@@ -11,7 +11,7 @@ import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
-import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
+import com.cxygzl.biz.entity.ProcessInstanceAssignUserRecord;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.vo.FormItemVO;
@@ -38,11 +38,11 @@ public class TaskServiceImpl implements ITaskService {
     @Resource
     private IProcessService processService;
     @Resource
-    private IProcessNodeRecordService processNodeRecordService;
+    private IProcessInstanceNodeRecordService processNodeRecordService;
     @Resource
     private IProcessNodeDataService nodeDataService;
     @Resource
-    private IProcessNodeRecordAssignUserService processNodeRecordAssignUserService;
+    private IProcessInstanceAssignUserRecordService processNodeRecordAssignUserService;
     @Resource
     private IProcessInstanceRecordService processInstanceRecordService;
 
@@ -73,12 +73,12 @@ public class TaskServiceImpl implements ITaskService {
         //是否是当前活动任务
         Boolean currentTask = taskResultDto.getCurrentTask();
         if(!currentTask){
-            List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
-                    .eq(ProcessNodeRecordAssignUser::getTaskId, taskId)
-                    .eq(ProcessNodeRecordAssignUser::getUserId, userId)
-                    .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.YJS.getCode())
+            List<ProcessInstanceAssignUserRecord> list = processNodeRecordAssignUserService.lambdaQuery()
+                    .eq(ProcessInstanceAssignUserRecord::getTaskId, taskId)
+                    .eq(ProcessInstanceAssignUserRecord::getUserId, userId)
+                    .eq(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.YJS.getCode())
 
-                    .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
+                    .orderByDesc(ProcessInstanceAssignUserRecord::getEndTime)
                     .list();
 
             if(CollUtil.isNotEmpty(list)){

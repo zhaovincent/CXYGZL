@@ -19,7 +19,7 @@ import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.NodeFormatUtil;
 import com.cxygzl.biz.vo.FormItemVO;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
-import com.cxygzl.biz.vo.ProcessCopyVo;
+import com.cxygzl.biz.vo.ProcessInstanceCopyVo;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
@@ -45,14 +45,14 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     @Resource
     private IProcessInstanceRecordService processInstanceRecordService;
     @Resource
-    private IProcessCopyService processCopyService;
+    private IProcessInstanceCopyService processCopyService;
 
     @Resource
     private IProcessService processService;
     @Resource
-    private IProcessNodeRecordService processNodeRecordService;
+    private IProcessInstanceNodeRecordService processNodeRecordService;
     @Resource
-    private IProcessNodeRecordAssignUserService processNodeRecordAssignUserService;
+    private IProcessInstanceAssignUserRecordService processNodeRecordAssignUserService;
 
 
     /**
@@ -264,14 +264,14 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         String userId = StpUtil.getLoginIdAsString();
 
-        Page<ProcessCopy> page = processCopyService.lambdaQuery()
-                .eq(ProcessCopy::getUserId, userId)
-                .orderByDesc(ProcessCopy::getNodeTime)
+        Page<ProcessInstanceCopy> page = processCopyService.lambdaQuery()
+                .eq(ProcessInstanceCopy::getUserId, userId)
+                .orderByDesc(ProcessInstanceCopy::getNodeTime)
                 .page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()));
 
-        List<ProcessCopy> records = page.getRecords();
+        List<ProcessInstanceCopy> records = page.getRecords();
 
-        List<ProcessCopyVo> processCopyVoList = BeanUtil.copyToList(records, ProcessCopyVo.class);
+        List<ProcessInstanceCopyVo> processCopyVoList = BeanUtil.copyToList(records, ProcessInstanceCopyVo.class);
 
         if (CollUtil.isNotEmpty(records)) {
 
@@ -284,7 +284,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 startUserList.add(user);
             }
 
-            for (ProcessCopyVo record : processCopyVoList) {
+            for (ProcessInstanceCopyVo record : processCopyVoList) {
 
 
                 UserDto startUser = startUserList.stream().filter(w -> w.getId()
@@ -348,11 +348,11 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                     });
             if (!r.isOk()) {
 
-                List<ProcessNodeRecordAssignUser> list = processNodeRecordAssignUserService.lambdaQuery()
-                        .eq(ProcessNodeRecordAssignUser::getTaskId, nodeFormatParamVo.getTaskId())
-                        .eq(ProcessNodeRecordAssignUser::getStatus, NodeStatusEnum.YJS.getCode())
+                List<ProcessInstanceAssignUserRecord> list = processNodeRecordAssignUserService.lambdaQuery()
+                        .eq(ProcessInstanceAssignUserRecord::getTaskId, nodeFormatParamVo.getTaskId())
+                        .eq(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.YJS.getCode())
 
-                        .orderByDesc(ProcessNodeRecordAssignUser::getEndTime)
+                        .orderByDesc(ProcessInstanceAssignUserRecord::getEndTime)
                         .list();
 
                 String data = list.get(0).getData();
@@ -371,11 +371,11 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         Set<String> completeNodeSet=new HashSet<>();
 
         if(StrUtil.isNotBlank(processInstanceId)){
-            List<ProcessNodeRecord> processNodeRecordList = processNodeRecordService.lambdaQuery()
-                    .eq(ProcessNodeRecord::getProcessInstanceId, processInstanceId)
-                    .eq(ProcessNodeRecord::getStatus, NodeStatusEnum.YJS.getCode())
+            List<ProcessInstanceNodeRecord> processInstanceNodeRecordList = processNodeRecordService.lambdaQuery()
+                    .eq(ProcessInstanceNodeRecord::getProcessInstanceId, processInstanceId)
+                    .eq(ProcessInstanceNodeRecord::getStatus, NodeStatusEnum.YJS.getCode())
                     .list();
-            Set<String> collect = processNodeRecordList.stream().map(w -> w.getNodeId()).collect(Collectors.toSet());
+            Set<String> collect = processInstanceNodeRecordList.stream().map(w -> w.getNodeId()).collect(Collectors.toSet());
             completeNodeSet.addAll(collect);
         }
 

@@ -56,7 +56,7 @@ public class RemoteController {
      * @return
      */
     @PostMapping("savecc")
-    public R saveCC(@RequestBody ProcessCopyDto copyDto) {
+    public R saveCC(@RequestBody ProcessInstanceCopyDto copyDto) {
         return remoteService.saveCC(copyDto);
     }
 
@@ -125,7 +125,7 @@ public class RemoteController {
      * @return
      */
     @PostMapping("startNodeEvent")
-    public R startNodeEvent(@RequestBody ProcessNodeRecordParamDto recordParamDto) {
+    public R startNodeEvent(@RequestBody ProcessInstanceNodeRecordParamDto recordParamDto) {
         return remoteService.startNodeEvent(recordParamDto);
     }
 
@@ -148,30 +148,30 @@ public class RemoteController {
      * @return
      */
     @PostMapping("endNodeEvent")
-    public R endNodeEvent(@RequestBody ProcessNodeRecordParamDto recordParamDto) {
+    public R endNodeEvent(@RequestBody ProcessInstanceNodeRecordParamDto recordParamDto) {
         return remoteService.endNodeEvent(recordParamDto);
     }
 
     /**
      * 开始设置执行人
      *
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
     @PostMapping("startAssignUser")
-    public R startAssignUser(@RequestBody ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        return remoteService.startAssignUser(processNodeRecordAssignUserParamDto);
+    public R startAssignUser(@RequestBody ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
+        return remoteService.startAssignUser(processInstanceAssignUserRecordParamDto);
     }
 
     /**
      * 任务结束事件
      *
-     * @param processNodeRecordAssignUserParamDto
+     * @param processInstanceAssignUserRecordParamDto
      * @return
      */
     @PostMapping("taskEndEvent")
-    public R taskEndEvent(@RequestBody ProcessNodeRecordAssignUserParamDto processNodeRecordAssignUserParamDto) {
-        return remoteService.taskEndEvent(processNodeRecordAssignUserParamDto);
+    public R taskEndEvent(@RequestBody ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
+        return remoteService.taskEndEvent(processInstanceAssignUserRecordParamDto);
     }
 
     /**

@@ -19,8 +19,8 @@ import java.util.Date;
 @Getter
 @Setter
 @Accessors(chain = true)
-@TableName("`process_node_record_assign_user`")
-public class ProcessNodeRecordAssignUser  extends BaseEntity {
+@TableName("`process_instance_assign_user_record`")
+public class ProcessInstanceAssignUserRecord extends BaseEntity {
 
 
     /**

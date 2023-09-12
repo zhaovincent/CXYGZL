@@ -8,9 +8,9 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cxygzl.biz.entity.Process;
-import com.cxygzl.biz.entity.ProcessCopy;
-import com.cxygzl.biz.mapper.ProcessCopyMapper;
-import com.cxygzl.biz.service.IProcessCopyService;
+import com.cxygzl.biz.entity.ProcessInstanceCopy;
+import com.cxygzl.biz.mapper.ProcessInstanceCopyMapper;
+import com.cxygzl.biz.service.IProcessInstanceCopyService;
 import com.cxygzl.biz.service.IProcessNodeDataService;
 import com.cxygzl.biz.service.IProcessService;
 import com.cxygzl.biz.vo.FormItemVO;
@@ -34,7 +34,7 @@ import java.util.Map;
  * @since 2023-05-20
  */
 @Service
-public class ProcessCopyServiceImpl extends ServiceImpl<ProcessCopyMapper, ProcessCopy> implements IProcessCopyService {
+public class ProcessInstanceCopyServiceImpl extends ServiceImpl<ProcessInstanceCopyMapper, ProcessInstanceCopy> implements IProcessInstanceCopyService {
     @Resource
     private IProcessService processService;
     @Resource
@@ -48,18 +48,18 @@ public class ProcessCopyServiceImpl extends ServiceImpl<ProcessCopyMapper, Proce
      */
     @Override
     public Object querySingleDetail(long id) {
-        ProcessCopy processCopy = this.getById(id);
-        String flowId = processCopy.getFlowId();
+        ProcessInstanceCopy processInstanceCopy = this.getById(id);
+        String flowId = processInstanceCopy.getFlowId();
         Process oaForms = processService.getByFlowId(flowId);
         if(oaForms==null){
             return R.fail("流程不存在");
         }
-        String formData = processCopy.getFormData();
+        String formData = processInstanceCopy.getFormData();
 
         Map<String, Object> variableMap = JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
         });
 
-        String nodeId = processCopy.getNodeId();
+        String nodeId = processInstanceCopy.getNodeId();
 
 
         String data = nodeDataService.getNodeData(flowId, nodeId).getData();

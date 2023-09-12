@@ -8,9 +8,9 @@ import com.alibaba.fastjson2.JSON;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
-import com.cxygzl.biz.entity.ProcessNodeRecordAssignUser;
+import com.cxygzl.biz.entity.ProcessInstanceAssignUserRecord;
 import com.cxygzl.biz.service.IProcessInstanceRecordService;
-import com.cxygzl.biz.service.IProcessNodeRecordAssignUserService;
+import com.cxygzl.biz.service.IProcessInstanceAssignUserRecordService;
 import com.cxygzl.biz.service.IRemoteService;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.biz.vo.node.UserVo;
@@ -96,17 +96,17 @@ public class NodeFormatUtil {
 
             // 用户列表
             if (StrUtil.isNotBlank(processInstanceId)) {
-                IProcessNodeRecordAssignUserService processNodeRecordAssignUserService = SpringUtil.getBean(IProcessNodeRecordAssignUserService.class);
-                List<ProcessNodeRecordAssignUser> processNodeRecordAssignUserList = processNodeRecordAssignUserService
+                IProcessInstanceAssignUserRecordService processNodeRecordAssignUserService = SpringUtil.getBean(IProcessInstanceAssignUserRecordService.class);
+                List<ProcessInstanceAssignUserRecord> processInstanceAssignUserRecordList = processNodeRecordAssignUserService
                         .lambdaQuery().
-                        eq(ProcessNodeRecordAssignUser::getNodeId, node.getId())
-                        .eq(ProcessNodeRecordAssignUser::getProcessInstanceId, processInstanceId)
-                        .orderByAsc(ProcessNodeRecordAssignUser::getCreateTime)
+                        eq(ProcessInstanceAssignUserRecord::getNodeId, node.getId())
+                        .eq(ProcessInstanceAssignUserRecord::getProcessInstanceId, processInstanceId)
+                        .orderByAsc(ProcessInstanceAssignUserRecord::getCreateTime)
                         .list();
-                Map<String, List<ProcessNodeRecordAssignUser>> map = processNodeRecordAssignUserList.stream().collect(Collectors.groupingBy(w -> w.getTaskId()));
+                Map<String, List<ProcessInstanceAssignUserRecord>> map = processInstanceAssignUserRecordList.stream().collect(Collectors.groupingBy(w -> w.getTaskId()));
 
-                for (Map.Entry<String, List<ProcessNodeRecordAssignUser>> entry : map.entrySet()) {
-                    List<ProcessNodeRecordAssignUser> value = entry.getValue();
+                for (Map.Entry<String, List<ProcessInstanceAssignUserRecord>> entry : map.entrySet()) {
+                    List<ProcessInstanceAssignUserRecord> value = entry.getValue();
                     List<UserVo> collect = value.stream().filter(w->!ProcessInstanceConstant.DEFAULT_EMPTY_ASSIGN.equals(w.getUserId())).map(w -> {
                         UserVo userVo = buildUser((w.getUserId()));
                         userVo.setShowTime(w.getEndTime());
@@ -119,7 +119,7 @@ public class NodeFormatUtil {
 
                 }
 
-                if (processNodeRecordAssignUserList.isEmpty()) {
+                if (processInstanceAssignUserRecordList.isEmpty()) {
                     if (assignedType == ProcessInstanceConstant.AssignedTypeClass.SELF) {
                         //发起人自己
                         userVoList.addAll(CollUtil.newArrayList(buildRootUser(processInstanceId)));

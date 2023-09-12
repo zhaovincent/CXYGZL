@@ -3,10 +3,10 @@ package com.cxygzl.common.dto;
 import lombok.Data;
 
 /**
- * 流程节点记录
+ * 流程节点记录-执行人
  */
 @Data
-public class ProcessNodeRecordParamDto {
+public class ProcessInstanceAssignUserRecordParamDto {
 
 
     /**
@@ -23,20 +23,19 @@ public class ProcessNodeRecordParamDto {
      * 表单数据
      */
     private String data;
+    private String localData;
 
     private String nodeId;
 
     /**
-     * 节点类型
+     * 用户id
      */
-    private String nodeType;
-
-    /**
-     * 节点名字
-     */
-    private String nodeName;
-
+    private String userId;
     private String executionId;
+    private String taskId;
+    private String approveDesc;
+    private String nodeName;
+    private String taskType;
 
 
 

@@ -689,8 +689,8 @@ CREATE TABLE `process`  (
 -- ----------------------------
 -- Table structure for process_copy
 -- ----------------------------
-DROP TABLE IF EXISTS `process_copy`;
-CREATE TABLE `process_copy`  (
+DROP TABLE IF EXISTS `process_instance_copy`;
+CREATE TABLE `process_instance_copy`  (
                                  `id` bigint NOT NULL COMMENT 'id',
                                  `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
                                  `create_time` datetime NOT NULL COMMENT '创建时间',
@@ -746,8 +746,8 @@ CREATE TABLE `process_node_data`  (
 -- ----------------------------
 -- Table structure for process_node_record
 -- ----------------------------
-DROP TABLE IF EXISTS `process_node_record`;
-CREATE TABLE `process_node_record`  (
+DROP TABLE IF EXISTS `process_instance_node_record`;
+CREATE TABLE `process_instance_node_record`  (
                                         `id` bigint NOT NULL COMMENT 'id',
                                         `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
                                         `create_time` datetime NOT NULL COMMENT '创建时间',
@@ -769,8 +769,8 @@ CREATE TABLE `process_node_record`  (
 -- ----------------------------
 -- Table structure for process_node_record_assign_user
 -- ----------------------------
-DROP TABLE IF EXISTS `process_node_record_assign_user`;
-CREATE TABLE `process_node_record_assign_user`  (
+DROP TABLE IF EXISTS `process_instance_assign_user_record`;
+CREATE TABLE `process_instance_assign_user_record`  (
                                                     `id` bigint NOT NULL COMMENT 'id',
                                                     `del_flag` tinyint(1) NOT NULL COMMENT '逻辑删除字段',
                                                     `create_time` datetime NOT NULL COMMENT '创建时间',
