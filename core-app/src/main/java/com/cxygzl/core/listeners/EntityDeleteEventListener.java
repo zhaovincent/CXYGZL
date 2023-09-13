@@ -12,6 +12,7 @@ import org.flowable.common.engine.api.delegate.event.FlowableEntityEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
 import org.flowable.engine.TaskService;
+import org.flowable.engine.delegate.event.impl.FlowableEntityEventImpl;
 import org.flowable.task.service.impl.persistence.entity.TaskEntityImpl;
 
 /**
@@ -29,13 +30,19 @@ public class EntityDeleteEventListener implements FlowableEventListener {
     public void onEvent(FlowableEvent event) {
 
 
-
         if (event.getType().toString().equals(FlowableEngineEventType.ENTITY_DELETED.toString())) {
             //流程开始了
-            org.flowable.engine.delegate.event.impl.FlowableEntityEventImpl flowableProcessStartedEvent = (org.flowable.engine.delegate.event.impl.FlowableEntityEventImpl) event;
+            Object entity = null;
+            if (event instanceof org.flowable.common.engine.impl.event.FlowableEntityEventImpl) {
+                org.flowable.common.engine.impl.event.FlowableEntityEventImpl f = (org.flowable.common.engine.impl.event.FlowableEntityEventImpl) event;
+                entity = f.getEntity();
+            } else if (event instanceof org.flowable.engine.delegate.event.impl.FlowableEntityEventImpl) {
+                org.flowable.engine.delegate.event.impl.FlowableEntityEventImpl f = (FlowableEntityEventImpl) event;
+                entity = f.getEntity();
+            }
 
-            Object entity = flowableProcessStartedEvent.getEntity();
-            if(entity instanceof TaskEntityImpl){
+
+            if (entity != null && entity instanceof TaskEntityImpl) {
 
                 TaskService taskService = SpringUtil.getBean(TaskService.class);
 
@@ -64,12 +71,10 @@ public class EntityDeleteEventListener implements FlowableEventListener {
                 processInstanceAssignUserRecordParamDto.setUserId((assignee));
                 processInstanceAssignUserRecordParamDto.setTaskId(task.getId());
                 processInstanceAssignUserRecordParamDto.setNodeName(task.getName());
-                processInstanceAssignUserRecordParamDto.setFlowUniqueId(task.getVariableLocal(ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID,String.class));
+                processInstanceAssignUserRecordParamDto.setFlowUniqueId(task.getVariableLocal(ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID, String.class));
                 String taskType = task.getVariableLocal(ProcessInstanceConstant.VariableKey.TASK_TYPE, String.class);
                 //RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
                 processInstanceAssignUserRecordParamDto.setTaskType(taskType);
-
-
 
 
                 processInstanceAssignUserRecordParamDto.setExecutionId(task.getExecutionId());

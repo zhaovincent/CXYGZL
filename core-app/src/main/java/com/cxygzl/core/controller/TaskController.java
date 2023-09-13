@@ -11,7 +11,12 @@ import com.cxygzl.common.dto.*;
 import com.cxygzl.core.utils.NodeUtil;
 import com.cxygzl.core.vo.TaskCommentDto;
 import lombok.extern.slf4j.Slf4j;
+import org.flowable.bpmn.model.BpmnModel;
+import org.flowable.bpmn.model.MultiInstanceLoopCharacteristics;
+import org.flowable.bpmn.model.Process;
+import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.*;
+import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.task.Comment;
 import org.flowable.task.api.DelegationState;
 import org.flowable.task.api.Task;
@@ -23,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID;
 
@@ -376,6 +382,17 @@ public class TaskController {
         if (task == null) {
             return R.fail("任务不存在");
         }
+        Map<String, UserTask> allUserTaskMap = getAllUserTaskMap(task.getProcessDefinitionId());
+        UserTask userTaskModel = allUserTaskMap.get(task.getTaskDefinitionKey());
+        if (!userTaskModel.hasMultiInstanceLoopCharacteristics()) {
+            return R.fail("非多实例任务，不能加签");
+        }
+
+        MultiInstanceLoopCharacteristics loopCharacteristics = userTaskModel.getLoopCharacteristics();
+        if (loopCharacteristics.isSequential()) {
+            return R.fail("串行多实例不支持加签");
+        }
+
 
         taskService.setVariables(task.getId(), taskParamDto.getParamMap());
 
@@ -396,14 +413,27 @@ public class TaskController {
             ), userId);
         }
 
+
         List<String> targetUserIdList = taskParamDto.getTargetUserIdList();
         for (String s : targetUserIdList) {
+
             runtimeService.addMultiInstanceExecution(task.getTaskDefinitionKey(), task.getProcessInstanceId(),
-                    Collections.singletonMap(StrUtil.format("{}_assignee_temp", task.getTaskDefinitionKey()), s)
+                    Collections.singletonMap(loopCharacteristics.getElementVariable(), s)
             );
         }
 
         return R.success();
+    }
+
+
+    private Map<String, UserTask> getAllUserTaskMap(String processDefinitionId) {
+        ProcessDefinition processDefinition = repositoryService
+                .createProcessDefinitionQuery()
+                .processDefinitionId(processDefinitionId).singleResult();
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinition.getId());
+        Process process = bpmnModel.getProcesses().get(0);
+        return process.findFlowElementsOfType(UserTask.class)
+                .stream().collect(Collectors.toMap(UserTask::getId, a -> a, (k1, k2) -> k1));
     }
 
     /**
@@ -419,6 +449,18 @@ public class TaskController {
         if (task == null) {
             return R.fail("任务不存在");
         }
+
+        Map<String, UserTask> allUserTaskMap = getAllUserTaskMap(task.getProcessDefinitionId());
+        UserTask userTaskModel = allUserTaskMap.get(task.getTaskDefinitionKey());
+        if (!userTaskModel.hasMultiInstanceLoopCharacteristics()) {
+            return R.fail("非多实例任务，不能减签");
+        }
+
+        MultiInstanceLoopCharacteristics loopCharacteristics = userTaskModel.getLoopCharacteristics();
+        if (loopCharacteristics.isSequential()) {
+            return R.fail("串行多实例不支持减签");
+        }
+
         taskService.setVariables(task.getId(), taskParamDto.getParamMap());
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
