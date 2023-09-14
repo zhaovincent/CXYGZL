@@ -15,10 +15,7 @@ import com.cxygzl.core.expression.condition.NodeExpressionStrategyFactory;
 import com.cxygzl.core.listeners.*;
 import com.cxygzl.core.node.IDataStoreHandler;
 import com.cxygzl.core.node.NodeDataStoreFactory;
-import com.cxygzl.core.servicetask.ApproveServiceTask;
-import com.cxygzl.core.servicetask.CopyServiceTask;
-import com.cxygzl.core.servicetask.RouteServiceTask;
-import com.cxygzl.core.servicetask.TriggerServiceTask;
+import com.cxygzl.core.servicetask.*;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
@@ -29,7 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.cxygzl.common.constants.ProcessInstanceConstant.MERGE_GATEWAY_FLAG;
-import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.*;
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE;
+import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE;
 
 /**
  * 模型工具类 处理模型构建相关的
@@ -408,6 +406,12 @@ public class ModelUtil {
 
 
             flowElementList.add(buildTriggerNode(node));
+        }
+        //异步触发器
+        if (node.getType() == NodeTypeEnum.ASYN_TRIGGER.getValue().intValue()) {
+
+
+            flowElementList.addAll(buildAsynTriggerNode(node));
         }
         //路由
         if (node.getType() == NodeTypeEnum.ROUTE.getValue().intValue()) {
@@ -836,6 +840,54 @@ public class ModelUtil {
         serviceTask.addExtensionElement(e);
 
         return serviceTask;
+    }
+
+    /**
+     * 创建异步触发器节点
+     *
+     * @param node
+     * @return
+     */
+    private static List<FlowElement> buildAsynTriggerNode(Node node) {
+
+        List<FlowElement> flowElementList=new ArrayList<>();
+
+        String messageId = StrUtil.format("message_{}_{}", node.getId(), IdUtil.fastSimpleUUID());
+
+        Message message=new Message();
+        message.setId(messageId);
+        message.setName(StrUtil.format("{}_消息",node.getNodeName()));
+
+        {
+            ServiceTask serviceTask = new ServiceTask();
+            serviceTask.setId(node.getId());
+            serviceTask.setName(node.getNodeName());
+            serviceTask.setImplementationType("class");
+            serviceTask.setImplementation(AsynTriggerServiceTask.class.getCanonicalName());
+            serviceTask.setAsynchronous(true);
+            ExtensionElement e = new ExtensionElement();
+            {
+
+
+                e.setName("flowable:failedJobRetryTimeCycle");
+                //上面的例子会让作业执行器重试5次，并在每次重试前等待1分钟。
+                e.setElementText("R5/PT1M");
+
+            }
+            serviceTask.addExtensionElement(e);
+
+            flowElementList.add(serviceTask);
+
+        }
+        {
+            IntermediateCatchEvent intermediateCatchEvent=new IntermediateCatchEvent();
+//            intermediateCatchEvent.setId();
+//            intermediateCatchEvent.se
+        }
+
+
+
+        return flowElementList;
     }
 
     /**
