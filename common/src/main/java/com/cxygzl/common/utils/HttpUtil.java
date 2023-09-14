@@ -70,14 +70,16 @@ public class HttpUtil {
 
     /**
      * 流程扩展请求
+     *
      * @param httpSetting
      * @param paramMap
      * @param flowId
      * @param processInstanceId
+     * @param messageNotifyId
      * @return
      */
     public static String flowExtenstionHttpRequest(HttpSetting httpSetting, Map<String, Object> paramMap, String flowId,
-                                                   String processInstanceId) {
+                                                   String processInstanceId,String messageNotifyId) {
         Map<String, String> headerParamMap = new HashMap<>();
         {
             List<HttpSettingData> headerSetting = httpSetting.getHeader();
@@ -96,6 +98,7 @@ public class HttpUtil {
             //存入默认值
             bodyMap.put("flowId", flowId);
             bodyMap.put("processInstanceId", processInstanceId);
+            bodyMap.put("messageNotifyId", messageNotifyId);
             List<HttpSettingData> bodySetting = httpSetting.getBody();
             for (HttpSettingData httpSettingData : bodySetting) {
                 if (httpSettingData.getValueMode()) {

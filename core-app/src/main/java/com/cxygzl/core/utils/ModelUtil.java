@@ -44,6 +44,7 @@ public class ModelUtil {
         BpmnModel bpmnModel = new BpmnModel();
         bpmnModel.setTargetNamespace("cxygzl");
 
+
         Process process = new Process();
         process.setId(flowId);
         process.setName(processName);
@@ -150,7 +151,7 @@ public class ModelUtil {
 
 
         //创建所有的节点
-        buildAllNode(process, nodeDto, flowId);
+        buildAllNode(process, nodeDto, flowId, bpmnModel);
         //创建所有的内部节点连接线
         buildAllNodeInnerSequence(process, nodeDto, flowId);
         //创建节点间连线
@@ -169,14 +170,15 @@ public class ModelUtil {
      * @param process
      * @param nodeDto
      * @param flowId
+     * @param bpmnModel
      */
-    public static void buildAllNode(Process process, Node nodeDto, String flowId) {
+    public static void buildAllNode(Process process, Node nodeDto, String flowId,BpmnModel bpmnModel) {
         if (!NodeUtil.isNode(nodeDto)) {
             return;
         }
 
 
-        List<FlowElement> flowElementList = buildNode(nodeDto, flowId);
+        List<FlowElement> flowElementList = buildNode(nodeDto, flowId,process, bpmnModel);
         for (FlowElement flowElement : flowElementList) {
             if (process.getFlowElement(flowElement.getId()) == null) {
                 process.addFlowElement(flowElement);
@@ -192,18 +194,18 @@ public class ModelUtil {
             List<Node> branchs = nodeDto.getConditionNodes();
             for (Node branch : branchs) {
                 buildAllNode(process, branch.getChildNode(),
-                        flowId);
+                        flowId, bpmnModel);
 
 
             }
             if (NodeUtil.isNode(children)) {
-                buildAllNode(process, children, flowId);
+                buildAllNode(process, children, flowId, bpmnModel);
             }
 
         } else {
 
             if (NodeUtil.isNode(children)) {
-                buildAllNode(process, children, flowId);
+                buildAllNode(process, children, flowId, bpmnModel);
             }
         }
 
@@ -358,11 +360,13 @@ public class ModelUtil {
     /**
      * 构建节点
      *
-     * @param node   前端传输节点
+     * @param node      前端传输节点
      * @param flowId
+     * @param process
+     * @param bpmnModel
      * @return
      */
-    private static List<FlowElement> buildNode(Node node, String flowId) {
+    private static List<FlowElement> buildNode(Node node, String flowId,Process process,BpmnModel bpmnModel) {
         List<FlowElement> flowElementList = new ArrayList<>();
         if (!NodeUtil.isNode(node)) {
             return flowElementList;
@@ -411,7 +415,7 @@ public class ModelUtil {
         if (node.getType() == NodeTypeEnum.ASYN_TRIGGER.getValue().intValue()) {
 
 
-            flowElementList.addAll(buildAsynTriggerNode(node));
+            flowElementList.addAll(buildAsynTriggerNode(node, bpmnModel));
         }
         //路由
         if (node.getType() == NodeTypeEnum.ROUTE.getValue().intValue()) {
@@ -846,25 +850,31 @@ public class ModelUtil {
      * 创建异步触发器节点
      *
      * @param node
+     * @param bpmnModel
      * @return
      */
-    private static List<FlowElement> buildAsynTriggerNode(Node node) {
+    private static List<FlowElement> buildAsynTriggerNode(Node node,BpmnModel bpmnModel) {
+        node.setHeadId(StrUtil.format("asyn_trigger_service_task_{}", node.getId()));
+
 
         List<FlowElement> flowElementList=new ArrayList<>();
 
-        String messageId = StrUtil.format("message_{}_{}", node.getId(), IdUtil.fastSimpleUUID());
+        String messageId = StrUtil.format("message_notify_{}", node.getId());
 
         Message message=new Message();
         message.setId(messageId);
         message.setName(StrUtil.format("{}_消息",node.getNodeName()));
+        bpmnModel.addMessage(message);
 
         {
             ServiceTask serviceTask = new ServiceTask();
-            serviceTask.setId(node.getId());
-            serviceTask.setName(node.getNodeName());
+            serviceTask.setId(StrUtil.format("asyn_trigger_service_task_{}",node.getId()));
+            serviceTask.setName(StrUtil.format("{}_请求",node.getNodeName()));
             serviceTask.setImplementationType("class");
             serviceTask.setImplementation(AsynTriggerServiceTask.class.getCanonicalName());
             serviceTask.setAsynchronous(true);
+            serviceTask.setExtensionElements(FlowableUtils.generateFlowNodeIdExtensionMap(node.getId()));
+
             ExtensionElement e = new ExtensionElement();
             {
 
@@ -881,8 +891,29 @@ public class ModelUtil {
         }
         {
             IntermediateCatchEvent intermediateCatchEvent=new IntermediateCatchEvent();
-//            intermediateCatchEvent.setId();
-//            intermediateCatchEvent.se
+            intermediateCatchEvent.setId(node.getId());
+            intermediateCatchEvent.setName(StrUtil.format("{}_消息捕获",node.getNodeName()));
+            ExtensionElement e = new ExtensionElement();
+            {
+
+                HashMap<String, List<ExtensionAttribute>> attributes = new HashMap<>();
+
+                ArrayList<ExtensionAttribute> value1 = new ArrayList<>();
+                {
+                    ExtensionAttribute e1 = new ExtensionAttribute();
+                    e1.setName("messageRef");
+                    e1.setValue(messageId);
+                    value1.add(e1);
+                }
+
+                attributes.put(IdUtil.fastSimpleUUID(), value1);
+                e.setName("flowable:messageEventDefinition");
+
+                e.setAttributes(attributes);
+
+            }
+            intermediateCatchEvent.addExtensionElement(e);
+            flowElementList.add(intermediateCatchEvent);
         }
 
 
@@ -1148,6 +1179,19 @@ public class ModelUtil {
 
             {
                 SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeId, gatewayId, "${12==12}", null);
+                sequenceFlowList.add(sequenceFlow);
+            }
+
+
+        }
+        if (node.getType() == NodeTypeEnum.ASYN_TRIGGER.getValue().intValue()) {
+
+
+            String gatewayId = StrUtil.format("asyn_trigger_service_task_{}", nodeId);
+
+
+            {
+                SequenceFlow sequenceFlow = buildSingleSequenceFlow(gatewayId, nodeId, "${12==12}", null);
                 sequenceFlowList.add(sequenceFlow);
             }
 

@@ -42,7 +42,7 @@ public class TriggerServiceTask implements JavaDelegate {
         String result = null;
         try {
 
-            result =  HttpUtil.flowExtenstionHttpRequest(backNotify, variables, flowId, processInstanceId);
+            result =  HttpUtil.flowExtenstionHttpRequest(backNotify, variables, flowId, processInstanceId, null);
 
             log.info(" 返回值:{}", result);
         } catch (Exception e) {

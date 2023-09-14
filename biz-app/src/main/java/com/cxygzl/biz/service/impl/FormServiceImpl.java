@@ -198,7 +198,7 @@ public class FormServiceImpl implements IFormService {
         String result = com.cxygzl.common.utils.HttpUtil.flowExtenstionHttpRequest(dynamicFormConfig,
                 paramMap,
                 flowId,
-                processInstanceId);
+                processInstanceId, null);
         JSONObject jsonObject = JSON.parseObject(result);
         if (jsonObject.isEmpty()) {
             return;

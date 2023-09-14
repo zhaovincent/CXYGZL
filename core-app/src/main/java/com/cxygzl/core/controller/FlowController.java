@@ -1,7 +1,7 @@
 package com.cxygzl.core.controller;
 
-import cn.hutool.core.codec.Base64;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -13,9 +13,11 @@ import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.HttpSetting;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.HttpUtil;
+import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.ModelUtil;
 import com.cxygzl.core.utils.NodeUtil;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.BpmnAutoLayout;
 import org.flowable.bpmn.converter.BpmnXMLConverter;
@@ -37,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -117,6 +120,27 @@ public class FlowController {
     }
 
     /**
+     * 唤醒消息事件
+     * @param messageDto
+     * @return
+     */
+    @PostMapping("notifyMsg")
+    public R notifyMsg(@RequestBody NotifyMessageDto messageDto){
+
+        String msgId = NodeDataStoreFactory.getInstance().get("msgId", messageDto.getMessageNotifyId());
+        String nodeId = NodeDataStoreFactory.getInstance().get("nodeId", messageDto.getMessageNotifyId());
+
+
+        Execution execution = runtimeService.createExecutionQuery()
+                .activityId(nodeId)
+                .processInstanceId(messageDto.getProcessInstanceId())
+                .singleResult();
+
+        runtimeService.messageEventReceived(msgId,execution.getId());
+        return R.success();
+    }
+
+    /**
      * 前置检查
      *
      * @param processInstanceParamDto
@@ -132,7 +156,7 @@ public class FlowController {
             HttpSetting frontCheck = flowSettingDto.getFrontCheck();
             if (frontCheck != null && frontCheck.getEnable()) {
 
-                String result = HttpUtil.flowExtenstionHttpRequest(frontCheck, paramMap, flowId, null);
+                String result = HttpUtil.flowExtenstionHttpRequest(frontCheck, paramMap, flowId, null, null);
 
 
                 if (StrUtil.isNotBlank(result)) {
@@ -147,9 +171,10 @@ public class FlowController {
     }
 
 
-    @NotWriteLogAnno(all = false, printResultLog = false)
+    @NotWriteLogAnno(all = true, printResultLog = false)
     @GetMapping("/showImg")
-    public R showImg(String procInsId) {
+    @SneakyThrows
+    public void showImg(String procInsId, HttpServletResponse response) {
 
 
         String procDefId;
@@ -220,9 +245,9 @@ public class FlowController {
                 customClassLoader,
                 scaleFactor,
                 drawSequenceFlowNameWithNoLabelDI); // 获取输入流
-
-        String content = Base64.encode(inputStream);
-        return R.success(content);
+        IoUtil.write(response.getOutputStream(),true,IoUtil.readBytes(inputStream));
+//        String content = Base64.encode(inputStream);
+       // return R.success(content);
     }
 
 

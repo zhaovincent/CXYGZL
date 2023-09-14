@@ -1,5 +1,6 @@
 package com.cxygzl.common.utils;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import lombok.SneakyThrows;
@@ -46,6 +47,9 @@ public class CommonUtil {
 
     @SneakyThrows
     public static String toJson(Object obj) {
+        if(obj instanceof String){
+            return Convert.toStr(obj);
+        }
         return JSON.toJSONString(obj);
     }
 }

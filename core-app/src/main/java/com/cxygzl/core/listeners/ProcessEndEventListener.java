@@ -67,7 +67,7 @@ public class ProcessEndEventListener implements FlowableEventListener {
                         HttpSetting backNotify = flowSettingDto.getBackNotify();
                         if (backNotify != null && backNotify.getEnable()) {
 
-                            String result = HttpUtil.flowExtenstionHttpRequest(backNotify, variables, flowId, processInstanceId);
+                            String result = HttpUtil.flowExtenstionHttpRequest(backNotify, variables, flowId, processInstanceId, null);
 
 
 
