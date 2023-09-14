@@ -23,7 +23,7 @@ public class HttpUtil {
     /**
      * 请求超时时间
      */
-    public static final int TIME_OUT=60000;
+    public static final int TIME_OUT = 60000;
 
 
     public static String post(Object object, String url, String baseUrl) {
@@ -79,16 +79,20 @@ public class HttpUtil {
      * @return
      */
     public static String flowExtenstionHttpRequest(HttpSetting httpSetting, Map<String, Object> paramMap, String flowId,
-                                                   String processInstanceId,String messageNotifyId) {
+                                                   String processInstanceId, String messageNotifyId) {
         Map<String, String> headerParamMap = new HashMap<>();
         {
             List<HttpSettingData> headerSetting = httpSetting.getHeader();
             for (HttpSettingData httpSettingData : headerSetting) {
+                String field = httpSettingData.getField();
+                if (StrUtil.isBlank(field)) {
+                    continue;
+                }
                 if (httpSettingData.getValueMode()) {
-                    headerParamMap.put(httpSettingData.getField(), httpSettingData.getValue());
+                    headerParamMap.put(field, httpSettingData.getValue());
                 } else {
                     Object object = paramMap.get(httpSettingData.getValue());
-                    headerParamMap.put(httpSettingData.getField(), object == null ? null : (object instanceof String ? Convert.toStr(object) : JSON.toJSONString(object)));
+                    headerParamMap.put(field, object == null ? null : (object instanceof String ? Convert.toStr(object) : JSON.toJSONString(object)));
                 }
             }
 
@@ -101,11 +105,15 @@ public class HttpUtil {
             bodyMap.put("messageNotifyId", messageNotifyId);
             List<HttpSettingData> bodySetting = httpSetting.getBody();
             for (HttpSettingData httpSettingData : bodySetting) {
+                String field = httpSettingData.getField();
+                if (StrUtil.isBlank(field)) {
+                    continue;
+                }
                 if (httpSettingData.getValueMode()) {
-                    bodyMap.put(httpSettingData.getField(), httpSettingData.getValue());
+                    bodyMap.put(field, httpSettingData.getValue());
                 } else {
                     Object object = paramMap.get(httpSettingData.getValue());
-                    bodyMap.put(httpSettingData.getField(), object == null ? null : (object instanceof String ?
+                    bodyMap.put(field, object == null ? null : (object instanceof String ?
                             Convert.toStr(object) : JSON.toJSONString(object)));
                 }
             }

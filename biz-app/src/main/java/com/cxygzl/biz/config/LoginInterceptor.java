@@ -59,6 +59,8 @@ public class LoginInterceptor implements WebMvcConfigurer {
                         "/fonts/*",
                         "/js/*",
                         "*.ico",
+                        "/api/process-instance/notifyMsgEvent",
+                        "/process-instance/notifyMsgEvent",
                         "/api/file/show/*",
                         "/api/file/show/*/*",
                         "/file/show/*/*",

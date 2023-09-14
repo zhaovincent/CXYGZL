@@ -114,6 +114,19 @@ public class CoreHttpUtil {
 
     }
 
+    /**
+     * 通知消息事件继续执行
+     *
+     * @param jsonObject
+     * @return
+     */
+    public static R notifyMsgEvent(NotifyMessageDto jsonObject) {
+
+        String post = post(jsonObject, "/flow/notifyMsg");
+        return JSON.parseObject(post, new TypeReference<R>() {
+        });
+    }
+
 
     /**
      * 查询指派任务
@@ -248,7 +261,6 @@ public class CoreHttpUtil {
         return r;
 
     }
-
 
 
     /**

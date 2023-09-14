@@ -2,6 +2,7 @@ package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.service.IProcessInstanceService;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
+import com.cxygzl.common.dto.NotifyMessageDto;
 import com.cxygzl.common.dto.PageDto;
 import com.cxygzl.common.dto.ProcessInstanceParamDto;
 import com.cxygzl.common.dto.R;
@@ -19,6 +20,17 @@ public class ProcessInstanceController {
 
     @Resource
     private IProcessInstanceService processInstanceService;
+
+    /**
+     * 消息通知事件
+     *
+     * @param messageDto
+     * @return
+     */
+    @PostMapping("notifyMsgEvent")
+    public R notifyMsgEvent(@RequestBody NotifyMessageDto messageDto) {
+        return processInstanceService.notifyMsgEvent(messageDto);
+    }
 
     /**
      * 启动流程

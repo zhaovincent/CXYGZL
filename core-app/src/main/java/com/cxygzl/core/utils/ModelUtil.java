@@ -863,7 +863,7 @@ public class ModelUtil {
 
         Message message=new Message();
         message.setId(messageId);
-        message.setName(StrUtil.format("{}_消息",node.getNodeName()));
+        message.setName(messageId);
         bpmnModel.addMessage(message);
 
         {

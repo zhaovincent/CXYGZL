@@ -62,6 +62,16 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     @Resource
     private IProcessInstanceAssignUserRecordService processNodeRecordAssignUserService;
 
+    /**
+     * 消息通知事件
+     *
+     * @param messageDto
+     * @return
+     */
+    @Override
+    public R notifyMsgEvent(NotifyMessageDto messageDto) {
+        return CoreHttpUtil.notifyMsgEvent(messageDto);
+    }
 
     /**
      * 启动流程

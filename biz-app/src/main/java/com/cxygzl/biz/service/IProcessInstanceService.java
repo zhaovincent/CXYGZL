@@ -1,6 +1,7 @@
 package com.cxygzl.biz.service;
 
 import com.cxygzl.biz.vo.NodeFormatParamVo;
+import com.cxygzl.common.dto.NotifyMessageDto;
 import com.cxygzl.common.dto.PageDto;
 import com.cxygzl.common.dto.ProcessInstanceParamDto;
 import com.cxygzl.common.dto.R;
@@ -9,6 +10,12 @@ import com.cxygzl.common.dto.R;
  * 流程实例进程
  */
 public interface IProcessInstanceService  {
+    /**
+     * 消息通知事件
+     * @param messageDto
+     * @return
+     */
+    R notifyMsgEvent(NotifyMessageDto messageDto);
     /**
      * 启动流程
      * @param processInstanceParamDto
