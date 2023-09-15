@@ -57,6 +57,8 @@ public class ProcessEndEventListener implements FlowableEventListener {
                     ProcessInstanceConstant.VariableKey.CANCEL
                     , false));
             processInstanceParamDto.setResult(finalResult);
+            processInstanceParamDto.setFlowId(flowId);
+            processInstanceParamDto.setParamMap(variables);
             BizHttpUtil.endProcessEvent(processInstanceParamDto);
             {
 

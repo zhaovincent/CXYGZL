@@ -14,6 +14,7 @@ import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessStarter;
 import com.cxygzl.biz.entity.ProcessSubProcess;
+import com.cxygzl.biz.form.FormStrategyFactory;
 import com.cxygzl.biz.mapper.ProcessMapper;
 import com.cxygzl.biz.service.IProcessService;
 import com.cxygzl.biz.service.IProcessStarterService;
@@ -326,7 +327,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                 if (dbRecord == null || !dbRecord.getEnable()) {
                     buildTableSql(processVO, p.getUniqueId());
                 }
-            }else{
+            } else {
                 buildTableSql(processVO, p.getUniqueId());
             }
         }
@@ -334,26 +335,14 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
     }
 
     private void buildTableSql(ProcessVO processVO, String uniqueId) {
-
         FlowSettingDto flowSettingDto = JSON.parseObject(processVO.getSettings(), FlowSettingDto.class);
         FlowSettingDto.DbRecord dbRecord = flowSettingDto.getDbRecord();
         if (dbRecord == null || !dbRecord.getEnable()) {
             return;
         }
-
         List<FormItemVO> formItemVOS = JSON.parseArray(processVO.getFormItems(), FormItemVO.class);
-        StringBuilder tableField = new StringBuilder();
-        tableField.append(StrUtil.format("CREATE TABLE `tb_{}` (", uniqueId));
-        tableField.append("id varchar(100) not null");
-        for (FormItemVO formItemVO : formItemVOS) {
-            String format = StrUtil.format("`{}` {} NULL COMMENT '{}'", formItemVO.getId(),
-                    FormTypeEnum.getByType(formItemVO.getType()).getSqlDDL(), formItemVO.getName());
-            tableField.append(",").append(format);
-        }
-        tableField.append(", `create_time` datetime DEFAULT NULL COMMENT '创建时间'");
-        tableField.append(",PRIMARY KEY (`id`) USING BTREE");
-        tableField.append(StrUtil.format(")ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='{}';", processVO.getName()));
-        SqlRunner.db().update(tableField.toString());
+        String ddlSql = FormStrategyFactory.getDDLSql(formItemVOS, uniqueId, processVO.getName());
+        SqlRunner.db().update(ddlSql);
     }
 
     /**
