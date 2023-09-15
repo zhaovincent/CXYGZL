@@ -18,10 +18,11 @@ public interface IProcessInstanceService  {
     R notifyMsgEvent(NotifyMessageDto messageDto);
     /**
      * 启动流程
+     *
      * @param processInstanceParamDto
      * @return
      */
-    Object startProcessInstance(ProcessInstanceParamDto processInstanceParamDto);
+    R startProcessInstance(ProcessInstanceParamDto processInstanceParamDto);
 
     /**
      * 查询当前登录用户的待办任务

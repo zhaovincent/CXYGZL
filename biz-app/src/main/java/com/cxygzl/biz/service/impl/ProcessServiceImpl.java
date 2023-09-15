@@ -90,7 +90,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                 for (FormItemVO itemVO : subList) {
                     String perm1 = MapUtil.getStr(formPerms, itemVO.getId(), ProcessInstanceConstant.FormPermClass.EDIT);
                     itemVO.setPerm(perm1);
-                    if(handleForm){
+                    if (handleForm) {
                         handleForm(itemVO);
 
                     }
@@ -192,6 +192,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
     @Override
     public R create(ProcessVO processVO) {
 
+        String uniqueId = "";
         {
             //名字唯一
             String name = processVO.getName();
@@ -201,8 +202,11 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                     .list();
             if (StrUtil.isNotBlank(processVO.getFlowId())) {
                 Process process = this.getByFlowId(processVO.getFlowId());
-                String uniqueId = process.getUniqueId();
-                long count = processList.stream().filter(w -> !StrUtil.equals(w.getUniqueId(), uniqueId)).count();
+                uniqueId = process.getUniqueId();
+
+                String finalUniqueId = uniqueId;
+
+                long count = processList.stream().filter(w -> !StrUtil.equals(w.getUniqueId(), finalUniqueId)).count();
                 if (count > 0) {
                     return R.fail("流程名字已存在，不能重复");
                 }
@@ -285,7 +289,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         p.setHidden(false);
         p.setStop(false);
         p.setAdminId(nodeUser.getId());
-        p.setUniqueId(IdUtil.fastSimpleUUID());
+        p.setUniqueId(StrUtil.isBlank(uniqueId) ? IdUtil.fastSimpleUUID() : uniqueId);
         p.setAdmin(processVO.getAdmin());
         p.setRangeShow(stringBuilder.toString());
 

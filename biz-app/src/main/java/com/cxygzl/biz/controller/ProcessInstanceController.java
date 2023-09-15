@@ -40,7 +40,7 @@ public class ProcessInstanceController {
      */
     @SneakyThrows
     @PostMapping("startProcessInstance")
-    public Object startProcessInstance(@RequestBody ProcessInstanceParamDto processInstanceParamDto) {
+    public R startProcessInstance(@RequestBody ProcessInstanceParamDto processInstanceParamDto) {
 
         return processInstanceService.startProcessInstance(processInstanceParamDto);
 

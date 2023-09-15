@@ -80,7 +80,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      * @return
      */
     @Override
-    public Object startProcessInstance(ProcessInstanceParamDto processInstanceParamDto) {
+    public R startProcessInstance(ProcessInstanceParamDto processInstanceParamDto) {
 
         String userId = StpUtil.getLoginIdAsString();
 
