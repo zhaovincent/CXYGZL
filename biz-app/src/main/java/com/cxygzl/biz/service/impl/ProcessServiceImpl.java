@@ -9,6 +9,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.toolkit.SqlRunner;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessStarter;
@@ -22,6 +23,7 @@ import com.cxygzl.biz.vo.ProcessVO;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.dto.FlowSettingDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.dto.flow.Node;
@@ -193,6 +195,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
     public R create(ProcessVO processVO) {
 
         String uniqueId = "";
+
         {
             //名字唯一
             String name = processVO.getName();
@@ -314,7 +317,43 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         //创建第三方对接流程
         ApiStrategyFactory.getStrategy().createProcess(CreateProcessDto.builder().oriFlowId(processVO.getFlowId()).flowId(flowId).name(processVO.getName()).description(processVO.getRemark()).formItemVOList(JSON.parseArray(processVO.getFormItems(), FormItemVO.class)).build());
 
+        //建立数据库表
+        {
+            if (StrUtil.isNotBlank(processVO.getFlowId())) {
+                Process process = this.getByFlowId(processVO.getFlowId());
+                FlowSettingDto flowSettingDto = JSON.parseObject(process.getSettings(), FlowSettingDto.class);
+                FlowSettingDto.DbRecord dbRecord = flowSettingDto.getDbRecord();
+                if (dbRecord == null || !dbRecord.getEnable()) {
+                    buildTableSql(processVO, p.getUniqueId());
+                }
+            }else{
+                buildTableSql(processVO, p.getUniqueId());
+            }
+        }
         return com.cxygzl.common.dto.R.success();
+    }
+
+    private void buildTableSql(ProcessVO processVO, String uniqueId) {
+
+        FlowSettingDto flowSettingDto = JSON.parseObject(processVO.getSettings(), FlowSettingDto.class);
+        FlowSettingDto.DbRecord dbRecord = flowSettingDto.getDbRecord();
+        if (dbRecord == null || !dbRecord.getEnable()) {
+            return;
+        }
+
+        List<FormItemVO> formItemVOS = JSON.parseArray(processVO.getFormItems(), FormItemVO.class);
+        StringBuilder tableField = new StringBuilder();
+        tableField.append(StrUtil.format("CREATE TABLE `tb_{}` (", uniqueId));
+        tableField.append("id varchar(100) not null");
+        for (FormItemVO formItemVO : formItemVOS) {
+            String format = StrUtil.format("`{}` {} NULL COMMENT '{}'", formItemVO.getId(),
+                    FormTypeEnum.getByType(formItemVO.getType()).getSqlDDL(), formItemVO.getName());
+            tableField.append(",").append(format);
+        }
+        tableField.append(", `create_time` datetime DEFAULT NULL COMMENT '创建时间'");
+        tableField.append(",PRIMARY KEY (`id`) USING BTREE");
+        tableField.append(StrUtil.format(")ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='{}';", processVO.getName()));
+        SqlRunner.db().update(tableField.toString());
     }
 
     /**

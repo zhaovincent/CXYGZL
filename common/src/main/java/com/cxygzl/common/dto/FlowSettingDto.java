@@ -24,5 +24,12 @@ public class FlowSettingDto {
      */
     private HttpSetting frontCheck;
 
+    private DbRecord  dbRecord;
+
+    @Data
+    public static class DbRecord{
+
+        private Boolean enable;
+    }
 
 }
