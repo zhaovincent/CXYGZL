@@ -45,7 +45,7 @@ public class FormStrategyFactory {
      * @param processName
      * @return
      */
-    public static String getDDLSql(List<FormItemVO> formItemVOList, String uniqueId, String processName) {
+    public static String buildDDLSql(List<FormItemVO> formItemVOList, String uniqueId, String processName) {
         StringBuilder tableField = new StringBuilder();
         tableField.append(StrUtil.format("CREATE TABLE `tb_{}` (", uniqueId));
         tableField.append("id bigint not null");

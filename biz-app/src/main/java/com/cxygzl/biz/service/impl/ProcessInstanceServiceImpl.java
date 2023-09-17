@@ -385,17 +385,24 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         }
 
 
-        String flowId = processInstanceParamDto.getFlowId();
-        Process process = processService.getByFlowId(flowId);
-        String settings = process.getSettings();
-        FlowSettingDto flowSettingDto = JSON.parseObject(settings, FlowSettingDto.class);
-        if (flowSettingDto.getDbRecord() != null && flowSettingDto.getDbRecord().getEnable()) {
+        //保存数据到数据库
+        try {
+            String flowId = processInstanceParamDto.getFlowId();
+            Process process = processService.getByFlowId(flowId);
+            String settings = process.getSettings();
+            FlowSettingDto flowSettingDto = JSON.parseObject(settings, FlowSettingDto.class);
+            if (flowSettingDto.getDbRecord() != null && flowSettingDto.getDbRecord().getEnable()) {
 
-            String formItems = process.getFormItems();
-            List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
-            String s = FormStrategyFactory.buildInsertSql(formItemVOList, flowId, processInstanceParamDto.getProcessInstanceId(),
-                    processInstanceParamDto.getParamMap(), process.getUniqueId());
-            SqlRunner.db().insert(s);
+                String formItems = process.getFormItems();
+                List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
+                String s = FormStrategyFactory.buildInsertSql(formItemVOList, flowId, processInstanceParamDto.getProcessInstanceId(),
+                        processInstanceParamDto.getParamMap(), process.getUniqueId());
+                try (SqlRunner db = SqlRunner.db()) {
+                    db.insert(s);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error", e);
         }
 
 
