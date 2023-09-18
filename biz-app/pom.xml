@@ -20,8 +20,19 @@
 
     </properties>
 
-    <dependencies>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <!--mysq驱动以下两个都需要 如果是pg换成pg相应的依赖-->
+        <!-- https://mvnrepository.com/artifact/org.anyline/anyline-data-jdbc-mysql -->
+<!--        <dependency>-->
+<!--            <groupId>org.anyline</groupId>-->
+<!--            <artifactId>anyline-data-jdbc-mysql</artifactId>-->
+<!--            <version>8.6.5-SNAPSHOT</version>-->
+<!--        </dependency>-->
         <!-- https://mvnrepository.com/artifact/com.github.binarywang/wx-java -->
         <dependency>
             <groupId>com.github.binarywang</groupId>
@@ -187,5 +198,15 @@
 
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>
