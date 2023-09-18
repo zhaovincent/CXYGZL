@@ -10,10 +10,12 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.toolkit.SqlRunner;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
-import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.entity.Process;
+import com.cxygzl.biz.entity.*;
+import com.cxygzl.biz.form.FormStrategyFactory;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.FormUtil;
@@ -377,10 +379,32 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         //通知第三方
         if (processInstanceParamDto.getCancel()) {
-            ApiStrategyFactory.getStrategy().stopProcessInstance(BeanUtil.copyProperties(processInstanceParamDto,com.cxygzl.common.dto.third.ProcessInstanceParamDto.class));
+            ApiStrategyFactory.getStrategy().stopProcessInstance(BeanUtil.copyProperties(processInstanceParamDto, com.cxygzl.common.dto.third.ProcessInstanceParamDto.class));
         } else {
-            ApiStrategyFactory.getStrategy().completeProcessInstance(BeanUtil.copyProperties(processInstanceParamDto,com.cxygzl.common.dto.third.ProcessInstanceParamDto.class));
+            ApiStrategyFactory.getStrategy().completeProcessInstance(BeanUtil.copyProperties(processInstanceParamDto, com.cxygzl.common.dto.third.ProcessInstanceParamDto.class));
         }
+
+
+        //保存数据到数据库
+        try {
+            String flowId = processInstanceParamDto.getFlowId();
+            Process process = processService.getByFlowId(flowId);
+            String settings = process.getSettings();
+            FlowSettingDto flowSettingDto = JSON.parseObject(settings, FlowSettingDto.class);
+            if (flowSettingDto.getDbRecord() != null && flowSettingDto.getDbRecord().getEnable()) {
+
+                String formItems = process.getFormItems();
+                List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
+                String s = FormStrategyFactory.buildInsertSql(formItemVOList, flowId, processInstanceParamDto.getProcessInstanceId(),
+                        processInstanceParamDto.getParamMap(), process.getUniqueId());
+                try (SqlRunner db = SqlRunner.db()) {
+                    db.insert(s);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error", e);
+        }
+
 
         return com.cxygzl.common.dto.R.success();
     }
@@ -646,7 +670,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
             processInstanceNodeRecordParamDtoList.addAll(BeanUtil.copyToList(list, ProcessInstanceNodeRecordParamDto.class));
         }
         List<NodeVo> processNodeShowDtos = NodeFormatUtil.formatProcessNodeShow(nodeDto,
-                processInstanceId, paramMap, processInstanceNodeRecordParamDtoList,null );
+                processInstanceId, paramMap, processInstanceNodeRecordParamDtoList, null);
 
         return com.cxygzl.common.dto.R.success(processNodeShowDtos);
     }

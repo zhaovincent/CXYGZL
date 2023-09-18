@@ -1,6 +1,7 @@
 package com.cxygzl.biz.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
+import com.alibaba.fastjson2.JSON;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessGroup;
@@ -8,6 +9,7 @@ import com.cxygzl.biz.entity.ProcessStarter;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.vo.FormGroupVo;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
+import com.cxygzl.common.dto.FlowSettingDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.third.UserDto;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,7 @@ public class CombinationGroupServiceImpl implements ICombinationGroupService {
 
     @Resource
     private IProcessStarterService processStarterService;
+
     /**
      * 查询表单组包含流程
      *
@@ -62,6 +65,15 @@ public class CombinationGroupServiceImpl implements ICombinationGroupService {
 
             processList.forEach(process -> {
 
+                String settings = process.getSettings();
+                FlowSettingDto flowSettingDto = JSON.parseObject(settings, FlowSettingDto.class);
+                FlowSettingDto.DbRecord dbRecord = flowSettingDto.getDbRecord();
+
+
+                Boolean dbRecordEnable = false;
+                if (dbRecord != null) {
+                    dbRecordEnable = dbRecord.getEnable();
+                }
 
 
                 formGroupVo.getItems().add(FormGroupVo.FlowVo.builder()
@@ -72,6 +84,7 @@ public class CombinationGroupServiceImpl implements ICombinationGroupService {
                         .remark(process.getRemark())
                         .stop(process.getStop())
                         .updated(process.getUpdateTime())
+                        .dbRecordEnable(dbRecordEnable)
                         .build());
             });
         });
@@ -97,7 +110,7 @@ public class CombinationGroupServiceImpl implements ICombinationGroupService {
 
         processGroupList.forEach(group -> {
             FormGroupVo formGroupVo = FormGroupVo.builder()
-                    .id( (group.getId()))
+                    .id((group.getId()))
                     .name(group.getGroupName())
                     .items(new LinkedList<>())
                     .build();

@@ -48,6 +48,8 @@ public class FormGroupVo {
         private String remark;
 
         private Date updated;
+
+        private Boolean dbRecordEnable;
     }
 
 
