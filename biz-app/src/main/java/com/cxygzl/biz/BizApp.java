@@ -59,7 +59,7 @@ public class BizApp {
                 }
                 table = new Table(name);
                 //根据不同数据库长度精度有可能忽略
-                Column column=new Column(StrUtil.format("{}_name","aa"),"decimal",30);
+                Column column=new Column(StrUtil.format("{}_name","aa"),"tinyint",1);
                 column.setNullable(true);
                 column.setScale(10);
                 column.setComment("哈哈哈");

@@ -2,6 +2,7 @@ package com.cxygzl.biz.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.cxygzl.biz.entity.Process;
+import com.cxygzl.biz.vo.ProcessDataQueryVO;
 import com.cxygzl.biz.vo.ProcessVO;
 import com.cxygzl.common.dto.R;
 
@@ -49,4 +50,11 @@ public interface IProcessService extends IService<Process> {
      * @return 操作结果
      */
     R update(String flowId, String type, Long groupId);
+
+    /**
+     * 查询数据列表
+     * @param pageDto
+     * @return
+     */
+    R queryDataList(ProcessDataQueryVO pageDto);
 }

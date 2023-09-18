@@ -19,6 +19,7 @@ import com.cxygzl.biz.service.IProcessService;
 import com.cxygzl.biz.service.IProcessStarterService;
 import com.cxygzl.biz.service.IProcessSubProcessService;
 import com.cxygzl.biz.utils.CoreHttpUtil;
+import com.cxygzl.biz.vo.ProcessDataQueryVO;
 import com.cxygzl.biz.vo.ProcessVO;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
@@ -34,6 +35,10 @@ import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.entity.DataRow;
+import org.anyline.entity.DataSet;
+import org.anyline.entity.DefaultPageNavi;
+import org.anyline.entity.PageNavi;
 import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
@@ -395,5 +400,24 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         this.updateByFlowId(process);
 
         return com.cxygzl.common.dto.R.success();
+    }
+
+    /**
+     * 查询数据列表
+     *
+     * @param pageDto
+     * @return
+     */
+    @Override
+    public R queryDataList(ProcessDataQueryVO pageDto) {
+        Process process = getByFlowId(pageDto.getFlowId());
+        String uniqueId = process.getUniqueId();
+        PageNavi navi = new DefaultPageNavi(pageDto.getPageNum(), pageDto.getPageSize());
+//        org.anyline.data.prepare.Condition condition = new DefaultAutoConditionChain();
+//        condition.
+
+        DataSet dataSet = anylineService.querys(StrUtil.format("tb_{}", uniqueId), navi);
+        List<DataRow> rows = dataSet.getRows();
+        return null;
     }
 }
