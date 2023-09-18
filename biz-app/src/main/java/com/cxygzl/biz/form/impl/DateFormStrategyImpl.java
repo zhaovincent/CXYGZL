@@ -47,14 +47,14 @@ public class DateFormStrategyImpl implements InitializingBean, FormStrategy {
         List<Column> list=new ArrayList<>();
 
         {
-            Column column=new Column(StrUtil.format("{}",formItemVO.getId()),"datetime",0);
+            Column column=new Column(StrUtil.format("{}_db",formItemVO.getId()),"datetime",0);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
             list.add(column);
         }
 
         {
-            Column column=new Column(StrUtil.format("{}_data",formItemVO.getId()),"varchar",100);
+            Column column=new Column(StrUtil.format("{}",formItemVO.getId()),"varchar",100);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
             list.add(column);
@@ -71,7 +71,8 @@ public class DateFormStrategyImpl implements InitializingBean, FormStrategy {
      */
     @Override
     public List<String> getInsertField(FormItemVO formItemVO) {
-        return CollUtil.newArrayList(StrUtil.format("{}", formItemVO.getId()),StrUtil.format("{}_data", formItemVO.getId()));
+        return CollUtil.newArrayList(StrUtil.format("{}_db", formItemVO.getId()),StrUtil.format("{}",
+                formItemVO.getId()));
     }
 
     /**

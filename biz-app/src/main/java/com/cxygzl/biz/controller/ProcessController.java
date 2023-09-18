@@ -1,6 +1,7 @@
 package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.service.IProcessService;
+import com.cxygzl.biz.vo.ProcessDataQueryVO;
 import com.cxygzl.biz.vo.ProcessVO;
 import com.cxygzl.common.dto.R;
 import org.springframework.web.bind.annotation.*;
@@ -51,6 +52,14 @@ public class ProcessController {
                  @RequestParam(required = false) Long groupId){
         return processService.update(flowId, type, groupId);
     }
-
+    /**
+     * 查询数据列表
+     * @param pageDto
+     * @return
+     */
+    @PostMapping("queryDataList")
+    public R queryDataList(@RequestBody ProcessDataQueryVO pageDto){
+        return processService.queryDataList(pageDto);
+    }
 
 }

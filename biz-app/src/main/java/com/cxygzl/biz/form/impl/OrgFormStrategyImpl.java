@@ -96,7 +96,7 @@ public class OrgFormStrategyImpl implements InitializingBean, FormStrategy {
         }
 
         {
-            Column column=new Column(StrUtil.format("{}_data",formItemVO.getId()),"longtext",0);
+            Column column=new Column(StrUtil.format("{}",formItemVO.getId()),"longtext",0);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
 
@@ -118,7 +118,7 @@ public class OrgFormStrategyImpl implements InitializingBean, FormStrategy {
                 StrUtil.format("{}_id", formItemVO.getId()),
                 StrUtil.format("{}_name", formItemVO.getId()),
                 StrUtil.format("{}_type", formItemVO.getId()),
-                StrUtil.format("{}_data",
+                StrUtil.format("{}",
                         formItemVO.getId()));
     }
 

@@ -46,10 +46,18 @@ public class NumberFormStrategyImpl implements InitializingBean, FormStrategy {
         List<Column> list=new ArrayList<>();
 
         {
-            Column column=new Column(StrUtil.format("{}",formItemVO.getId()),"decimal",30);
+            Column column=new Column(StrUtil.format("{}_db",formItemVO.getId()),"decimal",30);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
             column.setScale(10);
+            list.add(column);
+        }
+
+        {
+            Column column=new Column(StrUtil.format("{}",formItemVO.getId()),"varchar",50);
+            column.setNullable(true);
+            column.setComment(formItemVO.getName());
+
             list.add(column);
         }
 
@@ -64,7 +72,8 @@ public class NumberFormStrategyImpl implements InitializingBean, FormStrategy {
      */
     @Override
     public List<String> getInsertField(FormItemVO formItemVO) {
-        return CollUtil.newArrayList(StrUtil.format("{}", formItemVO.getId()));
+        return CollUtil.newArrayList(StrUtil.format("{}_db", formItemVO.getId()),StrUtil.format("{}",
+                formItemVO.getId()));
     }
 
     /**
@@ -76,6 +85,6 @@ public class NumberFormStrategyImpl implements InitializingBean, FormStrategy {
      */
     @Override
     public List<String> getInsertValue(FormItemVO formItemVO, Object value) {
-        return value == null ? null : CollUtil.newArrayList(value.toString());
+        return value == null ? null : CollUtil.newArrayList(value.toString(),value.toString());
     }
 }

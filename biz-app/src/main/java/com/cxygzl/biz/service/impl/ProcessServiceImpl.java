@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -45,6 +46,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -410,7 +412,25 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
      */
     @Override
     public R queryDataList(ProcessDataQueryVO pageDto) {
+
+        Map dataMap=new HashMap();
+
         Process process = getByFlowId(pageDto.getFlowId());
+
+        String formItems = process.getFormItems();
+        List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
+        {
+            List headList=new ArrayList();
+            for (FormItemVO formItemVO : formItemVOList) {
+                Dict set = Dict.create()
+                        .set("id", formItemVO.getId())
+                        .set("name", formItemVO.getName())
+                        .set("type", formItemVO.getType());
+                headList.add(set);
+            }
+            dataMap.put("headList",headList);
+        }
+
         String uniqueId = process.getUniqueId();
         PageNavi navi = new DefaultPageNavi(pageDto.getPageNum(), pageDto.getPageSize());
 //        org.anyline.data.prepare.Condition condition = new DefaultAutoConditionChain();
@@ -418,6 +438,17 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
         DataSet dataSet = anylineService.querys(StrUtil.format("tb_{}", uniqueId), navi);
         List<DataRow> rows = dataSet.getRows();
-        return null;
+
+        List records=new ArrayList();
+        for (DataRow row : rows) {
+            Dict dict = Dict.create();
+            for (FormItemVO formItemVO : formItemVOList) {
+                dict.set(formItemVO.getId(),row.get(formItemVO.getId()));
+            }
+            records.add(dict);
+        }
+        dataMap.put("records",records);
+        dataMap.put("total",dataSet.total());
+        return R.success(dataMap);
     }
 }

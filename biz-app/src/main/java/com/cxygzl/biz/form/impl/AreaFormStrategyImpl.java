@@ -52,15 +52,21 @@ public class AreaFormStrategyImpl implements InitializingBean, FormStrategy {
      */
     @Override
     public List<Column> getTableColumn(FormItemVO formItemVO) {
-        List<Column> list=new ArrayList<>();
+        List<Column> list = new ArrayList<>();
         {
-            Column column=new Column(StrUtil.format("{}_code",formItemVO.getId()),"varchar",20);
+            Column column = new Column(StrUtil.format("{}_code", formItemVO.getId()), "varchar", 20);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
             list.add(column);
         }
         {
-            Column column=new Column(StrUtil.format("{}_name",formItemVO.getId()),"varchar",100);
+            Column column = new Column(StrUtil.format("{}_name", formItemVO.getId()), "varchar", 100);
+            column.setNullable(true);
+            column.setComment(formItemVO.getName());
+            list.add(column);
+        }
+        {
+            Column column = new Column(StrUtil.format("{}", formItemVO.getId()), "varchar", 1000);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
             list.add(column);
@@ -79,8 +85,9 @@ public class AreaFormStrategyImpl implements InitializingBean, FormStrategy {
     public List<String> getInsertField(FormItemVO formItemVO) {
         return CollUtil.newArrayList(
                 StrUtil.format("{}_code", formItemVO.getId()),
-                StrUtil.format("{}_name",
-                        formItemVO.getId()));
+                StrUtil.format("{}_name", formItemVO.getId()),
+                StrUtil.format("{}", formItemVO.getId())
+        );
     }
 
     /**
@@ -100,7 +107,7 @@ public class AreaFormStrategyImpl implements InitializingBean, FormStrategy {
             return null;
         }
 
-        return CollUtil.newArrayList(areaFormValue.getCode(), areaFormValue.getName());
+        return CollUtil.newArrayList(areaFormValue.getCode(), areaFormValue.getName(), JSON.toJSONString(areaFormValue));
     }
 
 }
