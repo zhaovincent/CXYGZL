@@ -10,7 +10,6 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.toolkit.SqlRunner;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
@@ -35,6 +34,8 @@ import com.cxygzl.common.dto.flow.*;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.entity.DataRow;
+import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -64,6 +65,8 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     @Resource
     private IProcessInstanceAssignUserRecordService processNodeRecordAssignUserService;
 
+    @Resource
+    private AnylineService anylineService;
     /**
      * 消息通知事件
      *
@@ -395,11 +398,10 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
                 String formItems = process.getFormItems();
                 List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
-                String s = FormStrategyFactory.buildInsertSql(formItemVOList, flowId, processInstanceParamDto.getProcessInstanceId(),
-                        processInstanceParamDto.getParamMap(), process.getUniqueId());
-                try (SqlRunner db = SqlRunner.db()) {
-                    db.insert(s);
-                }
+                DataRow dataRow = FormStrategyFactory.buildInsertSql(formItemVOList, flowId, processInstanceParamDto.getProcessInstanceId(),
+                        processInstanceParamDto.getParamMap());
+
+                anylineService.insert(StrUtil.format("tb_{}",process.getUniqueId()),dataRow);
             }
         } catch (Exception e) {
             log.error("Error", e);

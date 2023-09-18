@@ -1,12 +1,15 @@
 package com.cxygzl.biz.form;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.dto.flow.FormItemVO;
+import org.anyline.data.jdbc.adapter.JDBCAdapter;
+import org.anyline.entity.DataRow;
+import org.anyline.entity.OriginalDataRow;
+import org.anyline.metadata.Column;
+import org.anyline.metadata.Table;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,25 +48,30 @@ public class FormStrategyFactory {
      * @param processName
      * @return
      */
-    public static String buildDDLSql(List<FormItemVO> formItemVOList, String uniqueId, String processName) {
-        StringBuilder tableField = new StringBuilder();
-        tableField.append(StrUtil.format("CREATE TABLE `tb_{}` (", uniqueId));
-        tableField.append("id bigint not null");
-        for (FormItemVO formItemVO : formItemVOList) {
-            List<String> createSqlList = getStrategy(formItemVO.getType()).getCreateSql(formItemVO);
-            for (String s : createSqlList) {
-                tableField.append(",").append(s);
+    public static Table buildDDLSql(List<FormItemVO> formItemVOList, String uniqueId, String processName) {
 
+        Table table = new Table(StrUtil.format("tb_{}", uniqueId));
+        table.addColumn("id", "bigint").setPrimaryKey(true).setComment("id主键");
+        table.addColumn("create_time", "datetime").setComment("创建时间").setDefaultValue(JDBCAdapter.SQL_BUILD_IN_VALUE.CURRENT_TIME);
+        table.addColumn("update_time", "datetime").setComment("修改时间").setDefaultValue(JDBCAdapter.SQL_BUILD_IN_VALUE.CURRENT_TIME);
+        table.addColumn("del_flag", "tinyint").setComment("是否删除").setPrecision(1).setDefaultValue(0);
+        table.addColumn("process_instance_id", "varchar").setComment("流程实例id").setPrecision(100).setNullable(false);
+        table.addColumn("flow_id", "varchar").setPrecision(100).setComment("流程id").setNullable(false);
+
+
+        for (FormItemVO formItemVO : formItemVOList) {
+            FormStrategy strategy = getStrategy(formItemVO.getType());
+            if (strategy == null) {
+                continue;
+            }
+            List<Column> columnList = strategy.getTableColumn(formItemVO);
+            for (Column column : columnList) {
+                table.addColumn(column);
             }
         }
-        tableField.append(", `create_time` datetime DEFAULT NULL COMMENT '创建时间'");
-        tableField.append(", `process_instance_id` varchar(100) DEFAULT NULL COMMENT '实例id'");
-        tableField.append(", `flow_id` varchar(100)  DEFAULT NULL COMMENT '流程id'");
-        tableField.append(",PRIMARY KEY (`id`) USING BTREE");
-        tableField.append(StrUtil.format(")ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci  " +
-                "COMMENT='{}';", processName));
 
-        return tableField.toString();
+
+        return table;
     }
 
     /**
@@ -73,35 +81,34 @@ public class FormStrategyFactory {
      * @param flowId
      * @param processInstanceId
      * @param paramMap
-     * @param uniqueId
      * @return
      */
-    public static String buildInsertSql(List<FormItemVO> formItemVOList, String flowId, String processInstanceId,
-                                        Map<String, Object> paramMap, String uniqueId) {
-        StringBuilder fieldBuilder = new StringBuilder();
-        StringBuilder valueBuilder = new StringBuilder();
+    public static DataRow buildInsertSql(List<FormItemVO> formItemVOList, String flowId, String processInstanceId,
+                                        Map<String, Object> paramMap) {
+        DataRow dataRow = new OriginalDataRow();
+
         for (FormItemVO formItemVO : formItemVOList) {
             Object value = paramMap.get(formItemVO.getId());
             if (value == null || StrUtil.isBlankIfStr(value)) {
                 continue;
             }
 
-            List<String> fieldList = FormStrategyFactory.getStrategy(formItemVO.getType()).getInsertField(formItemVO);
-            List<String> valueList = FormStrategyFactory.getStrategy(formItemVO.getType()).getInsertValue(formItemVO,
+            FormStrategy strategy = FormStrategyFactory.getStrategy(formItemVO.getType());
+            if (strategy == null) {
+                continue;
+            }
+            List<String> fieldList = strategy.getInsertField(formItemVO);
+            List<String> valueList = strategy.getInsertValue(formItemVO,
                     value);
 
             if (CollUtil.isEmpty(valueList)) {
                 continue;
             }
 
+            int index = 0;
             for (String s : fieldList) {
-                fieldBuilder.append("`").append(s).append("`,");
-
-            }
-
-            for (String s : valueList) {
-                valueBuilder.append("'").append(s).append("',");
-
+                dataRow.put(s, valueList.get(index));
+                index++;
             }
 
 
@@ -109,14 +116,12 @@ public class FormStrategyFactory {
 
 
         long snowflakeNextId = IdUtil.getSnowflakeNextId();
+        dataRow.put("id",snowflakeNextId);
+        dataRow.put("process_instance_id",processInstanceId);
+        dataRow.put("flow_id",flowId);
 
-        //保存到数据库
-        String format = StrUtil.format("INSERT INTO  `tb_{}` (`id`,{}" +
-                        "`create_time`,`process_instance_id`,`flow_id`) VALUES ('{}',  {} '{}','{}','{}');", uniqueId,
-                fieldBuilder.toString(),
-                snowflakeNextId, valueBuilder.toString(), DateUtil.formatDateTime(new Date()), processInstanceId, flowId);
 
-        return format;
+        return dataRow;
     }
 
 

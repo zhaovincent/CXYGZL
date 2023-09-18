@@ -1,6 +1,7 @@
 package com.cxygzl.biz.form;
 
 import com.cxygzl.common.dto.flow.FormItemVO;
+import org.anyline.metadata.Column;
 
 import java.util.List;
 
@@ -27,6 +28,13 @@ public interface FormStrategy {
     List<String> getCreateSql(FormItemVO formItemVO);
 
     /**
+     * 获取创建表的列
+     * @param formItemVO
+     * @return
+     */
+    List<Column> getTableColumn(FormItemVO formItemVO);
+
+    /**
      * 查询sql的表字段
      * @param formItemVO
      * @return
@@ -41,6 +49,8 @@ public interface FormStrategy {
      * @return
      */
     List<String> getInsertValue(FormItemVO formItemVO, Object value);
+
+
 
 
 }

@@ -22,17 +22,19 @@
 
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-jdbc</artifactId>-->
+<!--        </dependency>-->
         <!--mysq驱动以下两个都需要 如果是pg换成pg相应的依赖-->
         <!-- https://mvnrepository.com/artifact/org.anyline/anyline-data-jdbc-mysql -->
-<!--        <dependency>-->
-<!--            <groupId>org.anyline</groupId>-->
-<!--            <artifactId>anyline-data-jdbc-mysql</artifactId>-->
-<!--            <version>8.6.5-SNAPSHOT</version>-->
-<!--        </dependency>-->
+        <!-- https://mvnrepository.com/artifact/org.anyline/anyline-data-jdbc-mysql -->
+        <dependency>
+            <groupId>org.anyline</groupId>
+            <artifactId>anyline-data-jdbc-mysql</artifactId>
+            <version>8.6.5-SNAPSHOT</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/com.github.binarywang/wx-java -->
         <dependency>
             <groupId>com.github.binarywang</groupId>
@@ -47,11 +49,11 @@
             <artifactId>spring-boot-starter-aop</artifactId>
             <version>2.7.6</version>
         </dependency>
-        <dependency>
-            <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
-            <version>${knife4j.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.xiaoymin</groupId>-->
+<!--            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>-->
+<!--            <version>${knife4j.version}</version>-->
+<!--        </dependency>-->
         <!-- 验证码 -->
         <dependency>
             <groupId>com.github.whvcse</groupId>
@@ -136,6 +138,7 @@
             <artifactId>mybatis-plus-boot-starter</artifactId>
             <version>3.5.3.1</version>
         </dependency>
+
     </dependencies>
 
     <build>

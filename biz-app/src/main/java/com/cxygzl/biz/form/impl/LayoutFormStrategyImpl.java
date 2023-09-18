@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSON;
 import com.cxygzl.biz.form.FormStrategy;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.flow.FormItemVO;
+import org.anyline.metadata.Column;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +35,26 @@ public class LayoutFormStrategyImpl implements InitializingBean, FormStrategy {
             String format = StrUtil.format("`{}` {} NULL COMMENT '{}'", formItemVO.getId(),
                     "longtext", formItemVO.getName());
             list.add(format);
+        }
+
+        return list;
+    }
+
+    /**
+     * 获取创建表的列
+     *
+     * @param formItemVO
+     * @return
+     */
+    @Override
+    public List<Column> getTableColumn(FormItemVO formItemVO) {
+        List<Column> list=new ArrayList<>();
+
+        {
+            Column column=new Column(StrUtil.format("{}",formItemVO.getId()),"longtext",0);
+            column.setNullable(true);
+            column.setComment(formItemVO.getName());
+            list.add(column);
         }
 
         return list;

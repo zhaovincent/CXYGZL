@@ -7,6 +7,7 @@ import com.cxygzl.biz.form.FormStrategy;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.flow.AreaFormValue;
 import com.cxygzl.common.dto.flow.FormItemVO;
+import org.anyline.metadata.Column;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +39,31 @@ public class AreaFormStrategyImpl implements InitializingBean, FormStrategy {
             String format = StrUtil.format("`{}_name` {} NULL COMMENT '{}'", formItemVO.getId(),
                     "varchar(100)", formItemVO.getName());
             list.add(format);
+        }
+
+        return list;
+    }
+
+    /**
+     * 获取创建表的列
+     *
+     * @param formItemVO
+     * @return
+     */
+    @Override
+    public List<Column> getTableColumn(FormItemVO formItemVO) {
+        List<Column> list=new ArrayList<>();
+        {
+            Column column=new Column(StrUtil.format("{}_code",formItemVO.getId()),"varchar",20);
+            column.setNullable(true);
+            column.setComment(formItemVO.getName());
+            list.add(column);
+        }
+        {
+            Column column=new Column(StrUtil.format("{}_name",formItemVO.getId()),"varchar",100);
+            column.setNullable(true);
+            column.setComment(formItemVO.getName());
+            list.add(column);
         }
 
         return list;
@@ -76,4 +102,5 @@ public class AreaFormStrategyImpl implements InitializingBean, FormStrategy {
 
         return CollUtil.newArrayList(areaFormValue.getCode(), areaFormValue.getName());
     }
+
 }

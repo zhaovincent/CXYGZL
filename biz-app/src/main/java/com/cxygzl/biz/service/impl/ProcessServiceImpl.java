@@ -9,7 +9,6 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.baomidou.mybatisplus.extension.toolkit.SqlRunner;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessStarter;
@@ -29,12 +28,14 @@ import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
-import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.CreateProcessDto;
+import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.anyline.metadata.Table;
+import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -57,6 +58,10 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
     private IProcessStarterService processStarterService;
     @Resource
     private IProcessSubProcessService processSubProcessService;
+
+
+    @Resource
+    public AnylineService anylineService;
 
     /**
      * 获取详细数据
@@ -348,21 +353,23 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
             FlowSettingDto flowSettingDto = JSON.parseObject(processVO.getSettings(), FlowSettingDto.class);
             FlowSettingDto.DbRecord dbRecord = flowSettingDto.getDbRecord();
             if (dbRecord == null || !dbRecord.getEnable()) {
-
                 if(oldEnable){
                     log.info("删除数据库表：tb_{}",uniqueId);
-                    try (SqlRunner db = SqlRunner.db()) {
-                        db.update(StrUtil.format("drop table tb_{}",uniqueId));
-                    }
+                    Table table = anylineService.metadata().table(StrUtil.format("tb_{}",uniqueId), false); //false表示不加载表结构，只简单查询表名
+                    anylineService.ddl().drop(table);
                 }
 
                 return;
             }
+
+
+
+
+
+            //根据不同数据库长度精度有可能忽略
             List<FormItemVO> formItemVOS = JSON.parseArray(processVO.getFormItems(), FormItemVO.class);
-            String ddlSql = FormStrategyFactory.buildDDLSql(formItemVOS, uniqueId, processVO.getName());
-            try (SqlRunner db = SqlRunner.db()) {
-                db.update(ddlSql);
-            }
+            Table table = FormStrategyFactory.buildDDLSql(formItemVOS, uniqueId, processVO.getName());
+            anylineService.ddl().create(table);
         } catch (Exception e) {
             log.error("Error", e);
         }
