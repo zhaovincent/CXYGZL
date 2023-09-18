@@ -53,6 +53,13 @@ public class DateFormStrategyImpl implements InitializingBean, FormStrategy {
             list.add(column);
         }
 
+        {
+            Column column=new Column(StrUtil.format("{}_data",formItemVO.getId()),"varchar",100);
+            column.setNullable(true);
+            column.setComment(formItemVO.getName());
+            list.add(column);
+        }
+
         return list;
     }
 
@@ -64,7 +71,7 @@ public class DateFormStrategyImpl implements InitializingBean, FormStrategy {
      */
     @Override
     public List<String> getInsertField(FormItemVO formItemVO) {
-        return CollUtil.newArrayList(StrUtil.format("{}", formItemVO.getId()));
+        return CollUtil.newArrayList(StrUtil.format("{}", formItemVO.getId()),StrUtil.format("{}_data", formItemVO.getId()));
     }
 
     /**
@@ -81,13 +88,14 @@ public class DateFormStrategyImpl implements InitializingBean, FormStrategy {
         }
 
         String type = formItemVO.getType();
+        String dateVal = value.toString();
         if(StrUtil.equals(type,FormTypeEnum.DATE.getType())){
-            return CollUtil.newArrayList(DateUtil.formatDateTime(DateUtil.parseDate(value.toString())));
+            return CollUtil.newArrayList(DateUtil.formatDateTime(DateUtil.parseDate(dateVal)), dateVal);
         }
         if(StrUtil.equals(type,FormTypeEnum.DATE_TIME.getType())){
-            return CollUtil.newArrayList(DateUtil.formatDateTime(DateUtil.parseDateTime(value.toString())));
+            return CollUtil.newArrayList(DateUtil.formatDateTime(DateUtil.parseDateTime(dateVal)), dateVal);
         }
 
-        return CollUtil.newArrayList("2000-01-01 "+value.toString());
+        return CollUtil.newArrayList("2000-01-01 "+ dateVal, dateVal);
     }
 }
