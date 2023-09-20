@@ -9,6 +9,8 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.Process;
@@ -421,6 +423,13 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
         {
             List headList=new ArrayList();
+            {
+                headList.add(Dict.create()
+                        .set("id","index")
+                        .set("name","序号")
+                        .set("type","index")
+                );
+            }
             for (FormItemVO formItemVO : formItemVOList) {
                 Dict set = Dict.create()
                         .set("id", formItemVO.getId())
@@ -440,12 +449,58 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         List<DataRow> rows = dataSet.getRows();
 
         List records=new ArrayList();
+        int index=1;
         for (DataRow row : rows) {
             Dict dict = Dict.create();
+            dict.set("index",(pageDto.getPageNum()-1)*pageDto.getPageSize()+index);
             for (FormItemVO formItemVO : formItemVOList) {
                 dict.set(formItemVO.getId(),row.get(formItemVO.getId()));
+                if(formItemVO.getType().equals(FormTypeEnum.LAYOUT.getType())){
+                    //明细
+                    Object value = formItemVO.getProps().getValue();
+                    List<FormItemVO> subFormItemVoList = Convert.toList(FormItemVO.class, value);
+                    List headList=new ArrayList();
+                    {
+                        headList.add(Dict.create()
+                                .set("id","index")
+                                .set("name","序号")
+                                .set("type","index")
+                        );
+                    }
+                    for (FormItemVO formItemVOSub : subFormItemVoList) {
+                        Dict set = Dict.create()
+                                .set("id", formItemVOSub.getId())
+                                .set("name", formItemVOSub.getName())
+                                .set("type", formItemVOSub.getType());
+                        headList.add(set);
+                    }
+                    Object v = row.get(formItemVO.getId());
+                    JSONArray jsonArray = v == null ? new JSONArray() :
+                            (v instanceof String ? JSON.parseArray(v.toString()) : JSON.parseArray(JSON.toJSONString(v)));
+
+                    int subIndex=1;
+                    for (Object o : jsonArray) {
+                        JSONObject jsonObject= (JSONObject) o;
+                        jsonObject.put("index",subIndex);
+                        for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+                            String key = entry.getKey();
+                            Object value1 = entry.getValue();
+                            if(value1==null||value1 instanceof String){
+                                continue;
+                            }
+                            jsonObject.put(key,JSON.toJSONString(value1));
+                        }
+                        subIndex++;
+                    }
+
+                    Dict set = Dict.create().set("headList", headList).set("dataList", jsonArray);
+                    dict.set(formItemVO.getId(),set);
+
+
+                }
             }
             records.add(dict);
+            index++;
         }
         dataMap.put("records",records);
         dataMap.put("total",dataSet.total());
