@@ -26,11 +26,7 @@ public class NodeCanceledEventListener implements FlowableEventListener {
     public void onEvent(FlowableEvent event) {
 
 
-        if (
-                event.getType().toString().equals(FlowableEngineEventType.MULTI_INSTANCE_ACTIVITY_CANCELLED.toString())
-        ) {
 
-        }
         if (
                 event.getType().toString().equals(FlowableEngineEventType.ACTIVITY_CANCELLED.toString())
         ) {

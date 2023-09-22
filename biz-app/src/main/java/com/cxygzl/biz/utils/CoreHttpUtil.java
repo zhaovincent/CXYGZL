@@ -91,12 +91,17 @@ public class CoreHttpUtil {
     /**
      * 创建流程
      *
-     * @param jsonObject
+     * @param node
+     * @param processName
      * @return
      */
-    public static com.cxygzl.common.dto.R<String> createFlow(Node jsonObject, String userId) {
+    public static com.cxygzl.common.dto.R<String> createFlow(Node node, String userId,String processName) {
+        CreateFlowDto createFlowDto=new CreateFlowDto();
+        createFlowDto.setUserId(userId);
+        createFlowDto.setNode(node);
+        createFlowDto.setProcessName(processName);
 
-        String post = post(jsonObject, "/flow/create?userId=" + userId);
+        String post = post(createFlowDto, "/flow/create");
         com.cxygzl.common.dto.R<String> r = JSON.parseObject(post, com.cxygzl.common.dto.R.class);
         return r;
 
@@ -108,9 +113,11 @@ public class CoreHttpUtil {
      * @param jsonObject
      * @return
      */
-    public static String startProcess(ProcessInstanceParamDto jsonObject) {
+    public static R<String> startProcess(ProcessInstanceParamDto jsonObject) {
 
-        return post(jsonObject, "/flow/start");
+        String post = post(jsonObject, "/flow/start");
+        return JSON.parseObject(post, new TypeReference<R<String>>() {
+        });
 
     }
 

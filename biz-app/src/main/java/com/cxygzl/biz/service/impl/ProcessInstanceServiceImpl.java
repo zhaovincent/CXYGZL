@@ -67,6 +67,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
     @Resource
     private AnylineService anylineService;
+
     /**
      * 消息通知事件
      *
@@ -95,12 +96,11 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         processInstanceParamDto.setStartUserId(String.valueOf(userId));
         Map<String, Object> paramMap = processInstanceParamDto.getParamMap();
-        Dict rootUser = Dict.create().set("id", userId).set("name", user.getName()).set("type", NodeUserTypeEnum.USER.getKey());
+        NodeUser rootUser = NodeUser.builder().id(userId).name(user.getName()).type(NodeUserTypeEnum.USER.getKey()).build();
         paramMap.put(ProcessInstanceConstant.VariableKey.STARTER, CollUtil.newArrayList(rootUser));
 
-        String post = CoreHttpUtil.startProcess(processInstanceParamDto);
-        com.cxygzl.common.dto.R<String> r = JSON.parseObject(post, new TypeReference<com.cxygzl.common.dto.R<String>>() {
-        });
+        com.cxygzl.common.dto.R<String> r = CoreHttpUtil.startProcess(processInstanceParamDto);
+
         if (!r.isOk()) {
             return com.cxygzl.common.dto.R.fail(r.getMsg());
         }
@@ -401,7 +401,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 DataRow dataRow = FormStrategyFactory.buildInsertSql(formItemVOList, flowId, processInstanceParamDto.getProcessInstanceId(),
                         processInstanceParamDto.getParamMap());
 
-                anylineService.insert(StrUtil.format("tb_{}",process.getUniqueId()),dataRow);
+                anylineService.insert(StrUtil.format("tb_{}", process.getUniqueId()), dataRow);
             }
         } catch (Exception e) {
             log.error("Error", e);

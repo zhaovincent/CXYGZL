@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
@@ -14,10 +15,12 @@ import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.Process;
+import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.entity.ProcessStarter;
 import com.cxygzl.biz.entity.ProcessSubProcess;
 import com.cxygzl.biz.form.FormStrategyFactory;
 import com.cxygzl.biz.mapper.ProcessMapper;
+import com.cxygzl.biz.service.IProcessInstanceRecordService;
 import com.cxygzl.biz.service.IProcessService;
 import com.cxygzl.biz.service.IProcessStarterService;
 import com.cxygzl.biz.service.IProcessSubProcessService;
@@ -67,6 +70,9 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
     private IProcessStarterService processStarterService;
     @Resource
     private IProcessSubProcessService processSubProcessService;
+
+    @Resource
+    private IProcessInstanceRecordService processInstanceRecordService;
 
 
     @Resource
@@ -245,7 +251,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         com.cxygzl.biz.utils.NodeUtil.handleApprove(node);
 
 
-        com.cxygzl.common.dto.R<String> r = CoreHttpUtil.createFlow(node, StpUtil.getLoginIdAsString());
+        com.cxygzl.common.dto.R<String> r = CoreHttpUtil.createFlow(node, StpUtil.getLoginIdAsString(), processVO.getName());
         if (!r.isOk()) {
             return com.cxygzl.common.dto.R.fail(r.getMsg());
         }
@@ -339,13 +345,13 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                 FlowSettingDto flowSettingDto = JSON.parseObject(process.getSettings(), FlowSettingDto.class);
                 FlowSettingDto.DbRecord dbRecord = flowSettingDto.getDbRecord();
                 if (dbRecord == null || !dbRecord.getEnable()) {
-                    handleDbTable(processVO, p.getUniqueId(),false);
-                }else{
-                    handleDbTable(processVO, p.getUniqueId(),true);
+                    handleDbTable(processVO, p.getUniqueId(), false);
+                } else {
+                    handleDbTable(processVO, p.getUniqueId(), true);
 
                 }
             } else {
-                handleDbTable(processVO, p.getUniqueId(),false);
+                handleDbTable(processVO, p.getUniqueId(), false);
             }
         }
         return com.cxygzl.common.dto.R.success();
@@ -357,22 +363,19 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
      * @param processVO
      * @param uniqueId
      */
-    private void handleDbTable(ProcessVO processVO, String uniqueId,boolean oldEnable) {
+    private void handleDbTable(ProcessVO processVO, String uniqueId, boolean oldEnable) {
         try {
             FlowSettingDto flowSettingDto = JSON.parseObject(processVO.getSettings(), FlowSettingDto.class);
             FlowSettingDto.DbRecord dbRecord = flowSettingDto.getDbRecord();
             if (dbRecord == null || !dbRecord.getEnable()) {
-                if(oldEnable){
-                    log.info("删除数据库表：tb_{}",uniqueId);
-                    Table table = anylineService.metadata().table(StrUtil.format("tb_{}",uniqueId), false); //false表示不加载表结构，只简单查询表名
+                if (oldEnable) {
+                    log.info("删除数据库表：tb_{}", uniqueId);
+                    Table table = anylineService.metadata().table(StrUtil.format("tb_{}", uniqueId), false); //false表示不加载表结构，只简单查询表名
                     anylineService.ddl().drop(table);
                 }
 
                 return;
             }
-
-
-
 
 
             //根据不同数据库长度精度有可能忽略
@@ -415,19 +418,33 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
     @Override
     public R queryDataList(ProcessDataQueryVO pageDto) {
 
-        Map dataMap=new HashMap();
+        Map dataMap = new HashMap();
 
         Process process = getByFlowId(pageDto.getFlowId());
 
         String formItems = process.getFormItems();
         List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
         {
-            List headList=new ArrayList();
+            List headList = new ArrayList();
             {
                 headList.add(Dict.create()
-                        .set("id","index")
-                        .set("name","序号")
-                        .set("type","index")
+                        .set("id", "index")
+                        .set("name", "序号")
+                        .set("type", "index")
+                );
+            }
+            {
+                headList.add(Dict.create()
+                        .set("id", "startUserName")
+                        .set("name", "发起人")
+                        .set("type", "index")
+                );
+            }
+            {
+                headList.add(Dict.create()
+                        .set("id", "startTime")
+                        .set("name", "发起时间")
+                        .set("type", "index")
                 );
             }
             for (FormItemVO formItemVO : formItemVOList) {
@@ -437,34 +454,33 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                         .set("type", formItemVO.getType());
                 headList.add(set);
             }
-            dataMap.put("headList",headList);
+            dataMap.put("headList", headList);
         }
 
         String uniqueId = process.getUniqueId();
         PageNavi navi = new DefaultPageNavi(pageDto.getPageNum(), pageDto.getPageSize());
-//        org.anyline.data.prepare.Condition condition = new DefaultAutoConditionChain();
-//        condition.
 
-        DataSet dataSet = anylineService.querys(StrUtil.format("tb_{}", uniqueId), navi);
+
+        DataSet dataSet = anylineService.querys(StrUtil.format("tb_{}", uniqueId), navi,"order by create_time desc");
         List<DataRow> rows = dataSet.getRows();
 
-        List records=new ArrayList();
-        int index=1;
+        List records = new ArrayList();
+        int index = 1;
         for (DataRow row : rows) {
             Dict dict = Dict.create();
-            dict.set("index",(pageDto.getPageNum()-1)*pageDto.getPageSize()+index);
+            dict.set("index", (pageDto.getPageNum() - 1) * pageDto.getPageSize() + index);
             for (FormItemVO formItemVO : formItemVOList) {
-                dict.set(formItemVO.getId(),row.get(formItemVO.getId()));
-                if(formItemVO.getType().equals(FormTypeEnum.LAYOUT.getType())){
+                dict.set(formItemVO.getId(), row.get(formItemVO.getId()));
+                if (formItemVO.getType().equals(FormTypeEnum.LAYOUT.getType())) {
                     //明细
                     Object value = formItemVO.getProps().getValue();
                     List<FormItemVO> subFormItemVoList = Convert.toList(FormItemVO.class, value);
-                    List headList=new ArrayList();
+                    List headList = new ArrayList();
                     {
                         headList.add(Dict.create()
-                                .set("id","index")
-                                .set("name","序号")
-                                .set("type","index")
+                                .set("id", "index")
+                                .set("name", "序号")
+                                .set("type", "index")
                         );
                     }
                     for (FormItemVO formItemVOSub : subFormItemVoList) {
@@ -478,32 +494,37 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                     JSONArray jsonArray = v == null ? new JSONArray() :
                             (v instanceof String ? JSON.parseArray(v.toString()) : JSON.parseArray(JSON.toJSONString(v)));
 
-                    int subIndex=1;
+                    int subIndex = 1;
                     for (Object o : jsonArray) {
-                        JSONObject jsonObject= (JSONObject) o;
-                        jsonObject.put("index",subIndex);
+                        JSONObject jsonObject = (JSONObject) o;
+                        jsonObject.put("index", subIndex);
                         for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
                             String key = entry.getKey();
                             Object value1 = entry.getValue();
-                            if(value1==null||value1 instanceof String){
+                            if (value1 == null || value1 instanceof String) {
                                 continue;
                             }
-                            jsonObject.put(key,JSON.toJSONString(value1));
+                            jsonObject.put(key, JSON.toJSONString(value1));
                         }
                         subIndex++;
                     }
 
                     Dict set = Dict.create().set("headList", headList).set("dataList", jsonArray);
-                    dict.set(formItemVO.getId(),set);
+                    dict.set(formItemVO.getId(), set);
 
 
                 }
             }
+            String processInstanceId = row.getString("process_instance_id");
+            ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
+            dict.set("startTime", DateUtil.formatDateTime(processInstanceRecord.getCreateTime()));
+            UserDto user = ApiStrategyFactory.getStrategy().getUser(processInstanceRecord.getUserId());
+            dict.set("startUserName",user.getName());
             records.add(dict);
             index++;
         }
-        dataMap.put("records",records);
-        dataMap.put("total",dataSet.total());
+        dataMap.put("records", records);
+        dataMap.put("total", dataSet.total());
         return R.success(dataMap);
     }
 }

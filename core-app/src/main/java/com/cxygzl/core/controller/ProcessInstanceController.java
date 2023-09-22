@@ -3,9 +3,7 @@ package com.cxygzl.core.controller;
 import com.cxygzl.common.dto.IndexPageStatistics;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.VariableQueryParamDto;
-import com.cxygzl.core.service.IProcessService;
 import lombok.extern.slf4j.Slf4j;
-import org.flowable.bpmn.model.FlowElement;
 import org.flowable.engine.*;
 import org.flowable.engine.history.HistoricActivityInstanceQuery;
 import org.flowable.task.api.TaskQuery;
@@ -13,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,17 +31,11 @@ public class ProcessInstanceController {
     @Resource
     private ManagementService managementService;
 
-//    @Resource
-    private IProcessService processService;
 
 
     @Resource
     private RuntimeService runtimeService;
 
-    @PostMapping("calApprovePath")
-    public R<List<FlowElement>> calApprovePath(String processInstanceId, String modelId,@RequestBody Map<String, Object> variableMap) {
-        return processService.calApprovePath(processInstanceId, modelId, variableMap);
-    }
 
     /**
      * 查询统计数量

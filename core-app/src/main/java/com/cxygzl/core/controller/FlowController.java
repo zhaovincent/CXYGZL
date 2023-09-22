@@ -1,6 +1,5 @@
 package com.cxygzl.core.controller;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -11,7 +10,6 @@ import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.HttpSetting;
-import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.HttpUtil;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.BizHttpUtil;
@@ -20,7 +18,6 @@ import com.cxygzl.core.utils.NodeUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.BpmnAutoLayout;
-import org.flowable.bpmn.converter.BpmnXMLConverter;
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.engine.HistoryService;
@@ -68,23 +65,26 @@ public class FlowController {
     @Resource
     private RuntimeService runtimeService;
 
-
+    /**
+     * 创建流程
+     * @param createFlowDto
+     * @return
+     */
     @PostMapping("create")
-    public R create(@RequestBody Node nodeDto, String userId) {
-        String flowId = "p" + RandomUtil.randomString(9) + StrUtil.fillBefore(userId, '0', 10);
+    public R create(@RequestBody CreateFlowDto createFlowDto) {
+        String flowId = "p" + RandomUtil.randomString(9) + StrUtil.fillBefore(createFlowDto.getUserId(), '0', 10);
 
 
         log.info("flowId={}", flowId);
-        BpmnModel bpmnModel = ModelUtil.buildBpmnModel(nodeDto, "测试1", flowId);
+        BpmnModel bpmnModel = ModelUtil.buildBpmnModel(createFlowDto.getNode(), createFlowDto.getProcessName(), flowId);
         {
-            byte[] bpmnBytess = new BpmnXMLConverter().convertToXML(bpmnModel);
-            // ByteArrayInputStream in = new ByteArrayInputStream(bpmnBytess);
-            String filename = "/tmp/flowable-deployment/" + flowId + ".bpmn20.xml";
-            log.debug("部署时的模型文件：{}", filename);
-            FileUtil.writeBytes(bpmnBytess, filename);
+//            byte[] bpmnBytess = new BpmnXMLConverter().convertToXML(bpmnModel);
+//            String filename = "/tmp/flowable-deployment/" + flowId + ".bpmn20.xml";
+//            log.debug("部署时的模型文件：{}", filename);
+//            FileUtil.writeBytes(bpmnBytess, filename);
         }
         repositoryService.createDeployment()
-                .addBpmnModel(StrUtil.format("{}.bpmn20.xml", "test1"), bpmnModel).deploy();
+                .addBpmnModel(StrUtil.format("{}.bpmn20.xml", flowId), bpmnModel).deploy();
 
 
         return R.success(flowId);

@@ -507,20 +507,15 @@ public class ModelUtil {
 
                 //串行
 
-                boolean isSequential = true;
-
-
+                boolean isSequential = false;
                 MultiInstanceLoopCharacteristics loopCharacteristics = new MultiInstanceLoopCharacteristics();
                 loopCharacteristics.setSequential(isSequential);
                 loopCharacteristics.setInputDataItem(inputDataItem);
                 loopCharacteristics.setElementVariable(StrUtil.format("{}_assignee_temp", node.getId()));
-
                 loopCharacteristics.setCompletionCondition("${multiInstanceHandler.completionCondition(execution)}");
-
                 userTask.setLoopCharacteristics(loopCharacteristics);
                 String format = StrUtil.format("${{}_assignee_temp}", node.getId());
                 userTask.setAssignee(format);
-
             }
 
             flowElementList.add(userTask);
@@ -578,9 +573,8 @@ public class ModelUtil {
             String inputDataItem = "${multiInstanceHandler.resolveAssignee(execution)}";
 
 
-            //串行
-
-            boolean isSequential = true;
+            //默认并行
+            boolean isSequential = false;
 
             Integer multipleMode = node.getMultipleMode();
             //多人
@@ -591,6 +585,7 @@ public class ModelUtil {
             if ((multipleMode == ProcessInstanceConstant.MULTIPLE_MODE_ALL_SORT)) {
 
                 //串行会签
+                isSequential = true;
             }
             if ((multipleMode == ProcessInstanceConstant.MULTIPLE_MODE_ONE)) {
 
