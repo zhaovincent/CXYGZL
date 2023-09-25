@@ -1,0 +1,2 @@
+INSERT INTO  `menu` (`id`, `parent_id`, `tree_path`, `name`, `type`, `path`, `component`, `perm`, `visible`, `sort`, `icon`, `redirect`, `create_time`, `update_time`, `del_flag`) VALUES (1706144197164838914, 89, '0,89', '流程报表', 1, '/flow/data', 'cxygzl/views/flow/flowdata', NULL, 0, 1, 'document', NULL, '2023-09-25 11:10:50', '2023-09-25 11:10:50', 0);
+INSERT INTO  `role_menu` (`role_id`, `menu_id`, `id`, `del_flag`, `create_time`, `update_time`) VALUES (2, 1706144197164838914, 1706144314223669259, 0, '2023-09-25 11:11:18', '2023-09-25 11:11:18');
