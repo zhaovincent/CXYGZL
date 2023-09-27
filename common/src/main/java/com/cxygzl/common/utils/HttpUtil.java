@@ -4,6 +4,8 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.Header;
 import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpStatus;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.flow.HttpSetting;
@@ -35,12 +37,13 @@ public class HttpUtil {
 
 
     public static String post(String url, Map<String, String> headerParamMap, Object bodyMap) {
+        log.info("请求地址：{}  请求头：{} 请求体：{}",url,headerParamMap,bodyMap);
         if (headerParamMap == null) {
             headerParamMap = new HashMap<>();
         }
         String result = null;
         try {
-            result = HttpRequest.post(url)
+            HttpResponse httpResponse = HttpRequest.post(url)
                     //头信息，多个头信息多次调用此方法即可
                     .header(Header.USER_AGENT, ProcessInstanceConstant.VariableKey.SYS_CODE)
                     .headerMap(headerParamMap, true)
@@ -48,8 +51,15 @@ public class HttpUtil {
                     //超时，毫秒
                     .timeout(TIME_OUT)
                     .addInterceptor(tLogHutoolhttpInterceptor)
-                    .execute().body();
-            log.info("  返回值:{}", result);
+                    .execute();
+            int status = httpResponse.getStatus();
+
+            result = httpResponse.body();
+            log.info("  返回值:{}  状态码：{}", result,status);
+            if (HttpStatus.HTTP_OK != status) {
+                throw new RuntimeException("网络请求失败！");
+            }
+
         } catch (Exception e) {
             log.error("前置检查事件异常", e);
         }
