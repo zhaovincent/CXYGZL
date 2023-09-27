@@ -799,17 +799,17 @@ public class ModelUtil {
         serviceTask.setImplementationType("class");
         serviceTask.setImplementation(CopyServiceTask.class.getCanonicalName());
 
-        ExtensionElement e = new ExtensionElement();
-        {
-
-
-            e.setName("flowable:failedJobRetryTimeCycle");
-            //上面的例子会让作业执行器重试5次，并在每次重试前等待10秒。
-            e.setElementText("R5/PT10S");
-
-        }
-
-        serviceTask.addExtensionElement(e);
+//        ExtensionElement e = new ExtensionElement();
+//        {
+//
+//
+//            e.setName("flowable:failedJobRetryTimeCycle");
+//            //上面的例子会让作业执行器重试5次，并在每次重试前等待10秒。
+//            e.setElementText("R5/PT10S");
+//
+//        }
+//
+//        serviceTask.addExtensionElement(e);
         return serviceTask;
     }
 
