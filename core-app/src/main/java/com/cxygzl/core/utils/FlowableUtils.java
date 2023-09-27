@@ -42,6 +42,10 @@ public class FlowableUtils {
     }
 
 
+    public static void getLastNode(String flowId){
+
+    }
+
 
     public static ExtensionAttribute generate(String key, String val) {
         ExtensionAttribute ea = new ExtensionAttribute();

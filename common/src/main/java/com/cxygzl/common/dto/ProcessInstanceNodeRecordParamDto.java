@@ -34,6 +34,7 @@ public class ProcessInstanceNodeRecordParamDto {
 
     private String parentNodeId;
 
+
     /**
      * 节点类型
      */

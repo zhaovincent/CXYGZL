@@ -104,6 +104,7 @@ public class NodeStartEventListener implements FlowableEventListener {
         Map<String, Object> processVariables = runtimeService.getVariables(executionId);
 
 
+
         Node node = NodeDataStoreFactory.getInstance().getNode(flowId, activityId);
         ProcessInstanceNodeRecordParamDto processInstanceNodeRecordParamDto = new ProcessInstanceNodeRecordParamDto();
         processInstanceNodeRecordParamDto.setFlowId(flowId);
@@ -111,6 +112,7 @@ public class NodeStartEventListener implements FlowableEventListener {
 //            processNodeRecordParamDto.setChildExecutionId(childExecutionIdList);
         processInstanceNodeRecordParamDto.setData(JSON.toJSONString(processVariables));
         processInstanceNodeRecordParamDto.setNodeId(activityId);
+//        processInstanceNodeRecordParamDto.setFromNodeId();
         processInstanceNodeRecordParamDto.setParentNodeId(MapUtil.getStr(processVariables, StrUtil.format("{}_parent_id", activityId)));
         processInstanceNodeRecordParamDto.setFlowUniqueId(MapUtil.getStr(processVariables, FLOW_UNIQUE_ID));
         if (node != null) {

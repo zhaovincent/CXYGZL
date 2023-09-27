@@ -53,7 +53,10 @@ public class ProcessInstanceNodeRecordServiceImpl extends ServiceImpl<ProcessIns
      */
     @Override
     public R start(ProcessInstanceNodeRecordParamDto processInstanceNodeRecordParamDto) {
+        String flowId = processInstanceNodeRecordParamDto.getFlowId();
 
+        String nodeId = processInstanceNodeRecordParamDto.getNodeId();
+        String parentNodeId = processInstanceNodeRecordParamDto.getParentNodeId();
 
         log.info("开始节点：{} - {} - {} -{}", processInstanceNodeRecordParamDto.getNodeId(), processInstanceNodeRecordParamDto.getNodeName(), processInstanceNodeRecordParamDto.getExecutionId(), processInstanceNodeRecordParamDto.getFlowUniqueId());
 
@@ -65,13 +68,13 @@ public class ProcessInstanceNodeRecordServiceImpl extends ServiceImpl<ProcessIns
 
         }
 
+        //设置上级id
+        String lastNodeId = com.cxygzl.biz.utils.NodeUtil.getLastNodeId(flowId, nodeId, parentNodeId);
+        processNodeRecord.setParentNodeId(lastNodeId);
 
         this.save(processNodeRecord);
 
-        String flowId = processInstanceNodeRecordParamDto.getFlowId();
 
-        String parentNodeId = processInstanceNodeRecordParamDto.getParentNodeId();
-        String nodeId = processInstanceNodeRecordParamDto.getNodeId();
         //查询父级
         Process process = processService.getByFlowId(flowId);
         final Node rootNode = JSON.parseObject(process.getProcess(), Node.class);
@@ -140,6 +143,8 @@ public class ProcessInstanceNodeRecordServiceImpl extends ServiceImpl<ProcessIns
             }
 
         }
+
+
 
         processInstanceRecordService.updateById(processInstanceRecord);
 

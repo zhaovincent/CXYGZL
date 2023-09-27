@@ -795,7 +795,7 @@ public class ModelUtil {
         ServiceTask serviceTask = new ServiceTask();
         serviceTask.setId(node.getId());
         serviceTask.setName(node.getNodeName());
-        serviceTask.setAsynchronous(true);
+        serviceTask.setAsynchronous(false);
         serviceTask.setImplementationType("class");
         serviceTask.setImplementation(CopyServiceTask.class.getCanonicalName());
 
@@ -804,8 +804,8 @@ public class ModelUtil {
 
 
             e.setName("flowable:failedJobRetryTimeCycle");
-            //上面的例子会让作业执行器重试5次，并在每次重试前等待1分钟。
-            e.setElementText("R5/PT1M");
+            //上面的例子会让作业执行器重试5次，并在每次重试前等待10秒。
+            e.setElementText("R5/PT10S");
 
         }
 
@@ -826,14 +826,14 @@ public class ModelUtil {
         serviceTask.setName(node.getNodeName());
         serviceTask.setImplementationType("class");
         serviceTask.setImplementation(TriggerServiceTask.class.getCanonicalName());
-        serviceTask.setAsynchronous(true);
+        serviceTask.setAsynchronous(false);
         ExtensionElement e = new ExtensionElement();
         {
 
 
             e.setName("flowable:failedJobRetryTimeCycle");
-            //上面的例子会让作业执行器重试5次，并在每次重试前等待1分钟。
-            e.setElementText("R5/PT1M");
+            //上面的例子会让作业执行器重试5次，并在每次重试前等待10秒。
+            e.setElementText("R5/PT10S");
 
         }
         serviceTask.addExtensionElement(e);
@@ -867,7 +867,7 @@ public class ModelUtil {
             serviceTask.setName(StrUtil.format("{}_请求",node.getNodeName()));
             serviceTask.setImplementationType("class");
             serviceTask.setImplementation(AsynTriggerServiceTask.class.getCanonicalName());
-            serviceTask.setAsynchronous(true);
+            serviceTask.setAsynchronous(false);
             serviceTask.setExtensionElements(FlowableUtils.generateFlowNodeIdExtensionMap(node.getId()));
 
             ExtensionElement e = new ExtensionElement();
@@ -875,8 +875,8 @@ public class ModelUtil {
 
 
                 e.setName("flowable:failedJobRetryTimeCycle");
-                //上面的例子会让作业执行器重试5次，并在每次重试前等待1分钟。
-                e.setElementText("R5/PT1M");
+                //上面的例子会让作业执行器重试5次，并在每次重试前等待10秒。
+                e.setElementText("R5/PT10S");
 
             }
             serviceTask.addExtensionElement(e);
