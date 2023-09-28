@@ -57,7 +57,7 @@ public class HttpUtil {
             result = httpResponse.body();
             log.info("  返回值:{}  状态码：{}", result,status);
             if (HttpStatus.HTTP_OK != status) {
-                throw new RuntimeException("网络请求失败！");
+               return null;
             }
 
         } catch (Exception e) {

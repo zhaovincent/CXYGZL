@@ -67,6 +67,7 @@ public class FlowController {
 
     /**
      * 创建流程
+     *
      * @param createFlowDto
      * @return
      */
@@ -121,11 +122,12 @@ public class FlowController {
 
     /**
      * 唤醒消息事件
+     *
      * @param messageDto
      * @return
      */
     @PostMapping("notifyMsg")
-    public R notifyMsg(@RequestBody NotifyMessageDto messageDto){
+    public R notifyMsg(@RequestBody NotifyMessageDto messageDto) {
 
         String msgId = NodeDataStoreFactory.getInstance().get("msgId", messageDto.getMessageNotifyId());
         String nodeId = NodeDataStoreFactory.getInstance().get("nodeId", messageDto.getMessageNotifyId());
@@ -136,7 +138,7 @@ public class FlowController {
                 .processInstanceId(messageDto.getProcessInstanceId())
                 .singleResult();
 
-        runtimeService.messageEventReceived(msgId,execution.getId());
+        runtimeService.messageEventReceived(msgId, execution.getId());
         return R.success();
     }
 
@@ -163,6 +165,8 @@ public class FlowController {
                     R r = JSON.parseObject(result, new TypeReference<R>() {
                     });
                     return r;
+                } else {
+                    return R.fail("网络连接异常");
                 }
 
             }
@@ -245,9 +249,9 @@ public class FlowController {
                 customClassLoader,
                 scaleFactor,
                 drawSequenceFlowNameWithNoLabelDI); // 获取输入流
-        IoUtil.write(response.getOutputStream(),true,IoUtil.readBytes(inputStream));
+        IoUtil.write(response.getOutputStream(), true, IoUtil.readBytes(inputStream));
 //        String content = Base64.encode(inputStream);
-       // return R.success(content);
+        // return R.success(content);
     }
 
 
