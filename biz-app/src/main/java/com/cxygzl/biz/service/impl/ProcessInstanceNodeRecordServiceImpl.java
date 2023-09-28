@@ -87,7 +87,7 @@ public class ProcessInstanceNodeRecordServiceImpl extends ServiceImpl<ProcessIns
 
         }
 
-        //设置上级id
+        //设置来源的上级id
         String lastNodeId = com.cxygzl.biz.utils.NodeUtil.getLastNodeId(flowId, nodeId, parentNodeId);
         processNodeRecord.setParentNodeId(lastNodeId);
 
