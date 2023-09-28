@@ -11,6 +11,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
+import com.cxygzl.biz.config.exception.BusinessException;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.service.*;
@@ -199,6 +200,9 @@ public class FormServiceImpl implements IFormService {
                 paramMap,
                 flowId,
                 processInstanceId, null);
+        if(StrUtil.isBlank(result)){
+            throw new BusinessException("网络请求异常");
+        }
         JSONObject jsonObject = JSON.parseObject(result);
         if (jsonObject.isEmpty()) {
             return;

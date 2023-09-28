@@ -59,6 +59,8 @@ public class TriggerServiceTask implements JavaDelegate {
                     execution.setVariable(value, resultMap.get(httpSettingData.getField()));
                 }
             }
+        }else{
+            throw new RuntimeException("网络连接异常");
         }
 
 

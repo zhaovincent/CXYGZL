@@ -60,6 +60,9 @@ public class AsynTriggerServiceTask implements JavaDelegate {
             log.error("触发器异常", e);
         }
 
+        if(StrUtil.isBlank(result)){
+            throw new RuntimeException("网络连接异常");
+        }
 
     }
 }
