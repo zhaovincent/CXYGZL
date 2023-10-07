@@ -254,6 +254,20 @@ public class CoreHttpUtil {
 
     }
 
+
+    /**
+     * 撤回
+     *
+     * @param jsonObject
+     * @return
+     */
+    public static R revoke(TaskParamDto jsonObject) {
+
+        String post = post(jsonObject, "/task/revoke");
+        return JSON.parseObject(post,R.class);
+
+    }
+
     /**
      * 委派任务
      *

@@ -139,6 +139,8 @@ public class ProcessInstanceConstant {
         public static final String REFUSE = "refuse";
         //驳回
         public static final String REJECT = "reject";
+        //撤回
+        public static final String REVOKE = "revoke";
         //委派
         public static final String FRONT_JOIN = "frontJoin";
         //转办

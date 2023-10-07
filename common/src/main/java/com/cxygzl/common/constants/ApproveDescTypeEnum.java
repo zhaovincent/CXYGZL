@@ -23,6 +23,7 @@ public enum ApproveDescTypeEnum {
     DEL_ASSIGNEE("delAssigneeDesc","减签"),
     FRONT_JOIN("frontJoinDesc","委派"),
     REJECT("rejectDesc","驳回"),
+    REVOKE("revokeDesc","撤回"),
 
     ;
 

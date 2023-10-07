@@ -562,4 +562,71 @@ public class TaskController {
     }
 
 
+    /**
+     * 撤回
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @PostMapping("revoke")
+    public R revoke(@RequestBody TaskParamDto taskParamDto) {
+
+        String targetKey = taskParamDto.getTargetNodeId();
+        String nodeId = taskParamDto.getNodeId();
+
+        String processInstanceId = taskParamDto.getProcessInstanceId();
+
+        List<String> taskIdList = taskParamDto.getTaskIdList();
+
+        List<Task> taskList = taskService.createTaskQuery().processInstanceId(processInstanceId).taskIds(taskIdList).active().list();
+        if (taskList.size() != taskIdList.size()) {
+            return R.fail("有已完成的任务，不能撤回");
+        }
+
+        for (Task task : taskList) {
+
+            if (task.isSuspended()) {
+                return R.fail("任务处于挂起状态");
+            }
+
+        }
+
+
+        // 当前任务 task
+
+        if (StrUtil.equals(targetKey, ProcessInstanceConstant.VariableKey.STARTER)) {
+            targetKey = StrUtil.format("{}_user_task", targetKey);
+            runtimeService.setVariable(processInstanceId,
+                    ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE, true);
+        }
+        if(CollUtil.isNotEmpty(taskParamDto.getParamMap())){
+            runtimeService.setVariables(processInstanceId, taskParamDto.getParamMap());
+        }
+        runtimeService.setVariable(processInstanceId, StrUtil.format("{}_parent_id", targetKey), nodeId);
+        runtimeService.setVariable(processInstanceId, FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
+
+        for (Task task : taskList) {
+            runtimeService.setVariableLocal(task.getExecutionId(), ProcessInstanceConstant.VariableKey.TASK_TYPE, ProcessInstanceConstant.TaskType.REVOKE);
+
+            taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
+                    ProcessInstanceConstant.TaskType.REVOKE
+            );
+
+
+            if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
+                saveUserCommentToTask(task, ApproveDescTypeEnum.REVOKE.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
+                        "撤回了任务并添加了评论");
+            } else {
+                saveSysCommentToTask(task, ApproveDescTypeEnum.REVOKE.getType(), "撤回了任务", taskParamDto.getUserId());
+            }
+        }
+
+
+        runtimeService.createChangeActivityStateBuilder()
+                .processInstanceId(processInstanceId)
+                .moveActivityIdTo(nodeId, targetKey)
+                .changeState();
+        return R.success();
+
+    }
 }

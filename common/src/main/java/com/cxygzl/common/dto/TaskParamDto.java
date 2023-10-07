@@ -56,8 +56,15 @@ public class TaskParamDto {
 
 
     /**
-     * 模板节点
+     * 目标节点
      */
     private String targetNodeId;
+
+    private List<String> nodeIdList;
+    private List<String> taskIdList;
+    /**
+     * 执行id
+     */
+    private String executionId;
 
 }

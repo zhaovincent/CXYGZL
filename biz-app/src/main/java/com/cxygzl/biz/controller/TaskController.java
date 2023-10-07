@@ -132,5 +132,16 @@ public class TaskController {
     }
 
 
+    /**
+     * 撤回
+     * @param taskParamDto
+     * @return
+     */
+    @PostMapping("revoke")
+    public R revoke(@RequestBody TaskParamDto taskParamDto){
+        return taskService.revoke(taskParamDto);
+    }
+
+
 
 }

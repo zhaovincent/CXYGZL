@@ -67,4 +67,11 @@ public interface ITaskService {
      */
     R back(TaskParamDto taskParamDto);
 
+    /**
+     * 撤回
+     * @param taskParamDto
+     * @return
+     */
+    R revoke(TaskParamDto taskParamDto);
+
 }
