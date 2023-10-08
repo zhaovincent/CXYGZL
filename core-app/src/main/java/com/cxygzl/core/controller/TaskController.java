@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
+import com.cxygzl.core.cmd.InjectRevokeGatewayCmd;
 import com.cxygzl.core.utils.NodeUtil;
 import com.cxygzl.core.vo.TaskCommentDto;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.cxygzl.common.constants.ProcessInstanceConstant.MERGE_GATEWAY_FLAG;
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID;
 
 /**
@@ -572,7 +574,6 @@ public class TaskController {
     public R revoke(@RequestBody TaskParamDto taskParamDto) {
 
         String targetKey = taskParamDto.getTargetNodeId();
-        String nodeId = taskParamDto.getNodeId();
 
         String processInstanceId = taskParamDto.getProcessInstanceId();
 
@@ -586,11 +587,13 @@ public class TaskController {
         for (Task task : taskList) {
 
             if (task.isSuspended()) {
-                return R.fail("任务处于挂起状态");
+                return R.fail("有任务处于挂起状态");
             }
 
         }
 
+
+        String gatewayId = StrUtil.format("{}{}", MERGE_GATEWAY_FLAG, IdUtil.fastSimpleUUID());
 
         // 当前任务 task
 
@@ -599,10 +602,10 @@ public class TaskController {
             runtimeService.setVariable(processInstanceId,
                     ProcessInstanceConstant.VariableKey.REJECT_TO_STARTER_NODE, true);
         }
-        if(CollUtil.isNotEmpty(taskParamDto.getParamMap())){
+        if (CollUtil.isNotEmpty(taskParamDto.getParamMap())) {
             runtimeService.setVariables(processInstanceId, taskParamDto.getParamMap());
         }
-        runtimeService.setVariable(processInstanceId, StrUtil.format("{}_parent_id", targetKey), nodeId);
+        runtimeService.setVariable(processInstanceId, StrUtil.format("{}_parent_id", targetKey), gatewayId);
         runtimeService.setVariable(processInstanceId, FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
 
         for (Task task : taskList) {
@@ -622,11 +625,31 @@ public class TaskController {
         }
 
 
+        //创建节点
+        managementService.executeCommand(new InjectRevokeGatewayCmd(processInstanceId, null, targetKey, gatewayId));
+        // return R.success();
+
+        List<String> nodeIdList = taskParamDto.getNodeIdList();
+
+
         runtimeService.createChangeActivityStateBuilder()
                 .processInstanceId(processInstanceId)
-                .moveActivityIdTo(nodeId, targetKey)
+                .moveActivityIdsToSingleActivityId(nodeIdList, gatewayId)
                 .changeState();
         return R.success();
 
+    }
+
+
+    /**
+     * 删除任务
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @PostMapping("delete")
+    public R delete(@RequestBody TaskParamDto taskParamDto) {
+
+        return R.success();
     }
 }

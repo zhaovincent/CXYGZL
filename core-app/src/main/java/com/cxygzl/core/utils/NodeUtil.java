@@ -1,9 +1,11 @@
 package com.cxygzl.core.utils;
 
 import cn.hutool.extra.spring.SpringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.repository.ProcessDefinition;
 
+@Slf4j
 public class NodeUtil {
 
     public static String getFlowId(String processDefinitionId) {
@@ -13,6 +15,11 @@ public class NodeUtil {
         ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionId(processDefinitionId)
                 .singleResult();
+
+        log.info("获取流程id的：{}", processDefinitionId);
+        if (processDefinition == null) {
+            return "";
+        }
 
 
         return processDefinition.getKey();

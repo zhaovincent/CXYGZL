@@ -353,9 +353,9 @@ public class TaskServiceImpl implements ITaskService {
         if (CollUtil.isEmpty(processInstanceNodeRecordList)) {
             return R.fail("未找到下级节点，不能撤回");
         }
-        if(processInstanceNodeRecordList.size()>1){
-            return R.fail("暂不支持多子级节点撤回");
-        }
+//        if(processInstanceNodeRecordList.size()>1){
+//            return R.fail("暂不支持多子级节点撤回");
+//        }
 
         for (ProcessInstanceNodeRecord instanceNodeRecord : processInstanceNodeRecordList) {
             //如果不是用户任务 直接不能撤回
@@ -369,8 +369,9 @@ public class TaskServiceImpl implements ITaskService {
             }
         }
         //查找正在执行的所有的任务id
+        List<String> executionIdList = processInstanceNodeRecordList.stream().map(w -> w.getExecutionId()).collect(Collectors.toList());
         List<String> childrenExecutionIdList = executionService.lambdaQuery()
-                .eq(ProcessInstanceExecution::getExecutionId, processInstanceNodeRecordList.get(0).getExecutionId())
+                .in(ProcessInstanceExecution::getExecutionId, executionIdList)
                 .list().stream().map(ProcessInstanceExecution::getChildExecutionId).collect(Collectors.toList());
 
         List<ProcessInstanceAssignUserRecord> processInstanceAssignUserRecordList = processInstanceAssignUserRecordService.lambdaQuery()
@@ -379,8 +380,10 @@ public class TaskServiceImpl implements ITaskService {
                 .list();
         List<String> taskIdList = processInstanceAssignUserRecordList.stream().map(w -> w.getTaskId()).collect(Collectors.toList());
 
+        List<String> nodeIdList = processInstanceNodeRecordList.stream().map(w -> w.getNodeId()).collect(Collectors.toList());
+
         taskParamDto.setTargetNodeId(processInstanceNodeRecord.getNodeId());
-        taskParamDto.setNodeId(processInstanceNodeRecordList.get(0).getNodeId());
+        taskParamDto.setNodeIdList(nodeIdList);
         taskParamDto.setTaskIdList(taskIdList);
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
         R r = CoreHttpUtil.revoke(taskParamDto);
