@@ -386,7 +386,7 @@ public class TaskServiceImpl implements ITaskService {
 
         Node currentNode = nodeDataService.getNode(processInstanceNodeRecord.getFlowId(), processInstanceNodeRecord.getNodeId()).getData();
         Node parentNode = NodeUtil.getParentNode(currentProcessRootNode, processInstanceNodeRecordList.get(0).getNodeId());
-        NodeUtil.handleChildrenAfterJump(currentProcessRootNode, parentNode.getId(), currentNode);
+        NodeUtil.handleChildrenAfterJump(currentProcessRootNode,NodeTypeEnum.getByValue(parentNode.getType()).getBranch()? parentNode.getId():processInstanceNodeRecordList.get(0).getNodeId(), currentNode);
         processInstanceRecordService.lambdaUpdate()
                 .set(ProcessInstanceRecord::getProcess,com.alibaba.fastjson.JSON.toJSONString(currentProcessRootNode))
                 .eq(ProcessInstanceRecord::getId,processInstanceRecord.getId())
