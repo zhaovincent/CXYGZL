@@ -40,6 +40,8 @@ public class InjectRevokeGatewayCmd extends InjectUserTaskInProcessInstanceCmd {
     protected void updateBpmnProcess(CommandContext commandContext, Process process, BpmnModel bpmnModel,
                                      ProcessDefinitionEntity originalProcessDefinitionEntity, DeploymentEntity newDeploymentEntity) {
 
+
+
         //合并网关
         InclusiveGateway gateway = new InclusiveGateway();
         gateway.setId(gatewayId);
