@@ -494,9 +494,8 @@ public class NodeUtil {
      * 节点跳转之后处理子级
      *
      * @param node
-     * @param executionId
      */
-    public static void handleChildrenAfterJump(Node node, String parentId, Node c, String executionId) {
+    public static void handleChildrenAfterJump(Node node, String parentId, Node c) {
         if (!isNode(node)) {
             return;
         }
@@ -524,13 +523,13 @@ public class NodeUtil {
             for (Node branch : branchs) {
 
                 Node children = branch.getChildNode();
-                handleChildrenAfterJump(children, parentId, c, executionId);
+                handleChildrenAfterJump(children, parentId, c);
 
             }
 
         }
 
-        handleChildrenAfterJump(childNode, parentId, c, executionId);
+        handleChildrenAfterJump(childNode, parentId, c);
 
     }
 

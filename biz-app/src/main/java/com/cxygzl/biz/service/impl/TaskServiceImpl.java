@@ -6,6 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
+import com.cxygzl.biz.config.exception.BusinessException;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.ProcessInstanceAssignUserRecord;
 import com.cxygzl.biz.entity.ProcessInstanceExecution;
@@ -16,7 +17,9 @@ import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskParamDto;
+import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.third.UserDto;
+import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -336,6 +339,15 @@ public class TaskServiceImpl implements ITaskService {
 
         String processInstanceId = taskParamDto.getProcessInstanceId();
 
+        //判断流程是否进行中
+        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery()
+                .eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId)
+                .eq(ProcessInstanceRecord::getStatus, NodeStatusEnum.JXZ.getCode())
+                .one();
+        if (processInstanceRecord == null) {
+            return R.fail("流程已结束，不能撤回了");
+        }
+
 
         //已经完成的执行实例
         ProcessInstanceExecution processInstanceExecution = executionService.lambdaQuery()
@@ -368,6 +380,19 @@ public class TaskServiceImpl implements ITaskService {
                 return R.fail("审批节点已完成，不能撤回");
             }
         }
+
+        //重新构建流程树
+        Node currentProcessRootNode = com.alibaba.fastjson.JSON.parseObject(processInstanceRecord.getProcess(), Node.class);
+
+        Node currentNode = nodeDataService.getNode(processInstanceNodeRecord.getFlowId(), processInstanceNodeRecord.getNodeId()).getData();
+        Node parentNode = NodeUtil.getParentNode(currentProcessRootNode, processInstanceNodeRecordList.get(0).getNodeId());
+        NodeUtil.handleChildrenAfterJump(currentProcessRootNode, parentNode.getId(), currentNode);
+        processInstanceRecordService.lambdaUpdate()
+                .set(ProcessInstanceRecord::getProcess,com.alibaba.fastjson.JSON.toJSONString(currentProcessRootNode))
+                .eq(ProcessInstanceRecord::getId,processInstanceRecord.getId())
+                .update(new ProcessInstanceRecord());
+
+
         //查找正在执行的所有的任务id
         List<String> executionIdList = processInstanceNodeRecordList.stream().map(w -> w.getExecutionId()).collect(Collectors.toList());
         List<String> childrenExecutionIdList = executionService.lambdaQuery()
@@ -387,6 +412,10 @@ public class TaskServiceImpl implements ITaskService {
         taskParamDto.setTaskIdList(taskIdList);
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
         R r = CoreHttpUtil.revoke(taskParamDto);
+
+        if (!r.isOk()) {
+          throw new BusinessException(r.getMsg());
+        }
 
         return r;
     }

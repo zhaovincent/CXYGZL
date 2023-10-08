@@ -593,7 +593,7 @@ public class TaskController {
         }
 
 
-        String gatewayId = StrUtil.format("{}{}", MERGE_GATEWAY_FLAG, IdUtil.fastSimpleUUID());
+        String gatewayId = StrUtil.format("REVOKE_{}{}",IdUtil.fastSimpleUUID(), MERGE_GATEWAY_FLAG);
 
         // 当前任务 task
 

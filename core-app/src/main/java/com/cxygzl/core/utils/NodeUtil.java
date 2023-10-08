@@ -16,10 +16,6 @@ public class NodeUtil {
                 .processDefinitionId(processDefinitionId)
                 .singleResult();
 
-        log.info("获取流程id的：{}", processDefinitionId);
-        if (processDefinition == null) {
-            return "";
-        }
 
 
         return processDefinition.getKey();

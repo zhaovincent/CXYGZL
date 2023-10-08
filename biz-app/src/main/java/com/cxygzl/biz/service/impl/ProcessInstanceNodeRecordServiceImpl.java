@@ -121,7 +121,7 @@ public class ProcessInstanceNodeRecordServiceImpl extends ServiceImpl<ProcessIns
             Node currentNode = processNodeDataService.getNode(flowId, nodeId).getData();
             // currentNode.setExecutionId(processNodeRecordParamDto.getExecutionId());
 
-            NodeUtil.handleChildrenAfterJump(currentProcessRootNode, parentNodeId, currentNode, processInstanceNodeRecordParamDto.getExecutionId());
+            NodeUtil.handleChildrenAfterJump(currentProcessRootNode, parentNodeId, currentNode);
             processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
 
         }
@@ -137,30 +137,33 @@ public class ProcessInstanceNodeRecordServiceImpl extends ServiceImpl<ProcessIns
         if (StrUtil.endWith(processInstanceNodeRecordParamDto.getNodeId(), MERGE_GATEWAY_FLAG)) {
             Node node = processNodeDataService.getNode(processInstanceNodeRecordParamDto.getFlowId(),
                     StrUtil.replace(processInstanceNodeRecordParamDto.getNodeId(), MERGE_GATEWAY_FLAG, "")).getData();
+            if (node != null) {
 
-            if (node.getType().intValue() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue()) {
-                //排他
-                NodeUtil.handleExclusiveGatewayAsLine(currentProcessRootNode, node.getId(), null, null);
-                processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
+
+                if (node.getType().intValue() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue()) {
+                    //排他
+                    NodeUtil.handleExclusiveGatewayAsLine(currentProcessRootNode, node.getId(), null, null);
+                    processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
+                }
+                if (node.getType().intValue() == NodeTypeEnum.INCLUSIVE_GATEWAY.getValue()) {
+                    //包容
+
+                    //找到所有的执行节点
+                    List<ProcessInstanceNodeRecord> processNodeRecordList = this.lambdaQuery().eq(ProcessInstanceNodeRecord::getProcessInstanceId,
+                            processInstanceRecord.getProcessInstanceId()).orderByDesc(ProcessInstanceNodeRecord::getCreateTime).list();
+
+                    List<ProcessInstanceNodeRecordParamDto> processInstanceNodeRecordParamDtos = BeanUtil.copyToList(processNodeRecordList, ProcessInstanceNodeRecordParamDto.class);
+
+                    //找到当前这个节点
+                    ProcessInstanceNodeRecord p = processNodeRecordList.stream().filter(w -> StrUtil.equals(w.getNodeId(), node.getId())).findFirst().get();
+
+                    NodeUtil.handleInclusiveGatewayAsLine(currentProcessRootNode, node.getId(), p.getExecutionId(), p.getFlowUniqueId(),
+                            processInstanceNodeRecordParamDtos, null);
+                    processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
+
+                }
+
             }
-            if (node.getType().intValue() == NodeTypeEnum.INCLUSIVE_GATEWAY.getValue()) {
-                //包容
-
-                //找到所有的执行节点
-                List<ProcessInstanceNodeRecord> processNodeRecordList = this.lambdaQuery().eq(ProcessInstanceNodeRecord::getProcessInstanceId,
-                        processInstanceRecord.getProcessInstanceId()).orderByDesc(ProcessInstanceNodeRecord::getCreateTime).list();
-
-                List<ProcessInstanceNodeRecordParamDto> processInstanceNodeRecordParamDtos = BeanUtil.copyToList(processNodeRecordList, ProcessInstanceNodeRecordParamDto.class);
-
-                //找到当前这个节点
-                ProcessInstanceNodeRecord p = processNodeRecordList.stream().filter(w -> StrUtil.equals(w.getNodeId(), node.getId())).findFirst().get();
-
-                NodeUtil.handleInclusiveGatewayAsLine(currentProcessRootNode, node.getId(), p.getExecutionId(), p.getFlowUniqueId(),
-                        processInstanceNodeRecordParamDtos, null);
-                processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
-
-            }
-
         }
 
 
