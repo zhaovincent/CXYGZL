@@ -2,6 +2,7 @@ package com.cxygzl.core.cmd;
 
 
 import cn.hutool.core.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
 import org.flowable.common.engine.impl.interceptor.CommandContext;
@@ -17,7 +18,7 @@ import java.util.List;
 /**
  * 添加撤回网关节点
  */
-
+@Slf4j
 public class InjectRevokeGatewayCmd extends InjectUserTaskInProcessInstanceCmd {
 
     private String targetNodeId;
@@ -41,11 +42,12 @@ public class InjectRevokeGatewayCmd extends InjectUserTaskInProcessInstanceCmd {
                                      ProcessDefinitionEntity originalProcessDefinitionEntity, DeploymentEntity newDeploymentEntity) {
 
 
+        log.info("创建临时节点撤回合并网关：{}",gatewayId);
 
         //合并网关
         InclusiveGateway gateway = new InclusiveGateway();
         gateway.setId(gatewayId);
-        gateway.setName(StrUtil.format("{}_合并网关", "临时节点"));
+        gateway.setName(StrUtil.format("{}_撤回合并网关", "临时节点"));
 
 
         process.addFlowElement(gateway);
