@@ -2,7 +2,9 @@ package com.cxygzl.core.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ApproveDescTypeEnum;
@@ -593,7 +595,7 @@ public class TaskController {
         }
 
 
-        String gatewayId = StrUtil.format("REVOKE_{}{}",IdUtil.fastSimpleUUID(), MERGE_GATEWAY_FLAG);
+        String gatewayId = StrUtil.format("REVOKE_{}{}{}", DateUtil.format(new Date(),"yyyyMMddHHmmss"), RandomUtil.randomString(6), MERGE_GATEWAY_FLAG);
 
         // 当前任务 task
 

@@ -14,6 +14,7 @@ import com.cxygzl.biz.entity.ProcessInstanceNodeRecord;
 import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
+import com.cxygzl.biz.vo.NextNodeQueryVO;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskParamDto;
@@ -354,14 +355,15 @@ public class TaskServiceImpl implements ITaskService {
                 .eq(ProcessInstanceExecution::getChildExecutionId, executionId)
                 .one();
 
-        //已经完成的节点
+        //已经完成的节点--用户已办任务节点
         ProcessInstanceNodeRecord processInstanceNodeRecord = processInstanceNodeRecordService.lambdaQuery()
                 .eq(ProcessInstanceNodeRecord::getProcessInstanceId, processInstanceId)
                 .eq(ProcessInstanceNodeRecord::getExecutionId, processInstanceExecution.getExecutionId())
                 .one();
 
         //查询下级的节点
-        List<ProcessInstanceNodeRecord> processInstanceNodeRecordList = queryNextNode(processInstanceNodeRecord);
+        NextNodeQueryVO nodeQueryVO = queryNextNode(processInstanceNodeRecord);
+        List<ProcessInstanceNodeRecord> processInstanceNodeRecordList = nodeQueryVO.getProcessInstanceNodeRecordList();
         if (CollUtil.isEmpty(processInstanceNodeRecordList)) {
             return R.fail("未找到下级节点，不能撤回");
         }
@@ -385,12 +387,20 @@ public class TaskServiceImpl implements ITaskService {
         Node currentProcessRootNode = com.alibaba.fastjson.JSON.parseObject(processInstanceRecord.getProcess(), Node.class);
 
         Node currentNode = nodeDataService.getNode(processInstanceNodeRecord.getFlowId(), processInstanceNodeRecord.getNodeId()).getData();
-        Node parentNode = NodeUtil.getParentNode(currentProcessRootNode, processInstanceNodeRecordList.get(0).getNodeId());
-        NodeUtil.handleChildrenAfterJump(currentProcessRootNode,NodeTypeEnum.getByValue(parentNode.getType()).getBranch()? parentNode.getId():processInstanceNodeRecordList.get(0).getNodeId(), currentNode);
-        processInstanceRecordService.lambdaUpdate()
-                .set(ProcessInstanceRecord::getProcess,com.alibaba.fastjson.JSON.toJSONString(currentProcessRootNode))
-                .eq(ProcessInstanceRecord::getId,processInstanceRecord.getId())
-                .update(new ProcessInstanceRecord());
+        if (!nodeQueryVO.getContainGateway()) {
+            NodeUtil.handleChildrenAfterJump(currentProcessRootNode, processInstanceNodeRecordList.get(0).getNodeId(), currentNode);
+            processInstanceRecordService.lambdaUpdate()
+                    .set(ProcessInstanceRecord::getProcess, com.alibaba.fastjson.JSON.toJSONString(currentProcessRootNode))
+                    .eq(ProcessInstanceRecord::getId, processInstanceRecord.getId())
+                    .update(new ProcessInstanceRecord());
+        } else {
+            //经过网关
+            NodeUtil.handleChildrenAfterJump(currentProcessRootNode, nodeQueryVO.getGatewayId(), currentNode);
+            processInstanceRecordService.lambdaUpdate()
+                    .set(ProcessInstanceRecord::getProcess, com.alibaba.fastjson.JSON.toJSONString(currentProcessRootNode))
+                    .eq(ProcessInstanceRecord::getId, processInstanceRecord.getId())
+                    .update(new ProcessInstanceRecord());
+        }
 
 
         //查找正在执行的所有的任务id
@@ -414,7 +424,7 @@ public class TaskServiceImpl implements ITaskService {
         R r = CoreHttpUtil.revoke(taskParamDto);
 
         if (!r.isOk()) {
-          throw new BusinessException(r.getMsg());
+            throw new BusinessException(r.getMsg());
         }
 
         return r;
@@ -426,7 +436,10 @@ public class TaskServiceImpl implements ITaskService {
      * @param processInstanceNodeRecord
      * @return
      */
-    private List<ProcessInstanceNodeRecord> queryNextNode(ProcessInstanceNodeRecord processInstanceNodeRecord) {
+    private NextNodeQueryVO queryNextNode(ProcessInstanceNodeRecord processInstanceNodeRecord) {
+
+        NextNodeQueryVO nodeQueryVO = new NextNodeQueryVO();
+        nodeQueryVO.setContainGateway(false);
 
         List<ProcessInstanceNodeRecord> processInstanceNodeRecordList = new ArrayList<>();
 
@@ -436,18 +449,29 @@ public class TaskServiceImpl implements ITaskService {
                 .ge(ProcessInstanceNodeRecord::getStartTime, processInstanceNodeRecord.getStartTime())
                 .list();
         if (CollUtil.isEmpty(list)) {
-            return processInstanceNodeRecordList;
+            nodeQueryVO.setProcessInstanceNodeRecordList(processInstanceNodeRecordList);
+            return nodeQueryVO;
         }
-        Integer nodeType = list.get(0).getNodeType();
-        if (NodeTypeEnum.getByValue(nodeType).getBranch()) {
-            //分支
-            for (ProcessInstanceNodeRecord instanceNodeRecord : list) {
-                List<ProcessInstanceNodeRecord> tempList = queryNextNode(instanceNodeRecord);
-                processInstanceNodeRecordList.addAll(tempList);
+        for (ProcessInstanceNodeRecord instanceNodeRecord : list) {
+            Integer nodeType = instanceNodeRecord.getNodeType();
+            if (NodeTypeEnum.getByValue(nodeType).getBranch()) {
+                //分支
+                nodeQueryVO.setContainGateway(true);
+                nodeQueryVO.setGatewayId(list.get(0).getNodeId());
+
+                NextNodeQueryVO nodeQueryVO1 = queryNextNode(instanceNodeRecord);
+                processInstanceNodeRecordList.addAll(nodeQueryVO1.getProcessInstanceNodeRecordList());
+                if (nodeQueryVO1.getContainGateway()) {
+                    nodeQueryVO.setContainGateway(true);
+                }
+
+            }else{
+                processInstanceNodeRecordList.add(instanceNodeRecord);
+
             }
-        } else {
-            processInstanceNodeRecordList.addAll(list);
         }
-        return processInstanceNodeRecordList;
+
+        nodeQueryVO.setProcessInstanceNodeRecordList(processInstanceNodeRecordList);
+        return nodeQueryVO;
     }
 }
