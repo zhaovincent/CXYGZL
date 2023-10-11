@@ -2,9 +2,12 @@ package com.cxygzl.biz.form.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.cxygzl.biz.form.FormStrategy;
+import com.cxygzl.biz.form.FormStrategyFactory;
+import com.cxygzl.biz.utils.FormUtil;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.flow.FormItemVO;
 import org.anyline.metadata.Column;
@@ -48,10 +51,10 @@ public class LayoutFormStrategyImpl implements InitializingBean, FormStrategy {
      */
     @Override
     public List<Column> getTableColumn(FormItemVO formItemVO) {
-        List<Column> list=new ArrayList<>();
+        List<Column> list = new ArrayList<>();
 
         {
-            Column column=new Column(StrUtil.format("{}",formItemVO.getId()),"longtext",0);
+            Column column = new Column(StrUtil.format("{}", formItemVO.getId()), "longtext", 0);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
             list.add(column);
@@ -91,6 +94,51 @@ public class LayoutFormStrategyImpl implements InitializingBean, FormStrategy {
             return null;
         }
 
-        return CollUtil.newArrayList( JSON.toJSONString(list));
+        return CollUtil.newArrayList(JSON.toJSONString(list));
+    }
+
+    /**
+     * 打印显示内容
+     *
+     * @param formItemVO
+     * @param value
+     * @return
+     */
+    @Override
+    public String printShow(FormItemVO formItemVO, Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        com.alibaba.fastjson2.JSONArray jsonArray= (com.alibaba.fastjson2.JSONArray) value;
+
+        Object propsValue = formItemVO.getProps().getValue();
+
+        List list=new ArrayList();
+
+        for (Object y : jsonArray) {
+            List l=new ArrayList();
+
+            com.alibaba.fastjson2.JSONObject map= (com.alibaba.fastjson2.JSONObject) y;
+            List<FormItemVO> subItemList = Convert.toList(FormItemVO.class, propsValue);
+            for (FormItemVO itemVO : subItemList) {
+                Object value1 = map.get(itemVO.getId());
+
+                FormUtil.handValue(itemVO, value1);
+
+
+                Dict formItem = Dict.create()
+                        .set("formName", itemVO.getName())
+                        .set("formType", itemVO.getType())
+                        .set("formValue", value1);
+                //处理表单显示
+                String printShow = FormStrategyFactory.getStrategy(itemVO.getType()).printShow(formItemVO,value1);
+                formItem.set("formValueShow",printShow);
+                l.add(formItem);
+
+            }
+            list.add(l);
+        }
+        return JSON.toJSONString(list);
     }
 }

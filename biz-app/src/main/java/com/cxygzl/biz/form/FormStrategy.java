@@ -50,7 +50,13 @@ public interface FormStrategy {
      */
     List<String> getInsertValue(FormItemVO formItemVO, Object value);
 
-
+    /**
+     * 打印显示内容
+     * @param formItemVO
+     * @param value
+     * @return
+     */
+    String printShow(FormItemVO formItemVO,Object value);
 
 
 }

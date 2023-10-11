@@ -49,4 +49,11 @@ public interface IBaseService {
      * @return
      */
     R queryTaskOperData(String taskId);
+
+    /**
+     * 查询打印数据
+     * @param processInstanceId
+     * @return
+     */
+    R queryPrintData(String processInstanceId);
 }

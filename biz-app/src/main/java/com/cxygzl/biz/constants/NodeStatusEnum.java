@@ -3,6 +3,8 @@ package com.cxygzl.biz.constants;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+
 @Getter
 @AllArgsConstructor
 public enum NodeStatusEnum {
@@ -18,5 +20,8 @@ public enum NodeStatusEnum {
     private String name;
 
 
+    public static NodeStatusEnum get(int code){
+       return Arrays.stream(NodeStatusEnum.values()).filter(w->w.getCode()==code).findAny().get();
+    }
 
 }

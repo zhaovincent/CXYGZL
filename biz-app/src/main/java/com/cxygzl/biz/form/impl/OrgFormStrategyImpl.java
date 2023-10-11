@@ -68,10 +68,10 @@ public class OrgFormStrategyImpl implements InitializingBean, FormStrategy {
      */
     @Override
     public List<Column> getTableColumn(FormItemVO formItemVO) {
-        List<Column> list=new ArrayList<>();
+        List<Column> list = new ArrayList<>();
 
         {
-            Column column=new Column(StrUtil.format("{}_id",formItemVO.getId()),"longtext",0);
+            Column column = new Column(StrUtil.format("{}_id", formItemVO.getId()), "longtext", 0);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
 
@@ -80,7 +80,7 @@ public class OrgFormStrategyImpl implements InitializingBean, FormStrategy {
 
 
         {
-            Column column=new Column(StrUtil.format("{}_name",formItemVO.getId()),"longtext",0);
+            Column column = new Column(StrUtil.format("{}_name", formItemVO.getId()), "longtext", 0);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
 
@@ -88,7 +88,7 @@ public class OrgFormStrategyImpl implements InitializingBean, FormStrategy {
         }
 
         {
-            Column column=new Column(StrUtil.format("{}_type",formItemVO.getId()),"longtext",0);
+            Column column = new Column(StrUtil.format("{}_type", formItemVO.getId()), "longtext", 0);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
 
@@ -96,7 +96,7 @@ public class OrgFormStrategyImpl implements InitializingBean, FormStrategy {
         }
 
         {
-            Column column=new Column(StrUtil.format("{}",formItemVO.getId()),"longtext",0);
+            Column column = new Column(StrUtil.format("{}", formItemVO.getId()), "longtext", 0);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
 
@@ -141,6 +141,29 @@ public class OrgFormStrategyImpl implements InitializingBean, FormStrategy {
         String name = nodeUserList.stream().map(w -> w.getName()).collect(Collectors.joining("||"));
         String type = nodeUserList.stream().map(w -> w.getType()).collect(Collectors.joining("||"));
 
-        return CollUtil.newArrayList(id,name,type, JSON.toJSONString(nodeUserList));
+        return CollUtil.newArrayList(id, name, type, JSON.toJSONString(nodeUserList));
+    }
+
+    /**
+     * 打印显示内容
+     *
+     * @param formItemVO
+     * @param value
+     * @return
+     */
+    @Override
+    public String printShow(FormItemVO formItemVO, Object value) {
+        if (value == null) {
+            return null;
+        }
+        List<NodeUser> nodeUserList = BeanUtil.copyToList(Convert.toList(value), NodeUser.class);
+        if(CollUtil.isEmpty(nodeUserList)){
+            return null;
+        }
+        if (nodeUserList.size() < 3) {
+            return nodeUserList.stream().map(w -> w.getName()).collect(Collectors.joining(","));
+        }
+        String collect = nodeUserList.subList(0, 2).stream().map(w -> w.getName()).collect(Collectors.joining(","));
+        return StrUtil.format("{} 等{}个",collect,nodeUserList.size());
     }
 }

@@ -61,10 +61,10 @@ public class SelectFormStrategyImpl implements InitializingBean, FormStrategy {
      */
     @Override
     public List<Column> getTableColumn(FormItemVO formItemVO) {
-        List<Column> list=new ArrayList<>();
+        List<Column> list = new ArrayList<>();
 
         {
-            Column column=new Column(StrUtil.format("{}_key",formItemVO.getId()),"longtext",0);
+            Column column = new Column(StrUtil.format("{}_key", formItemVO.getId()), "longtext", 0);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
 
@@ -73,7 +73,7 @@ public class SelectFormStrategyImpl implements InitializingBean, FormStrategy {
 
 
         {
-            Column column=new Column(StrUtil.format("{}_value",formItemVO.getId()),"longtext",0);
+            Column column = new Column(StrUtil.format("{}_value", formItemVO.getId()), "longtext", 0);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
 
@@ -81,9 +81,8 @@ public class SelectFormStrategyImpl implements InitializingBean, FormStrategy {
         }
 
 
-
         {
-            Column column=new Column(StrUtil.format("{}",formItemVO.getId()),"longtext",0);
+            Column column = new Column(StrUtil.format("{}", formItemVO.getId()), "longtext", 0);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
 
@@ -128,6 +127,30 @@ public class SelectFormStrategyImpl implements InitializingBean, FormStrategy {
         String id = selectValueList.stream().map(w -> w.getKey()).collect(Collectors.joining("||"));
         String name = selectValueList.stream().map(w -> w.getValue()).collect(Collectors.joining("||"));
 
-        return CollUtil.newArrayList(id,name, JSON.toJSONString(selectValueList));
+        return CollUtil.newArrayList(id, name, JSON.toJSONString(selectValueList));
+    }
+
+    /**
+     * 打印显示内容
+     *
+     * @param formItemVO
+     * @param value
+     * @return
+     */
+    @Override
+    public String printShow(FormItemVO formItemVO, Object value) {
+        if (value == null) {
+            return null;
+        }
+        List<SelectValue> selectValueList = BeanUtil.copyToList(Convert.toList(value), SelectValue.class);
+
+        if (CollUtil.isEmpty(selectValueList)) {
+            return null;
+        }
+        if (selectValueList.size() < 4) {
+            return selectValueList.stream().map(w -> w.getKey()).collect(Collectors.joining(","));
+        }
+        String collect = selectValueList.subList(0, 3).stream().map(w -> w.getValue()).collect(Collectors.joining(","));
+        return StrUtil.format("{}等{}个",collect,selectValueList.size());
     }
 }

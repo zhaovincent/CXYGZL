@@ -72,6 +72,7 @@ public class ProcessInstanceController {
 
         Map<String, Object> variables = runtimeService.getVariables(paramDto.getExecutionId());
 
+
         return R.success(variables);
 
 

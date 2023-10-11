@@ -78,4 +78,15 @@ public class BaseController {
     public R queryTaskOperData(String taskId) {
         return baseService.queryTaskOperData(taskId);
     }
+
+    /**
+     * 查询打印数据
+     *
+     * @param processInstanceId
+     * @return
+     */
+    @GetMapping("queryPrintData")
+    public R queryPrintData(String processInstanceId) {
+        return baseService.queryPrintData(processInstanceId);
+    }
 }

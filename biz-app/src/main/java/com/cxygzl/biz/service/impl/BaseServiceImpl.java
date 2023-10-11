@@ -3,6 +3,7 @@ package com.cxygzl.biz.service.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.lang.Dict;
@@ -10,8 +11,10 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
+import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.*;
+import com.cxygzl.biz.form.FormStrategyFactory;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.NodeFormatUtil;
@@ -20,11 +23,10 @@ import com.cxygzl.biz.vo.NodeFormatResultVo;
 import com.cxygzl.biz.vo.QueryFormListParamVo;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
-import com.cxygzl.common.dto.IndexPageStatistics;
-import com.cxygzl.common.dto.ProcessInstanceNodeRecordParamDto;
-import com.cxygzl.common.dto.R;
-import com.cxygzl.common.dto.TaskResultDto;
+import com.cxygzl.common.dto.*;
+import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.common.utils.NodeUtil;
@@ -32,10 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -295,6 +294,7 @@ public class BaseServiceImpl implements IBaseService {
         Dict set = Dict.create()
                 .set("processInstanceResult", processInstanceRecord.getResult())
                 .set("starterName", starterUser.getName())
+                .set("processInstanceId", processInstanceRecord.getProcessInstanceId())
                 .set("starterAvatarUrl", starterUser.getAvatarUrl())
                 .set("processName", processInstanceRecord.getName())
                 .set("startTime", processInstanceRecord.getCreateTime());
@@ -357,6 +357,61 @@ public class BaseServiceImpl implements IBaseService {
 
                 .set("taskExist", currentTask)
                 .set("process", CommonUtil.toObj(process, Node.class));
+
+        return R.success(set);
+    }
+
+    /**
+     * 查询打印数据
+     *
+     * @param processInstanceId
+     * @return
+     */
+    @Override
+    public R queryPrintData(String processInstanceId) {
+
+        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery()
+                .eq(ProcessInstanceRecord::getProcessInstanceId,
+                        processInstanceId).one();
+        String starterUserId = processInstanceRecord.getUserId();
+        UserDto starterUser = ApiStrategyFactory.getStrategy().getUser(starterUserId);
+
+        DeptDto dept = ApiStrategyFactory.getStrategy().getDept(starterUser.getDeptId());
+
+        Dict set = Dict.create()
+                .set("processInstanceResult", processInstanceRecord.getResult())
+                .set("processStatus", processInstanceRecord.getStatus())
+                .set("processInstanceId", processInstanceRecord.getProcessInstanceId())
+                .set("processStatusShow", NodeStatusEnum.get(processInstanceRecord.getStatus()).getName())
+                .set("starterName", starterUser.getName())
+                .set("starterDeptName", dept.getName())
+                .set("processName", processInstanceRecord.getName())
+                .set("startTime", DateUtil.format(processInstanceRecord.getCreateTime(), "yyyy-MM-dd HH:mm"));
+
+
+        //查询所有的变量
+        VariableQueryParamDto variableQueryParamDto = new VariableQueryParamDto();
+        variableQueryParamDto.setExecutionId(processInstanceId);
+        Map<String, Object> paramMap = CoreHttpUtil.queryVariables(variableQueryParamDto).getData();
+
+        //表单
+        List formList = new ArrayList();
+        String flowId = processInstanceRecord.getFlowId();
+        Process process = processService.getByFlowId(flowId);
+        String formItems = process.getFormItems();
+        List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
+        for (FormItemVO formItemVO : formItemVOList) {
+            Dict formItem = Dict.create()
+                    .set("formName", formItemVO.getName())
+                    .set("formType", formItemVO.getType())
+                    .set("formValue", paramMap.get(formItemVO.getId()));
+            //处理表单显示
+            String printShow = FormStrategyFactory.getStrategy(formItemVO.getType()).printShow(formItemVO, paramMap.get(formItemVO.getId()));
+            formItem.set("formValueShow",printShow);
+            formList.add(formItem);
+        }
+        set.set("formList", formList);
+
 
         return R.success(set);
     }

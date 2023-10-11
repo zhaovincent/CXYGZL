@@ -110,4 +110,19 @@ public class AreaFormStrategyImpl implements InitializingBean, FormStrategy {
         return CollUtil.newArrayList(areaFormValue.getCode(), areaFormValue.getName(), JSON.toJSONString(areaFormValue));
     }
 
+    /**
+     * 打印显示内容
+     *
+     * @param formItemVO
+     * @param value
+     * @return
+     */
+    @Override
+    public String printShow(FormItemVO formItemVO, Object value) {
+        if (value == null) {
+            return null;
+        }
+        AreaFormValue areaFormValue = JSON.parseObject(JSON.toJSONString(value), AreaFormValue.class);
+        return areaFormValue.getName();
+    }
 }

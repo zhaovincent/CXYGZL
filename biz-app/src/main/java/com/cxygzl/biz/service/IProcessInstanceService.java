@@ -84,4 +84,6 @@ public interface IProcessInstanceService  {
      * @return
      */
     R detail(String processInstanceId);
+
+
 }

@@ -42,10 +42,10 @@ public class InputFormStrategyImpl implements InitializingBean, FormStrategy {
      */
     @Override
     public List<Column> getTableColumn(FormItemVO formItemVO) {
-        List<Column> list=new ArrayList<>();
+        List<Column> list = new ArrayList<>();
 
         {
-            Column column=new Column(StrUtil.format("{}",formItemVO.getId()),"longtext",0);
+            Column column = new Column(StrUtil.format("{}", formItemVO.getId()), "longtext", 0);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
             list.add(column);
@@ -75,5 +75,17 @@ public class InputFormStrategyImpl implements InitializingBean, FormStrategy {
     @Override
     public List<String> getInsertValue(FormItemVO formItemVO, Object value) {
         return value == null ? CollUtil.newArrayList("") : CollUtil.newArrayList(value.toString());
+    }
+
+    /**
+     * 打印显示内容
+     *
+     * @param formItemVO
+     * @param value
+     * @return
+     */
+    @Override
+    public String printShow(FormItemVO formItemVO, Object value) {
+        return value == null ? null : value.toString();
     }
 }

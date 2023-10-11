@@ -11,6 +11,7 @@ import com.cxygzl.common.utils.HttpUtil;
 import org.springframework.core.env.Environment;
 
 import java.util.List;
+import java.util.Map;
 
 public class CoreHttpUtil {
 
@@ -84,6 +85,18 @@ public class CoreHttpUtil {
 
         String s = get("/process-instance/querySimpleData?userId=" + userId);
         return JSON.parseObject(s, new TypeReference<R<IndexPageStatistics>>() {
+        });
+
+    }
+    /**
+     * 查询流程表单数据
+     *
+     * @return
+     */
+    public static R<Map<String, Object>> queryVariables(VariableQueryParamDto variableQueryParamDto) {
+
+        String s = post(variableQueryParamDto,"/process-instance/queryVariables"  );
+        return JSON.parseObject(s, new TypeReference<R<Map<String, Object>>>() {
         });
 
     }

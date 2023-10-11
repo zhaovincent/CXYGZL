@@ -56,10 +56,10 @@ public class UploadFormStrategyImpl implements InitializingBean, FormStrategy {
      */
     @Override
     public List<Column> getTableColumn(FormItemVO formItemVO) {
-        List<Column> list=new ArrayList<>();
+        List<Column> list = new ArrayList<>();
 
         {
-            Column column=new Column(StrUtil.format("{}_url",formItemVO.getId()),"longtext",0);
+            Column column = new Column(StrUtil.format("{}_url", formItemVO.getId()), "longtext", 0);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
 
@@ -68,23 +68,21 @@ public class UploadFormStrategyImpl implements InitializingBean, FormStrategy {
 
 
         {
-            Column column=new Column(StrUtil.format("{}_name",formItemVO.getId()),"longtext",0);
+            Column column = new Column(StrUtil.format("{}_name", formItemVO.getId()), "longtext", 0);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
 
             list.add(column);
         }
-
 
 
         {
-            Column column=new Column(StrUtil.format("{}",formItemVO.getId()),"longtext",0);
+            Column column = new Column(StrUtil.format("{}", formItemVO.getId()), "longtext", 0);
             column.setNullable(true);
             column.setComment(formItemVO.getName());
 
             list.add(column);
         }
-
 
 
         return list;
@@ -100,8 +98,8 @@ public class UploadFormStrategyImpl implements InitializingBean, FormStrategy {
     public List<String> getInsertField(FormItemVO formItemVO) {
         return CollUtil.newArrayList(
                 StrUtil.format("{}_url", formItemVO.getId()),
-                StrUtil.format("{}_name",  formItemVO.getId()),
-                StrUtil.format("{}",  formItemVO.getId())
+                StrUtil.format("{}_name", formItemVO.getId()),
+                StrUtil.format("{}", formItemVO.getId())
         );
     }
 
@@ -123,6 +121,26 @@ public class UploadFormStrategyImpl implements InitializingBean, FormStrategy {
         String url = uploadValueList.stream().map(w -> w.getUrl()).collect(Collectors.joining("||"));
         String name = uploadValueList.stream().map(w -> w.getName()).collect(Collectors.joining("||"));
 
-        return CollUtil.newArrayList(url,name, JSON.toJSONString(uploadValueList));
+        return CollUtil.newArrayList(url, name, JSON.toJSONString(uploadValueList));
+    }
+
+    /**
+     * 打印显示内容
+     *
+     * @param formItemVO
+     * @param value
+     * @return
+     */
+    @Override
+    public String printShow(FormItemVO formItemVO, Object value) {
+        if (value == null) {
+            return null;
+        }
+        List<UploadValue> uploadValueList = BeanUtil.copyToList(Convert.toList(value), UploadValue.class);
+        if(CollUtil.isEmpty(uploadValueList)){
+            return null;
+        }
+
+        return StrUtil.format("{}个", uploadValueList.size());
     }
 }

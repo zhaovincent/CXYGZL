@@ -99,4 +99,21 @@ public class DateFormStrategyImpl implements InitializingBean, FormStrategy {
 
         return CollUtil.newArrayList("2000-01-01 "+ dateVal, dateVal);
     }
+
+    /**
+     * 打印显示内容
+     *
+     * @param formItemVO
+     * @param value
+     * @return
+     */
+    @Override
+    public String printShow(FormItemVO formItemVO, Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        String dateVal = value.toString();
+        return dateVal;
+    }
 }

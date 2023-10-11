@@ -1,6 +1,7 @@
 package com.cxygzl.biz.form.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.biz.form.FormStrategy;
 import com.cxygzl.common.constants.FormTypeEnum;
@@ -86,5 +87,17 @@ public class NumberFormStrategyImpl implements InitializingBean, FormStrategy {
     @Override
     public List<String> getInsertValue(FormItemVO formItemVO, Object value) {
         return value == null ? null : CollUtil.newArrayList(value.toString(),value.toString());
+    }
+
+    /**
+     * 打印显示内容
+     *
+     * @param formItemVO
+     * @param value
+     * @return
+     */
+    @Override
+    public String printShow(FormItemVO formItemVO, Object value) {
+        return Convert.toStr(value);
     }
 }
