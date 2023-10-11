@@ -9,6 +9,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.constants.TaskTypeEnum;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.core.cmd.InjectRevokeGatewayCmd;
 import com.cxygzl.core.utils.NodeUtil;
@@ -247,7 +248,7 @@ public class TaskController {
 
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
-                approveResult ? ProcessInstanceConstant.TaskType.PASS : ProcessInstanceConstant.TaskType.REFUSE);
+                approveResult ? TaskTypeEnum.PASS.getValue() : TaskTypeEnum.REFUSE.getValue());
 
         String descType = approveResult ? ApproveDescTypeEnum.PASS.getType() : ApproveDescTypeEnum.REFUSE.getType();
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
@@ -292,7 +293,7 @@ public class TaskController {
 
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
-                ProcessInstanceConstant.TaskType.FRONT_JOIN
+                TaskTypeEnum.FRONT_JOIN.getValue()
         );
 
 
@@ -327,7 +328,7 @@ public class TaskController {
         }
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
-                ProcessInstanceConstant.TaskType.RESOLVE
+                TaskTypeEnum.RESOLVE.getValue()
         );
         //不能搞 因为涉及多实例
         // taskService.setVariable(task.getId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
@@ -351,7 +352,7 @@ public class TaskController {
         }
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
-                ProcessInstanceConstant.TaskType.BACK_JOIN
+                TaskTypeEnum.BACK_JOIN.getValue()
         );
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
             saveUserCommentToTask(task, ApproveDescTypeEnum.BACK_JOIN.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
@@ -401,7 +402,7 @@ public class TaskController {
         taskService.setVariables(task.getId(), taskParamDto.getParamMap());
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
-                ProcessInstanceConstant.TaskType.ADD_ASSIGNEE
+                TaskTypeEnum.ADD_ASSIGNEE.getValue()
         );
         String userId = taskParamDto.getUserId();
         String targetUserName = CollUtil.join(taskParamDto.getTargetUserNameList(), ",");
@@ -468,7 +469,7 @@ public class TaskController {
         taskService.setVariables(task.getId(), taskParamDto.getParamMap());
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
-                ProcessInstanceConstant.TaskType.DEL_ASSIGNEE
+                TaskTypeEnum.DEL_ASSIGNEE.getValue()
         );
         String userId = taskParamDto.getUserId();
         String targetUserName = CollUtil.join(taskParamDto.getTargetUserNameList(), ",");
@@ -526,10 +527,11 @@ public class TaskController {
         runtimeService.setVariables(task.getExecutionId(), taskParamDto.getParamMap());
         runtimeService.setVariable(task.getExecutionId(), StrUtil.format("{}_parent_id", targetKey), task.getTaskDefinitionKey());
         runtimeService.setVariable(task.getExecutionId(), FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
-        runtimeService.setVariableLocal(task.getExecutionId(), ProcessInstanceConstant.VariableKey.TASK_TYPE, ProcessInstanceConstant.TaskType.REJECT);
+        runtimeService.setVariableLocal(task.getExecutionId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
+                TaskTypeEnum.REJECT.getValue());
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
-                ProcessInstanceConstant.TaskType.REJECT
+                TaskTypeEnum.REJECT.getValue()
         );
 
 
@@ -622,10 +624,11 @@ public class TaskController {
         runtimeService.setVariable(processInstanceId, FLOW_UNIQUE_ID, IdUtil.fastSimpleUUID());
 
         for (Task task : taskList) {
-            runtimeService.setVariableLocal(task.getExecutionId(), ProcessInstanceConstant.VariableKey.TASK_TYPE, ProcessInstanceConstant.TaskType.REVOKE);
+            runtimeService.setVariableLocal(task.getExecutionId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
+                    TaskTypeEnum.REVOKE.getValue());
 
             taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
-                    ProcessInstanceConstant.TaskType.REVOKE
+                    TaskTypeEnum.REVOKE.getValue()
             );
 
 

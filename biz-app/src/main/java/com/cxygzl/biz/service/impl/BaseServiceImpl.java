@@ -23,6 +23,7 @@ import com.cxygzl.biz.vo.NodeFormatResultVo;
 import com.cxygzl.biz.vo.QueryFormListParamVo;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.constants.TaskTypeEnum;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.dto.flow.Node;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -390,9 +392,17 @@ public class BaseServiceImpl implements IBaseService {
 
 
         //查询所有的变量
-        VariableQueryParamDto variableQueryParamDto = new VariableQueryParamDto();
-        variableQueryParamDto.setExecutionId(processInstanceId);
-        Map<String, Object> paramMap = CoreHttpUtil.queryVariables(variableQueryParamDto).getData();
+        Map<String, Object> paramMap = new HashMap<>();
+        if (processInstanceRecord.getStatus().intValue() == NodeStatusEnum.JXZ.getCode()) {
+            VariableQueryParamDto variableQueryParamDto = new VariableQueryParamDto();
+            variableQueryParamDto.setExecutionId(processInstanceId);
+            paramMap = CoreHttpUtil.queryVariables(variableQueryParamDto).getData();
+
+        } else {
+            paramMap= JSON.parseObject(processInstanceRecord.getFormData(),
+                    new com.alibaba.fastjson.TypeReference<Map<String, Object>>() {
+                    });
+        }
 
         //表单
         List formList = new ArrayList();
@@ -407,13 +417,13 @@ public class BaseServiceImpl implements IBaseService {
                     .set("formValue", paramMap.get(formItemVO.getId()));
             //处理表单显示
             String printShow = FormStrategyFactory.getStrategy(formItemVO.getType()).printShow(formItemVO, paramMap.get(formItemVO.getId()));
-            formItem.set("formValueShow",printShow);
+            formItem.set("formValueShow", printShow);
             formList.add(formItem);
         }
         set.set("formList", formList);
 
         //流程审批节点
-        List approveList=new ArrayList();
+        List approveList = new ArrayList();
         List<ProcessInstanceAssignUserRecord> processInstanceAssignUserRecordList = processNodeRecordAssignUserService.lambdaQuery().eq(ProcessInstanceAssignUserRecord::getProcessInstanceId, processInstanceId)
                 .orderByAsc(ProcessInstanceAssignUserRecord::getCreateTime)
                 .list();
@@ -426,17 +436,20 @@ public class BaseServiceImpl implements IBaseService {
             String taskType = processInstanceAssignUserRecord.getTaskType();
 
             List<SimpleApproveDescDto> simpleApproveDescDtoList = CoreHttpUtil.queryTaskComments(processInstanceAssignUserRecord.getTaskId()).getData();
+            //非系统评论
+            List<SimpleApproveDescDto> collect =
+                    simpleApproveDescDtoList.stream().filter(w -> !w.getSys()).collect(Collectors.toList());
 
             Dict dict = Dict.create()
                     .set("userName", user.getName())
-                    .set("date",endTime==null?null: DateUtil.format(endTime,"yyyy-MM-dd HH:mm"))
+                    .set("nodeName", processInstanceAssignUserRecord.getNodeName())
+                    .set("date", endTime == null ? null : DateUtil.format(endTime, "yyyy-MM-dd HH:mm"))
                     .set("taskType", taskType)
-                    .set("comment", simpleApproveDescDtoList )
-
-                    ;
+                    .set("taskTypeShow", StrUtil.isBlankIfStr(taskType) ? "-" : TaskTypeEnum.getByValue(taskType).getName())
+                    .set("comment", collect);
             approveList.add(dict);
         }
-        set.set("approveList",approveList);
+        set.set("approveList", approveList);
 
         return R.success(set);
     }

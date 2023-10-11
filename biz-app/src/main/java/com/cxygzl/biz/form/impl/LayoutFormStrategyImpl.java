@@ -110,7 +110,7 @@ public class LayoutFormStrategyImpl implements InitializingBean, FormStrategy {
             return null;
         }
 
-        com.alibaba.fastjson2.JSONArray jsonArray= (com.alibaba.fastjson2.JSONArray) value;
+        com.alibaba.fastjson.JSONArray jsonArray= JSON.parseArray(JSON.toJSONString(value));
 
         Object propsValue = formItemVO.getProps().getValue();
 
@@ -119,7 +119,7 @@ public class LayoutFormStrategyImpl implements InitializingBean, FormStrategy {
         for (Object y : jsonArray) {
             List l=new ArrayList();
 
-            com.alibaba.fastjson2.JSONObject map= (com.alibaba.fastjson2.JSONObject) y;
+            com.alibaba.fastjson.JSONObject map= (com.alibaba.fastjson.JSONObject) y;
             List<FormItemVO> subItemList = Convert.toList(FormItemVO.class, propsValue);
             for (FormItemVO itemVO : subItemList) {
                 Object value1 = map.get(itemVO.getId());

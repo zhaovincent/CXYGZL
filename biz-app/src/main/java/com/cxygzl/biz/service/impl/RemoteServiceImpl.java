@@ -13,7 +13,7 @@ import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.DataUtil;
-import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.constants.TaskTypeEnum;
 import com.cxygzl.common.dto.ProcessInstanceParamDto;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.FormItemVO;
@@ -399,7 +399,7 @@ public class RemoteServiceImpl implements IRemoteService {
                             taskParamDtoList.add(taskParamDto);
                         }
 
-                        ApiStrategyFactory.getStrategy().handleTask(taskParamDtoList, ProcessInstanceConstant.TaskType.CANCEL);
+                        ApiStrategyFactory.getStrategy().handleTask(taskParamDtoList, TaskTypeEnum.CANCEL.getValue());
                     }
 
 
@@ -407,7 +407,7 @@ public class RemoteServiceImpl implements IRemoteService {
 
                 processNodeRecordAssignUserService.lambdaUpdate()
                         .set(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.YCX.getCode())
-                        .set(ProcessInstanceAssignUserRecord::getTaskType, ProcessInstanceConstant.TaskType.CANCEL)
+                        .set(ProcessInstanceAssignUserRecord::getTaskType, TaskTypeEnum.CANCEL.getValue())
                         .eq(ProcessInstanceAssignUserRecord::getProcessInstanceId, recordParamDto.getProcessInstanceId())
                         .eq(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.JXZ.getCode())
                         .eq(ProcessInstanceAssignUserRecord::getNodeId, recordParamDto.getNodeId())
@@ -447,7 +447,7 @@ public class RemoteServiceImpl implements IRemoteService {
 
                 processNodeRecordAssignUserService.lambdaUpdate()
                         .set(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.YCX.getCode())
-                        .set(ProcessInstanceAssignUserRecord::getTaskType, ProcessInstanceConstant.TaskType.CANCEL)
+                        .set(ProcessInstanceAssignUserRecord::getTaskType, TaskTypeEnum.CANCEL.getValue())
                         .eq(ProcessInstanceAssignUserRecord::getProcessInstanceId, recordParamDto.getProcessInstanceId())
                         .eq(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.JXZ.getCode())
                         .eq(ProcessInstanceAssignUserRecord::getNodeId, recordParamDto.getNodeId())

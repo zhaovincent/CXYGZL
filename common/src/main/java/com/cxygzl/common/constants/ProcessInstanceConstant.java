@@ -126,34 +126,6 @@ public class ProcessInstanceConstant {
         public static final int OK = 1;
         public static final int REFUSE = 2;
     }
-
-    /**
-     * 任务类型
-     */
-    public static class TaskType {
-        //通过
-        public static final String PASS = "pass";
-        //委派之后完成
-        public static final String RESOLVE = "resolve";
-        //拒绝
-        public static final String REFUSE = "refuse";
-        //驳回
-        public static final String REJECT = "reject";
-        //撤回
-        public static final String REVOKE = "revoke";
-        //委派
-        public static final String FRONT_JOIN = "frontJoin";
-        //转办
-        public static final String BACK_JOIN = "backJoin";
-        //任务取消了
-        public static final String CANCEL = "cancel";
-        //加签
-        public static final String ADD_ASSIGNEE = "addAssignee";
-        //减签
-        public static final String DEL_ASSIGNEE = "delAssignee";
-
-    }
-
     /**
      * 用户任务---处理人和发起人一致
      */
