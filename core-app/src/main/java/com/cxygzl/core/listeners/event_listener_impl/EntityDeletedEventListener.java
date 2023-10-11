@@ -1,42 +1,60 @@
-package com.cxygzl.core.listeners;
+package com.cxygzl.core.listeners.event_listener_impl;
 
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.ProcessInstanceAssignUserRecordParamDto;
+import com.cxygzl.core.listeners.EventListenerStrategy;
 import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEntityEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
-import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
 import org.flowable.engine.TaskService;
+import org.flowable.engine.delegate.event.impl.FlowableEntityEventImpl;
 import org.flowable.task.service.impl.persistence.entity.TaskEntityImpl;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.stereotype.Component;
 
 /**
- * 流程监听器
+ * 实体删除
+ * @author Huijun Zhao
+ * @description
+ * @date 2023-10-10 10:12
  */
 @Slf4j
-public class TaskCompleteEventListener implements FlowableEventListener {
-
+@Component
+public class EntityDeletedEventListener implements EventListenerStrategy, InitializingBean {
     /**
-     * Called when an event has been fired
+     * 处理数据
      *
-     * @param event the event
+     * @param event
+     * @return
      */
     @Override
-    public void onEvent(FlowableEvent event) {
+    public void handle(FlowableEvent event) {
 
-        if (event.getType().toString().equals(FlowableEngineEventType.TASK_COMPLETED.toString())) {
+        //流程开始了
+        Object entity = null;
+        if (event instanceof org.flowable.common.engine.impl.event.FlowableEntityEventImpl) {
+            org.flowable.common.engine.impl.event.FlowableEntityEventImpl f = (org.flowable.common.engine.impl.event.FlowableEntityEventImpl) event;
+            entity = f.getEntity();
+        } else if (event instanceof org.flowable.engine.delegate.event.impl.FlowableEntityEventImpl) {
+            org.flowable.engine.delegate.event.impl.FlowableEntityEventImpl f = (FlowableEntityEventImpl) event;
+            entity = f.getEntity();
+        }
+
+
+        if (entity != null && entity instanceof TaskEntityImpl) {
 
             TaskService taskService = SpringUtil.getBean(TaskService.class);
 
             //任务完成
             FlowableEntityEvent flowableEntityEvent = (FlowableEntityEvent) event;
             TaskEntityImpl task = (TaskEntityImpl) flowableEntityEvent.getEntity();
-            //执行人id
             String assignee = task.getAssignee();
+
 
             //nodeid
             String nodeId = task.getTaskDefinitionKey();
@@ -50,52 +68,31 @@ public class TaskCompleteEventListener implements FlowableEventListener {
             ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto = new ProcessInstanceAssignUserRecordParamDto();
             processInstanceAssignUserRecordParamDto.setFlowId(flowId);
             processInstanceAssignUserRecordParamDto.setProcessInstanceId(processInstanceId);
-         //   processNodeRecordAssignUserParamDto.setParentExecutionId();
+            //   processNodeRecordAssignUserParamDto.setParentExecutionId();
             processInstanceAssignUserRecordParamDto.setData(JSON.toJSONString(taskService.getVariables(task.getId())));
             processInstanceAssignUserRecordParamDto.setLocalData(JSON.toJSONString(taskService.getVariablesLocal(task.getId())));
             processInstanceAssignUserRecordParamDto.setNodeId(nodeId);
             processInstanceAssignUserRecordParamDto.setUserId((assignee));
             processInstanceAssignUserRecordParamDto.setTaskId(task.getId());
             processInstanceAssignUserRecordParamDto.setNodeName(task.getName());
-            processInstanceAssignUserRecordParamDto.setFlowUniqueId(task.getVariableLocal(ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID,String.class));
+            processInstanceAssignUserRecordParamDto.setFlowUniqueId(task.getVariableLocal(ProcessInstanceConstant.VariableKey.FLOW_UNIQUE_ID, String.class));
             String taskType = task.getVariableLocal(ProcessInstanceConstant.VariableKey.TASK_TYPE, String.class);
             //RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
             processInstanceAssignUserRecordParamDto.setTaskType(taskType);
 
 
-
-
             processInstanceAssignUserRecordParamDto.setExecutionId(task.getExecutionId());
 
-            BizHttpUtil.taskCompletedEvent(processInstanceAssignUserRecordParamDto);
+            BizHttpUtil.taskEndEvent(processInstanceAssignUserRecordParamDto);
+
 
         }
 
     }
 
-
-    /**
-     * @return whether or not the current operation should fail when this listeners execution throws an exception.
-     */
     @Override
-    public boolean isFailOnException() {
-        return false;
-    }
+    public void afterPropertiesSet() throws Exception {
+        afterPropertiesSet(FlowableEngineEventType.ENTITY_DELETED.toString());
 
-    /**
-     * @return Returns whether this event listener fires immediately when the event occurs or
-     * on a transaction lifecycle event (before/after commit or rollback).
-     */
-    @Override
-    public boolean isFireOnTransactionLifecycleEvent() {
-        return false;
-    }
-
-    /**
-     * @return if non-null, indicates the point in the lifecycle of the current transaction when the event should be fired.
-     */
-    @Override
-    public String getOnTransaction() {
-        return null;
     }
 }

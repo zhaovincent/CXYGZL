@@ -565,6 +565,17 @@ public class TaskController {
 
     }
 
+    /**
+     * 查询过期任务
+     * @return
+     */
+    @GetMapping("queryDueDateTask")
+    public R queryDueDateTask(){
+        List<Task> taskList = taskService.createTaskQuery().taskDueBefore(new Date()).list();
+        log.info("过期任务数量:{}",taskList.size());
+        return R.success();
+    }
+
 
     /**
      * 撤回

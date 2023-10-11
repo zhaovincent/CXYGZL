@@ -12,7 +12,9 @@ import com.cxygzl.common.dto.flow.HttpSettingData;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.expression.condition.NodeExpressionStrategyFactory;
-import com.cxygzl.core.listeners.*;
+import com.cxygzl.core.listeners.AllEventListener;
+import com.cxygzl.core.listeners.ApprovalCreateListener;
+import com.cxygzl.core.listeners.StarterUserTaskCreateListener;
 import com.cxygzl.core.node.IDataStoreHandler;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.servicetask.*;
@@ -55,91 +57,11 @@ public class ModelUtil {
         {
 
             {
-                //流程开始
+                //流程监听器
                 EventListener eventListener = new EventListener();
 
                 eventListener.setImplementationType("class");
-                eventListener.setImplementation(ProcessStartEventListener.class.getCanonicalName());
-
-
-                eventListeners.add(eventListener);
-            }
-            {
-                //节点取消
-                EventListener eventListener = new EventListener();
-
-                eventListener.setImplementationType("class");
-                eventListener.setImplementation(NodeCanceledEventListener.class.getCanonicalName());
-
-
-                eventListeners.add(eventListener);
-            }
-            {
-                //流程结束
-                EventListener eventListener = new EventListener();
-
-                eventListener.setImplementationType("class");
-                eventListener.setImplementation(ProcessEndEventListener.class.getCanonicalName());
-
-
-                eventListeners.add(eventListener);
-            }
-            {
-                //实体删除
-                EventListener eventListener = new EventListener();
-
-                eventListener.setImplementationType("class");
-                eventListener.setImplementation(EntityDeleteEventListener.class.getCanonicalName());
-
-
-                eventListeners.add(eventListener);
-            }
-
-            {
-                //节点结束
-                EventListener eventListener = new EventListener();
-
-                eventListener.setImplementationType("class");
-                eventListener.setImplementation(NodeEndEventListener.class.getCanonicalName());
-//                eventListener.setEvents(StrUtil.format("{},{},{}",FlowableEngineEventType.MULTI_INSTANCE_ACTIVITY_COMPLETED_WITH_CONDITION.name(),
-//                        FlowableEngineEventType.MULTI_INSTANCE_ACTIVITY_COMPLETED.name(),
-//                        FlowableEngineEventType.ACTIVITY_COMPLETED.name()
-//                        ));
-
-
-                eventListeners.add(eventListener);
-            }
-            {
-                //节点开始
-                EventListener eventListener = new EventListener();
-
-                eventListener.setImplementationType("class");
-                eventListener.setImplementation(NodeStartEventListener.class.getCanonicalName());
-//                eventListener.setEvents(FlowableEngineEventType.ACTIVITY_STARTED.name());
-
-
-                eventListeners.add(eventListener);
-            }
-            {
-                //任务被设置执行人
-                EventListener eventListener = new EventListener();
-
-                eventListener.setImplementationType("class");
-                eventListener.setImplementation(TaskAssignedEventListener.class.getCanonicalName());
-
-//                eventListener.setEvents(FlowableEngineEventType.TASK_ASSIGNED.name());
-
-                eventListeners.add(eventListener);
-            }
-            {
-                //任务完成
-                EventListener eventListener = new EventListener();
-
-                eventListener.setImplementationType("class");
-                eventListener.setImplementation(TaskCompleteEventListener.class.getCanonicalName());
-//                eventListener.setEvents(FlowableEngineEventType.TASK_COMPLETED.name());
-
-
+                eventListener.setImplementation(AllEventListener.class.getCanonicalName());
                 eventListeners.add(eventListener);
             }
 
@@ -172,13 +94,13 @@ public class ModelUtil {
      * @param flowId
      * @param bpmnModel
      */
-    public static void buildAllNode(Process process, Node nodeDto, String flowId,BpmnModel bpmnModel) {
+    public static void buildAllNode(Process process, Node nodeDto, String flowId, BpmnModel bpmnModel) {
         if (!NodeUtil.isNode(nodeDto)) {
             return;
         }
 
 
-        List<FlowElement> flowElementList = buildNode(nodeDto, flowId,process, bpmnModel);
+        List<FlowElement> flowElementList = buildNode(nodeDto, flowId, process, bpmnModel);
         for (FlowElement flowElement : flowElementList) {
             if (process.getFlowElement(flowElement.getId()) == null) {
                 process.addFlowElement(flowElement);
@@ -366,7 +288,7 @@ public class ModelUtil {
      * @param bpmnModel
      * @return
      */
-    private static List<FlowElement> buildNode(Node node, String flowId,Process process,BpmnModel bpmnModel) {
+    private static List<FlowElement> buildNode(Node node, String flowId, Process process, BpmnModel bpmnModel) {
         List<FlowElement> flowElementList = new ArrayList<>();
         if (!NodeUtil.isNode(node)) {
             return flowElementList;
@@ -549,6 +471,8 @@ public class ModelUtil {
 
 
         UserTask userTask = buildUserTask(node, node.getId(), createListener);
+        //1分钟过期
+//        userTask.setDueDate(DateUtil);
         flowElementList.add(userTask);
 
 
@@ -684,7 +608,7 @@ public class ModelUtil {
      * @return
      */
     private static List<FlowElement> buildParallelGatewayNode(Node node) {
-        node.setTailId(StrUtil.format("{}{}", node.getId(),MERGE_GATEWAY_FLAG));
+        node.setTailId(StrUtil.format("{}{}", node.getId(), MERGE_GATEWAY_FLAG));
         List<FlowElement> flowElementList = new ArrayList<>();
 
         ParallelGateway inclusiveGateway = new ParallelGateway();
@@ -694,7 +618,7 @@ public class ModelUtil {
 
         //合并网关
         ParallelGateway parallelGateway = new ParallelGateway();
-        parallelGateway.setId(StrUtil.format("{}{}", node.getId(),MERGE_GATEWAY_FLAG));
+        parallelGateway.setId(StrUtil.format("{}{}", node.getId(), MERGE_GATEWAY_FLAG));
         parallelGateway.setName(StrUtil.format("{}_合并网关", node.getNodeName()));
         flowElementList.add(parallelGateway);
 
@@ -709,7 +633,7 @@ public class ModelUtil {
      */
     private static List<FlowElement> buildInclusiveGatewayNode(Node node) {
 
-        node.setTailId(StrUtil.format("{}{}", node.getId(),MERGE_GATEWAY_FLAG));
+        node.setTailId(StrUtil.format("{}{}", node.getId(), MERGE_GATEWAY_FLAG));
 
         List<FlowElement> flowElementList = new ArrayList<>();
 
@@ -721,7 +645,7 @@ public class ModelUtil {
 
         //合并网关
         InclusiveGateway gateway = new InclusiveGateway();
-        gateway.setId(StrUtil.format("{}{}", node.getId(),MERGE_GATEWAY_FLAG));
+        gateway.setId(StrUtil.format("{}{}", node.getId(), MERGE_GATEWAY_FLAG));
         gateway.setName(StrUtil.format("{}_合并网关", node.getNodeName()));
 
         flowElementList.add(gateway);
@@ -836,23 +760,23 @@ public class ModelUtil {
      * @param bpmnModel
      * @return
      */
-    private static List<FlowElement> buildAsynTriggerNode(Node node,BpmnModel bpmnModel) {
+    private static List<FlowElement> buildAsynTriggerNode(Node node, BpmnModel bpmnModel) {
         node.setHeadId(StrUtil.format("asyn_trigger_service_task_{}", node.getId()));
 
 
-        List<FlowElement> flowElementList=new ArrayList<>();
+        List<FlowElement> flowElementList = new ArrayList<>();
 
         String messageId = StrUtil.format("message_notify_{}", node.getId());
 
-        Message message=new Message();
+        Message message = new Message();
         message.setId(messageId);
         message.setName(messageId);
         bpmnModel.addMessage(message);
 
         {
             ServiceTask serviceTask = new ServiceTask();
-            serviceTask.setId(StrUtil.format("asyn_trigger_service_task_{}",node.getId()));
-            serviceTask.setName(StrUtil.format("{}_请求",node.getNodeName()));
+            serviceTask.setId(StrUtil.format("asyn_trigger_service_task_{}", node.getId()));
+            serviceTask.setName(StrUtil.format("{}_请求", node.getNodeName()));
             serviceTask.setImplementationType("class");
             serviceTask.setImplementation(AsynTriggerServiceTask.class.getCanonicalName());
             serviceTask.setAsynchronous(true);
@@ -873,9 +797,9 @@ public class ModelUtil {
 
         }
         {
-            IntermediateCatchEvent intermediateCatchEvent=new IntermediateCatchEvent();
+            IntermediateCatchEvent intermediateCatchEvent = new IntermediateCatchEvent();
             intermediateCatchEvent.setId(node.getId());
-            intermediateCatchEvent.setName(StrUtil.format("{}_消息捕获",node.getNodeName()));
+            intermediateCatchEvent.setName(StrUtil.format("{}_消息捕获", node.getNodeName()));
             ExtensionElement e = new ExtensionElement();
             {
 
@@ -898,7 +822,6 @@ public class ModelUtil {
             intermediateCatchEvent.addExtensionElement(e);
             flowElementList.add(intermediateCatchEvent);
         }
-
 
 
         return flowElementList;

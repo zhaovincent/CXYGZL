@@ -49,7 +49,10 @@ public class BizHttpUtil {
      * @param nodeRecordParamDto
      */
     public static void startNodeEvent(ProcessInstanceNodeRecordParamDto nodeRecordParamDto) {
-        post(nodeRecordParamDto, "/remote/startNodeEvent");
+
+            post(nodeRecordParamDto, "/remote/startNodeEvent");
+
+
     }
 
     /**

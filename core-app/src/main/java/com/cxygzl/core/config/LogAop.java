@@ -96,7 +96,7 @@ public class LogAop {
 
             long l2 = System.currentTimeMillis();
 
-            logger.info("返回日志：{} 响应时间:{}", JSON.toJSONString(proceed), l2 - l1);
+            logger.info("返回日志 类：{} 方法：{} 结果：{} 响应时间:{}",className,method.getName(), JSON.toJSONString(proceed), l2 - l1);
 
             return proceed;
         } catch (

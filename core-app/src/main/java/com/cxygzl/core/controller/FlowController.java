@@ -1,5 +1,6 @@
 package com.cxygzl.core.controller;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -18,6 +19,7 @@ import com.cxygzl.core.utils.NodeUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.BpmnAutoLayout;
+import org.flowable.bpmn.converter.BpmnXMLConverter;
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.engine.HistoryService;
@@ -79,10 +81,10 @@ public class FlowController {
         log.info("flowId={}", flowId);
         BpmnModel bpmnModel = ModelUtil.buildBpmnModel(createFlowDto.getNode(), createFlowDto.getProcessName(), flowId);
         {
-//            byte[] bpmnBytess = new BpmnXMLConverter().convertToXML(bpmnModel);
-//            String filename = "/tmp/flowable-deployment/" + flowId + ".bpmn20.xml";
-//            log.debug("部署时的模型文件：{}", filename);
-//            FileUtil.writeBytes(bpmnBytess, filename);
+            byte[] bpmnBytess = new BpmnXMLConverter().convertToXML(bpmnModel);
+            String filename = "/tmp/flowable-deployment/" + flowId + ".bpmn20.xml";
+            log.debug("部署时的模型文件：{}", filename);
+            FileUtil.writeBytes(bpmnBytess, filename);
         }
         repositoryService.createDeployment()
                 .addBpmnModel(StrUtil.format("{}.bpmn20.xml", flowId), bpmnModel).deploy();
