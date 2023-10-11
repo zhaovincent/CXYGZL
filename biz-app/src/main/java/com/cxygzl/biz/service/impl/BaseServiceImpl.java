@@ -412,6 +412,31 @@ public class BaseServiceImpl implements IBaseService {
         }
         set.set("formList", formList);
 
+        //流程审批节点
+        List approveList=new ArrayList();
+        List<ProcessInstanceAssignUserRecord> processInstanceAssignUserRecordList = processNodeRecordAssignUserService.lambdaQuery().eq(ProcessInstanceAssignUserRecord::getProcessInstanceId, processInstanceId)
+                .orderByAsc(ProcessInstanceAssignUserRecord::getCreateTime)
+                .list();
+        for (ProcessInstanceAssignUserRecord processInstanceAssignUserRecord : processInstanceAssignUserRecordList) {
+
+            String userId = processInstanceAssignUserRecord.getUserId();
+            UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
+
+            Date endTime = processInstanceAssignUserRecord.getEndTime();
+            String taskType = processInstanceAssignUserRecord.getTaskType();
+
+            List<SimpleApproveDescDto> simpleApproveDescDtoList = CoreHttpUtil.queryTaskComments(processInstanceAssignUserRecord.getTaskId()).getData();
+
+            Dict dict = Dict.create()
+                    .set("userName", user.getName())
+                    .set("date",endTime==null?null: DateUtil.format(endTime,"yyyy-MM-dd HH:mm"))
+                    .set("taskType", taskType)
+                    .set("comment", simpleApproveDescDtoList )
+
+                    ;
+            approveList.add(dict);
+        }
+        set.set("approveList",approveList);
 
         return R.success(set);
     }
