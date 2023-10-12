@@ -12,5 +12,6 @@ public class MqQueueObject {
 
     private Object object;
     private String url;
+    private String key;
 
 }
