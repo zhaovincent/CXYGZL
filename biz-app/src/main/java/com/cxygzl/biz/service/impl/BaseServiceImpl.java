@@ -6,7 +6,6 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
-import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.TypeReference;
@@ -18,10 +17,7 @@ import com.cxygzl.biz.form.FormStrategyFactory;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.NodeFormatUtil;
-import com.cxygzl.biz.vo.NodeFormatParamVo;
-import com.cxygzl.biz.vo.NodeFormatResultVo;
-import com.cxygzl.biz.vo.PrintDataResultVO;
-import com.cxygzl.biz.vo.QueryFormListParamVo;
+import com.cxygzl.biz.vo.*;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.constants.TaskTypeEnum;
@@ -294,15 +290,17 @@ public class BaseServiceImpl implements IBaseService {
         String starterUserId = processInstanceRecord.getUserId();
         UserDto starterUser = ApiStrategyFactory.getStrategy().getUser(starterUserId);
 
-        Dict set = Dict.create()
-                .set("processInstanceResult", processInstanceRecord.getResult())
-                .set("starterName", starterUser.getName())
-                .set("processInstanceId", processInstanceRecord.getProcessInstanceId())
-                .set("starterAvatarUrl", starterUser.getAvatarUrl())
-                .set("processName", processInstanceRecord.getName())
-                .set("startTime", processInstanceRecord.getCreateTime());
 
-        return R.success(set);
+        TaskHeaderShowResultVO taskHeaderShowResultVO=new TaskHeaderShowResultVO();
+        taskHeaderShowResultVO.setProcessInstanceId(processInstanceRecord.getProcessInstanceId());
+        taskHeaderShowResultVO.setStarterName(starterUser.getName());
+        taskHeaderShowResultVO.setStarterAvatarUrl( starterUser.getAvatarUrl());
+        taskHeaderShowResultVO.setProcessName(processInstanceRecord.getName());
+        taskHeaderShowResultVO.setStartTime( processInstanceRecord.getCreateTime());
+        taskHeaderShowResultVO.setProcessInstanceResult(processInstanceRecord.getResult());
+
+
+        return R.success(taskHeaderShowResultVO);
     }
 
     /**
@@ -325,13 +323,16 @@ public class BaseServiceImpl implements IBaseService {
         TaskResultDto taskResultDto = r.getData();
         Boolean currentTask = taskResultDto.getCurrentTask();
         if (!currentTask) {
-            Dict set = Dict.create()
 
-                    .set("processInstanceId", taskResultDto.getProcessInstanceId())
+            TaskOperDataResultVO taskOperDataResultVO=new TaskOperDataResultVO();
+            taskOperDataResultVO.setProcessInstanceId(taskResultDto.getProcessInstanceId());
 
-                    .set("taskExist", false);
+            taskOperDataResultVO.setTaskExist(false);
 
-            return R.success(set);
+
+
+
+            return R.success(taskOperDataResultVO);
 
         }
 
@@ -351,17 +352,18 @@ public class BaseServiceImpl implements IBaseService {
         List operList = node.getOperList();
         String process = oaForms.getProcess();
 
-        Dict set = Dict.create()
-                .set("operList", operList)
-                .set("processInstanceId", taskResultDto.getProcessInstanceId())
-                .set("nodeId", nodeId)
-                .set("node", node)
-                .set("frontJoinTask", taskResultDto.getFrontJoinTask())
+        TaskOperDataResultVO taskOperDataResultVO=new TaskOperDataResultVO();
+        taskOperDataResultVO.setProcessInstanceId(taskResultDto.getProcessInstanceId());
+        taskOperDataResultVO.setNodeId(nodeId);
+        taskOperDataResultVO.setTaskExist(currentTask);
+        taskOperDataResultVO.setFrontJoinTask(taskResultDto.getFrontJoinTask());
+        taskOperDataResultVO.setOperList(operList);
+        taskOperDataResultVO.setNode(node);
+        taskOperDataResultVO.setProcess(CommonUtil.toObj(process, Node.class));
 
-                .set("taskExist", currentTask)
-                .set("process", CommonUtil.toObj(process, Node.class));
 
-        return R.success(set);
+
+        return R.success(taskOperDataResultVO);
     }
 
     /**
