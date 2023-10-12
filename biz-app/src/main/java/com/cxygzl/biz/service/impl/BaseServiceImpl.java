@@ -20,6 +20,7 @@ import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.NodeFormatUtil;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.NodeFormatResultVo;
+import com.cxygzl.biz.vo.PrintDataResultVO;
 import com.cxygzl.biz.vo.QueryFormListParamVo;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
@@ -380,15 +381,19 @@ public class BaseServiceImpl implements IBaseService {
 
         DeptDto dept = ApiStrategyFactory.getStrategy().getDept(starterUser.getDeptId());
 
-        Dict set = Dict.create()
-                .set("processInstanceResult", processInstanceRecord.getResult())
-                .set("processStatus", processInstanceRecord.getStatus())
-                .set("processInstanceId", processInstanceRecord.getProcessInstanceId())
-                .set("processStatusShow", NodeStatusEnum.get(processInstanceRecord.getStatus()).getName())
-                .set("starterName", starterUser.getName())
-                .set("starterDeptName", dept.getName())
-                .set("processName", processInstanceRecord.getName())
-                .set("startTime", DateUtil.format(processInstanceRecord.getCreateTime(), "yyyy-MM-dd HH:mm"));
+
+        PrintDataResultVO printDataResultVO=new PrintDataResultVO();
+        printDataResultVO.setProcessInstanceResult(processInstanceRecord.getResult());
+        printDataResultVO.setProcessStatus( processInstanceRecord.getStatus());
+        printDataResultVO.setProcessInstanceId(processInstanceRecord.getProcessInstanceId());
+        printDataResultVO.setProcessStatusShow(NodeStatusEnum.get(processInstanceRecord.getStatus()).getName());
+        printDataResultVO.setStarterName(starterUser.getName());
+        printDataResultVO.setStarterDeptName(dept.getName());
+        printDataResultVO.setProcessName(processInstanceRecord.getName());
+        printDataResultVO.setStartTime(DateUtil.format(processInstanceRecord.getCreateTime(), "yyyy-MM-dd HH:mm"));
+
+
+
 
 
         //查询所有的变量
@@ -411,16 +416,20 @@ public class BaseServiceImpl implements IBaseService {
         String formItems = process.getFormItems();
         List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
         for (FormItemVO formItemVO : formItemVOList) {
-            Dict formItem = Dict.create()
-                    .set("formName", formItemVO.getName())
-                    .set("formType", formItemVO.getType())
-                    .set("formValue", paramMap.get(formItemVO.getId()));
+
+            PrintDataResultVO.Form f=new PrintDataResultVO.Form();
+            f.setFormName(formItemVO.getName());
+            f.setFormType(formItemVO.getType());
+            f.setFormValue(paramMap.get(formItemVO.getId()));
+
+
             //处理表单显示
             String printShow = FormStrategyFactory.getStrategy(formItemVO.getType()).printShow(formItemVO, paramMap.get(formItemVO.getId()));
-            formItem.set("formValueShow", printShow);
-            formList.add(formItem);
+
+            f.setFormValueShow(printShow);
+            formList.add(f);
         }
-        set.set("formList", formList);
+        printDataResultVO.setFormList(formList);
 
         //流程审批节点
         List approveList = new ArrayList();
@@ -437,20 +446,23 @@ public class BaseServiceImpl implements IBaseService {
 
             List<SimpleApproveDescDto> simpleApproveDescDtoList = CoreHttpUtil.queryTaskComments(processInstanceAssignUserRecord.getTaskId()).getData();
             //非系统评论
-            List<SimpleApproveDescDto> collect =
+            List<SimpleApproveDescDto> notSysApproveDescDtoList =
                     simpleApproveDescDtoList.stream().filter(w -> !w.getSys()).collect(Collectors.toList());
 
-            Dict dict = Dict.create()
-                    .set("userName", user.getName())
-                    .set("nodeName", processInstanceAssignUserRecord.getNodeName())
-                    .set("date", endTime == null ? null : DateUtil.format(endTime, "yyyy-MM-dd HH:mm"))
-                    .set("taskType", taskType)
-                    .set("taskTypeShow", StrUtil.isBlankIfStr(taskType) ? "-" : TaskTypeEnum.getByValue(taskType).getName())
-                    .set("comment", collect);
-            approveList.add(dict);
-        }
-        set.set("approveList", approveList);
+            PrintDataResultVO.Approve approve=new PrintDataResultVO.Approve();
+            approve.setUserName(user.getName());
+            approve.setNodeName(processInstanceAssignUserRecord.getNodeName());
+            approve.setTaskType(taskType);
+            approve.setTaskTypeShow(StrUtil.isBlankIfStr(taskType) ? "-" : TaskTypeEnum.getByValue(taskType).getName());
+            approve.setDate(endTime == null ? null : DateUtil.format(endTime, "yyyy-MM-dd HH:mm"));
+            approve.setComment(notSysApproveDescDtoList);
 
-        return R.success(set);
+
+
+            approveList.add(approve);
+        }
+        printDataResultVO.setApproveList(approveList);
+
+        return R.success(printDataResultVO);
     }
 }
