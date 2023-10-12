@@ -8,6 +8,7 @@ import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.UserFieldDto;
 import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.HttpUtil;
+import com.cxygzl.core.config.MqQueue;
 import org.springframework.core.env.Environment;
 
 import java.util.List;
@@ -49,7 +50,7 @@ public class BizHttpUtil {
      */
     public static void startNodeEvent(ProcessInstanceNodeRecordParamDto nodeRecordParamDto) {
 
-            post(nodeRecordParamDto, "/remote/startNodeEvent");
+        MqQueue.put(nodeRecordParamDto, "/remote/startNodeEvent");
 
 
     }
@@ -69,7 +70,7 @@ public class BizHttpUtil {
      * @param nodeRecordParamDto
      */
     public static void endNodeEvent(ProcessInstanceNodeRecordParamDto nodeRecordParamDto) {
-        post(nodeRecordParamDto, "/remote/endNodeEvent");
+        MqQueue.put(nodeRecordParamDto, "/remote/endNodeEvent");
     }
 
     /**
@@ -78,7 +79,7 @@ public class BizHttpUtil {
      * @param nodeRecordParamDto
      */
     public static void cancelNodeEvent(ProcessInstanceNodeRecordParamDto nodeRecordParamDto) {
-        post(nodeRecordParamDto, "/remote/cancelNodeEvent");
+        MqQueue.put(nodeRecordParamDto, "/remote/cancelNodeEvent");
     }
 
     /**
@@ -99,7 +100,7 @@ public class BizHttpUtil {
      * @param messageDto
      */
     public static void saveMessage(MessageDto messageDto) {
-        post(messageDto, "/remote/saveMessage");
+        MqQueue.put(messageDto, "/remote/saveMessage");
     }
 
     /**
@@ -108,7 +109,7 @@ public class BizHttpUtil {
      * @param processInstanceParamDto
      */
     public static void endProcessEvent(ProcessInstanceParamDto processInstanceParamDto) {
-        post(processInstanceParamDto, "/remote/endProcess");
+        MqQueue.put(processInstanceParamDto, "/remote/endProcess");
     }
 
     /**
@@ -117,7 +118,7 @@ public class BizHttpUtil {
      * @param processInstanceParamDto
      */
     public static void startProcessEvent(ProcessInstanceRecordParamDto processInstanceParamDto) {
-        post(processInstanceParamDto, "/remote/startProcessEvent");
+        MqQueue.put(processInstanceParamDto, "/remote/startProcessEvent");
     }
 
     /**
@@ -236,7 +237,7 @@ public class BizHttpUtil {
      * @return
      */
     public static void startAssignUser(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
-        post(processInstanceAssignUserRecordParamDto, "/remote/startAssignUser");
+        MqQueue.put(processInstanceAssignUserRecordParamDto, "/remote/startAssignUser");
     }
 
     /**
@@ -246,7 +247,7 @@ public class BizHttpUtil {
      * @return
      */
     public static void taskCompletedEvent(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
-        post(processInstanceAssignUserRecordParamDto, "/remote/taskCompletedEvent");
+        MqQueue.put(processInstanceAssignUserRecordParamDto, "/remote/taskCompletedEvent");
     }
 
     /**
@@ -256,7 +257,7 @@ public class BizHttpUtil {
      * @return
      */
     public static void taskEndEvent(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
-        post(processInstanceAssignUserRecordParamDto, "/remote/taskEndEvent");
+        MqQueue.put(processInstanceAssignUserRecordParamDto, "/remote/taskEndEvent");
     }
 
 
