@@ -2,12 +2,11 @@ package com.cxygzl.core.utils;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.UserFieldDto;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.HttpUtil;
 import org.springframework.core.env.Environment;
 
@@ -30,7 +29,7 @@ public class BizHttpUtil {
     public static <T> R<List<T>> postArray(Object object, String url) {
         String post = post(object, url);
 
-        R<List<T>> r = JSON.parseObject(post, new TypeReference<R<List<T>>>() {
+        R<List<T>> r = JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<List<T>>>() {
         });
         return r;
     }
@@ -89,7 +88,7 @@ public class BizHttpUtil {
      */
     public static List<DeptDto> queryDeptList(List<String> deptIdList) {
         String post = post(deptIdList, "/remote/queryDeptList");
-        R<List<DeptDto>> listR = JSON.parseObject(post, new TypeReference<R<List<DeptDto>>>() {
+        R<List<DeptDto>> listR = JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<List<DeptDto>>>() {
         });
         return listR.getData();
     }
@@ -137,7 +136,7 @@ public class BizHttpUtil {
      */
     public static List<String> queryRoleIdListByUserId(String userId) {
         String s = get("/remote/queryRoleIdListByUserId?userId=" + userId);
-        return JSON.parseObject(s, new TypeReference<R<List<String>>>() {
+        return JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<List<String>>>() {
         }).getData();
     }
 
@@ -148,7 +147,7 @@ public class BizHttpUtil {
      */
     public static R<List<String>> queryUserIdListByDepIdList(List<String> deptIdList) {
         String s = post(deptIdList, "/remote/queryUserIdListByDepIdList");
-        R<List<String>> r = JSON.parseObject(s, new TypeReference<R<List<String>>>() {
+        R<List<String>> r = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<List<String>>>() {
         });
         return r;
     }
@@ -160,7 +159,7 @@ public class BizHttpUtil {
      */
     public static R<List<com.cxygzl.common.dto.third.DeptDto>> queryParentDepListByUserId(String userId) {
         String s = get("/remote/queryParentDepListByUserId?userId=" + userId);
-        R<List<com.cxygzl.common.dto.third.DeptDto>> r = JSON.parseObject(s, new TypeReference<R<List<DeptDto>>>() {
+        R<List<com.cxygzl.common.dto.third.DeptDto>> r = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<List<DeptDto>>>() {
         });
         return r;
     }
@@ -172,7 +171,7 @@ public class BizHttpUtil {
      */
     public static R<String> queryProcessAdmin(String flowId) {
         String s = get("/remote/queryProcessAdmin?flowId=" + flowId);
-        R<String> longR = JSON.parseObject(s, new TypeReference<R<String>>() {
+        R<String> longR = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<String>>() {
         });
         return longR;
     }
@@ -184,7 +183,7 @@ public class BizHttpUtil {
      */
     public static R<FlowSettingDto> queryProcessSetting(String flowId) {
         String s = get("/remote/queryProcessSetting?flowId=" + flowId);
-        R<FlowSettingDto> longR = JSON.parseObject(s, new TypeReference<R<FlowSettingDto>>() {
+        R<FlowSettingDto> longR = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<FlowSettingDto>>() {
         });
         return longR;
     }
@@ -199,7 +198,7 @@ public class BizHttpUtil {
     public static R<String> queryNodeOriData(String flowId, String nodeId) {
         String s = get(StrUtil.format("/remote/getNodeData?flowId" +
                 "={}&nodeId={}", flowId, nodeId));
-        R<String> r = JSON.parseObject(s, new TypeReference<R<String>>() {
+        R<String> r = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<String>>() {
         });
 
         return r;
@@ -213,7 +212,7 @@ public class BizHttpUtil {
      */
     public static R<Map<String, Object>> queryUserInfo(String userId) {
         String s = get("/remote/queryUserAllInfo?userId=" + userId);
-        R<Map<String, Object>> mapR = JSON.parseObject(s, new TypeReference<R<Map<String, Object>>>() {
+        R<Map<String, Object>> mapR = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<Map<String, Object>>>() {
         });
         return mapR;
     }
@@ -225,7 +224,7 @@ public class BizHttpUtil {
      */
     public static R<List<UserFieldDto>> queryUseField() {
         String s = get("/remote/queryUseField");
-        R<List<UserFieldDto>> mapR = JSON.parseObject(s, new TypeReference<R<List<UserFieldDto>>>() {
+        R<List<UserFieldDto>> mapR = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<List<UserFieldDto>>>() {
         });
         return mapR;
     }

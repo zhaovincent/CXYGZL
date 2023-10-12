@@ -1,12 +1,11 @@
 package com.cxygzl.biz.api.impl;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategy;
 import com.cxygzl.biz.utils.DingTalkHttpUtil;
 import com.cxygzl.common.dto.LoginUrlDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.third.*;
+import com.cxygzl.common.utils.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -30,7 +29,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     public List<String> loadUserIdListByRoleIdList(List<String> roleIdList) {
 
         String post = DingTalkHttpUtil.post(roleIdList, "/remote/loadUserIdListByRoleIdList");
-        return JSON.parseObject(post, new TypeReference<R<List<String>>>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<List<String>>>() {
         }).getData();
 
 
@@ -45,7 +44,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     @Override
     public List<String> loadRoleIdListByUserId(String userId) {
         String post = DingTalkHttpUtil.get( "/remote/loadRoleIdListByUserId?userId="+userId);
-        return JSON.parseObject(post, new TypeReference<R<List<String>>>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<List<String>>>() {
         }).getData();
     }
 
@@ -57,7 +56,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     @Override
     public List<RoleDto> loadAllRole() {
         String post = DingTalkHttpUtil.get("/remote/loadAllRole");
-        return JSON.parseObject(post, new TypeReference<R<List<RoleDto>>>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<List<RoleDto>>>() {
         }).getData();
     }
 
@@ -71,7 +70,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     @Override
     public List<String> loadUserIdListByDeptIdList(List<String> deptIdList) {
         String post = DingTalkHttpUtil.post(deptIdList, "/remote/loadUserIdListByDeptIdList");
-        return JSON.parseObject(post, new TypeReference<R<List<String>>>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<List<String>>>() {
         }).getData();
     }
 
@@ -83,7 +82,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     @Override
     public List<DeptDto> loadAllDept(String parentDeptId) {
         String post = DingTalkHttpUtil.get("/remote/loadAllDept?deptId=" + (parentDeptId == null ? "" : parentDeptId));
-        return JSON.parseObject(post, new TypeReference<R<List<DeptDto>>>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<List<DeptDto>>>() {
         }).getData();
     }
 
@@ -96,7 +95,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     @Override
     public List<UserDto> loadUserByDept(String deptId) {
         String post = DingTalkHttpUtil.get("/remote/loadUserByDept?deptId=" + deptId);
-        return JSON.parseObject(post, new TypeReference<R<List<UserDto>>>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<List<UserDto>>>() {
         }).getData();
     }
 
@@ -109,7 +108,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     @Override
     public DeptDto getDept(String deptId) {
         String post = DingTalkHttpUtil.get("/remote/getDept?deptId=" + deptId);
-        return JSON.parseObject(post, new TypeReference<R<DeptDto>>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<DeptDto>>() {
         }).getData();
     }
 
@@ -122,7 +121,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     @Override
     public UserDto getUser(String userId) {
         String post = DingTalkHttpUtil.get("/remote/getUser?userId=" + userId);
-        return JSON.parseObject(post, new TypeReference<R<UserDto>>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<UserDto>>() {
         }).getData();
     }
 
@@ -135,14 +134,14 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     @Override
     public UserDto getUserByPhone(String phone) {
         String post = DingTalkHttpUtil.get("/remote/getUserByPhone?phone=" + phone);
-        return JSON.parseObject(post, new TypeReference<R<UserDto>>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<UserDto>>() {
         }).getData();
     }
 
     @Override
     public List<UserDto> searchUser(String name) {
         String post = DingTalkHttpUtil.get("/remote/searchUser?name=" + name);
-        return JSON.parseObject(post, new TypeReference<R<List<UserDto>>>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<List<UserDto>>>() {
         }).getData();
     }
 
@@ -154,7 +153,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     @Override
     public List<UserFieldDto> queryUserFieldList() {
         String post = DingTalkHttpUtil.get("/remote/queryUserFieldList");
-        return JSON.parseObject(post, new TypeReference<R<List<UserFieldDto>>>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<List<UserFieldDto>>>() {
         }).getData();
     }
 
@@ -167,7 +166,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     @Override
     public Map<String, String> queryUserFieldData(String userId) {
         String post = DingTalkHttpUtil.get("/remote/queryUserFieldData?userId=" + userId);
-        return JSON.parseObject(post, new TypeReference<R<Map<String, String>>>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<Map<String, String>>>() {
         }).getData();
     }
 
@@ -250,7 +249,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     @Override
     public LoginUrlDto getLoginUrl() {
         String s = DingTalkHttpUtil.get("/remote/getLoginUrl");
-        R<LoginUrlDto> r = JSON.parseObject(s, new TypeReference<R<LoginUrlDto>>() {
+        R<LoginUrlDto> r = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<LoginUrlDto>>() {
         });
         return r.getData();
 
@@ -264,7 +263,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     @Override
     public Object getLoginParam() {
         String s = DingTalkHttpUtil.get("/remote/getLoginParam");
-        R r = JSON.parseObject(s, new TypeReference<R>() {
+        R r = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R>() {
         });
         return r.getData();
     }
@@ -290,7 +289,7 @@ public class DingTalkApi implements ApiStrategy, InitializingBean {
     public String getUserIdByToken(String token) {
 
         String s = DingTalkHttpUtil.get("/user/getUserIdByCode?authCode=" + token);
-        R<String> r = JSON.parseObject(s, new TypeReference<R<String>>() {
+        R<String> r = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<String>>() {
         });
 
         return r.getData();

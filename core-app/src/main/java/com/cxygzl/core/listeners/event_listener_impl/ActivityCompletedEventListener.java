@@ -1,8 +1,8 @@
 package com.cxygzl.core.listeners.event_listener_impl;
 
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.dto.ProcessInstanceNodeRecordParamDto;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.listeners.EventListenerStrategy;
 import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.NodeUtil;
@@ -52,7 +52,7 @@ public class ActivityCompletedEventListener implements EventListenerStrategy, In
         processInstanceNodeRecordParamDto.setFlowId(flowId);
         processInstanceNodeRecordParamDto.setExecutionId(flowableActivityEvent.getExecutionId());
         processInstanceNodeRecordParamDto.setProcessInstanceId(processInstanceId);
-        processInstanceNodeRecordParamDto.setData(JSON.toJSONString(variables));
+        processInstanceNodeRecordParamDto.setData(JsonUtil.toJSONString(variables));
         processInstanceNodeRecordParamDto.setNodeId(activityId);
 //            processNodeRecordParamDto.setNodeType(nodeDto.getType());
         processInstanceNodeRecordParamDto.setNodeName(activityName);

@@ -7,12 +7,11 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.RoleDto;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.dto.third.UserFieldDto;
+import com.cxygzl.common.utils.JsonUtil;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.web.bind.annotation.*;
@@ -47,28 +46,28 @@ public class TestNetController {
         if (FileUtil.exist("/tmp/user.json")) {
             {
                 String s = FileUtil.readUtf8String("/tmp/user.json");
-                userList.addAll(JSON.parseArray(s, UserDto.class));
+                userList.addAll(JsonUtil.parseArray(s, UserDto.class));
             }
             {
                 String s = FileUtil.readUtf8String("/tmp/dept.json");
-                deptList.addAll(JSON.parseArray(s, DeptDto.class));
+                deptList.addAll(JsonUtil.parseArray(s, DeptDto.class));
             }
             {
                 String s = FileUtil.readUtf8String("/tmp/role.json");
-                roleList.addAll(JSON.parseArray(s, RoleDto.class));
+                roleList.addAll(JsonUtil.parseArray(s, RoleDto.class));
             }
             {
                 String s = FileUtil.readUtf8String("/tmp/userrole.json");
-                userRoleList.addAll(JSON.parseArray(s, UserRole.class));
+                userRoleList.addAll(JsonUtil.parseArray(s, UserRole.class));
             }
             {
                 String s = FileUtil.readUtf8String("/tmp/userfield.json");
-                userFieldList.addAll(JSON.parseArray(s, UserFieldDto.class));
+                userFieldList.addAll(JsonUtil.parseArray(s, UserFieldDto.class));
             }
             {
                 String s = FileUtil.readUtf8String("/tmp/userfielddata.json");
 
-                Map<String, Object> stringObjectMap = JSON.parseObject(s, new TypeReference<Map<String, Object>>() {
+                Map<String, Object> stringObjectMap = JsonUtil.parseObject(s, new JsonUtil.TypeReference<Map<String, Object>>() {
                 });
                 userFieldDataList.putAll(stringObjectMap);
             }
@@ -119,7 +118,7 @@ public class TestNetController {
             userFieldDto.setName("年龄");
             userFieldDto.setType("Number");
             userFieldDto.setRequired(true);
-            userFieldDto.setProps(JSON.toJSONString(Dict.create().set("radixNum",3)));
+            userFieldDto.setProps(JsonUtil.toJSONString(Dict.create().set("radixNum",3)));
             userFieldDto.setKey("cxygzl_age");
             userFieldList.add(userFieldDto);
 

@@ -1,6 +1,6 @@
 package com.cxygzl.biz.config.exception;
 
-import com.alibaba.fastjson2.JSON;
+import com.cxygzl.common.utils.JsonUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -26,6 +26,6 @@ public enum ResultCode {
 
     @Override
     public String toString() {
-        return JSON.toJSONString(this);
+        return JsonUtil.toJSONString(this);
     }
 }

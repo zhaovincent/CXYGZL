@@ -2,18 +2,18 @@ package com.cxygzl.biz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
-import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.entity.ProcessInstanceNodeRecord;
+import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.mapper.ProcessInstanceNodeRecordMapper;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.dto.ProcessInstanceNodeRecordParamDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -96,12 +96,12 @@ public class ProcessInstanceNodeRecordServiceImpl extends ServiceImpl<ProcessIns
 
         //查询父级
         Process process = processService.getByFlowId(flowId);
-        final Node rootNode = JSON.parseObject(process.getProcess(), Node.class);
+        final Node rootNode = JsonUtil.parseObject(process.getProcess(), Node.class);
         Node parentNode = NodeUtil.getParentNode(rootNode, nodeId);
 
         //当前流程
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceNodeRecordParamDto.getProcessInstanceId()).one();
-        Node currentProcessRootNode = JSON.parseObject(processInstanceRecord.getProcess(), Node.class);
+        Node currentProcessRootNode = JsonUtil.parseObject(processInstanceRecord.getProcess(), Node.class);
 
 
         if (parentNode != null) {
@@ -109,7 +109,7 @@ public class ProcessInstanceNodeRecordServiceImpl extends ServiceImpl<ProcessIns
 
                 //处理排他分支为线性
                 NodeUtil.handleExclusiveGatewayAsLine(currentProcessRootNode, parentNode.getId(), nodeId, null);
-                processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
+                processInstanceRecord.setProcess(JsonUtil.toJSONString(currentProcessRootNode));
             }
         }
 
@@ -122,7 +122,7 @@ public class ProcessInstanceNodeRecordServiceImpl extends ServiceImpl<ProcessIns
             // currentNode.setExecutionId(processNodeRecordParamDto.getExecutionId());
 
             NodeUtil.handleChildrenAfterJump(currentProcessRootNode, parentNodeId, currentNode);
-            processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
+            processInstanceRecord.setProcess(JsonUtil.toJSONString(currentProcessRootNode));
 
         }
 
@@ -131,7 +131,7 @@ public class ProcessInstanceNodeRecordServiceImpl extends ServiceImpl<ProcessIns
                 nodeId,
                 processInstanceNodeRecordParamDto.getExecutionId(),
                 processInstanceNodeRecordParamDto.getFlowUniqueId());
-        processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
+        processInstanceRecord.setProcess(JsonUtil.toJSONString(currentProcessRootNode));
 
         //判断是聚合网关--处理条件分支和包容分支 删除没用执行的
         if (StrUtil.endWith(processInstanceNodeRecordParamDto.getNodeId(), MERGE_GATEWAY_FLAG)) {
@@ -143,7 +143,7 @@ public class ProcessInstanceNodeRecordServiceImpl extends ServiceImpl<ProcessIns
                 if (node.getType().intValue() == NodeTypeEnum.EXCLUSIVE_GATEWAY.getValue()) {
                     //排他
                     NodeUtil.handleExclusiveGatewayAsLine(currentProcessRootNode, node.getId(), null, null);
-                    processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
+                    processInstanceRecord.setProcess(JsonUtil.toJSONString(currentProcessRootNode));
                 }
                 if (node.getType().intValue() == NodeTypeEnum.INCLUSIVE_GATEWAY.getValue()) {
                     //包容
@@ -159,7 +159,7 @@ public class ProcessInstanceNodeRecordServiceImpl extends ServiceImpl<ProcessIns
 
                     NodeUtil.handleInclusiveGatewayAsLine(currentProcessRootNode, node.getId(), p.getExecutionId(), p.getFlowUniqueId(),
                             processInstanceNodeRecordParamDtos, null);
-                    processInstanceRecord.setProcess(JSON.toJSONString(currentProcessRootNode));
+                    processInstanceRecord.setProcess(JsonUtil.toJSONString(currentProcessRootNode));
 
                 }
 

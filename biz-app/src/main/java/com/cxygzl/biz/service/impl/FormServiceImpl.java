@@ -7,9 +7,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.config.exception.BusinessException;
 import com.cxygzl.biz.entity.Process;
@@ -27,7 +25,7 @@ import com.cxygzl.common.dto.TaskResultDto;
 import com.cxygzl.common.dto.flow.*;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.UserDto;
-import com.cxygzl.common.utils.CommonUtil;
+import com.cxygzl.common.utils.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +67,7 @@ public class FormServiceImpl implements IFormService {
 
         String remoteUrl = formRemoteSelectOptionParamVo.getRemoteUrl();
         String s = HttpUtil.post(remoteUrl, "");
-        List<Map> mapList = JSON.parseArray(s, Map.class);
+        List<Map> mapList = JsonUtil.parseArray(s, Map.class);
 
         for (Map map : mapList) {
             String str = MapUtil.getStr(map, "key");
@@ -157,7 +155,6 @@ public class FormServiceImpl implements IFormService {
     /**
      * 处理动态表单
      *
-     * @param dynamicFormConfig
      * @param paramMap
      * @param formItemVOList
      * @param flowId
@@ -170,7 +167,7 @@ public class FormServiceImpl implements IFormService {
         if (StrUtil.isNotBlank(nodeId)) {
             node = nodeDataService.getNode(flowId, nodeId).getData();
         } else {
-            node = JSON.parseObject(process, Node.class);
+            node = JsonUtil.parseObject(process, Node.class);
         }
         HttpSetting dynamicFormConfig = node.getDynamicFormConfig();
         if (dynamicFormConfig == null || dynamicFormConfig.getEnable() == null ||
@@ -203,7 +200,7 @@ public class FormServiceImpl implements IFormService {
         if(StrUtil.isBlank(result)){
             throw new BusinessException("网络请求异常");
         }
-        JSONObject jsonObject = JSON.parseObject(result);
+        JSONObject jsonObject = JsonUtil.parseObject(result);
         if (jsonObject.isEmpty()) {
             return;
         }
@@ -240,18 +237,18 @@ public class FormServiceImpl implements IFormService {
 
         String formData = processCopy.getFormData();
 
-        Map<String, Object> variableMap = JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
+        Map<String, Object> variableMap = JsonUtil.parseObject(formData, new JsonUtil.TypeReference<Map<String, Object>>() {
         });
 
         String nodeId = processCopy.getNodeId();
 
 
         String data = nodeDataService.getNodeData(flowId, nodeId).getData();
-        Node node = JSON.parseObject(data, Node.class);
+        Node node = JsonUtil.parseObject(data, Node.class);
         Map<String, String> formPerms = node.getFormPerms();
 
 
-        List<FormItemVO> formItemVOList = JSON.parseArray(oaForms.getFormItems(), FormItemVO.class);
+        List<FormItemVO> formItemVOList = JsonUtil.parseArray(oaForms.getFormItems(), FormItemVO.class);
         for (FormItemVO formItemVO : formItemVOList) {
 
 
@@ -323,15 +320,15 @@ public class FormServiceImpl implements IFormService {
 
         //发起人变量数据
         String formData = processInstanceRecord.getFormData();
-        Map<String, Object> variableMap = JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
+        Map<String, Object> variableMap = JsonUtil.parseObject(formData, new JsonUtil.TypeReference<Map<String, Object>>() {
         });
         //发起人表单权限
         String process = oaForms.getProcess();
-        Node nodeDto = JSON.parseObject(process, Node.class);
+        Node nodeDto = JsonUtil.parseObject(process, Node.class);
         Map<String, String> formPerms1 = nodeDto.getFormPerms();
 
 
-        List<FormItemVO> formItemVOList = JSON.parseArray(oaForms.getFormItems(), FormItemVO.class);
+        List<FormItemVO> formItemVOList = JsonUtil.parseArray(oaForms.getFormItems(), FormItemVO.class);
         for (FormItemVO formItemVO : formItemVOList) {
             String id = formItemVO.getId();
             String perm = formPerms1.get(id);
@@ -429,7 +426,7 @@ public class FormServiceImpl implements IFormService {
 
             String data = processInstanceAssignUserRecordList.get(0).getData();
             if (StrUtil.isNotBlank(data)) {
-                Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
+                Map<String, Object> collect = JsonUtil.parseObject(data, new JsonUtil.TypeReference<Map<String, Object>>() {
                 });
                 paramMap.putAll(collect);
 
@@ -447,7 +444,7 @@ public class FormServiceImpl implements IFormService {
         Map<String, String> formPerms = node.getFormPerms();
 
 
-        List<FormItemVO> formItemVOList = CommonUtil.toArray(oaForms.getFormItems(), FormItemVO.class);
+        List<FormItemVO> formItemVOList = JsonUtil.parseArray(oaForms.getFormItems(), FormItemVO.class);
         for (FormItemVO formItemVO : formItemVOList) {
 
 
@@ -549,11 +546,11 @@ public class FormServiceImpl implements IFormService {
 
         String process = oaForms.getProcess();
         String formItems = oaForms.getFormItems();
-        Node startNode = CommonUtil.toObj(process, Node.class);
+        Node startNode = JsonUtil.parseObject(process, Node.class);
 
 
         Map<String, String> formPerms = startNode.getFormPerms();
-        List<FormItemVO> t = JSON.parseArray(formItems, FormItemVO.class);
+        List<FormItemVO> t = JsonUtil.parseArray(formItems, FormItemVO.class);
 
         for (FormItemVO formItemVO : t) {
             String perm = MapUtil.getStr(formPerms, formItemVO.getId(), ProcessInstanceConstant.FormPermClass.EDIT);

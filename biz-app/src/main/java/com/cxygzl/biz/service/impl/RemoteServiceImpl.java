@@ -5,8 +5,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
@@ -21,6 +19,7 @@ import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.TaskParamDto;
 import com.cxygzl.common.dto.third.*;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -332,23 +331,23 @@ public class RemoteServiceImpl implements IRemoteService {
         entity.setGroupName(processGroup.getGroupName());
         entity.setStatus(NodeStatusEnum.JXZ.getCode());
         String processStr = process.getProcess();
-        Node node = JSON.parseObject(processStr, Node.class);
+        Node node = JsonUtil.parseObject(processStr, Node.class);
         NodeUtil.addEndNode(node);
-        entity.setProcess(JSON.toJSONString(node));
+        entity.setProcess(JsonUtil.toJSONString(node));
 
         processInstanceRecordService.save(entity);
 
 
         //调用接口通知其他
         String formData = processInstanceRecordParamDto.getFormData();
-        Map<String, Object> valueMap = JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
+        Map<String, Object> valueMap = JsonUtil.parseObject(formData, new JsonUtil.TypeReference<Map<String, Object>>() {
         });
         StartProcessDto processDto =
                 StartProcessDto.builder()
                         .processInstanceId(processInstanceRecordParamDto.getProcessInstanceId())
                         .userId(processInstanceRecordParamDto.getUserId())
                         .flowId(process.getFlowId())
-                        .formItemVOList(JSON.parseArray(process.getFormItems(), FormItemVO.class))
+                        .formItemVOList(JsonUtil.parseArray(process.getFormItems(), FormItemVO.class))
                         .valueMap(valueMap).build();
         ApiStrategyFactory.getStrategy().startProcess(processDto);
 
@@ -534,7 +533,7 @@ public class RemoteServiceImpl implements IRemoteService {
         if (StrUtil.isBlank(settings)) {
             return R.fail("该流程没有设置");
         }
-        return R.success(JSON.parseObject(settings, FlowSettingDto.class));
+        return R.success(JsonUtil.parseObject(settings, FlowSettingDto.class));
     }
 
     /**

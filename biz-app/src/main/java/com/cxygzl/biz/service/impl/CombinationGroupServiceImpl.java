@@ -1,7 +1,6 @@
 package com.cxygzl.biz.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessGroup;
@@ -12,6 +11,7 @@ import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.dto.FlowSettingDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.third.UserDto;
+import com.cxygzl.common.utils.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -66,7 +66,7 @@ public class CombinationGroupServiceImpl implements ICombinationGroupService {
             processList.forEach(process -> {
 
                 String settings = process.getSettings();
-                FlowSettingDto flowSettingDto = JSON.parseObject(settings, FlowSettingDto.class);
+                FlowSettingDto flowSettingDto = JsonUtil.parseObject(settings, FlowSettingDto.class);
                 FlowSettingDto.DbRecord dbRecord = flowSettingDto.getDbRecord();
 
 

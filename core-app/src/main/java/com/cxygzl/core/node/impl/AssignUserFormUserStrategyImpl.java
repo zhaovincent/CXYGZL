@@ -1,11 +1,10 @@
 package com.cxygzl.core.node.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
-import com.cxygzl.common.utils.CommonUtil;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.node.AssignUserStrategy;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
@@ -37,8 +36,8 @@ public class AssignUserFormUserStrategyImpl implements InitializingBean, AssignU
 
         } else {
 
-            String jsonString = JSON.toJSONString(variable);
-            List<NodeUser> nodeUserDtoList = CommonUtil.toArray(jsonString, NodeUser.class);
+            String jsonString = JsonUtil.toJSONString(variable);
+            List<NodeUser> nodeUserDtoList = JsonUtil.parseArray(jsonString, NodeUser.class);
 
             List<String> userIdList = nodeUserDtoList.stream().map(w -> String.valueOf(w.getId())).collect(Collectors.toList());
 

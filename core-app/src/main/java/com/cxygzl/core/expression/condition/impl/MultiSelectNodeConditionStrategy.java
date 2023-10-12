@@ -3,9 +3,9 @@ package com.cxygzl.core.expression.condition.impl;
 import cn.hutool.core.util.EscapeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.flow.Condition;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.expression.ExpressionHandler;
 import com.cxygzl.core.expression.condition.NodeConditionStrategy;
 import org.springframework.beans.factory.InitializingBean;
@@ -31,7 +31,7 @@ public class MultiSelectNodeConditionStrategy implements NodeConditionStrategy, 
 
 
         return StrUtil.format("(expressionHandler.selectHandler(\"{}\", execution,\"{}\",\"{}\"))", id,
-                EscapeUtil.escape(JSON.toJSONString(value)), compare);
+                EscapeUtil.escape(JsonUtil.toJSONString(value)), compare);
 
 
     }
@@ -52,7 +52,7 @@ public class MultiSelectNodeConditionStrategy implements NodeConditionStrategy, 
 
         ExpressionHandler bean = SpringUtil.getBean(ExpressionHandler.class);
         return bean.selectHandler( id,paramMap,
-                EscapeUtil.escape(JSON.toJSONString(value)), compare);
+                EscapeUtil.escape(JsonUtil.toJSONString(value)), compare);
     }
 
     @Override

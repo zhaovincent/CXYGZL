@@ -7,8 +7,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
 import com.cxygzl.biz.entity.Process;
@@ -26,7 +24,7 @@ import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.UserDto;
-import com.cxygzl.common.utils.CommonUtil;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -87,7 +85,7 @@ public class BaseServiceImpl implements IBaseService {
         ClassPathResource classPathResource = new ClassPathResource("area.json");
         String json = FileUtil.readUtf8String(classPathResource.getFile());
 //
-//        List<AreaVO> areaVOList = JSON.parseArray(json, AreaVO.class);
+//        List<AreaVO> areaVOList = CommonUtil.parseArray(json, AreaVO.class);
 //        List<AreaVO> provinceList = areaVOList.stream().filter(w -> StrUtil.endWith(w.getCode(), "0000")).collect(Collectors.toList());
 //        List<AreaVO> cityList =
 //                areaVOList.stream()
@@ -117,7 +115,7 @@ public class BaseServiceImpl implements IBaseService {
 //        List<Tree<String>> treeList = TreeUtil.build(nodeList, "000000");
 
 
-        return R.success(JSON.parseArray(json));
+        return R.success(JsonUtil.parseArray(json));
     }
 
     /**
@@ -165,8 +163,8 @@ public class BaseServiceImpl implements IBaseService {
         if (StrUtil.isNotBlank(nodeFormatParamVo.getCcId())) {
 
             ProcessInstanceCopy processInstanceCopy = processCopyService.getById(nodeFormatParamVo.getCcId());
-            Map<String, Object> variableMap = com.alibaba.fastjson2.JSON.parseObject(processInstanceCopy.getFormData(),
-                    new TypeReference<Map<String, Object>>() {
+            Map<String, Object> variableMap = JsonUtil.parseObject(processInstanceCopy.getFormData(),
+                    new JsonUtil.TypeReference<Map<String, Object>>() {
                     });
             if (variableMap == null) {
                 variableMap = new HashMap<>();
@@ -188,7 +186,7 @@ public class BaseServiceImpl implements IBaseService {
                         .list();
 
                 String data = list.get(0).getData();
-                Map<String, Object> variableMap = com.alibaba.fastjson2.JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
+                Map<String, Object> variableMap = JsonUtil.parseObject(data, new JsonUtil.TypeReference<Map<String, Object>>() {
                 });
                 if (variableMap == null) {
                     variableMap = new HashMap<>();
@@ -220,7 +218,7 @@ public class BaseServiceImpl implements IBaseService {
                     processInstanceId).one();
             //任务里没有
             String formData = processInstanceRecord.getFormData();
-            Map<String, Object> map = com.alibaba.fastjson2.JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
+            Map<String, Object> map = JsonUtil.parseObject(formData, new JsonUtil.TypeReference<Map<String, Object>>() {
             });
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 String key = entry.getKey();
@@ -238,7 +236,7 @@ public class BaseServiceImpl implements IBaseService {
             Process oaForms = processService.getByFlowId(flowId);
             process = oaForms.getProcess();
         }
-        Node nodeDto = com.alibaba.fastjson2.JSON.parseObject(process, Node.class);
+        Node nodeDto = JsonUtil.parseObject(process, Node.class);
 
 
         //查询所有的节点
@@ -348,7 +346,7 @@ public class BaseServiceImpl implements IBaseService {
         }
         String nodeDataJson =
                 processNodeDataService.getNodeData(flowId, nodeId).getData();
-        Node node = CommonUtil.toObj(nodeDataJson, Node.class);
+        Node node = JsonUtil.parseObject(nodeDataJson, Node.class);
         List operList = node.getOperList();
         String process = oaForms.getProcess();
 
@@ -359,7 +357,7 @@ public class BaseServiceImpl implements IBaseService {
         taskOperDataResultVO.setFrontJoinTask(taskResultDto.getFrontJoinTask());
         taskOperDataResultVO.setOperList(operList);
         taskOperDataResultVO.setNode(node);
-        taskOperDataResultVO.setProcess(CommonUtil.toObj(process, Node.class));
+        taskOperDataResultVO.setProcess(JsonUtil.parseObject(process, Node.class));
 
 
 
@@ -406,8 +404,8 @@ public class BaseServiceImpl implements IBaseService {
             paramMap = CoreHttpUtil.queryVariables(variableQueryParamDto).getData();
 
         } else {
-            paramMap= JSON.parseObject(processInstanceRecord.getFormData(),
-                    new com.alibaba.fastjson.TypeReference<Map<String, Object>>() {
+            paramMap= JsonUtil.parseObject(processInstanceRecord.getFormData(),
+                    new JsonUtil.TypeReference<Map<String, Object>>() {
                     });
         }
 
@@ -416,7 +414,7 @@ public class BaseServiceImpl implements IBaseService {
         String flowId = processInstanceRecord.getFlowId();
         Process process = processService.getByFlowId(flowId);
         String formItems = process.getFormItems();
-        List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
+        List<FormItemVO> formItemVOList = JsonUtil.parseArray(formItems, FormItemVO.class);
         for (FormItemVO formItemVO : formItemVOList) {
 
             PrintDataResultVO.Form f=new PrintDataResultVO.Form();

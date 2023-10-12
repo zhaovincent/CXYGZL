@@ -1,7 +1,5 @@
 package com.cxygzl.biz.api.impl;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategy;
 import com.cxygzl.biz.service.IDeptService;
 import com.cxygzl.biz.service.IRoleService;
@@ -10,6 +8,7 @@ import com.cxygzl.biz.service.IUserService;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.common.dto.LoginUrlDto;
 import com.cxygzl.common.dto.third.*;
+import com.cxygzl.common.utils.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -41,7 +40,7 @@ public class NetApi implements ApiStrategy, InitializingBean {
     public List<String> loadUserIdListByRoleIdList(List<String> roleIdList) {
 
         String post = CoreHttpUtil.post(roleIdList, "/test/net/loadUserIdListByRoleIdList");
-        return JSON.parseArray(post,String.class);
+        return JsonUtil.parseArray(post,String.class);
 
 
     }
@@ -65,7 +64,7 @@ public class NetApi implements ApiStrategy, InitializingBean {
     @Override
     public List<RoleDto> loadAllRole() {
         String post = CoreHttpUtil.get( "/test/net/loadUserIdListByRoleIdList");
-        return JSON.parseArray(post,RoleDto.class);
+        return JsonUtil.parseArray(post,RoleDto.class);
     }
 
     /**
@@ -78,7 +77,7 @@ public class NetApi implements ApiStrategy, InitializingBean {
     @Override
     public List<String> loadUserIdListByDeptIdList(List<String> deptIdList) {
         String post = CoreHttpUtil.post(deptIdList, "/test/net/loadUserIdListByDeptIdList");
-        return JSON.parseArray(post,String.class);
+        return JsonUtil.parseArray(post,String.class);
     }
 
     /**
@@ -89,7 +88,7 @@ public class NetApi implements ApiStrategy, InitializingBean {
     @Override
     public List<DeptDto> loadAllDept(String parentDeptId) {
         String post = CoreHttpUtil.get( "/test/net/loadAllDept?parentDeptId="+(parentDeptId==null?"":parentDeptId));
-        return JSON.parseArray(post,DeptDto.class);
+        return JsonUtil.parseArray(post,DeptDto.class);
     }
 
     /**
@@ -101,7 +100,7 @@ public class NetApi implements ApiStrategy, InitializingBean {
     @Override
     public List<UserDto> loadUserByDept(String deptId) {
         String post = CoreHttpUtil.get( "/test/net/loadUserByDept?deptId="+deptId);
-        return JSON.parseArray(post, UserDto.class);
+        return JsonUtil.parseArray(post, UserDto.class);
     }
 
     /**
@@ -113,7 +112,7 @@ public class NetApi implements ApiStrategy, InitializingBean {
     @Override
     public UserDto getUser(String userId) {
         String post = CoreHttpUtil.get( "/test/net/getUser?userId="+userId);
-        return JSON.parseObject(post,UserDto.class);
+        return JsonUtil.parseObject(post,UserDto.class);
     }
 
     /**
@@ -141,7 +140,7 @@ public class NetApi implements ApiStrategy, InitializingBean {
     @Override
     public List<UserDto> searchUser(String name) {
         String post = CoreHttpUtil.get( "/test/net/searchUser?name="+name);
-        return JSON.parseArray(post,UserDto.class);
+        return JsonUtil.parseArray(post,UserDto.class);
     }
 
     /**
@@ -152,7 +151,7 @@ public class NetApi implements ApiStrategy, InitializingBean {
     @Override
     public List<UserFieldDto> queryUserFieldList() {
         String post = CoreHttpUtil.get( "/test/net/queryUserFieldList");
-        return JSON.parseArray(post,UserFieldDto.class);
+        return JsonUtil.parseArray(post,UserFieldDto.class);
     }
 
     /**
@@ -164,7 +163,7 @@ public class NetApi implements ApiStrategy, InitializingBean {
     @Override
     public Map<String, String> queryUserFieldData(String userId) {
         String post = CoreHttpUtil.get( "/test/net/queryUserFieldData?userId="+userId);
-        return JSON.parseObject(post, new TypeReference<Map<String, String>>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<Map<String, String>>() {
         });
     }
 

@@ -4,9 +4,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.EscapeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.flow.Condition;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.expression.ExpressionHandler;
 import com.cxygzl.core.expression.condition.NodeConditionStrategy;
 import org.springframework.beans.factory.InitializingBean;
@@ -35,7 +35,7 @@ public class SelectUserNodeConditionStrategy implements NodeConditionStrategy, I
         ArrayList<Object> list = CollUtil.newArrayList(value);
 
         return StrUtil.format("(expressionHandler.userCompare(\"{}\",\"{}\",\"{}\", execution,\"{}\"))", id,
-                EscapeUtil.escape(JSON.toJSONString(list)),compare,condition.getUserKey());
+                EscapeUtil.escape(JsonUtil.toJSONString(list)),compare,condition.getUserKey());
 
 
     }
@@ -61,7 +61,7 @@ public class SelectUserNodeConditionStrategy implements NodeConditionStrategy, I
 
 
         return bean.userCompare( id,
-                EscapeUtil.escape(JSON.toJSONString(list)),compare,paramMap,condition.getUserKey());
+                EscapeUtil.escape(JsonUtil.toJSONString(list)),compare,paramMap,condition.getUserKey());
     }
 
     @Override

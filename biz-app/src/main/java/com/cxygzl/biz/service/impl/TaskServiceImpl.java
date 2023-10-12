@@ -3,8 +3,6 @@ package com.cxygzl.biz.service.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.config.exception.BusinessException;
 import com.cxygzl.biz.constants.NodeStatusEnum;
@@ -20,6 +18,7 @@ import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.third.UserDto;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -107,7 +106,7 @@ public class TaskServiceImpl implements ITaskService {
     public R resolveTask(TaskParamDto taskParamDto) {
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
         String post = CoreHttpUtil.resolveTask(taskParamDto);
-        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
+        com.cxygzl.common.dto.R r = JsonUtil.parseObject(post, new JsonUtil.TypeReference<R>() {
         });
         if (!r.isOk()) {
             return R.fail(r.getMsg());
@@ -129,7 +128,7 @@ public class TaskServiceImpl implements ITaskService {
         UserDto user = ApiStrategyFactory.getStrategy().getUser(taskParamDto.getTargetUserId());
         taskParamDto.setTargetUserName(user.getName());
         String post = CoreHttpUtil.setAssignee(taskParamDto);
-        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
+        com.cxygzl.common.dto.R r = JsonUtil.parseObject(post, new JsonUtil.TypeReference<R>() {
         });
         if (!r.isOk()) {
             return R.fail(r.getMsg());
@@ -186,7 +185,7 @@ public class TaskServiceImpl implements ITaskService {
         taskParamDto.setTargetUserNameList(targetUserNameList);
 
         String post = CoreHttpUtil.addAssignee(taskParamDto);
-        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
+        com.cxygzl.common.dto.R r = JsonUtil.parseObject(post, new JsonUtil.TypeReference<R>() {
         });
         if (!r.isOk()) {
             return R.fail(r.getMsg());
@@ -253,7 +252,7 @@ public class TaskServiceImpl implements ITaskService {
         taskParamDto.setTargetUserNameList(targetUserNameList);
 
         String post = CoreHttpUtil.delAssignee(taskParamDto);
-        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
+        com.cxygzl.common.dto.R r = JsonUtil.parseObject(post, new JsonUtil.TypeReference<R>() {
         });
         if (!r.isOk()) {
             return R.fail(r.getMsg());
@@ -300,7 +299,7 @@ public class TaskServiceImpl implements ITaskService {
     public R back(TaskParamDto taskParamDto) {
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
         String post = CoreHttpUtil.back(taskParamDto);
-        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
+        com.cxygzl.common.dto.R r = JsonUtil.parseObject(post, new JsonUtil.TypeReference<R>() {
         });
         if (!r.isOk()) {
             return R.fail(r.getMsg());
@@ -384,20 +383,20 @@ public class TaskServiceImpl implements ITaskService {
         }
 
         //重新构建流程树
-        Node currentProcessRootNode = com.alibaba.fastjson.JSON.parseObject(processInstanceRecord.getProcess(), Node.class);
+        Node currentProcessRootNode = JsonUtil.parseObject(processInstanceRecord.getProcess(), Node.class);
 
         Node currentNode = nodeDataService.getNode(processInstanceNodeRecord.getFlowId(), processInstanceNodeRecord.getNodeId()).getData();
         if (!nodeQueryVO.getContainGateway()) {
             NodeUtil.handleChildrenAfterJump(currentProcessRootNode, processInstanceNodeRecordList.get(0).getNodeId(), currentNode);
             processInstanceRecordService.lambdaUpdate()
-                    .set(ProcessInstanceRecord::getProcess, com.alibaba.fastjson.JSON.toJSONString(currentProcessRootNode))
+                    .set(ProcessInstanceRecord::getProcess,  JsonUtil.toJSONString(currentProcessRootNode))
                     .eq(ProcessInstanceRecord::getId, processInstanceRecord.getId())
                     .update(new ProcessInstanceRecord());
         } else {
             //经过网关
             NodeUtil.handleChildrenAfterJump(currentProcessRootNode, nodeQueryVO.getGatewayId(), currentNode);
             processInstanceRecordService.lambdaUpdate()
-                    .set(ProcessInstanceRecord::getProcess, com.alibaba.fastjson.JSON.toJSONString(currentProcessRootNode))
+                    .set(ProcessInstanceRecord::getProcess,  JsonUtil.toJSONString(currentProcessRootNode))
                     .eq(ProcessInstanceRecord::getId, processInstanceRecord.getId())
                     .update(new ProcessInstanceRecord());
         }

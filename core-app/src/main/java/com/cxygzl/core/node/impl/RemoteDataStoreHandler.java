@@ -3,11 +3,10 @@ package com.cxygzl.core.node.impl;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.LRUCache;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.dto.ProcessNodeDataDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
-import com.cxygzl.common.utils.CommonUtil;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.node.IDataStoreHandler;
 import com.cxygzl.core.utils.BizHttpUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +35,7 @@ public class RemoteDataStoreHandler implements IDataStoreHandler {
         ProcessNodeDataDto processNodeDataDto = new ProcessNodeDataDto();
         processNodeDataDto.setFlowId(flowId);
         processNodeDataDto.setNodeId(nodeId);
-        processNodeDataDto.setData(CommonUtil.toJson(data));
+        processNodeDataDto.setData(JsonUtil.toJSONString(data));
         BizHttpUtil.saveNodeOriData(processNodeDataDto);
     }
 
@@ -76,7 +75,7 @@ public class RemoteDataStoreHandler implements IDataStoreHandler {
         R<String> r = BizHttpUtil.queryNodeOriData(flowId, nodeId);
 
 
-        log.debug("flowId={} nodeId={} data={}", flowId, nodeId, JSON.toJSONString(r));
+        log.debug("flowId={} nodeId={} data={}", flowId, nodeId, JsonUtil.toJSONString(r));
 
 
         String data = r.getData();

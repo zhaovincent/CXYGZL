@@ -5,12 +5,11 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.HttpSetting;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.HttpUtil;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.BizHttpUtil;
@@ -164,7 +163,7 @@ public class FlowController {
 
 
                 if (StrUtil.isNotBlank(result)) {
-                    R r = JSON.parseObject(result, new TypeReference<R>() {
+                    R r = JsonUtil.parseObject(result, new JsonUtil.TypeReference<R>() {
                     });
                     return r;
                 } else {

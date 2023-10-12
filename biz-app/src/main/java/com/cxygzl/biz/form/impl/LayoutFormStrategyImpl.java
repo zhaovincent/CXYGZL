@@ -4,12 +4,13 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.cxygzl.biz.form.FormStrategy;
 import com.cxygzl.biz.form.FormStrategyFactory;
 import com.cxygzl.biz.utils.FormUtil;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.flow.FormItemVO;
+import com.cxygzl.common.utils.JsonUtil;
 import org.anyline.metadata.Column;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
@@ -94,7 +95,7 @@ public class LayoutFormStrategyImpl implements InitializingBean, FormStrategy {
             return null;
         }
 
-        return CollUtil.newArrayList(JSON.toJSONString(list));
+        return CollUtil.newArrayList(JsonUtil.toJSONString(list));
     }
 
     /**
@@ -110,16 +111,15 @@ public class LayoutFormStrategyImpl implements InitializingBean, FormStrategy {
             return null;
         }
 
-        com.alibaba.fastjson.JSONArray jsonArray= JSON.parseArray(JSON.toJSONString(value));
+        List<JSONObject> jsonArray = JsonUtil.parseArray(JsonUtil.toJSONString(value));
 
         Object propsValue = formItemVO.getProps().getValue();
 
         List list=new ArrayList();
 
-        for (Object y : jsonArray) {
+        for (JSONObject map : jsonArray) {
             List l=new ArrayList();
 
-            com.alibaba.fastjson.JSONObject map= (com.alibaba.fastjson.JSONObject) y;
             List<FormItemVO> subItemList = Convert.toList(FormItemVO.class, propsValue);
             for (FormItemVO itemVO : subItemList) {
                 Object value1 = map.get(itemVO.getId());
@@ -139,6 +139,6 @@ public class LayoutFormStrategyImpl implements InitializingBean, FormStrategy {
             }
             list.add(l);
         }
-        return JSON.toJSONString(list);
+        return JsonUtil.toJSONString(list);
     }
 }

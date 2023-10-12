@@ -3,9 +3,9 @@ package com.cxygzl.core.expression.condition.impl;
 import cn.hutool.core.util.EscapeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.flow.Condition;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.expression.ExpressionHandler;
 import com.cxygzl.core.expression.condition.NodeConditionStrategy;
 import org.springframework.beans.factory.InitializingBean;
@@ -30,7 +30,7 @@ public class AreaNodeConditionStrategy implements NodeConditionStrategy, Initial
         Object value = condition.getValue();
 
         return StrUtil.format("(expressionHandler.areaHandler(\"{}\",\"{}\",\"{}\",execution))", id, compare,
-                value==null?null: EscapeUtil.escape(JSON.toJSONString(value)));
+                value==null?null: EscapeUtil.escape(JsonUtil.toJSONString(value)));
 
 
     }
@@ -51,7 +51,7 @@ public class AreaNodeConditionStrategy implements NodeConditionStrategy, Initial
 
 
         ExpressionHandler bean = SpringUtil.getBean(ExpressionHandler.class);
-        return bean.areaHandler(id,compare,value==null?null: EscapeUtil.escape(JSON.toJSONString(value)),paramMap.get(id));
+        return bean.areaHandler(id,compare,value==null?null: EscapeUtil.escape(JsonUtil.toJSONString(value)),paramMap.get(id));
     }
 
     @Override

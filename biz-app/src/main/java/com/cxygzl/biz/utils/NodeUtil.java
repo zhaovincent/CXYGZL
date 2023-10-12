@@ -3,7 +3,6 @@ package com.cxygzl.biz.utils;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.service.IProcessService;
 import com.cxygzl.common.constants.NodeTypeEnum;
@@ -11,6 +10,7 @@ import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.dto.flow.Nobody;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.utils.JsonUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -123,7 +123,7 @@ public class NodeUtil {
 
         IProcessService processService = SpringUtil.getBean(IProcessService.class);
         Process process = processService.getByFlowId(flowId);
-        Node node = JSON.parseObject(process.getProcess(), Node.class);
+        Node node = JsonUtil.parseObject(process.getProcess(), Node.class);
 
         Node parentNode = com.cxygzl.common.utils.NodeUtil.getParentNode(node, nodeId);
         if (parentNode == null) {

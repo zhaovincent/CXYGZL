@@ -11,7 +11,6 @@ import cn.hutool.core.util.EscapeUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
@@ -22,6 +21,7 @@ import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.flow.SelectValue;
 import com.cxygzl.common.dto.third.UserFieldDto;
 import com.cxygzl.common.utils.AreaUtil;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.expression.condition.NodeExpressionResultStrategyFactory;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.BizHttpUtil;
@@ -63,8 +63,8 @@ public class ExpressionHandler {
     public boolean dateTimeHandler(String key, String symbol, Object param, Object value, String format) {
 
 
-        log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
-        log.debug("条件 标识:{} 参数：{} 格式：{}", symbol, JSON.toJSONString(param), format);
+        log.debug("表单值：key={} value={}", key, JsonUtil.toJSONString(value));
+        log.debug("条件 标识:{} 参数：{} 格式：{}", symbol, JsonUtil.toJSONString(param), format);
 
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
 
@@ -110,8 +110,8 @@ public class ExpressionHandler {
         String unescape = EscapeUtil.unescape(param.toString());
 
 
-        log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
-        log.debug("条件 标识:{} 参数：{}", symbol, JSON.toJSONString(param));
+        log.debug("表单值：key={} value={}", key, JsonUtil.toJSONString(value));
+        log.debug("条件 标识:{} 参数：{}", symbol, JsonUtil.toJSONString(param));
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
 
             return value == null || StrUtil.isBlankIfStr(value) || Convert.toMap(Object.class, Object.class, value).size() == 0;
@@ -128,7 +128,7 @@ public class ExpressionHandler {
         if (value == null || Convert.toMap(Object.class, Object.class, value).size() == 0) {
             return false;
         }
-        AreaFormValue areaFormValueParam = JSON.parseObject(unescape, AreaFormValue.class);
+        AreaFormValue areaFormValueParam = JsonUtil.parseObject(unescape, AreaFormValue.class);
         String paramCode = areaFormValueParam.getCode();
 
         AreaFormValue areaFormValueValue = BeanUtil.copyProperties(value, AreaFormValue.class);
@@ -188,8 +188,8 @@ public class ExpressionHandler {
     public boolean numberHandler(String key, String symbol, Object param, Object value) {
 
 
-        log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
-        log.debug("条件 标识:{} 参数：{}", symbol, JSON.toJSONString(param));
+        log.debug("表单值：key={} value={}", key, JsonUtil.toJSONString(value));
+        log.debug("条件 标识:{} 参数：{}", symbol, JsonUtil.toJSONString(param));
 
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
 
@@ -229,7 +229,7 @@ public class ExpressionHandler {
     }
 
     public boolean selectHandler(String key, Map<String, Object> execution, String param, String symbol) {
-        List<SelectValue> paramObjList = JSON.parseArray(EscapeUtil.unescape(param), SelectValue.class);
+        List<SelectValue> paramObjList = JsonUtil.parseArray(EscapeUtil.unescape(param), SelectValue.class);
         List<String> paramList = paramObjList.stream().map(w -> w.getKey()).collect(Collectors.toList());
         Object value = execution.get(key);
 
@@ -255,8 +255,8 @@ public class ExpressionHandler {
     public boolean selectHandler(Object value, List<String> paramList, String symbol) {
 
 
-        log.debug("表单值：value={}  symbol={}", JSON.toJSONString(value), symbol);
-        log.debug("条件  参数：{}", JSON.toJSONString(paramList));
+        log.debug("表单值：value={}  symbol={}", JsonUtil.toJSONString(value), symbol);
+        log.debug("条件  参数：{}", JsonUtil.toJSONString(paramList));
 
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
 
@@ -319,7 +319,7 @@ public class ExpressionHandler {
      */
     public boolean handle(DelegateExecution execution, String uniqueId) {
         String s = NodeDataStoreFactory.getInstance().get(uniqueId, uniqueId);
-        Condition condition = JSON.parseObject(s, Condition.class);
+        Condition condition = JsonUtil.parseObject(s, Condition.class);
         Map<String, Object> variables = execution.getVariables();
         return NodeExpressionResultStrategyFactory.handleSingleConditionResult(condition, variables);
     }
@@ -426,8 +426,8 @@ public class ExpressionHandler {
 
     public boolean stringHandler(String key, String param, Object value, String symbol) {
 
-        log.debug("表单值：key={} value={}", key, JSON.toJSONString(value));
-        log.debug("条件  参数：{}", JSON.toJSONString(param));
+        log.debug("表单值：key={} value={}", key, JsonUtil.toJSONString(value));
+        log.debug("条件  参数：{}", JsonUtil.toJSONString(param));
 
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
 
@@ -483,7 +483,7 @@ public class ExpressionHandler {
 
         Object value = paramMap.get(key);
 
-        String jsonString = JSON.toJSONString(value);
+        String jsonString = JsonUtil.toJSONString(value);
         log.debug("表单值：key={} value={} symbol={}", key, jsonString, symbol);
         log.debug("条件  参数：{}", param);
 
@@ -503,14 +503,14 @@ public class ExpressionHandler {
         }
 
         //表单值
-        List<NodeUser> nodeUserDtoList = JSON.parseArray(jsonString, NodeUser.class);
+        List<NodeUser> nodeUserDtoList = JsonUtil.parseArray(jsonString, NodeUser.class);
         if (CollUtil.isEmpty(nodeUserDtoList) || nodeUserDtoList.size() != 1) {
             return false;
         }
         NodeUser nodeUserDto = nodeUserDtoList.get(0);
 
         //参数
-        List<NodeUser> paramDeptList = JSON.parseArray(param, NodeUser.class);
+        List<NodeUser> paramDeptList = JsonUtil.parseArray(param, NodeUser.class);
         List<String> deptIdList = paramDeptList.stream().map(w -> (w.getId())).collect(Collectors.toList());
 
 
@@ -547,12 +547,12 @@ public class ExpressionHandler {
     public boolean userCompare(String key, String param1, String symbol, Map<String, Object> execution, String userKey) {
 
         param1 = EscapeUtil.unescape(param1);
-        Object o = JSON.parseArray(param1, Object.class).get(0);
+        Object o = JsonUtil.parseArray(param1, Object.class).get(0);
 
 
         Object value = execution.get(key);
 
-        String jsonString = JSON.toJSONString(value);
+        String jsonString = JsonUtil.toJSONString(value);
         log.debug("表单值：key={} value={}   symbol={} userKey={} ", key, jsonString, symbol, userKey);
         log.debug("条件  参数：{}", o);
 
@@ -576,7 +576,7 @@ public class ExpressionHandler {
         }
 
         //表单值
-        List<NodeUser> nodeUserDtoList = JSON.parseArray(jsonString, NodeUser.class);
+        List<NodeUser> nodeUserDtoList = JsonUtil.parseArray(jsonString, NodeUser.class);
         if (CollUtil.isEmpty(nodeUserDtoList) || nodeUserDtoList.size() != 1) {
             return false;
         }
@@ -586,7 +586,7 @@ public class ExpressionHandler {
 
         if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.RANGE, userKey)) {
             //参数
-            List<NodeUser> paramDeptList = JSON.parseArray(JSON.toJSONString(o), NodeUser.class);
+            List<NodeUser> paramDeptList = JsonUtil.parseArray(JsonUtil.toJSONString(o), NodeUser.class);
 
             List<String> deptIdList = paramDeptList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.DEPT.getKey())).map(w -> (w.getId())).collect(Collectors.toList());
             List<String> userIdList = paramDeptList.stream().filter(w -> StrUtil.equals(w.getType(),
@@ -610,7 +610,7 @@ public class ExpressionHandler {
             // 角色
 
             //参数
-            List<NodeUser> paramList = JSON.parseArray(JSON.toJSONString(o), NodeUser.class);
+            List<NodeUser> paramList = JsonUtil.parseArray(JsonUtil.toJSONString(o), NodeUser.class);
             //当前用户
             String userId = nodeUserDto.getId();
 

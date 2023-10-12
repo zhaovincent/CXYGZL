@@ -1,7 +1,7 @@
 package com.cxygzl.core.node;
 
 import com.cxygzl.common.dto.flow.Node;
-import com.cxygzl.common.utils.CommonUtil;
+import com.cxygzl.common.utils.JsonUtil;
 
 /**
  * 数据处理接口
@@ -35,7 +35,7 @@ public interface IDataStoreHandler {
 
     default Node getNode(String flowId, String nodeId){
         String text = this.get(flowId, nodeId);
-        return CommonUtil.toObj(text,Node.class);
+        return JsonUtil.parseObject(text,Node.class);
     }
 
 

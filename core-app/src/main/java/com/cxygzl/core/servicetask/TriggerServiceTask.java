@@ -1,11 +1,10 @@
 package com.cxygzl.core.servicetask;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.flow.HttpSetting;
 import com.cxygzl.common.dto.flow.HttpSettingData;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.HttpUtil;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +49,7 @@ public class TriggerServiceTask implements JavaDelegate {
         }
 
         if (StrUtil.isNotBlank(result)) {
-            Map<String, Object> resultMap = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {
+            Map<String, Object> resultMap = JsonUtil.parseObject(result, new JsonUtil.TypeReference<Map<String, Object>>() {
             });
             List<HttpSettingData> resultSetting = backNotify.getResult();
             for (HttpSettingData httpSettingData : resultSetting) {

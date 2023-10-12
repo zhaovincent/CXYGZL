@@ -9,8 +9,6 @@ import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cxygzl.biz.api.ApiStrategyFactory;
@@ -38,7 +36,7 @@ import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.third.CreateProcessDto;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.UserDto;
-import com.cxygzl.common.utils.CommonUtil;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.DataRow;
@@ -95,11 +93,11 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         Process oaForms = getByFlowId(flowId);
         String process = oaForms.getProcess();
         String formItems = oaForms.getFormItems();
-        Node startNode = CommonUtil.toObj(process, Node.class);
+        Node startNode = JsonUtil.parseObject(process, Node.class);
 
 
         Map<String, String> formPerms = startNode.getFormPerms();
-        List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
+        List<FormItemVO> formItemVOList = JsonUtil.parseArray(formItems, FormItemVO.class);
 
         for (FormItemVO formItemVO : formItemVOList) {
             String perm = MapUtil.getStr(formPerms, formItemVO.getId(), ProcessInstanceConstant.FormPermClass.EDIT);
@@ -130,7 +128,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
             }
 
         }
-        oaForms.setFormItems(CommonUtil.toJson(formItemVOList));
+        oaForms.setFormItems(JsonUtil.toJSONString(formItemVOList));
 
 
         List<String> selectUserNodeId = NodeUtil.selectUserNodeId(startNode);
@@ -142,7 +140,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         List<ProcessStarter> processStarterList = processStarterService.lambdaQuery().eq(ProcessStarter::getProcessId, oaForms.getId()).list();
         List<NodeUser> rangeList = new ArrayList<>();
         for (ProcessStarter processStarter : processStarterList) {
-            NodeUser nodeUser = JSON.parseObject(processStarter.getData(), NodeUser.class);
+            NodeUser nodeUser = JsonUtil.parseObject(processStarter.getData(), NodeUser.class);
             rangeList.add(nodeUser);
         }
         processVO.setRangeList(rangeList);
@@ -244,10 +242,10 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
         String processStr = processVO.getProcess();
 
-        Node node = JSON.parseObject(processStr, Node.class);
+        Node node = JsonUtil.parseObject(processStr, Node.class);
         NodeUtil.handleParentId(node, null);
-        com.cxygzl.biz.utils.NodeUtil.handleStarterNode(node, JSON.parseArray(processVO.getFormItems(), FormItemVO.class));
-        com.cxygzl.biz.utils.NodeUtil.handleApproveForm(node, JSON.parseArray(processVO.getFormItems(), FormItemVO.class));
+        com.cxygzl.biz.utils.NodeUtil.handleStarterNode(node, JsonUtil.parseArray(processVO.getFormItems(), FormItemVO.class));
+        com.cxygzl.biz.utils.NodeUtil.handleApproveForm(node, JsonUtil.parseArray(processVO.getFormItems(), FormItemVO.class));
         com.cxygzl.biz.utils.NodeUtil.handleApprove(node);
 
 
@@ -267,7 +265,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         }
 
 
-        NodeUser nodeUser = CommonUtil.toArray(processVO.getAdmin(), NodeUser.class).get(0);
+        NodeUser nodeUser = JsonUtil.parseArray(processVO.getAdmin(), NodeUser.class).get(0);
 
         if (StrUtil.isNotBlank(processVO.getFlowId())) {
 
@@ -307,7 +305,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         p.setSettings(processVO.getSettings());
         p.setGroupId(processVO.getGroupId());
         p.setFormItems(processVO.getFormItems());
-        p.setProcess(JSON.toJSONString(node));
+        p.setProcess(JsonUtil.toJSONString(node));
         p.setRemark(processVO.getRemark());
         p.setSort(0);
         p.setHidden(false);
@@ -329,20 +327,20 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                 processStarter.setProcessId(p.getId());
                 processStarter.setTypeId((nodeUserDto.getId()));
                 processStarter.setType(nodeUserDto.getType());
-                processStarter.setData(JSON.toJSONString(nodeUserDto));
+                processStarter.setData(JsonUtil.toJSONString(nodeUserDto));
                 processStarterService.save(processStarter);
 
             }
         }
 
         //创建第三方对接流程
-        ApiStrategyFactory.getStrategy().createProcess(CreateProcessDto.builder().oriFlowId(processVO.getFlowId()).flowId(flowId).name(processVO.getName()).description(processVO.getRemark()).formItemVOList(JSON.parseArray(processVO.getFormItems(), FormItemVO.class)).build());
+        ApiStrategyFactory.getStrategy().createProcess(CreateProcessDto.builder().oriFlowId(processVO.getFlowId()).flowId(flowId).name(processVO.getName()).description(processVO.getRemark()).formItemVOList(JsonUtil.parseArray(processVO.getFormItems(), FormItemVO.class)).build());
 
         //建立数据库表
         {
             if (StrUtil.isNotBlank(processVO.getFlowId())) {
                 Process process = this.getByFlowId(processVO.getFlowId());
-                FlowSettingDto flowSettingDto = JSON.parseObject(process.getSettings(), FlowSettingDto.class);
+                FlowSettingDto flowSettingDto = JsonUtil.parseObject(process.getSettings(), FlowSettingDto.class);
                 FlowSettingDto.DbRecord dbRecord = flowSettingDto.getDbRecord();
                 if (dbRecord == null || !dbRecord.getEnable()) {
                     handleDbTable(processVO, p.getUniqueId(), false);
@@ -365,7 +363,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
      */
     private void handleDbTable(ProcessVO processVO, String uniqueId, boolean oldEnable) {
         try {
-            FlowSettingDto flowSettingDto = JSON.parseObject(processVO.getSettings(), FlowSettingDto.class);
+            FlowSettingDto flowSettingDto = JsonUtil.parseObject(processVO.getSettings(), FlowSettingDto.class);
             FlowSettingDto.DbRecord dbRecord = flowSettingDto.getDbRecord();
             if (dbRecord == null || !dbRecord.getEnable()) {
                 if (oldEnable) {
@@ -379,7 +377,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
 
             //根据不同数据库长度精度有可能忽略
-            List<FormItemVO> formItemVOS = JSON.parseArray(processVO.getFormItems(), FormItemVO.class);
+            List<FormItemVO> formItemVOS = JsonUtil.parseArray(processVO.getFormItems(), FormItemVO.class);
             Table table = FormStrategyFactory.buildDDLSql(formItemVOS, uniqueId, processVO.getName());
             anylineService.ddl().create(table);
         } catch (Exception e) {
@@ -423,7 +421,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         Process process = getByFlowId(pageDto.getFlowId());
 
         String formItems = process.getFormItems();
-        List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
+        List<FormItemVO> formItemVOList = JsonUtil.parseArray(formItems, FormItemVO.class);
         {
             List headList = new ArrayList();
             {
@@ -491,8 +489,8 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                         headList.add(set);
                     }
                     Object v = row.get(formItemVO.getId());
-                    JSONArray jsonArray = v == null ? new JSONArray() :
-                            (v instanceof String ? JSON.parseArray(v.toString()) : JSON.parseArray(JSON.toJSONString(v)));
+                    List<JSONObject> jsonArray = v == null ?new ArrayList<>() :
+                            (v instanceof String ? JsonUtil.parseArray(v.toString()) : JsonUtil.parseArray(JsonUtil.toJSONString(v)));
 
                     int subIndex = 1;
                     for (Object o : jsonArray) {
@@ -504,7 +502,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                             if (value1 == null || value1 instanceof String) {
                                 continue;
                             }
-                            jsonObject.put(key, JSON.toJSONString(value1));
+                            jsonObject.put(key, JsonUtil.toJSONString(value1));
                         }
                         subIndex++;
                     }

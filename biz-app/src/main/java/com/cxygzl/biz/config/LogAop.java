@@ -1,8 +1,8 @@
 package com.cxygzl.biz.config;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.utils.JsonUtil;
 import com.yomahub.tlog.context.TLogContext;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -81,7 +81,7 @@ public class LogAop {
                         paramMap.remove(p);
                     }
                 }
-                logger.info(" 入参   类:  " + className + " 方法:  " + method.getName() + " 参数:  " + JSON.toJSONString(paramMap));
+                logger.info(" 入参   类:  " + className + " 方法:  " + method.getName() + " 参数:  " + JsonUtil.toJSONString(paramMap));
             }
 
             proceed = point.proceed(args);
@@ -97,7 +97,7 @@ public class LogAop {
 
             long l2 = System.currentTimeMillis();
 
-            logger.info("返回日志 类：{} 方法：{} 结果：{} 响应时间:{}",className,method.getName(), JSON.toJSONString(proceed), l2 - l1);
+            logger.info("返回日志 类：{} 方法：{} 结果：{} 响应时间:{}",className,method.getName(), JsonUtil.toJSONString(proceed), l2 - l1);
 
             return proceed;
         } catch (

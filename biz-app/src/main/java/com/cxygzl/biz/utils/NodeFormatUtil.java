@@ -5,17 +5,16 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
-import com.cxygzl.biz.entity.ProcessInstanceExecution;
-import com.cxygzl.biz.entity.ProcessInstanceRecord;
-import com.cxygzl.biz.entity.ProcessInstanceNodeRecord;
 import com.cxygzl.biz.entity.ProcessInstanceAssignUserRecord;
+import com.cxygzl.biz.entity.ProcessInstanceExecution;
+import com.cxygzl.biz.entity.ProcessInstanceNodeRecord;
+import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.vo.ProcessFormatNodeApproveDescVo;
-import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.biz.vo.node.NodeFormatUserVo;
+import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
@@ -27,6 +26,7 @@ import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.UserDto;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -148,7 +148,7 @@ public class NodeFormatUtil {
                 if (variable == null) {
                     variable = new ArrayList<>();
                 }
-                List<NodeUser> nodeUserDtos = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class);
+                List<NodeUser> nodeUserDtos = JsonUtil.parseArray(JsonUtil.toJSONString(variable), NodeUser.class);
 
                 List<String> collect = nodeUserDtos.stream().map(w -> (w.getId())).collect(Collectors.toList());
                 for (String aLong : collect) {
@@ -169,9 +169,9 @@ public class NodeFormatUtil {
 
                 Object o = paramMap.get(formUser);
                 if (o != null) {
-                    String jsonString = JSON.toJSONString(o);
+                    String jsonString = JsonUtil.toJSONString(o);
                     if (StrUtil.isNotBlank(jsonString)) {
-                        List<NodeUser> nodeUserDtoList = JSON.parseArray(jsonString, NodeUser.class);
+                        List<NodeUser> nodeUserDtoList = JsonUtil.parseArray(jsonString, NodeUser.class);
                         List<String> userIdList =
                                 nodeUserDtoList.stream().map(w -> (w.getId())).collect(Collectors.toList());
                         for (String aLong : userIdList) {
@@ -187,9 +187,9 @@ public class NodeFormatUtil {
 
                 Object o = paramMap.get(formUser);
                 if (o != null) {
-                    String jsonString = JSON.toJSONString(o);
+                    String jsonString = JsonUtil.toJSONString(o);
                     if (StrUtil.isNotBlank(jsonString)) {
-                        List<NodeUser> nodeUserDtoList = JSON.parseArray(jsonString, NodeUser.class);
+                        List<NodeUser> nodeUserDtoList = JsonUtil.parseArray(jsonString, NodeUser.class);
                         List<String> deptIdList =
                                 nodeUserDtoList.stream().map(w -> (w.getId())).collect(Collectors.toList());
 

@@ -1,10 +1,10 @@
 package com.cxygzl.core.listeners.event_listener_impl;
 
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.MessageTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.ProcessInstanceAssignUserRecordParamDto;
 import com.cxygzl.common.dto.third.MessageDto;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.listeners.EventListenerStrategy;
 import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.NodeUtil;
@@ -107,7 +107,7 @@ public class TaskAssignedEventListener implements EventListenerStrategy, Initial
                     .processInstanceId(processInstanceId)
 
                     .uniqueId(taskId)
-                    .param(JSON.toJSONString(taskEntity.getVariables()))
+                    .param(JsonUtil.toJSONString(taskEntity.getVariables()))
 
                     .type(MessageTypeEnum.TODO_TASK.getType())
                     .readed(false).build();

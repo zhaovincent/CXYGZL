@@ -3,13 +3,13 @@ package com.cxygzl.core.servicetask;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.ProcessInstanceCopyDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.BizHttpUtil;
 import org.flowable.engine.delegate.DelegateExecution;
@@ -60,7 +60,7 @@ public class CopyServiceTask implements JavaDelegate {
 
         //发起人
         Object rootUserObj = execution.getVariable(ProcessInstanceConstant.VariableKey.STARTER);
-        NodeUser rootUser = JSON.parseArray(JSON.toJSONString(rootUserObj), NodeUser.class).get(0);
+        NodeUser rootUser = JsonUtil.parseArray(JsonUtil.toJSONString(rootUserObj), NodeUser.class).get(0);
 
         Map<String, Object> variables = execution.getVariables();
 
@@ -73,7 +73,7 @@ public class CopyServiceTask implements JavaDelegate {
             processInstanceCopyDto.setProcessInstanceId(execution.getProcessInstanceId());
             processInstanceCopyDto.setNodeId(nodeId);
             processInstanceCopyDto.setNodeName(node.getNodeName());
-            processInstanceCopyDto.setFormData(JSON.toJSONString(variables));
+            processInstanceCopyDto.setFormData(JsonUtil.toJSONString(variables));
             processInstanceCopyDto.setUserId((userIds));
 
             BizHttpUtil.saveCC(processInstanceCopyDto);

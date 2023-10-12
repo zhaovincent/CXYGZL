@@ -2,11 +2,11 @@ package com.cxygzl.biz.form.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.biz.form.FormStrategy;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.flow.AreaFormValue;
 import com.cxygzl.common.dto.flow.FormItemVO;
+import com.cxygzl.common.utils.JsonUtil;
 import org.anyline.metadata.Column;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
@@ -102,12 +102,12 @@ public class AreaFormStrategyImpl implements InitializingBean, FormStrategy {
         if (value == null) {
             return null;
         }
-        AreaFormValue areaFormValue = JSON.parseObject(JSON.toJSONString(value), AreaFormValue.class);
+        AreaFormValue areaFormValue = JsonUtil.parseObject(JsonUtil.toJSONString(value), AreaFormValue.class);
         if (!StrUtil.isAllNotBlank(areaFormValue.getCode(), areaFormValue.getName())) {
             return null;
         }
 
-        return CollUtil.newArrayList(areaFormValue.getCode(), areaFormValue.getName(), JSON.toJSONString(areaFormValue));
+        return CollUtil.newArrayList(areaFormValue.getCode(), areaFormValue.getName(), JsonUtil.toJSONString(areaFormValue));
     }
 
     /**
@@ -122,7 +122,7 @@ public class AreaFormStrategyImpl implements InitializingBean, FormStrategy {
         if (value == null) {
             return null;
         }
-        AreaFormValue areaFormValue = JSON.parseObject(JSON.toJSONString(value), AreaFormValue.class);
+        AreaFormValue areaFormValue = JsonUtil.parseObject(JsonUtil.toJSONString(value), AreaFormValue.class);
         return areaFormValue.getName();
     }
 }

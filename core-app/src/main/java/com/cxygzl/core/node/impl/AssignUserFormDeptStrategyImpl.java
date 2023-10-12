@@ -2,13 +2,12 @@ package com.cxygzl.core.node.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.third.DeptDto;
-import com.cxygzl.common.utils.CommonUtil;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.node.AssignUserStrategy;
 import com.cxygzl.core.utils.BizHttpUtil;
 import org.springframework.beans.factory.InitializingBean;
@@ -42,8 +41,8 @@ public class AssignUserFormDeptStrategyImpl implements InitializingBean, AssignU
 
         } else {
 
-            String jsonString = JSON.toJSONString(variable);
-            List<NodeUser> nodeUserDtoList = CommonUtil.toArray(jsonString, NodeUser.class);
+            String jsonString = JsonUtil.toJSONString(variable);
+            List<NodeUser> nodeUserDtoList = JsonUtil.parseArray(jsonString, NodeUser.class);
 
             List<String> deptIdList = nodeUserDtoList.stream().map(w -> String.valueOf(w.getId())).collect(Collectors.toList());
 //部门id

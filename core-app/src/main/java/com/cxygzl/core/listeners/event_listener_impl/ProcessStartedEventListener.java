@@ -2,14 +2,13 @@ package com.cxygzl.core.listeners.event_listener_impl;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.FlowSettingDto;
 import com.cxygzl.common.dto.ProcessInstanceRecordParamDto;
 import com.cxygzl.common.dto.flow.HttpSetting;
 import com.cxygzl.common.dto.flow.HttpSettingData;
 import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.HttpUtil;
 import com.cxygzl.core.listeners.EventListenerStrategy;
 import com.cxygzl.core.utils.BizHttpUtil;
@@ -26,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.*;
-import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.SUB_PROCESS_STARTER_NODE;
 
 /**
  * 流程开始了
@@ -73,11 +71,11 @@ public class ProcessStartedEventListener implements EventListenerStrategy, Initi
 
         Object variable = execution.getVariable(
                 ProcessInstanceConstant.VariableKey.STARTER);
-        String startUserId = (JSON.parseArray(JSON.toJSONString(variable), NodeUser.class).get(0).getId());
+        String startUserId = (JsonUtil.parseArray(JsonUtil.toJSONString(variable), NodeUser.class).get(0).getId());
 
 
         Map<String, Object> variables = execution.getVariables();
-        log.info("流程开始了变量是：{}", JSON.toJSONString(variables));
+        log.info("流程开始了变量是：{}", JsonUtil.toJSONString(variables));
 
         {
 
@@ -87,7 +85,7 @@ public class ProcessStartedEventListener implements EventListenerStrategy, Initi
             processInstanceRecordParamDto.setParentProcessInstanceId(nestedProcessInstanceId);
             processInstanceRecordParamDto.setFlowId(flowId);
             processInstanceRecordParamDto.setProcessInstanceId(processInstanceId);
-            processInstanceRecordParamDto.setFormData(JSON.toJSONString(variables));
+            processInstanceRecordParamDto.setFormData(JsonUtil.toJSONString(variables));
             BizHttpUtil.startProcessEvent(processInstanceRecordParamDto);
         }
         {
@@ -102,7 +100,7 @@ public class ProcessStartedEventListener implements EventListenerStrategy, Initi
 
 
                     if (StrUtil.isNotBlank(result)) {
-                        Map<String, Object> resultMap = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {
+                        Map<String, Object> resultMap = JsonUtil.parseObject(result, new JsonUtil.TypeReference<Map<String, Object>>() {
                         });
                         List<HttpSettingData> resultSetting = frontNotify.getResult();
                         for (HttpSettingData httpSettingData : resultSetting) {

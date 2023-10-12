@@ -3,9 +3,9 @@ package com.cxygzl.core.expression.condition.impl;
 import cn.hutool.core.util.EscapeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.flow.Condition;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.expression.ExpressionHandler;
 import com.cxygzl.core.expression.condition.NodeConditionStrategy;
 import org.springframework.beans.factory.InitializingBean;
@@ -29,7 +29,7 @@ public class SelectDeptNodeConditionStrategy implements NodeConditionStrategy, I
         String id = condition.getKey();
         Object value = condition.getValue();
 
-        return StrUtil.format("(expressionHandler.deptCompare(\"{}\",\"{}\",\"{}\", execution))", id, EscapeUtil.escape(JSON.toJSONString(value)),compare);
+        return StrUtil.format("(expressionHandler.deptCompare(\"{}\",\"{}\",\"{}\", execution))", id, EscapeUtil.escape(JsonUtil.toJSONString(value)),compare);
 
 
     }
@@ -51,7 +51,7 @@ public class SelectDeptNodeConditionStrategy implements NodeConditionStrategy, I
 
         ExpressionHandler bean = SpringUtil.getBean(ExpressionHandler.class);
 
-        return bean.deptCompare( id, EscapeUtil.escape(JSON.toJSONString(value)),compare,paramMap);
+        return bean.deptCompare( id, EscapeUtil.escape(JsonUtil.toJSONString(value)),compare,paramMap);
     }
 
     @Override

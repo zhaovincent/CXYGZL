@@ -3,13 +3,13 @@ package com.cxygzl.core.node;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.flow.SameAsStarter;
 import com.cxygzl.common.dto.third.DeptDto;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.FlowableUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +54,7 @@ public class MultiInstanceHandler {
 
         //发起人
         Object rootUserObj = execution.getVariable(ProcessInstanceConstant.VariableKey.STARTER);
-        NodeUser rootUser = JSON.parseArray(JSON.toJSONString(rootUserObj), NodeUser.class).get(0);
+        NodeUser rootUser = JsonUtil.parseArray(JsonUtil.toJSONString(rootUserObj), NodeUser.class).get(0);
         String rootUserId = rootUser.getId();
 
         //节点数据
@@ -110,7 +110,7 @@ public class MultiInstanceHandler {
             //默认值
             String format = StrUtil.format("{}_assignee_default_list", nodeId);
             Object variable = execution.getVariable(format);
-            List<NodeUser> nodeUserDtos = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class);
+            List<NodeUser> nodeUserDtos = JsonUtil.parseArray(JsonUtil.toJSONString(variable), NodeUser.class);
             if (CollUtil.isNotEmpty(nodeUserDtos)) {
                 List<String> collect = nodeUserDtos.stream().map(w -> String.valueOf(w.getId())).collect(Collectors.toList());
                 assignSet.addAll(collect);
@@ -182,7 +182,7 @@ public class MultiInstanceHandler {
 
         //发起人
         Object rootUserObj = execution.getVariable(ProcessInstanceConstant.VariableKey.STARTER);
-        NodeUser rootUser = JSON.parseArray(JSON.toJSONString(rootUserObj), NodeUser.class).get(0);
+        NodeUser rootUser = JsonUtil.parseArray(JsonUtil.toJSONString(rootUserObj), NodeUser.class).get(0);
         assignList.add(rootUser.getId());
 
         return assignList;

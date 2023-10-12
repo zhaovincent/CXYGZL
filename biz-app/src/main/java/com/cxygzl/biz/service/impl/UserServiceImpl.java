@@ -5,7 +5,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cxygzl.biz.api.ApiStrategyFactory;
@@ -19,6 +18,7 @@ import com.cxygzl.biz.vo.third.UserDtoExtension;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.third.UserDto;
+import com.cxygzl.common.utils.JsonUtil;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.context.annotation.Lazy;
@@ -147,7 +147,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
 
             if (StrUtil.equals(userField.getType(), FormTypeEnum.MULTI_SELECT.getType())) {
                 List list = MapUtil.get(fieldData, key, List.class);
-                str = JSON.toJSONString(list);
+                str = JsonUtil.toJSONString(list);
             }
             UserFieldData userFieldData = new UserFieldData();
 
@@ -213,7 +213,7 @@ public class UserServiceImpl extends MPJBaseServiceImpl<UserMapper, User> implem
 
             if (StrUtil.equals(userField.getType(), FormTypeEnum.MULTI_SELECT.getType())) {
                 List list = MapUtil.get(fieldData, key, List.class);
-                str = JSON.toJSONString(list);
+                str = JsonUtil.toJSONString(list);
             }
             UserFieldData userFieldData = new UserFieldData();
 

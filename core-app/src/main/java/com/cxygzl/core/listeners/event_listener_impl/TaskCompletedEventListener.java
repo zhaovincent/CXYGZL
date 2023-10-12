@@ -1,9 +1,9 @@
 package com.cxygzl.core.listeners.event_listener_impl;
 
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.ProcessInstanceAssignUserRecordParamDto;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.listeners.EventListenerStrategy;
 import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.NodeUtil;
@@ -55,8 +55,8 @@ public class TaskCompletedEventListener implements EventListenerStrategy, Initia
         processInstanceAssignUserRecordParamDto.setFlowId(flowId);
         processInstanceAssignUserRecordParamDto.setProcessInstanceId(processInstanceId);
         //   processNodeRecordAssignUserParamDto.setParentExecutionId();
-        processInstanceAssignUserRecordParamDto.setData(JSON.toJSONString(taskService.getVariables(task.getId())));
-        processInstanceAssignUserRecordParamDto.setLocalData(JSON.toJSONString(taskService.getVariablesLocal(task.getId())));
+        processInstanceAssignUserRecordParamDto.setData(JsonUtil.toJSONString(taskService.getVariables(task.getId())));
+        processInstanceAssignUserRecordParamDto.setLocalData(JsonUtil.toJSONString(taskService.getVariablesLocal(task.getId())));
         processInstanceAssignUserRecordParamDto.setNodeId(nodeId);
         processInstanceAssignUserRecordParamDto.setUserId((assignee));
         processInstanceAssignUserRecordParamDto.setTaskId(task.getId());

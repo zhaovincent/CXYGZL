@@ -6,11 +6,11 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.constants.TaskTypeEnum;
 import com.cxygzl.common.dto.*;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.cmd.InjectRevokeGatewayCmd;
 import com.cxygzl.core.utils.NodeUtil;
 import com.cxygzl.core.vo.TaskCommentDto;
@@ -111,7 +111,7 @@ public class TaskController {
             String id = comment.getId();
             Date time = comment.getTime();
             String fullMessage = comment.getFullMessage();
-            TaskCommentDto taskCommentDto = JSON.parseObject(fullMessage, TaskCommentDto.class);
+            TaskCommentDto taskCommentDto = JsonUtil.parseObject(fullMessage, TaskCommentDto.class);
 
 
             String userId = taskCommentDto.getUserId();
@@ -553,7 +553,7 @@ public class TaskController {
 
         TaskCommentDto taskCommentDto = TaskCommentDto.builder().content(desc).title(descTitle).sys(false).userId(userId).build();
         Comment comment = taskService.addComment(task.getId(), task.getProcessInstanceId(),
-                type, JSON.toJSONString(taskCommentDto));
+                type, JsonUtil.toJSONString(taskCommentDto));
 
 
     }
@@ -562,7 +562,7 @@ public class TaskController {
         TaskCommentDto taskCommentDto = TaskCommentDto.builder().content(desc).sys(true).userId(userId).build();
 
         Comment comment = taskService.addComment(task.getId(), task.getProcessInstanceId(),
-                type, JSON.toJSONString(taskCommentDto));
+                type, JsonUtil.toJSONString(taskCommentDto));
 
 
     }

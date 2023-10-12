@@ -1,9 +1,8 @@
 package com.cxygzl.biz.utils;
 
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.HttpUtil;
 import org.springframework.core.env.Environment;
 
@@ -41,7 +40,7 @@ public class DingTalkHttpUtil {
      */
     public static R<String> getUserIdByCode(String authCode) {
         String s = get("/user/getUserIdByCode?authCode=" + authCode);
-        return JSON.parseObject(s, new TypeReference<R<String>>() {
+        return JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<String>>() {
         });
     }
     /**
@@ -52,7 +51,7 @@ public class DingTalkHttpUtil {
      */
     public static R<String> getUserIdByCodeAtMiniApp(String authCode) {
         String s = get("/user/getUserIdByCodeAtMiniApp?authCode=" + authCode);
-        return JSON.parseObject(s, new TypeReference<R<String>>() {
+        return JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<String>>() {
         });
     }
 

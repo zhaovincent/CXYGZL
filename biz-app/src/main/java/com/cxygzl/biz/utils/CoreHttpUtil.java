@@ -2,11 +2,9 @@ package com.cxygzl.biz.utils;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.Node;
-import com.cxygzl.common.utils.CommonUtil;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.HttpUtil;
 import org.springframework.core.env.Environment;
 
@@ -69,7 +67,7 @@ public class CoreHttpUtil {
         variableQueryParamDto.setTaskId(taskId);
 
         String post = post(variableQueryParamDto, "/task/queryTaskComments");
-        R<List<SimpleApproveDescDto>> listR = JSON.parseObject(post, new TypeReference<R<List<SimpleApproveDescDto>>>() {
+        R<List<SimpleApproveDescDto>> listR = JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<List<SimpleApproveDescDto>>>() {
         });
         return listR;
 
@@ -84,7 +82,7 @@ public class CoreHttpUtil {
     public static R<IndexPageStatistics> querySimpleData(String userId) {
 
         String s = get("/process-instance/querySimpleData?userId=" + userId);
-        return JSON.parseObject(s, new TypeReference<R<IndexPageStatistics>>() {
+        return JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<IndexPageStatistics>>() {
         });
 
     }
@@ -96,7 +94,7 @@ public class CoreHttpUtil {
     public static R<Map<String, Object>> queryVariables(VariableQueryParamDto variableQueryParamDto) {
 
         String s = post(variableQueryParamDto,"/process-instance/queryVariables"  );
-        return JSON.parseObject(s, new TypeReference<R<Map<String, Object>>>() {
+        return JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<Map<String, Object>>>() {
         });
 
     }
@@ -115,7 +113,7 @@ public class CoreHttpUtil {
         createFlowDto.setProcessName(processName);
 
         String post = post(createFlowDto, "/flow/create");
-        com.cxygzl.common.dto.R<String> r = JSON.parseObject(post, com.cxygzl.common.dto.R.class);
+        com.cxygzl.common.dto.R<String> r = JsonUtil.parseObject(post, com.cxygzl.common.dto.R.class);
         return r;
 
     }
@@ -129,7 +127,7 @@ public class CoreHttpUtil {
     public static R<String> startProcess(ProcessInstanceParamDto jsonObject) {
 
         String post = post(jsonObject, "/flow/start");
-        return JSON.parseObject(post, new TypeReference<R<String>>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<String>>() {
         });
 
     }
@@ -143,7 +141,7 @@ public class CoreHttpUtil {
     public static R notifyMsgEvent(NotifyMessageDto jsonObject) {
 
         String post = post(jsonObject, "/flow/notifyMsg");
-        return JSON.parseObject(post, new TypeReference<R>() {
+        return JsonUtil.parseObject(post, new JsonUtil.TypeReference<R>() {
         });
     }
 
@@ -158,7 +156,7 @@ public class CoreHttpUtil {
 
         String post = post(jsonObject, "/flow/queryAssignTask");
 
-        com.cxygzl.common.dto.R<PageResultDto<TaskDto>> r = JSON.parseObject(post, new TypeReference<com.cxygzl.common.dto.R<PageResultDto<TaskDto>>>() {
+        com.cxygzl.common.dto.R<PageResultDto<TaskDto>> r = JsonUtil.parseObject(post, new JsonUtil.TypeReference<com.cxygzl.common.dto.R<PageResultDto<TaskDto>>>() {
         });
         return r;
 
@@ -173,7 +171,7 @@ public class CoreHttpUtil {
     public static com.cxygzl.common.dto.R<PageResultDto<TaskDto>> queryCompletedTask(TaskQueryParamDto jsonObject) {
 
         String post = post(jsonObject, "/flow/queryCompletedTask");
-        com.cxygzl.common.dto.R<PageResultDto<TaskDto>> r = JSON.parseObject(post, new TypeReference<com.cxygzl.common.dto.R<PageResultDto<TaskDto>>>() {
+        com.cxygzl.common.dto.R<PageResultDto<TaskDto>> r = JsonUtil.parseObject(post, new JsonUtil.TypeReference<com.cxygzl.common.dto.R<PageResultDto<TaskDto>>>() {
         });
         return r;
 
@@ -188,7 +186,7 @@ public class CoreHttpUtil {
     public static R completeTask(TaskParamDto jsonObject) {
 
         String post = post(jsonObject, "/task/complete");
-        return CommonUtil.toObj(post, R.class);
+        return JsonUtil.parseObject(post, R.class);
 
     }
 
@@ -237,7 +235,7 @@ public class CoreHttpUtil {
     public static com.cxygzl.common.dto.R stopProcessInstance(TaskParamDto jsonObject) {
 
         String post = post(jsonObject, "/flow/stopProcessInstance");
-        com.cxygzl.common.dto.R r = JSON.parseObject(post, new TypeReference<R>() {
+        com.cxygzl.common.dto.R r = JsonUtil.parseObject(post, new JsonUtil.TypeReference<R>() {
         });
         return r;
 
@@ -277,7 +275,7 @@ public class CoreHttpUtil {
     public static R revoke(TaskParamDto jsonObject) {
 
         String post = post(jsonObject, "/task/revoke");
-        return JSON.parseObject(post,R.class);
+        return JsonUtil.parseObject(post,R.class);
 
     }
 
@@ -290,7 +288,7 @@ public class CoreHttpUtil {
     public static R delegateTask(TaskParamDto jsonObject) {
 
         String post = post(jsonObject, "/task/delegateTask");
-        com.cxygzl.common.dto.R r = JSON.parseObject(post, R.class);
+        com.cxygzl.common.dto.R r = JsonUtil.parseObject(post, R.class);
 
         return r;
 
@@ -307,7 +305,7 @@ public class CoreHttpUtil {
     public static com.cxygzl.common.dto.R<TaskResultDto> queryTask(String taskId, String userId) {
 
         String s = get(StrUtil.format("/task/queryTask?taskId={}&userId={}", taskId, userId));
-        com.cxygzl.common.dto.R<TaskResultDto> r = JSON.parseObject(s, new TypeReference<R<TaskResultDto>>() {
+        com.cxygzl.common.dto.R<TaskResultDto> r = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<TaskResultDto>>() {
         });
         return r;
 

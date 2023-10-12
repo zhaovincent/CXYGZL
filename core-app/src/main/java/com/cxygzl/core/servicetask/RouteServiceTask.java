@@ -3,10 +3,10 @@ package com.cxygzl.core.servicetask;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.expression.condition.NodeExpressionResultStrategyFactory;
 import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -108,7 +108,7 @@ public class RouteServiceTask implements JavaDelegate {
             ValueExpression e = factory.createValueExpression(context, exp, clazz);
             Object returnObj = e.getValue(context);
             log.info("表达式返回值：{}", returnObj);
-            return JSON.parseObject(returnObj.toString(), clazz);
+            return JsonUtil.parseObject(returnObj.toString(), clazz);
         } catch (PropertyNotFoundException e) {
             log.error("流程变量的属性找不到，请确认!", e);
             throw new RuntimeException("流程变量的属性找不到，请确认!", e);

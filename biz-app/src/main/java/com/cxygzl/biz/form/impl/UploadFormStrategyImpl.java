@@ -4,11 +4,11 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
 import com.cxygzl.biz.form.FormStrategy;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.dto.flow.UploadValue;
+import com.cxygzl.common.utils.JsonUtil;
 import org.anyline.metadata.Column;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
@@ -121,7 +121,7 @@ public class UploadFormStrategyImpl implements InitializingBean, FormStrategy {
         String url = uploadValueList.stream().map(w -> w.getUrl()).collect(Collectors.joining("||"));
         String name = uploadValueList.stream().map(w -> w.getName()).collect(Collectors.joining("||"));
 
-        return CollUtil.newArrayList(url, name, JSON.toJSONString(uploadValueList));
+        return CollUtil.newArrayList(url, name, JsonUtil.toJSONString(uploadValueList));
     }
 
     /**

@@ -2,13 +2,12 @@ package com.cxygzl.core.listeners.event_listener_impl;
 
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.FlowSettingDto;
 import com.cxygzl.common.dto.ProcessInstanceParamDto;
 import com.cxygzl.common.dto.flow.HttpSetting;
 import com.cxygzl.common.dto.flow.HttpSettingData;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.HttpUtil;
 import com.cxygzl.core.listeners.EventListenerStrategy;
 import com.cxygzl.core.utils.BizHttpUtil;
@@ -79,7 +78,7 @@ public class ProcessEndEventListener implements EventListenerStrategy, Initializ
 
 
                         if (StrUtil.isNotBlank(result)) {
-                            Map<String, Object> resultMap = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {
+                            Map<String, Object> resultMap = JsonUtil.parseObject(result, new JsonUtil.TypeReference<Map<String, Object>>() {
                             });
                             List<HttpSettingData> resultSetting = backNotify.getResult();
                             for (HttpSettingData httpSettingData : resultSetting) {

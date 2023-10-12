@@ -6,7 +6,6 @@ import cn.hutool.http.Header;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpStatus;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.flow.HttpSetting;
 import com.cxygzl.common.dto.flow.HttpSettingData;
@@ -47,7 +46,7 @@ public class HttpUtil {
                     //头信息，多个头信息多次调用此方法即可
                     .header(Header.USER_AGENT, ProcessInstanceConstant.VariableKey.SYS_CODE)
                     .headerMap(headerParamMap, true)
-                    .body(JSON.toJSONString(bodyMap))
+                    .body(JsonUtil.toJSONString(bodyMap))
                     //超时，毫秒
                     .timeout(TIME_OUT)
                     .addInterceptor(tLogHutoolhttpInterceptor)
@@ -102,7 +101,7 @@ public class HttpUtil {
                     headerParamMap.put(field, httpSettingData.getValue());
                 } else {
                     Object object = paramMap.get(httpSettingData.getValue());
-                    headerParamMap.put(field, object == null ? null : (object instanceof String ? Convert.toStr(object) : JSON.toJSONString(object)));
+                    headerParamMap.put(field, object == null ? null : (object instanceof String ? Convert.toStr(object) : JsonUtil.toJSONString(object)));
                 }
             }
 
@@ -124,12 +123,12 @@ public class HttpUtil {
                 } else {
                     Object object = paramMap.get(httpSettingData.getValue());
                     bodyMap.put(field, object == null ? null : (object instanceof String ?
-                            Convert.toStr(object) : JSON.toJSONString(object)));
+                            Convert.toStr(object) : JsonUtil.toJSONString(object)));
                 }
             }
 
         }
-        log.info("url：{} 请求头：{} 请求体：{} ", httpSetting.getUrl(), JSON.toJSONString(headerParamMap), JSON.toJSONString(bodyMap));
+        log.info("url：{} 请求头：{} 请求体：{} ", httpSetting.getUrl(), JsonUtil.toJSONString(headerParamMap), JsonUtil.toJSONString(bodyMap));
 
         return com.cxygzl.common.utils.HttpUtil.post(httpSetting.getUrl(), headerParamMap, bodyMap);
 

@@ -4,11 +4,11 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
 import com.cxygzl.biz.form.FormStrategy;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.utils.JsonUtil;
 import org.anyline.metadata.Column;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
@@ -141,7 +141,7 @@ public class OrgFormStrategyImpl implements InitializingBean, FormStrategy {
         String name = nodeUserList.stream().map(w -> w.getName()).collect(Collectors.joining("||"));
         String type = nodeUserList.stream().map(w -> w.getType()).collect(Collectors.joining("||"));
 
-        return CollUtil.newArrayList(id, name, type, JSON.toJSONString(nodeUserList));
+        return CollUtil.newArrayList(id, name, type, JsonUtil.toJSONString(nodeUserList));
     }
 
     /**

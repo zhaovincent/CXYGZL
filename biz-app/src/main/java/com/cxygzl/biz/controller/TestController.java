@@ -6,8 +6,8 @@ import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.utils.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +25,7 @@ public class TestController {
     public Object dynamicForm(@RequestBody String s,@RequestHeader(required = false) String b){
         log.info("收到动态表单数据：{} {}",s,b);
         HashMap<Object, Object> data = new HashMap<>();
-        com.alibaba.fastjson2.JSONObject jsonObject = JSON.parseObject(s);
+        com.alibaba.fastjson2.JSONObject jsonObject = JsonUtil.parseObject(s);
         String startDateTime = jsonObject.getString("startDateTime");
         String endDateTime = jsonObject.getString("endDateTime");
         if(StrUtil.isBlank(startDateTime)){

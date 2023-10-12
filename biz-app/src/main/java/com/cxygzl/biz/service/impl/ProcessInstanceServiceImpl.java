@@ -7,8 +7,6 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
@@ -32,6 +30,7 @@ import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.*;
 import com.cxygzl.common.dto.third.UserDto;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.DataRow;
@@ -342,7 +341,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 if (CollUtil.isNotEmpty(list)) {
                     String data = list.get(0).getData();
                     if (StrUtil.isNotBlank(data)) {
-                        Map<String, Object> collect = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
+                        Map<String, Object> collect = JsonUtil.parseObject(data, new JsonUtil.TypeReference<Map<String, Object>>() {
                         });
                         paramMap.putAll(collect);
 
@@ -393,11 +392,11 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
             String flowId = processInstanceParamDto.getFlowId();
             Process process = processService.getByFlowId(flowId);
             String settings = process.getSettings();
-            FlowSettingDto flowSettingDto = JSON.parseObject(settings, FlowSettingDto.class);
+            FlowSettingDto flowSettingDto = JsonUtil.parseObject(settings, FlowSettingDto.class);
             if (flowSettingDto.getDbRecord() != null && flowSettingDto.getDbRecord().getEnable()) {
 
                 String formItems = process.getFormItems();
-                List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
+                List<FormItemVO> formItemVOList = JsonUtil.parseArray(formItems, FormItemVO.class);
                 DataRow dataRow = FormStrategyFactory.buildInsertSql(formItemVOList, flowId, processInstanceParamDto.getProcessInstanceId(),
                         processInstanceParamDto.getParamMap());
 
@@ -454,7 +453,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
             //处理表单数据
             Process process = processList.stream().filter(w -> StrUtil.equals(w.getFlowId(), record.getFlowId())).findFirst().get();
-            List<Dict> formValueShowList = getFormValueShowList(process, record.getFlowId(), ProcessInstanceConstant.VariableKey.STARTER, JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
+            List<Dict> formValueShowList = getFormValueShowList(process, record.getFlowId(), ProcessInstanceConstant.VariableKey.STARTER, JsonUtil.parseObject(formData, new JsonUtil.TypeReference<Map<String, Object>>() {
             }));
 
             record.setFormValueShowList(formValueShowList);
@@ -524,7 +523,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
                 Process process = processList.stream().filter(w -> StrUtil.equals(w.getFlowId(), record.getFlowId())).findFirst().get();
 
-                List<Dict> formValueShowList = getFormValueShowList(process, record.getFlowId(), ProcessInstanceConstant.VariableKey.STARTER, JSON.parseObject(record.getFormData(), new TypeReference<Map<String, Object>>() {
+                List<Dict> formValueShowList = getFormValueShowList(process, record.getFlowId(), ProcessInstanceConstant.VariableKey.STARTER, JsonUtil.parseObject(record.getFormData(), new JsonUtil.TypeReference<Map<String, Object>>() {
                 }));
 
                 record.setFormValueShowList(formValueShowList);
@@ -552,9 +551,9 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      */
     private List<Dict> getFormValueShowList(Process process, String flowId, String nodeId, Map<String, Object> paramMap) {
         String formItems = process.getFormItems();
-        List<FormItemVO> formItemVOList = JSON.parseArray(formItems, FormItemVO.class);
+        List<FormItemVO> formItemVOList = JsonUtil.parseArray(formItems, FormItemVO.class);
         String data = processNodeDataService.getNodeData(flowId, nodeId).getData();
-        Node node = JSON.parseObject(data, Node.class);
+        Node node = JsonUtil.parseObject(data, Node.class);
         Map<String, String> map = node.getFormPerms();
 
         List<Dict> formValueShowList = new ArrayList<>();
@@ -575,7 +574,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     @Override
     public R showImg(String procInsId) {
 //        String s = CoreHttpUtil.showImg(procInsId);
-//        com.cxygzl.common.dto.R<String> stringR = JSON.parseObject(s, new TypeReference<com.cxygzl.common.dto.R<String>>() {
+//        com.cxygzl.common.dto.R<String> stringR = CommonUtil.parseObject(s, new TypeReference<com.cxygzl.common.dto.R<String>>() {
 //        });
 //        String data = stringR.getData();
 
@@ -584,7 +583,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         String flowId = processInstanceRecord.getFlowId();
         Process process = processService.getByFlowId(flowId);
         String content = process.getProcess();
-        Node node = JSON.parseObject(content, Node.class);
+        Node node = JsonUtil.parseObject(content, Node.class);
         NodeUtil.addEndNode(node);
 
 
@@ -618,8 +617,8 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         Map<String, Object> paramMap = nodeFormatParamVo.getParamMap();
         if (StrUtil.isNotBlank(nodeFormatParamVo.getTaskId())) {
             String s = CoreHttpUtil.queryTaskVariables(nodeFormatParamVo.getTaskId(), null);
-            com.cxygzl.common.dto.R<Map<String, Object>> r = JSON.parseObject(s,
-                    new TypeReference<com.cxygzl.common.dto.R<Map<String, Object>>>() {
+            com.cxygzl.common.dto.R<Map<String, Object>> r = JsonUtil.parseObject(s,
+                    new JsonUtil.TypeReference<com.cxygzl.common.dto.R<Map<String, Object>>>() {
                     });
             if (!r.isOk()) {
 
@@ -629,7 +628,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                         .list();
 
                 String data = list.get(0).getData();
-                Map<String, Object> variableMap = JSON.parseObject(data, new TypeReference<Map<String, Object>>() {
+                Map<String, Object> variableMap = JsonUtil.parseObject(data, new JsonUtil.TypeReference<Map<String, Object>>() {
                 });
                 if (variableMap == null) {
                     variableMap = new HashMap<>();
@@ -647,7 +646,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                     processInstanceId).one();
             //任务里没有
             String formData = processInstanceRecord.getFormData();
-            Map<String, Object> map = JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
+            Map<String, Object> map = JsonUtil.parseObject(formData, new JsonUtil.TypeReference<Map<String, Object>>() {
             });
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 String key = entry.getKey();
@@ -663,7 +662,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
             Process oaForms = processService.getByFlowId(flowId);
             process = oaForms.getProcess();
         }
-        Node nodeDto = JSON.parseObject(process, Node.class);
+        Node nodeDto = JsonUtil.parseObject(process, Node.class);
 
         //查询所有的节点
         List<ProcessInstanceNodeRecordParamDto> processInstanceNodeRecordParamDtoList = new ArrayList<>();
@@ -698,15 +697,15 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         //发起人变量数据
         String formData = processInstanceRecord.getFormData();
-        Map<String, Object> variableMap = JSON.parseObject(formData, new TypeReference<Map<String, Object>>() {
+        Map<String, Object> variableMap = JsonUtil.parseObject(formData, new JsonUtil.TypeReference<Map<String, Object>>() {
         });
         //发起人表单权限
         String process = oaForms.getProcess();
-        Node nodeDto = JSON.parseObject(process, Node.class);
+        Node nodeDto = JsonUtil.parseObject(process, Node.class);
         Map<String, String> formPerms1 = nodeDto.getFormPerms();
 
 
-        List<FormItemVO> jsonObjectList = JSON.parseArray(oaForms.getFormItems(), FormItemVO.class);
+        List<FormItemVO> jsonObjectList = JsonUtil.parseArray(oaForms.getFormItems(), FormItemVO.class);
         for (FormItemVO formItemVO : jsonObjectList) {
             String id = formItemVO.getId();
             String perm = formPerms1.get(id);

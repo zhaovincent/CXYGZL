@@ -1,10 +1,10 @@
 package com.cxygzl.core.node.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
+import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.node.AssignUserStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -36,7 +36,7 @@ public class AssignUserSelfSelectStrategyImpl implements InitializingBean, Assig
         if (variable == null) {
             return assignList;
         }
-        List<NodeUser> nodeUserDtos = JSON.parseArray(JSON.toJSONString(variable), NodeUser.class);
+        List<NodeUser> nodeUserDtos = JsonUtil.parseArray(JsonUtil.toJSONString(variable), NodeUser.class);
 
         List<String> collect = nodeUserDtos.stream().map(w -> String.valueOf(w.getId())).collect(Collectors.toList());
 
