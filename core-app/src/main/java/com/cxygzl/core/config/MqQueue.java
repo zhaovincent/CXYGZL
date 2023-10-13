@@ -1,6 +1,6 @@
 package com.cxygzl.core.config;
 
-import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.extra.spring.SpringUtil;
@@ -37,7 +37,8 @@ public class MqQueue {
         StringRedisTemplate redisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
         Map<Object, Object> cxygzlQueue = redisTemplate.opsForHash().entries("cxygzl_queue");
         for (Map.Entry<Object, Object> entry : cxygzlQueue.entrySet()) {
-            MqQueueObject mqQueueObject = BeanUtil.toBean(entry.getValue(), MqQueueObject.class);
+            String str = Convert.toStr(entry.getValue());
+            MqQueueObject mqQueueObject = JsonUtil.parseObject(str, MqQueueObject.class);
             ARRAY_BLOCKING_QUEUE.put(mqQueueObject);
         }
         log.info("初始化队列数据结束，总共：{}",cxygzlQueue.size());
@@ -67,7 +68,7 @@ public class MqQueue {
         ARRAY_BLOCKING_QUEUE.put(mqQueueObject);
 
         StringRedisTemplate redisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
-        redisTemplate.opsForHash().put("cxygzl_queue",key,mqQueueObject);
+        redisTemplate.opsForHash().put("cxygzl_queue",key,JsonUtil.toJSONString(mqQueueObject));
     }
 
 }

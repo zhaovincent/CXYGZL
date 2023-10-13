@@ -54,6 +54,7 @@ public class TaskServiceImpl implements ITaskService {
      * @param taskParamDto
      * @return
      */
+    @Transactional
     @Override
     public R completeTask(TaskParamDto taskParamDto) {
         String userId = StpUtil.getLoginIdAsString();
@@ -102,6 +103,7 @@ public class TaskServiceImpl implements ITaskService {
      * @param taskParamDto
      * @return
      */
+    @Transactional
     @Override
     public R resolveTask(TaskParamDto taskParamDto) {
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
@@ -122,6 +124,7 @@ public class TaskServiceImpl implements ITaskService {
      * @param taskParamDto
      * @return
      */
+    @Transactional
     @Override
     public R setAssignee(TaskParamDto taskParamDto) {
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
@@ -144,6 +147,7 @@ public class TaskServiceImpl implements ITaskService {
      * @param taskParamDto
      * @return
      */
+    @Transactional
     @Override
     public R addAssignee(TaskParamDto taskParamDto) {
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
@@ -201,6 +205,7 @@ public class TaskServiceImpl implements ITaskService {
      * @param taskParamDto
      * @return
      */
+    @Transactional
     @Override
     public R delAssignee(TaskParamDto taskParamDto) {
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
@@ -268,6 +273,7 @@ public class TaskServiceImpl implements ITaskService {
      * @param taskParamDto
      * @return
      */
+    @Transactional
     @Override
     public R stopProcessInstance(TaskParamDto taskParamDto) {
 
@@ -295,6 +301,7 @@ public class TaskServiceImpl implements ITaskService {
      * @param taskParamDto
      * @return
      */
+    @Transactional
     @Override
     public R back(TaskParamDto taskParamDto) {
         taskParamDto.setUserId(StpUtil.getLoginIdAsString());
@@ -330,6 +337,7 @@ public class TaskServiceImpl implements ITaskService {
      * @param taskParamDto
      * @return
      */
+    @Transactional
     @Override
     public R revoke(TaskParamDto taskParamDto) {
         //当前的任务id
