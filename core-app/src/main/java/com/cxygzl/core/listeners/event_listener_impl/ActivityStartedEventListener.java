@@ -39,8 +39,7 @@ public class ActivityStartedEventListener implements EventListenerStrategy, Init
         DelegateExecution execution = flowableActivityEvent.getExecution();
 
         String executionId = flowableActivityEvent.getExecutionId();
-        log.info("节点开始  节点id：{} 名字:{} executionId:{}", activityId, activityName,
-                executionId);
+        log.info("节点开始  节点id：{} 名字:{} executionId:{}", activityId, activityName,executionId);
         {
             DelegateExecution parent = execution.getParent();
             if (parent.isMultiInstanceRoot() && !execution.isMultiInstanceRoot()) {

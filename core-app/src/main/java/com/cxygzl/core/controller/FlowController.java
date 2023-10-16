@@ -1,26 +1,16 @@
 package com.cxygzl.core.controller;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
-import com.cxygzl.common.dto.flow.HttpSetting;
-import com.cxygzl.common.utils.JsonUtil;
-import com.cxygzl.common.utils.HttpUtil;
-import com.cxygzl.core.node.NodeDataStoreFactory;
-import com.cxygzl.core.utils.BizHttpUtil;
-import com.cxygzl.core.utils.ModelUtil;
+import com.cxygzl.core.service.IFlowService;
 import com.cxygzl.core.utils.NodeUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.BpmnAutoLayout;
-import org.flowable.bpmn.converter.BpmnXMLConverter;
 import org.flowable.bpmn.model.BpmnModel;
-import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
@@ -44,8 +34,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.ENABLE_SKIP_EXPRESSION;
-
 /**
  * 工作流控制器
  * 负责流程创建编辑发起等功能
@@ -65,6 +53,8 @@ public class FlowController {
 
     @Resource
     private RuntimeService runtimeService;
+    @Resource
+    private IFlowService flowService;
 
     /**
      * 创建流程
@@ -74,22 +64,7 @@ public class FlowController {
      */
     @PostMapping("create")
     public R create(@RequestBody CreateFlowDto createFlowDto) {
-        String flowId = "p" + RandomUtil.randomString(9) + StrUtil.fillBefore(createFlowDto.getUserId(), '0', 10);
-
-
-        log.info("flowId={}", flowId);
-        BpmnModel bpmnModel = ModelUtil.buildBpmnModel(createFlowDto.getNode(), createFlowDto.getProcessName(), flowId);
-        {
-            byte[] bpmnBytess = new BpmnXMLConverter().convertToXML(bpmnModel);
-            String filename = "/tmp/flowable-deployment/" + flowId + ".bpmn20.xml";
-            log.debug("部署时的模型文件：{}", filename);
-            FileUtil.writeBytes(bpmnBytess, filename);
-        }
-        repositoryService.createDeployment()
-                .addBpmnModel(StrUtil.format("{}.bpmn20.xml", flowId), bpmnModel).deploy();
-
-
-        return R.success(flowId);
+        return flowService.create(createFlowDto);
     }
 
     /**
@@ -100,24 +75,8 @@ public class FlowController {
      */
     @PostMapping("/start")
     public R start(@RequestBody ProcessInstanceParamDto processInstanceParamDto) {
-        String flowId = processInstanceParamDto.getFlowId();
-        {
-            //前置检查
-            R r = frontCheck(processInstanceParamDto);
-            if (!r.isOk()) {
-                return r;
-            }
-        }
-        Authentication.setAuthenticatedUserId(processInstanceParamDto.getStartUserId());
-        Map<String, Object> paramMap = processInstanceParamDto.getParamMap();
-        //支持自动跳过
-        paramMap.put(ENABLE_SKIP_EXPRESSION, true);
+        return flowService.start(processInstanceParamDto);
 
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(flowId,
-                paramMap);
-
-        String processInstanceId = processInstance.getProcessInstanceId();
-        return R.success(processInstanceId);
 
     }
 
@@ -130,49 +89,8 @@ public class FlowController {
     @PostMapping("notifyMsg")
     public R notifyMsg(@RequestBody NotifyMessageDto messageDto) {
 
-        String msgId = NodeDataStoreFactory.getInstance().get("msgId", messageDto.getMessageNotifyId());
-        String nodeId = NodeDataStoreFactory.getInstance().get("nodeId", messageDto.getMessageNotifyId());
+        return flowService.notifyMsg(messageDto);
 
-
-        Execution execution = runtimeService.createExecutionQuery()
-                .activityId(nodeId)
-                .processInstanceId(messageDto.getProcessInstanceId())
-                .singleResult();
-
-        runtimeService.messageEventReceived(msgId, execution.getId());
-        return R.success();
-    }
-
-    /**
-     * 前置检查
-     *
-     * @param processInstanceParamDto
-     * @return
-     */
-    private R frontCheck(ProcessInstanceParamDto processInstanceParamDto) {
-        String flowId = processInstanceParamDto.getFlowId();
-        Map<String, Object> paramMap = processInstanceParamDto.getParamMap();
-        //前置检查
-        FlowSettingDto flowSettingDto = BizHttpUtil.queryProcessSetting(flowId).getData();
-
-        if (flowSettingDto != null) {
-            HttpSetting frontCheck = flowSettingDto.getFrontCheck();
-            if (frontCheck != null && frontCheck.getEnable()) {
-
-                String result = HttpUtil.flowExtenstionHttpRequest(frontCheck, paramMap, flowId, null, null);
-
-
-                if (StrUtil.isNotBlank(result)) {
-                    R r = JsonUtil.parseObject(result, new JsonUtil.TypeReference<R>() {
-                    });
-                    return r;
-                } else {
-                    return R.fail("网络连接异常");
-                }
-
-            }
-        }
-        return R.success();
     }
 
 

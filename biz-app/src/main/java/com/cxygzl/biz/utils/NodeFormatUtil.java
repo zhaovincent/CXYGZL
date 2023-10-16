@@ -361,11 +361,12 @@ public class NodeFormatUtil {
 
             List<NodeFormatUserVo> tempList = buildUser(nodeUserList);
             //如果当前节点已执行  则用户为已执行
-            if (StrUtil.isAllNotBlank(node.getExecutionId(), node.getFlowUniqueId()))
+            if (StrUtil.isAllNotBlank(node.getExecutionId(), node.getFlowUniqueId())) {
                 for (NodeFormatUserVo nodeFormatUserVo : tempList) {
                     nodeFormatUserVo.setStatus(NodeStatusEnum.YJS.getCode());
 
                 }
+            }
             nodeFormatUserVoList.addAll(tempList);
 
         }

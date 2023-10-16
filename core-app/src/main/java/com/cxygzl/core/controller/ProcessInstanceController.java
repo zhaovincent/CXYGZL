@@ -25,12 +25,6 @@ public class ProcessInstanceController {
     private TaskService taskService;
     @Resource
     private HistoryService historyService;
-    @Resource
-    private RepositoryService repositoryService;
-
-    @Resource
-    private ManagementService managementService;
-
 
 
     @Resource
