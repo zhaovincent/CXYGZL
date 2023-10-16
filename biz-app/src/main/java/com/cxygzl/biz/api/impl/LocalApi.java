@@ -6,6 +6,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.cxygzl.biz.api.ApiStrategy;
 import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.service.*;
+import com.cxygzl.common.constants.StatusEnum;
 import com.cxygzl.common.dto.LoginUrlDto;
 import com.cxygzl.common.dto.third.*;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +49,11 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     public List<String> loadUserIdListByRoleIdList(List<String> roleIdList) {
         List<UserRole> userRoleList = userRoleService.lambdaQuery().in(UserRole::getRoleId, roleIdList).list();
         Set<String> userIdSet = userRoleList.stream().map(w -> String.valueOf(w.getUserId())).collect(Collectors.toSet());
-        return CollUtil.newArrayList(userIdSet);
+        List<User> userList = userService.lambdaQuery().in(User::getId, userIdSet)
+                .eq(User::getStatus, StatusEnum.ENABLE.getValue())
+                .list();
+        List<String> collect = userList.stream().map(w -> String.valueOf(w.getId())).collect(Collectors.toList());
+        return collect;
     }
 
     /**

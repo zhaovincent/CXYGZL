@@ -71,7 +71,7 @@ public class NodeFormatUtil {
                                                      Map<String, Object> paramMap,
                                                      List<ProcessInstanceNodeRecordParamDto> processInstanceNodeRecordParamDtoList,
                                                      Boolean disableSelectUser
-                                                     ) {
+    ) {
         List<NodeVo> list = new ArrayList();
 
         if (!NodeUtil.isNode(node)) {
@@ -520,6 +520,9 @@ public class NodeFormatUtil {
 
 
             NodeFormatUserVo nodeFormatUserVo = buildUser((userId));
+            if (nodeFormatUserVo == null) {
+                continue;
+            }
             nodeFormatUserVo.setShowTime(w.getEndTime());
             nodeFormatUserVo.setShowTimeStr(nodeDateShow(w.getEndTime()));
             nodeFormatUserVo.setStatus(w.getStatus());
@@ -530,21 +533,6 @@ public class NodeFormatUtil {
         return processInstanceAssignUserRecordList;
     }
 
-
-    /**
-     * 根据实例id
-     *
-     * @param processInstanceId
-     * @return
-     */
-    private static NodeFormatUserVo buildRootUser(String processInstanceId) {
-
-        IProcessInstanceRecordService processInstanceRecordService = SpringUtil.getBean(IProcessInstanceRecordService.class);
-        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
-        String userId = processInstanceRecord.getUserId();
-        NodeFormatUserVo nodeFormatUserVo = buildUser(userId);
-        return nodeFormatUserVo;
-    }
 
     /**
      * 根据用户id
