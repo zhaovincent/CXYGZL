@@ -49,6 +49,9 @@ public class LocalApi implements ApiStrategy, InitializingBean {
     public List<String> loadUserIdListByRoleIdList(List<String> roleIdList) {
         List<UserRole> userRoleList = userRoleService.lambdaQuery().in(UserRole::getRoleId, roleIdList).list();
         Set<String> userIdSet = userRoleList.stream().map(w -> String.valueOf(w.getUserId())).collect(Collectors.toSet());
+        if(CollUtil.isEmpty(userIdSet)){
+            return new ArrayList<>();
+        }
         List<User> userList = userService.lambdaQuery().in(User::getId, userIdSet)
                 .eq(User::getStatus, StatusEnum.ENABLE.getValue())
                 .list();
