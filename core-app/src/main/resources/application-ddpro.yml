@@ -4,7 +4,10 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: SD342Jf632JD^123
-
+  redis:
+    host: myserver
+    port: 6379
+    database: 13
 
 logging:
   config: classpath:logback-dd-pro.xml
