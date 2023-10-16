@@ -96,6 +96,7 @@ public class Node  implements Cloneable, Serializable {
     private String delayUnit;
     private Object groupRelation;
     private String subFlowId;
+    private List<String> subFlowIdArray;
     private String subFlowName;
     private Integer starterMode;
     private String starterValue;
