@@ -3,9 +3,9 @@ package com.cxygzl.common.config;
 import java.lang.annotation.*;
 
 /**
- * Vincent 创建于 2019/7/15.
+ * 日志打印注解
+ * 添加到controller方法上
  */
-
 @Target({ ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
@@ -20,7 +20,7 @@ public @interface NotWriteLogAnno {
      String[] paramsExclude() default {};
 
     /**
-     * 是否打印结果日志
+     * 是否打印返回值
      * @return
      */
      boolean printResultLog() default  true;

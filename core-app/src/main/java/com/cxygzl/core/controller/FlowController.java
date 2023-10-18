@@ -93,18 +93,22 @@ public class FlowController {
 
     }
 
-
+    /**
+     * 查看流程实例执行图片
+     * @param processInstanceId
+     * @param response
+     */
     @NotWriteLogAnno(all = true, printResultLog = false)
     @GetMapping("/showImg")
     @SneakyThrows
-    public void showImg(String procInsId, HttpServletResponse response) {
+    public void showImg(String processInstanceId, HttpServletResponse response) {
 
 
         String procDefId;
-        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(procInsId).singleResult();
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
         if (processInstance == null) {
             HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
-                    .processInstanceId(procInsId)
+                    .processInstanceId(processInstanceId)
                     .singleResult();
             procDefId = historicProcessInstance.getProcessDefinitionId();
 
@@ -126,7 +130,7 @@ public class FlowController {
         List<String> highLightedFlows = new ArrayList<>();
         // 查询所有历史节点信息
         List<HistoricActivityInstance> hisActInsList = historyService.createHistoricActivityInstanceQuery()
-                .processInstanceId(procInsId)
+                .processInstanceId(processInstanceId)
                 .list();
 
 

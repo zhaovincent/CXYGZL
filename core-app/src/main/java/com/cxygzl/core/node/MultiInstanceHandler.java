@@ -14,12 +14,10 @@ import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.FlowableUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.UserTask;
-import org.flowable.engine.RuntimeService;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,13 +25,16 @@ import java.util.stream.Collectors;
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_NODE_RESULT;
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_RESULT;
 
+/**
+ *  多实例任务处理
+ */
 @Component("multiInstanceHandler")
 @Slf4j
 public class MultiInstanceHandler {
-    @Resource
-    private RuntimeService runtimeService;
 
     /**
+     *
+     * 审批人节点
      * 处理执行人
      *
      * @param execution
