@@ -281,7 +281,7 @@ public class MultiInstanceHandler {
 
 
         if (
-                multipleMode.intValue() == ProcessInstanceConstant.MULTIPLE_MODE_AL_SAME
+                multipleMode.intValue() == ProcessInstanceConstant.MULTIPLE_MODE_ALL_SAME
 
         ) {
 

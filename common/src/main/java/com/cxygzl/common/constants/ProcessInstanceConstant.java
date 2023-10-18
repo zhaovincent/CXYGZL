@@ -26,7 +26,7 @@ public class ProcessInstanceConstant {
     /**
      * 会签
      */
-    public static final int MULTIPLE_MODE_AL_SAME = 1;
+    public static final int MULTIPLE_MODE_ALL_SAME = 1;
     /**
      * 或签
      */

@@ -502,7 +502,7 @@ public class ModelUtil {
 
             Integer multipleMode = node.getMultipleMode();
             //多人
-            if ((multipleMode == ProcessInstanceConstant.MULTIPLE_MODE_AL_SAME)) {
+            if ((multipleMode == ProcessInstanceConstant.MULTIPLE_MODE_ALL_SAME)) {
                 //并行会签
                 isSequential = false;
             }
