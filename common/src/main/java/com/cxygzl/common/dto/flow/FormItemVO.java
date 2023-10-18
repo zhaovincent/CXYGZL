@@ -26,6 +26,10 @@ public class FormItemVO {
 
 
     private Boolean required;
+    /**
+     * 是否可以打印
+     */
+    private Boolean printable;
 
     private String typeName;
 

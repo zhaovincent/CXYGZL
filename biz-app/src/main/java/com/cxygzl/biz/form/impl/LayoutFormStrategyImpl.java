@@ -122,6 +122,13 @@ public class LayoutFormStrategyImpl implements InitializingBean, FormStrategy {
 
             List<FormItemVO> subItemList = Convert.toList(FormItemVO.class, propsValue);
             for (FormItemVO itemVO : subItemList) {
+
+                if (itemVO.getPrintable() != null && !itemVO.getPrintable()) {
+                    continue;
+                }
+
+
+
                 Object value1 = map.get(itemVO.getId());
 
                 FormUtil.handValue(itemVO, value1);

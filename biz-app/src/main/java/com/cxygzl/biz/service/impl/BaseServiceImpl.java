@@ -289,12 +289,12 @@ public class BaseServiceImpl implements IBaseService {
         UserDto starterUser = ApiStrategyFactory.getStrategy().getUser(starterUserId);
 
 
-        TaskHeaderShowResultVO taskHeaderShowResultVO=new TaskHeaderShowResultVO();
+        TaskHeaderShowResultVO taskHeaderShowResultVO = new TaskHeaderShowResultVO();
         taskHeaderShowResultVO.setProcessInstanceId(processInstanceRecord.getProcessInstanceId());
         taskHeaderShowResultVO.setStarterName(starterUser.getName());
-        taskHeaderShowResultVO.setStarterAvatarUrl( starterUser.getAvatarUrl());
+        taskHeaderShowResultVO.setStarterAvatarUrl(starterUser.getAvatarUrl());
         taskHeaderShowResultVO.setProcessName(processInstanceRecord.getName());
-        taskHeaderShowResultVO.setStartTime( processInstanceRecord.getCreateTime());
+        taskHeaderShowResultVO.setStartTime(processInstanceRecord.getCreateTime());
         taskHeaderShowResultVO.setProcessInstanceResult(processInstanceRecord.getResult());
 
 
@@ -322,12 +322,10 @@ public class BaseServiceImpl implements IBaseService {
         Boolean currentTask = taskResultDto.getCurrentTask();
         if (!currentTask) {
 
-            TaskOperDataResultVO taskOperDataResultVO=new TaskOperDataResultVO();
+            TaskOperDataResultVO taskOperDataResultVO = new TaskOperDataResultVO();
             taskOperDataResultVO.setProcessInstanceId(taskResultDto.getProcessInstanceId());
 
             taskOperDataResultVO.setTaskExist(false);
-
-
 
 
             return R.success(taskOperDataResultVO);
@@ -350,7 +348,7 @@ public class BaseServiceImpl implements IBaseService {
         List operList = node.getOperList();
         String process = oaForms.getProcess();
 
-        TaskOperDataResultVO taskOperDataResultVO=new TaskOperDataResultVO();
+        TaskOperDataResultVO taskOperDataResultVO = new TaskOperDataResultVO();
         taskOperDataResultVO.setProcessInstanceId(taskResultDto.getProcessInstanceId());
         taskOperDataResultVO.setNodeId(nodeId);
         taskOperDataResultVO.setTaskExist(currentTask);
@@ -358,7 +356,6 @@ public class BaseServiceImpl implements IBaseService {
         taskOperDataResultVO.setOperList(operList);
         taskOperDataResultVO.setNode(node);
         taskOperDataResultVO.setProcess(JsonUtil.parseObject(process, Node.class));
-
 
 
         return R.success(taskOperDataResultVO);
@@ -382,18 +379,15 @@ public class BaseServiceImpl implements IBaseService {
         DeptDto dept = ApiStrategyFactory.getStrategy().getDept(starterUser.getDeptId());
 
 
-        PrintDataResultVO printDataResultVO=new PrintDataResultVO();
+        PrintDataResultVO printDataResultVO = new PrintDataResultVO();
         printDataResultVO.setProcessInstanceResult(processInstanceRecord.getResult());
-        printDataResultVO.setProcessStatus( processInstanceRecord.getStatus());
+        printDataResultVO.setProcessStatus(processInstanceRecord.getStatus());
         printDataResultVO.setProcessInstanceId(processInstanceRecord.getProcessInstanceId());
         printDataResultVO.setProcessStatusShow(NodeStatusEnum.get(processInstanceRecord.getStatus()).getName());
         printDataResultVO.setStarterName(starterUser.getName());
         printDataResultVO.setStarterDeptName(dept.getName());
         printDataResultVO.setProcessName(processInstanceRecord.getName());
         printDataResultVO.setStartTime(DateUtil.format(processInstanceRecord.getCreateTime(), "yyyy-MM-dd HH:mm"));
-
-
-
 
 
         //查询所有的变量
@@ -404,7 +398,7 @@ public class BaseServiceImpl implements IBaseService {
             paramMap = CoreHttpUtil.queryVariables(variableQueryParamDto).getData();
 
         } else {
-            paramMap= JsonUtil.parseObject(processInstanceRecord.getFormData(),
+            paramMap = JsonUtil.parseObject(processInstanceRecord.getFormData(),
                     new JsonUtil.TypeReference<Map<String, Object>>() {
                     });
         }
@@ -416,8 +410,11 @@ public class BaseServiceImpl implements IBaseService {
         String formItems = process.getFormItems();
         List<FormItemVO> formItemVOList = JsonUtil.parseArray(formItems, FormItemVO.class);
         for (FormItemVO formItemVO : formItemVOList) {
+            if (formItemVO.getPrintable() != null && !formItemVO.getPrintable()) {
+                continue;
+            }
 
-            PrintDataResultVO.Form f=new PrintDataResultVO.Form();
+            PrintDataResultVO.Form f = new PrintDataResultVO.Form();
             f.setFormName(formItemVO.getName());
             f.setFormType(formItemVO.getType());
             f.setFormValue(paramMap.get(formItemVO.getId()));
@@ -449,14 +446,13 @@ public class BaseServiceImpl implements IBaseService {
             List<SimpleApproveDescDto> notSysApproveDescDtoList =
                     simpleApproveDescDtoList.stream().filter(w -> !w.getSys()).collect(Collectors.toList());
 
-            PrintDataResultVO.Approve approve=new PrintDataResultVO.Approve();
+            PrintDataResultVO.Approve approve = new PrintDataResultVO.Approve();
             approve.setUserName(user.getName());
             approve.setNodeName(processInstanceAssignUserRecord.getNodeName());
             approve.setTaskType(taskType);
             approve.setTaskTypeShow(StrUtil.isBlankIfStr(taskType) ? "-" : TaskTypeEnum.getByValue(taskType).getName());
             approve.setDate(endTime == null ? null : DateUtil.format(endTime, "yyyy-MM-dd HH:mm"));
             approve.setComment(notSysApproveDescDtoList);
-
 
 
             approveList.add(approve);
