@@ -1,5 +1,7 @@
 package com.cxygzl.biz.service.impl;
 
+import cn.hutool.cache.CacheUtil;
+import cn.hutool.cache.impl.LRUCache;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,6 +13,7 @@ import com.cxygzl.common.dto.ProcessNodeDataDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.JsonUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,8 +24,13 @@ import org.springframework.stereotype.Service;
  * @author Vincent
  * @since 2023-05-07
  */
+@Slf4j
 @Service
 public class ProcessNodeDataServiceImpl extends ServiceImpl<ProcessNodeDataMapper, ProcessNodeData> implements IProcessNodeDataService {
+
+    private LRUCache<String, String> cache = CacheUtil.newLRUCache(1000);
+
+
     /**
      * 保存流程节点数据
      *
@@ -47,12 +55,27 @@ public class ProcessNodeDataServiceImpl extends ServiceImpl<ProcessNodeDataMappe
      */
     @Override
     public R<String> getNodeData(String flowId, String nodeId) {
+
+        String o = cache.get(StrUtil.format("{}||{}", flowId, nodeId));
+        if (StrUtil.isNotBlank(o)) {
+            log.debug("从缓存获取到数据 :{}  {} {}", flowId, nodeId, o);
+            return R.success(o);
+        }
+
+
         //发起人用户任务
         if (StrUtil.startWith(nodeId, ProcessInstanceConstant.VariableKey.STARTER)) {
             nodeId = ProcessInstanceConstant.VariableKey.STARTER;
         }
 
         ProcessNodeData processNodeData = this.lambdaQuery().eq(ProcessNodeData::getFlowId, flowId).eq(ProcessNodeData::getNodeId, nodeId).one();
+
+        if(processNodeData!=null){
+
+            cache.put(StrUtil.format("{}||{}", flowId, nodeId), processNodeData.getData());
+
+        }
+
         return R.success(processNodeData == null ? null : processNodeData.getData());
     }
 
