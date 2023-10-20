@@ -1,11 +1,5 @@
 package com.cxygzl.biz.constants;
 
-/**
- * 系统常量
- *
- * @author haoxr
- * @since  2022/10/22
- */
 public interface SystemConstants {
 
     /**
@@ -13,16 +7,11 @@ public interface SystemConstants {
      */
     Long ROOT_NODE_ID = 0L;
 
-
     /**
-     * 系统默认密码
+     * 系统版本号 redis key
      */
-    String DEFAULT_PASSWORD = "123456";
+    String VERSION_REDIS_KEY = "version_key";
 
-    /**
-     * 超级管理员角色编码
-     */
-    String ROOT_ROLE_CODE = "ROOT";
 
 
 }

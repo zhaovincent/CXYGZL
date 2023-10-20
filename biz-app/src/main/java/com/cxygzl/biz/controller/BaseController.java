@@ -3,6 +3,7 @@ package com.cxygzl.biz.controller;
 import com.cxygzl.biz.service.IBaseService;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.QueryFormListParamVo;
+import com.cxygzl.biz.vo.WebVersionVO;
 import com.cxygzl.common.dto.R;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +15,18 @@ public class BaseController {
 
     @Resource
     private IBaseService baseService;
+
+    /**
+     * 修改前端版本号
+     *
+     * @param webVersionVO
+     * @return
+     */
+    @PostMapping("setWebVersion")
+    public R setWebVersion(@RequestBody WebVersionVO webVersionVO) {
+        return baseService.setWebVersion(webVersionVO);
+    }
+
 
     /**
      * 首页数据

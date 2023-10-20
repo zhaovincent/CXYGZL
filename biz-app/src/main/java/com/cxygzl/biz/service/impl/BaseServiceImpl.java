@@ -9,6 +9,7 @@ import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
+import com.cxygzl.biz.constants.SystemConstants;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.form.FormStrategyFactory;
@@ -27,6 +28,7 @@ import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -51,6 +53,22 @@ public class BaseServiceImpl implements IBaseService {
     private IProcessInstanceNodeRecordService processNodeRecordService;
     @Resource
     private IProcessInstanceAssignUserRecordService processNodeRecordAssignUserService;
+
+    @Resource
+    private RedisTemplate redisTemplate;
+    /**
+     * 修改前端版本号
+     *
+     * @param webVersionVO
+     * @return
+     */
+    @Override
+    public R setWebVersion(WebVersionVO webVersionVO) {
+
+        redisTemplate.opsForValue().set(SystemConstants.VERSION_REDIS_KEY,webVersionVO.getVersionNo());
+
+        return R.success();
+    }
 
     /**
      * 首页数据

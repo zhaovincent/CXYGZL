@@ -16,6 +16,7 @@ public enum ResultCode {
     LOGIN_USER_NOTFOUND(400, "用户不存在"),
 
     LOGIN_USER_FAIL(401, "用户名或密码错误"),
+    WEB_VERSION_LOW(403, "前端版本较低，请刷新浏览器缓存"),
     TOKEN_EXPIRED(402, "登录失效");
 
     @Getter

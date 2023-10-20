@@ -2,9 +2,18 @@ package com.cxygzl.biz.service;
 
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.QueryFormListParamVo;
+import com.cxygzl.biz.vo.WebVersionVO;
 import com.cxygzl.common.dto.R;
 
 public interface IBaseService {
+
+
+    /**
+     * 修改前端版本号
+     * @param webVersionVO
+     * @return
+     */
+    R setWebVersion(WebVersionVO webVersionVO);
 
     /**
      * 首页数据
