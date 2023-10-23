@@ -54,6 +54,11 @@ public class FormItemVO {
         private String regexDesc;
         private String unit;
         private Boolean halfSelect;
+        /**
+         * 是否使用上次的内容
+         * 签名表单
+         */
+        private Boolean lastContent;
 
         private Object suffixArray;
         private Object max;

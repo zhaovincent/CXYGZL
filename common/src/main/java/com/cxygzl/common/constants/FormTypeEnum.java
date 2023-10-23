@@ -34,6 +34,7 @@ public enum FormTypeEnum {
     SELECT_USER("SelectUser","单用户",new ArrayList<>()),
     SELECT_MULTI_DEPT("SelectMultiDept","多部门",new ArrayList<>()),
     SELECT_MULTI_USER("SelectMultiUser","多用户",new ArrayList<>()),
+    SIGNATURE("Signature","签名",null),
 
 
     ;
