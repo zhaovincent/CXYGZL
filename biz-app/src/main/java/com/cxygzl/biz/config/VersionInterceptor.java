@@ -47,15 +47,15 @@ public class VersionInterceptor implements WebMvcConfigurer {
             @Override
             public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
                 String cxygzlVersion = request.getHeader("CxygzlVersion");
-                log.info("前端请求版本号：{}", cxygzlVersion);
+                log.debug("前端请求版本号：{}", cxygzlVersion);
                 if (StrUtil.isBlank(cxygzlVersion)) {
                     return true;
                 }
                 String version = timedCache.get(SystemConstants.VERSION_REDIS_KEY,false);
-                log.info("本地缓存获取的版本号:{}",version);
+                log.debug("本地缓存获取的版本号:{}",version);
                 if (StrUtil.isBlank(version)) {
                     Object o = redisTemplate.opsForValue().get(SystemConstants.VERSION_REDIS_KEY);
-                    log.info("从redis中获取的版本号:{}",o);
+                    log.debug("从redis中获取的版本号:{}",o);
                     if (o == null) {
                         return true;
                     }
