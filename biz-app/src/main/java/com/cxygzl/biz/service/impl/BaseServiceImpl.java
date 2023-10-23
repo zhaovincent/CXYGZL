@@ -71,6 +71,18 @@ public class BaseServiceImpl implements IBaseService {
     }
 
     /**
+     * 获取当前系统前端版本号
+     *
+     * @return
+     */
+    @Override
+    public R getWebVersion() {
+        Object o = redisTemplate.opsForValue().get(SystemConstants.VERSION_REDIS_KEY);
+
+        return R.success(o);
+    }
+
+    /**
      * 首页数据
      *
      * @return

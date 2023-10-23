@@ -16,6 +16,12 @@ public interface IBaseService {
     R setWebVersion(WebVersionVO webVersionVO);
 
     /**
+     * 获取当前系统前端版本号
+     * @return
+     */
+    R getWebVersion();
+
+    /**
      * 首页数据
      *
      * @return

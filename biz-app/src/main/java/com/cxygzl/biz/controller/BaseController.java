@@ -27,6 +27,15 @@ public class BaseController {
         return baseService.setWebVersion(webVersionVO);
     }
 
+    /**
+     * 获取当前系统版本号
+     * @return
+     */
+    @GetMapping("getWebVersion")
+    public R getWebVersion() {
+        return baseService.getWebVersion();
+    }
+
 
     /**
      * 首页数据
