@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * 表单
  */
@@ -54,6 +56,7 @@ public class FormItemVO {
         private String regexDesc;
         private String unit;
         private Boolean halfSelect;
+        private List expList;
         /**
          * 是否使用上次的内容
          * 签名表单

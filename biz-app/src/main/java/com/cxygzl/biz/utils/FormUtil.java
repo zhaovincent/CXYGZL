@@ -12,7 +12,9 @@ public class FormUtil {
 
         if (formItemVO.getType().equals(FormTypeEnum.NUMBER.getType())
                 ||
-                formItemVO.getType().equals(FormTypeEnum.MONEY.getType())
+                formItemVO.getType().equals(FormTypeEnum.MONEY.getType()   )
+                ||
+                formItemVO.getType().equals(FormTypeEnum.FORMULA.getType()   )
         ) {
             if (StrUtil.isBlankIfStr(value)) {
                 formItemVO.getProps().setValue(null);

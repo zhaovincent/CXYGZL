@@ -631,6 +631,9 @@ public class ExpressionHandler {
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.NUMBER.getType())) {
             return numberHandler(userKey, symbol, Convert.toStr(o), userValue);
         }
+        if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.FORMULA.getType())) {
+            return numberHandler(userKey, symbol, Convert.toStr(o), userValue);
+        }
 
         if (StrUtil.equals(userFieldDto.getType(), FormTypeEnum.DATE.getType())) {
             return dateTimeHandler(userKey, symbol, Convert.toStr(o), userValue, "yyyy-MM-dd");

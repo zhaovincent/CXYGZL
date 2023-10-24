@@ -54,5 +54,6 @@ public class NumberNodeConditionStrategy implements NodeConditionStrategy, Initi
     @Override
     public void afterPropertiesSet() throws Exception {
         afterPropertiesSet(FormTypeEnum.NUMBER.getType());
+        afterPropertiesSet(FormTypeEnum.FORMULA.getType());
     }
 }

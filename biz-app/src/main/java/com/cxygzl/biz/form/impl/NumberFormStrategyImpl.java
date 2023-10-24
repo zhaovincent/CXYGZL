@@ -17,6 +17,7 @@ import java.util.List;
 public class NumberFormStrategyImpl implements InitializingBean, FormStrategy {
     @Override
     public void afterPropertiesSet() throws Exception {
+        afterPropertiesSet(FormTypeEnum.FORMULA.getType());
         afterPropertiesSet(FormTypeEnum.NUMBER.getType());
         afterPropertiesSet(FormTypeEnum.MONEY.getType());
         afterPropertiesSet(FormTypeEnum.SCORE.getType());

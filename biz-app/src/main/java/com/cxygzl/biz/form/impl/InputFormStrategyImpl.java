@@ -20,6 +20,8 @@ public class InputFormStrategyImpl implements InitializingBean, FormStrategy {
         afterPropertiesSet(FormTypeEnum.TEXTAREA.getType());
         afterPropertiesSet(FormTypeEnum.DESCRIPTION.getType());
         afterPropertiesSet(FormTypeEnum.SIGNATURE.getType());
+        afterPropertiesSet(FormTypeEnum.FORMULA.getType());
+
     }
 
     /**
