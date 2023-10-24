@@ -6,6 +6,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.cxygzl.biz.api.ApiStrategyFactory;
@@ -49,6 +50,9 @@ public class FormServiceImpl implements IFormService {
     private IProcessNodeDataService nodeDataService;
 
     @Resource
+    private ISignatureRecordService signatureRecordService;
+
+    @Resource
     private IProcessInstanceAssignUserRecordService processNodeRecordAssignUserService;
 
     @Resource
@@ -85,7 +89,7 @@ public class FormServiceImpl implements IFormService {
      * @return
      */
     @Override
-    public R getFormList(QueryFormListParamVo taskDto, boolean handleForm) {
+    public R getFormList(QueryFormListParamVo taskDto, boolean handleForm1) {
         String processInstanceId = taskDto.getProcessInstanceId();
         String flowId = taskDto.getFlowId();
         String taskId = taskDto.getTaskId();
@@ -606,6 +610,20 @@ public class FormServiceImpl implements IFormService {
 
                 formItemVOProps.setValue(CollUtil.newArrayList(nodeUserDto));
             }
+        }
+        if (StrUtil.equalsAny(formItemVO.getType(), FormTypeEnum.SIGNATURE.getType())&&formItemVOProps.getLastContent()&&StrUtil.isBlankIfStr(formItemVOProps.getValue())) {
+
+            ISignatureRecordService bean = SpringUtil.getBean(ISignatureRecordService.class);
+
+            List<SignatureRecord> signatureRecordList = bean.lambdaQuery().eq(SignatureRecord::getUserId, StpUtil.getLoginIdAsString())
+                    .orderByDesc(SignatureRecord::getCreateTime)
+                    .list();
+            if(CollUtil.isNotEmpty(signatureRecordList)){
+                SignatureRecord signatureRecord = signatureRecordList.get(0);
+                formItemVOProps.setValue(signatureRecord.getUrl());
+
+            }
+
         }
         if (StrUtil.equalsAny(formItemVO.getType(), FormTypeEnum.SELECT_DEPT.getType(), FormTypeEnum.SELECT_MULTI_DEPT.getType())) {
             Boolean defaultRoot = formItemVOProps.getDefaultRoot();
