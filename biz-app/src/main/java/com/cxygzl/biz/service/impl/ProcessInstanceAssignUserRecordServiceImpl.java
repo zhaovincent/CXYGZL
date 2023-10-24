@@ -81,6 +81,7 @@ public class ProcessInstanceAssignUserRecordServiceImpl extends ServiceImpl<Proc
         taskParamDto.setNodeId(processInstanceAssignUserRecord.getNodeId());
         taskParamDto.setTaskId(processInstanceAssignUserRecord.getTaskId());
         taskParamDto.setUserId(processInstanceAssignUserRecord.getUserId());
+        taskParamDto.setFlowId(processInstanceAssignUserRecord.getFlowId());
         ApiStrategyFactory.getStrategy().addWaitTask(CollUtil.newArrayList(taskParamDto));
 
 

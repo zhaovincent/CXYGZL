@@ -29,5 +29,9 @@ public class TaskParamDto {
      * 用户id
      */
     private String userId;
+    /**
+     * 流程id
+     */
+    private String flowId;
 
 }
