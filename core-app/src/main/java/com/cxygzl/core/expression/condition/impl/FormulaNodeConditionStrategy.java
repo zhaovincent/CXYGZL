@@ -15,7 +15,7 @@ import java.util.Map;
  * 字符类型处理器
  */
 @Component
-public class NumberNodeConditionStrategy implements NodeConditionStrategy, InitializingBean {
+public class FormulaNodeConditionStrategy implements NodeConditionStrategy, InitializingBean {
     /**
      * 抽象方法 处理表达式
      */
@@ -53,6 +53,6 @@ public class NumberNodeConditionStrategy implements NodeConditionStrategy, Initi
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        afterPropertiesSet(FormTypeEnum.NUMBER.getType());
+        afterPropertiesSet(FormTypeEnum.FORMULA.getType());
     }
 }

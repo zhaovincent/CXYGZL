@@ -62,6 +62,7 @@ public class FormItemVO {
          * 签名表单
          */
         private Boolean lastContent;
+        private Boolean readonly;
 
         private Object suffixArray;
         private Object max;
