@@ -18,10 +18,7 @@ import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.utils.FormUtil;
 import com.cxygzl.biz.utils.NodeFormatUtil;
 import com.cxygzl.biz.utils.NodeImageUtil;
-import com.cxygzl.biz.vo.NodeFormatParamVo;
-import com.cxygzl.biz.vo.ProcessInstanceCopyVo;
-import com.cxygzl.biz.vo.ProcessInstanceRecordVO;
-import com.cxygzl.biz.vo.TaskDetailViewVO;
+import com.cxygzl.biz.vo.*;
 import com.cxygzl.biz.vo.node.NodeImageVO;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.FormTypeEnum;
@@ -271,7 +268,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      * @return
      */
     @Override
-    public R queryMineEndTask(PageDto pageVO) {
+    public R queryMineEndTask(ProcessDataQueryVO pageVO) {
         TaskQueryParamDto taskQueryParamDto = BeanUtil.copyProperties(pageVO, TaskQueryParamDto.class);
         taskQueryParamDto.setAssign(StpUtil.getLoginIdAsString());
 
@@ -417,12 +414,14 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      * @return
      */
     @Override
-    public R queryMineStarted(PageDto pageDto) {
+    public R queryMineStarted(ProcessDataQueryVO pageDto) {
 
         String userId = StpUtil.getLoginIdAsString();
 
         Page<ProcessInstanceRecord> instanceRecordPage = processInstanceRecordService.lambdaQuery()
                 .eq(ProcessInstanceRecord::getUserId, userId)
+                .in(CollUtil.isNotEmpty(pageDto.getFlowIdList()), ProcessInstanceRecord::getFlowId,
+                        pageDto.getFlowIdList())
                 .orderByDesc(ProcessInstanceRecord::getCreateTime)
                 .page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()));
 
@@ -476,12 +475,14 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      * @return
      */
     @Override
-    public R queryMineCC(PageDto pageDto) {
+    public R queryMineCC(ProcessDataQueryVO pageDto) {
 
         String userId = StpUtil.getLoginIdAsString();
 
         Page<ProcessInstanceCopy> page = processCopyService.lambdaQuery()
                 .eq(ProcessInstanceCopy::getUserId, userId)
+                .in(CollUtil.isNotEmpty(pageDto.getFlowIdList()), ProcessInstanceCopy::getFlowId,
+                        pageDto.getFlowIdList())
                 .orderByDesc(ProcessInstanceCopy::getNodeTime)
                 .page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()));
 

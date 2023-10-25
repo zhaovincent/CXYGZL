@@ -1,6 +1,7 @@
 package com.cxygzl.biz.service;
 
 import com.cxygzl.biz.vo.NodeFormatParamVo;
+import com.cxygzl.biz.vo.ProcessDataQueryVO;
 import com.cxygzl.common.dto.NotifyMessageDto;
 import com.cxygzl.common.dto.PageDto;
 import com.cxygzl.common.dto.ProcessInstanceParamDto;
@@ -37,7 +38,7 @@ public interface IProcessInstanceService  {
      * @param pageVO
      * @return
      */
-    R queryMineEndTask(PageDto pageVO);
+    R queryMineEndTask(ProcessDataQueryVO pageVO);
 
     /**
      * 流程结束
@@ -52,14 +53,14 @@ public interface IProcessInstanceService  {
      * @param pageDto
      * @return
      */
-    R queryMineStarted(PageDto pageDto);
+    R queryMineStarted(ProcessDataQueryVO pageDto);
 
     /**
      * 查询抄送给我的
      * @param pageDto
      * @return
      */
-    R queryMineCC(PageDto pageDto);
+    R queryMineCC(ProcessDataQueryVO pageDto);
 
     /**
      * 显示流程实例图片

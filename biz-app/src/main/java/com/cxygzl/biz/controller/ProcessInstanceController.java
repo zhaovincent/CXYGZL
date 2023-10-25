@@ -2,6 +2,7 @@ package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.service.IProcessInstanceService;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
+import com.cxygzl.biz.vo.ProcessDataQueryVO;
 import com.cxygzl.common.dto.NotifyMessageDto;
 import com.cxygzl.common.dto.PageDto;
 import com.cxygzl.common.dto.ProcessInstanceParamDto;
@@ -68,7 +69,7 @@ public class ProcessInstanceController {
      */
     @SneakyThrows
     @PostMapping("queryMineEndTask")
-    public R queryMineEndTask(@RequestBody PageDto pageDto) {
+    public R queryMineEndTask(@RequestBody ProcessDataQueryVO pageDto) {
 
         return processInstanceService.queryMineEndTask(pageDto);
 
@@ -82,7 +83,7 @@ public class ProcessInstanceController {
      */
     @SneakyThrows
     @PostMapping("queryMineStarted")
-    public R queryMineStarted(@RequestBody PageDto pageDto) {
+    public R queryMineStarted(@RequestBody ProcessDataQueryVO pageDto) {
         return processInstanceService.queryMineStarted(pageDto);
     }
 
@@ -94,7 +95,7 @@ public class ProcessInstanceController {
      */
     @SneakyThrows
     @PostMapping("queryMineCC")
-    public R queryMineCC(@RequestBody PageDto pageDto) {
+    public R queryMineCC(@RequestBody ProcessDataQueryVO pageDto) {
         return processInstanceService.queryMineCC(pageDto);
     }
 

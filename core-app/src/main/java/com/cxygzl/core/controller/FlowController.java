@@ -1,5 +1,6 @@
 package com.cxygzl.core.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.json.JSONUtil;
 import com.cxygzl.common.config.NotWriteLogAnno;
@@ -213,6 +214,8 @@ public class FlowController {
     @PostMapping("/queryCompletedTask")
     public R queryCompletedTask(@RequestBody TaskQueryParamDto taskQueryParamDto) {
         HistoricActivityInstanceQuery historicActivityInstanceQuery = historyService.createHistoricActivityInstanceQuery();
+        if(CollUtil.isNotEmpty(taskQueryParamDto.getFlowIdList())){
+        }
         List<HistoricActivityInstance> list = historicActivityInstanceQuery
                 .taskAssignee(taskQueryParamDto.getAssign())
                 .finished()
