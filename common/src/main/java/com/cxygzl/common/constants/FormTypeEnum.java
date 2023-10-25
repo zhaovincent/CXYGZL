@@ -36,6 +36,7 @@ public enum FormTypeEnum {
     SELECT_MULTI_USER("SelectMultiUser","多用户",new ArrayList<>()),
     SIGNATURE("Signature","手写签名",null),
     FORMULA("Formula","计算公式",null),
+    RELATED_PROCESS("RelatedProcess","关联流程",null),
 
 
     ;
