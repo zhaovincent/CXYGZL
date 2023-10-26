@@ -6,6 +6,8 @@ import com.cxygzl.biz.vo.ProcessDataQueryVO;
 import com.cxygzl.biz.vo.ProcessVO;
 import com.cxygzl.common.dto.R;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务类
@@ -57,4 +59,11 @@ public interface IProcessService extends IService<Process> {
      * @return
      */
     R queryDataList(ProcessDataQueryVO pageDto);
+
+    /**
+     * 查询所有关联的流程id
+     * @param flowIdList
+     * @return
+     */
+    R<List<String>> getAllRelatedFlowId(List<String> flowIdList);
 }

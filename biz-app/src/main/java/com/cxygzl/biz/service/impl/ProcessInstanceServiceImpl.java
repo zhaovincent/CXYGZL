@@ -418,10 +418,17 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         String userId = StpUtil.getLoginIdAsString();
 
+        //查询所有的流程id
+        List<String> allFlowIdList=new ArrayList<>();
+        if(CollUtil.isNotEmpty(pageDto.getFlowIdList())){
+            List<String> data = processService.getAllRelatedFlowId(pageDto.getFlowIdList()).getData();
+            allFlowIdList.addAll(data);
+        }
+
         Page<ProcessInstanceRecord> instanceRecordPage = processInstanceRecordService.lambdaQuery()
                 .eq(ProcessInstanceRecord::getUserId, userId)
-                .in(CollUtil.isNotEmpty(pageDto.getFlowIdList()), ProcessInstanceRecord::getFlowId,
-                        pageDto.getFlowIdList())
+                .in(CollUtil.isNotEmpty(allFlowIdList), ProcessInstanceRecord::getFlowId,
+                        allFlowIdList)
                 .orderByDesc(ProcessInstanceRecord::getCreateTime)
                 .page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()));
 

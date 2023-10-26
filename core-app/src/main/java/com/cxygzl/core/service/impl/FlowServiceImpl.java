@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.Map;
 
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.ENABLE_SKIP_EXPRESSION;
@@ -158,4 +159,6 @@ public class FlowServiceImpl implements IFlowService {
         runtimeService.messageEventReceived(msgId, execution.getId());
         return R.success();
     }
+
+
 }

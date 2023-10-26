@@ -48,10 +48,8 @@ import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -524,5 +522,20 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         dataMap.put("records", records);
         dataMap.put("total", dataSet.total());
         return R.success(dataMap);
+    }
+
+    /**
+     * 查询所有关联的流程id
+     *
+     * @param flowIdList
+     * @return
+     */
+    @Override
+    public R<List<String>> getAllRelatedFlowId(List<String> flowIdList) {
+        List<Process> list = this.lambdaQuery().in(Process::getFlowId, flowIdList).list();
+        Set<String> uniqueIdSet = list.stream().map(w -> w.getUniqueId()).collect(Collectors.toSet());
+        List<Process> processList = this.lambdaQuery().in(Process::getUniqueId, uniqueIdSet).list();
+        List<String> collect = processList.stream().map(w -> w.getFlowId()).collect(Collectors.toList());
+        return R.success(collect);
     }
 }
