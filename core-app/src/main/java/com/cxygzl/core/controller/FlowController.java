@@ -1,6 +1,5 @@
 package com.cxygzl.core.controller;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.json.JSONUtil;
 import com.cxygzl.common.config.NotWriteLogAnno;
@@ -19,6 +18,8 @@ import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricActivityInstanceQuery;
 import org.flowable.engine.history.HistoricProcessInstance;
+import org.flowable.engine.history.HistoricProcessInstanceQuery;
+import org.flowable.engine.impl.persistence.entity.HistoricProcessInstanceEntityImpl;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.image.impl.DefaultProcessDiagramGenerator;
@@ -206,6 +207,57 @@ public class FlowController {
     }
 
     /**
+     * 获取我已办的流程实例
+     * @param processQueryParamDto
+     * @return
+     */
+    @PostMapping("queryCompletedProcessInstance")
+    public R queryCompletedProcessInstance(@RequestBody ProcessQueryParamDto processQueryParamDto) {
+        HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery();
+        List<HistoricProcessInstance> list = historicProcessInstanceQuery
+
+                .involvedUser(processQueryParamDto.getAssign())
+                .processDefinitionKeyIn(processQueryParamDto.getFlowIdList())
+                .orderByProcessInstanceStartTime().desc()
+                .listPage((processQueryParamDto.getPageNum() - 1) * processQueryParamDto.getPageSize(),
+                        processQueryParamDto.getPageSize());
+
+        long count = historicProcessInstanceQuery
+
+                .involvedUser(processQueryParamDto.getAssign())
+                .processDefinitionKeyIn(processQueryParamDto.getFlowIdList()).count();
+
+
+
+        List<ProcessInstanceDto> processInstanceParamDtoList=new ArrayList<>();
+
+        for (HistoricProcessInstance historicProcessInstance : list) {
+
+            HistoricProcessInstanceEntityImpl historicProcessInstanceEntity= (HistoricProcessInstanceEntityImpl) historicProcessInstance;
+            String processInstanceId = historicProcessInstanceEntity.getProcessInstanceId();
+            String flowId = historicProcessInstanceEntity.getProcessDefinitionKey();
+            String processName = historicProcessInstanceEntity.getProcessDefinitionName();
+
+            ProcessInstanceDto processInstanceDto=new ProcessInstanceDto();
+            processInstanceDto.setProcessInstanceId(processInstanceId);
+            processInstanceDto.setFlowId(flowId);
+            processInstanceDto.setProcessName(processName);
+            processInstanceDto.setStartUserId(historicProcessInstance.getStartUserId());
+            processInstanceDto.setStartTime(historicProcessInstance.getStartTime());
+            processInstanceDto.setEndTime(historicProcessInstance.getEndTime());
+            processInstanceParamDtoList.add(processInstanceDto);
+
+
+        }
+        PageResultDto<ProcessInstanceDto> pageResultDto = new PageResultDto<>();
+        pageResultDto.setTotal(count);
+        pageResultDto.setRecords(processInstanceParamDtoList);
+
+
+        return R.success(pageResultDto);
+    }
+
+    /**
      * 查询用户已办任务
      *
      * @param taskQueryParamDto
@@ -214,8 +266,7 @@ public class FlowController {
     @PostMapping("/queryCompletedTask")
     public R queryCompletedTask(@RequestBody TaskQueryParamDto taskQueryParamDto) {
         HistoricActivityInstanceQuery historicActivityInstanceQuery = historyService.createHistoricActivityInstanceQuery();
-        if(CollUtil.isNotEmpty(taskQueryParamDto.getFlowIdList())){
-        }
+
         List<HistoricActivityInstance> list = historicActivityInstanceQuery
                 .taskAssignee(taskQueryParamDto.getAssign())
                 .finished()

@@ -16,4 +16,5 @@ public class ProcessInstanceCopyVo extends ProcessInstanceCopy {
     private List<Dict> formValueShowList;
 
     private Integer processInstanceResult;
+    private Integer processInstanceStatus;
 }

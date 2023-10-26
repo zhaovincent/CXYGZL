@@ -359,6 +359,75 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     }
 
     /**
+     * 查询已办任务的流程实例
+     *
+     * @param pageVO
+     * @return
+     */
+    @Override
+    public R queryMineDoneProcessInstance(ProcessDataQueryVO pageVO) {
+
+        List<String> flowIdList = pageVO.getFlowIdList();
+        if(CollUtil.isNotEmpty(flowIdList)){
+            flowIdList= processService.getAllRelatedFlowId(flowIdList).getData();
+        }
+
+        ProcessQueryParamDto processQueryParamDto = BeanUtil.copyProperties(pageVO, ProcessQueryParamDto.class);
+        processQueryParamDto.setAssign(StpUtil.getLoginIdAsString());
+        processQueryParamDto.setFlowIdList(flowIdList);
+        R<PageResultDto<ProcessInstanceDto>> r = CoreHttpUtil.queryCompletedProcessInstance(processQueryParamDto);
+
+        PageResultDto<ProcessInstanceDto> pageResultDto = r.getData();
+        List<ProcessInstanceDto> records = pageResultDto.getRecords();
+        if (CollUtil.isEmpty(records)) {
+            return com.cxygzl.common.dto.R.success(pageResultDto);
+
+        }
+
+
+        Set<String> processInstanceIdSet = records.stream().map(w -> w.getProcessInstanceId()).collect(Collectors.toSet());
+
+        //流程实例记录
+        List<ProcessInstanceRecord> processInstanceRecordList = processInstanceRecordService.lambdaQuery().in(ProcessInstanceRecord::getProcessInstanceId,
+                processInstanceIdSet).list();
+
+        //发起人
+        Set<String> startUserIdSet =
+                processInstanceRecordList.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
+
+        List<UserDto> startUserList = new ArrayList<>();
+        {
+            for (String userIds : startUserIdSet) {
+                UserDto user = ApiStrategyFactory.getStrategy().getUser(userIds);
+                startUserList.add(user);
+            }
+        }
+
+
+        for (ProcessInstanceDto record : records) {
+
+            ProcessInstanceRecord processInstanceRecord = processInstanceRecordList.stream().filter(w -> StrUtil.equals(w.getProcessInstanceId(),
+                    record.getProcessInstanceId())).findAny().orElse(null);
+
+            if (processInstanceRecord != null) {
+
+                record.setProcessName(processInstanceRecord.getName());
+
+
+                UserDto startUser = startUserList.stream().filter(w -> w.getId()
+                        .equals(processInstanceRecord.getUserId())).findAny().orElse(null);
+                record.setGroupName(processInstanceRecord.getGroupName());
+                record.setStartUserName(startUser.getName());
+                record.setProcessInstanceResult(processInstanceRecord.getResult());
+                record.setProcessInstanceStatus(processInstanceRecord.getStatus());
+            }
+
+        }
+
+        return R.success(pageResultDto);
+    }
+
+    /**
      * 流程结束
      *
      * @param processInstanceParamDto

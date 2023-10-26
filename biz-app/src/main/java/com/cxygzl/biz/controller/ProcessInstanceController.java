@@ -1,6 +1,7 @@
 package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.service.IProcessInstanceService;
+import com.cxygzl.biz.service.IProcessInstanceUserCopyService;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.ProcessDataQueryVO;
 import com.cxygzl.common.dto.NotifyMessageDto;
@@ -21,6 +22,9 @@ public class ProcessInstanceController {
 
     @Resource
     private IProcessInstanceService processInstanceService;
+
+    @Resource
+    private IProcessInstanceUserCopyService processInstanceUserCopyService;
 
     /**
      * 消息通知事件
@@ -74,6 +78,19 @@ public class ProcessInstanceController {
         return processInstanceService.queryMineEndTask(pageDto);
 
     }
+    /**
+     * 查询当前登录用户已办任务的流程实例
+     *
+     * @param pageDto
+     * @return
+     */
+    @SneakyThrows
+    @PostMapping("queryMineDoneProcessInstance")
+    public R queryMineDoneProcessInstance(@RequestBody ProcessDataQueryVO pageDto) {
+
+        return processInstanceService.queryMineDoneProcessInstance(pageDto);
+
+    }
 
     /**
      * 查询我发起的
@@ -97,6 +114,17 @@ public class ProcessInstanceController {
     @PostMapping("queryMineCC")
     public R queryMineCC(@RequestBody ProcessDataQueryVO pageDto) {
         return processInstanceService.queryMineCC(pageDto);
+    }
+    /**
+     * 查询抄送我的流程实例
+     *
+     * @param pageDto
+     * @return
+     */
+    @SneakyThrows
+    @PostMapping("queryMineCCProcessInstance")
+    public R queryMineCCProcessInstance(@RequestBody ProcessDataQueryVO pageDto) {
+        return processInstanceUserCopyService.queryMineCCProcessInstance(pageDto);
     }
 
     /**

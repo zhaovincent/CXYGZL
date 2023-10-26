@@ -2,7 +2,6 @@ package com.cxygzl.biz.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.biz.api.ApiStrategyFactory;
@@ -23,12 +22,12 @@ import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,6 +46,8 @@ public class RemoteServiceImpl implements IRemoteService {
     private IProcessInstanceService processInstanceService;
     @Resource
     private IProcessInstanceCopyService processCopyService;
+    @Resource
+    private IProcessInstanceUserCopyService processInstanceUserCopyService;
     @Resource
     private IProcessService processService;
     @Resource
@@ -118,37 +119,40 @@ public class RemoteServiceImpl implements IRemoteService {
      * @param copyDto
      * @return
      */
+    @Transactional
     @Override
     public R saveCC(ProcessInstanceCopyDto copyDto) {
 
         String processInstanceId = copyDto.getProcessInstanceId();
 
-
-        //如果抄送是第一个节点 会出现查询不到的情况
-
-        ThreadUtil.execute(() -> {
-            try {
-                ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
-
-                int index = 10;
-                while (index > 0 && processInstanceRecord == null) {
-                    TimeUnit.SECONDS.sleep(5);
-                    processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
-                    index--;
-                }
-
-                ProcessInstanceCopy processInstanceCopy = BeanUtil.copyProperties(copyDto, ProcessInstanceCopy.class);
-                processInstanceCopy.setGroupId(Long.valueOf(processInstanceRecord.getGroupId()));
-                processInstanceCopy.setGroupName(processInstanceRecord.getGroupName());
-                processInstanceCopy.setProcessName(processInstanceRecord.getName());
-                processInstanceCopy.setStartTime(processInstanceRecord.getCreateTime());
+        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
 
 
-                processCopyService.save(processInstanceCopy);
-            } catch (Exception e) {
-                log.error("Error:", e);
-            }
-        });
+
+        ProcessInstanceCopy processInstanceCopy = BeanUtil.copyProperties(copyDto, ProcessInstanceCopy.class);
+        processInstanceCopy.setGroupId(Long.valueOf(processInstanceRecord.getGroupId()));
+        processInstanceCopy.setGroupName(processInstanceRecord.getGroupName());
+        processInstanceCopy.setProcessName(processInstanceRecord.getName());
+        processInstanceCopy.setStartTime(processInstanceRecord.getCreateTime());
+
+
+        processCopyService.save(processInstanceCopy);
+
+        Long count = processInstanceUserCopyService.lambdaQuery()
+                .eq(ProcessInstanceUserCopy::getUserId, copyDto.getUserId())
+                .eq(ProcessInstanceUserCopy::getProcessInstanceId, copyDto.getProcessInstanceId())
+                .count();
+
+        log.info("抄送数量:{} {} {}",copyDto.getUserId(),copyDto.getProcessInstanceId(),count);
+        if(count==0){
+            ProcessInstanceUserCopy processInstanceUserCopy = BeanUtil.copyProperties(copyDto, ProcessInstanceUserCopy.class);
+            processInstanceUserCopy.setGroupId(Long.valueOf(processInstanceRecord.getGroupId()));
+            processInstanceUserCopy.setGroupName(processInstanceRecord.getGroupName());
+            processInstanceUserCopy.setProcessName(processInstanceRecord.getName());
+
+
+            processInstanceUserCopyService.save(processInstanceUserCopy);
+        }
 
 
         return R.success();
@@ -494,7 +498,6 @@ public class RemoteServiceImpl implements IRemoteService {
     public R taskEndEvent(ProcessInstanceAssignUserRecordParamDto processInstanceAssignUserRecordParamDto) {
         return processNodeRecordAssignUserService.taskEndEvent(processInstanceAssignUserRecordParamDto);
     }
-
 
 
     /**

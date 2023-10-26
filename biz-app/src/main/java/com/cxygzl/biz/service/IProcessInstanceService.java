@@ -41,6 +41,13 @@ public interface IProcessInstanceService  {
     R queryMineEndTask(ProcessDataQueryVO pageVO);
 
     /**
+     *  查询已办任务的流程实例
+     * @param pageVO
+     * @return
+     */
+    R queryMineDoneProcessInstance(ProcessDataQueryVO pageVO);
+
+    /**
      * 流程结束
      *
      * @param processInstanceParamDto

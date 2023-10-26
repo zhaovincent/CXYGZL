@@ -178,6 +178,21 @@ public class CoreHttpUtil {
     }
 
     /**
+     * 查询已办任务的流程实例
+     *
+     * @param jsonObject
+     * @return
+     */
+    public static com.cxygzl.common.dto.R<PageResultDto<ProcessInstanceDto>> queryCompletedProcessInstance(ProcessQueryParamDto jsonObject) {
+
+        String post = post(jsonObject, "/flow/queryCompletedProcessInstance");
+        com.cxygzl.common.dto.R<PageResultDto<ProcessInstanceDto>> r = JsonUtil.parseObject(post, new JsonUtil.TypeReference<com.cxygzl.common.dto.R<PageResultDto<ProcessInstanceDto>>>() {
+        });
+        return r;
+
+    }
+
+    /**
      * 完成任务
      *
      * @param jsonObject
