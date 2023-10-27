@@ -1,5 +1,6 @@
 package com.cxygzl.core.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.json.JSONUtil;
 import com.cxygzl.common.config.NotWriteLogAnno;
@@ -214,10 +215,14 @@ public class FlowController {
     @PostMapping("queryCompletedProcessInstance")
     public R queryCompletedProcessInstance(@RequestBody ProcessQueryParamDto processQueryParamDto) {
         HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery();
+
+        if(CollUtil.isNotEmpty(processQueryParamDto.getFlowIdList())){
+            historicProcessInstanceQuery= historicProcessInstanceQuery.processDefinitionKeyIn(processQueryParamDto.getFlowIdList());
+        }
+
         List<HistoricProcessInstance> list = historicProcessInstanceQuery
 
                 .involvedUser(processQueryParamDto.getAssign())
-                .processDefinitionKeyIn(processQueryParamDto.getFlowIdList())
                 .orderByProcessInstanceStartTime().desc()
                 .listPage((processQueryParamDto.getPageNum() - 1) * processQueryParamDto.getPageSize(),
                         processQueryParamDto.getPageSize());
@@ -225,7 +230,7 @@ public class FlowController {
         long count = historicProcessInstanceQuery
 
                 .involvedUser(processQueryParamDto.getAssign())
-                .processDefinitionKeyIn(processQueryParamDto.getFlowIdList()).count();
+              .count();
 
 
 
