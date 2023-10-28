@@ -2,9 +2,13 @@ package com.cxygzl.biz.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.cxygzl.biz.constants.ValidGroup;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * <p>
@@ -43,24 +47,28 @@ public class Process  extends BaseEntity {
     /**
      * 设置项
      */
+    @NotBlank(groups = {ValidGroup.Crud.Create.class},message = "设置不能为空")
     @TableField("`settings`")
     private String settings;
 
     /**
      * 分组ID
      */
+    @NotNull(groups = {ValidGroup.Crud.Create.class},message = "请设置分组")
     @TableField("`group_id`")
     private Long groupId;
 
     /**
      * 表单设置内容
      */
+    @NotBlank(groups = {ValidGroup.Crud.Create.class},message = "请设置表单")
     @TableField("`form_items`")
     private String formItems;
 
     /**
      * 流程设置内容
      */
+    @NotBlank(groups = {ValidGroup.Crud.Create.class},message = "请设置流程")
     @TableField("`process`")
     private String process;
 
@@ -69,6 +77,7 @@ public class Process  extends BaseEntity {
      */
     @TableField("`remark`")
     private String remark;
+
     @TableField("`sort`")
     private Integer sort;
 

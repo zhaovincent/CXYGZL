@@ -4,13 +4,18 @@ import com.cxygzl.common.dto.IndexPageStatistics;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.VariableQueryParamDto;
 import lombok.extern.slf4j.Slf4j;
-import org.flowable.engine.*;
+import org.flowable.engine.HistoryService;
+import org.flowable.engine.RuntimeService;
+import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricActivityInstanceQuery;
 import org.flowable.task.api.TaskQuery;
+import org.flowable.variable.api.history.HistoricVariableInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -63,9 +68,21 @@ public class ProcessInstanceController {
     @PostMapping("queryVariables")
     public R queryVariables(@RequestBody VariableQueryParamDto paramDto) {
 
+        long count = runtimeService.createProcessInstanceQuery().processInstanceId(paramDto.getExecutionId()).count();
+        if(count>0){
 
-        Map<String, Object> variables = runtimeService.getVariables(paramDto.getExecutionId());
+            Map<String, Object> variables = runtimeService.getVariables(paramDto.getExecutionId());
 
+
+            return R.success(variables);
+        }
+
+        List<HistoricVariableInstance> list = historyService.createHistoricVariableInstanceQuery().processInstanceId(paramDto.getExecutionId()).list();
+
+        Map<String, Object> variables=new HashMap<>();
+        for (HistoricVariableInstance historicVariableInstance : list) {
+            variables.put(historicVariableInstance.getVariableName(),historicVariableInstance.getValue());
+        }
 
         return R.success(variables);
 

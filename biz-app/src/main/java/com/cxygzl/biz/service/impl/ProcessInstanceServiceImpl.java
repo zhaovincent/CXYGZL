@@ -368,8 +368,8 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     public R queryMineDoneProcessInstance(ProcessDataQueryVO pageVO) {
 
         List<String> flowIdList = pageVO.getFlowIdList();
-        if(CollUtil.isNotEmpty(flowIdList)){
-            flowIdList= processService.getAllRelatedFlowId(flowIdList).getData();
+        if (CollUtil.isNotEmpty(flowIdList)) {
+            flowIdList = processService.getAllRelatedFlowId(flowIdList).getData();
         }
 
         ProcessQueryParamDto processQueryParamDto = BeanUtil.copyProperties(pageVO, ProcessQueryParamDto.class);
@@ -488,8 +488,8 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         String userId = StpUtil.getLoginIdAsString();
 
         //查询所有的流程id
-        List<String> allFlowIdList=new ArrayList<>();
-        if(CollUtil.isNotEmpty(pageDto.getFlowIdList())){
+        List<String> allFlowIdList = new ArrayList<>();
+        if (CollUtil.isNotEmpty(pageDto.getFlowIdList())) {
             List<String> data = processService.getAllRelatedFlowId(pageDto.getFlowIdList()).getData();
             allFlowIdList.addAll(data);
         }
@@ -507,15 +507,8 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         }
 
 
-        Set<String> processInstanceIdSet = records.stream().map(w -> w.getProcessInstanceId()).collect(Collectors.toSet());
-
-        //流程实例记录
-        List<ProcessInstanceRecord> processInstanceRecordList = processInstanceRecordService.lambdaQuery().in(ProcessInstanceRecord::getProcessInstanceId,
-                processInstanceIdSet).list();
-
-
         //流程配置
-        Set<String> flowIdSet = processInstanceRecordList.stream().map(w -> w.getFlowId()).collect(Collectors.toSet());
+        Set<String> flowIdSet = records.stream().map(w -> w.getFlowId()).collect(Collectors.toSet());
         List<Process> processList = processService.lambdaQuery().in(Process::getFlowId, flowIdSet).list();
 
         List<ProcessInstanceRecordVO> processInstanceRecordVOList = BeanUtil.copyToList(records, ProcessInstanceRecordVO.class);
@@ -542,6 +535,45 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
 
         return com.cxygzl.common.dto.R.success(page);
+    }
+
+    /**
+     * 查询流程实例详情
+     *
+     * @param processInstanceId
+     * @return
+     */
+    @Override
+    public R queryDetailByProcessInstanceId(String processInstanceId) {
+
+
+        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
+
+        Process process = processService.getByFlowId(processInstanceRecord.getFlowId());
+
+        ProcessInstanceRecordVO record = BeanUtil.copyProperties(processInstanceRecord, ProcessInstanceRecordVO.class);
+
+
+        //流程配置
+
+        UserDto userDto = ApiStrategyFactory.getStrategy().getUser(processInstanceRecord.getUserId());
+
+
+        VariableQueryParamDto variableQueryParamDto = new VariableQueryParamDto();
+        variableQueryParamDto.setExecutionId(processInstanceId);
+        Map<String, Object> data = CoreHttpUtil.queryVariables(variableQueryParamDto).getData();
+
+
+        List<Dict> formValueShowList = getFormValueShowList(process, record.getFlowId(), null, data);
+
+        record.setFormValueShowList(formValueShowList);
+        record.setFormData(null);
+        record.setProcess(null);
+        record.setRootUserAvatarUrl(userDto.getAvatarUrl());
+        record.setRootUserName(userDto.getName());
+
+
+        return com.cxygzl.common.dto.R.success(record);
     }
 
     /**
@@ -629,14 +661,25 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     private List<Dict> getFormValueShowList(Process process, String flowId, String nodeId, Map<String, Object> paramMap) {
         String formItems = process.getFormItems();
         List<FormItemVO> formItemVOList = JsonUtil.parseArray(formItems, FormItemVO.class);
-        String data = processNodeDataService.getNodeData(flowId, nodeId).getData();
-        Node node = JsonUtil.parseObject(data, Node.class);
-        Map<String, String> map = node.getFormPerms();
+
+        Map<String, String> formPermMap=new HashMap<>();
+
+        if(StrUtil.isNotBlank(nodeId)){
+            String data = processNodeDataService.getNodeData(flowId, nodeId).getData();
+            Node node = JsonUtil.parseObject(data, Node.class);
+            Map<String, String> map = node.getFormPerms();
+            formPermMap.putAll(map);
+        }else{
+            for (FormItemVO formItemVO : formItemVOList) {
+                formPermMap.put(formItemVO.getId(), ProcessInstanceConstant.FormPermClass.READ);
+            }
+        }
+
 
         List<Dict> formValueShowList = new ArrayList<>();
 
 
-        buildFormValueShow(paramMap, formItemVOList, map, formValueShowList);
+        buildFormValueShow(paramMap, formItemVOList, formPermMap, formValueShowList);
 
         List<Dict> list = formValueShowList.size() > 3 ? (formValueShowList.subList(0, 3)) : formValueShowList;
         return list;

@@ -211,6 +211,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
     @Override
     public R create(ProcessVO processVO) {
 
+
         String uniqueId = "";
 
         {
@@ -338,8 +339,12 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         {
             if (StrUtil.isNotBlank(processVO.getFlowId())) {
                 Process process = this.getByFlowId(processVO.getFlowId());
+
                 FlowSettingDto flowSettingDto = JsonUtil.parseObject(process.getSettings(), FlowSettingDto.class);
-                FlowSettingDto.DbRecord dbRecord = flowSettingDto.getDbRecord();
+                FlowSettingDto.DbRecord dbRecord =null;
+                if(flowSettingDto!=null){
+                    dbRecord = flowSettingDto.getDbRecord();
+                }
                 if (dbRecord == null || !dbRecord.getEnable()) {
                     handleDbTable(processVO, p.getUniqueId(), false);
                 } else {

@@ -6,8 +6,11 @@ import com.cxygzl.common.dto.R;
 import com.yomahub.tlog.context.TLogContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.stream.Collectors;
 
 /**
  * @author : willian fu
@@ -38,6 +41,24 @@ public class GlobalExceptionHandler {
     public R runtimeExceptionHandler(RuntimeException e){
         log.error("RuntimeException：",e);
         R fail = R.fail(e.getMessage());
+        fail.setTraceId(TLogContext.getTraceId());
+        return fail;
+
+    }
+
+    /**
+     * 参数校验
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public R paramCheckExceptionHandler(MethodArgumentNotValidException e){
+        log.error("MethodArgumentNotValidException：",e);
+
+        String s = e.getBindingResult().getAllErrors().stream()
+                .map(w -> w.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+        R fail = R.fail(s);
         fail.setTraceId(TLogContext.getTraceId());
         return fail;
 

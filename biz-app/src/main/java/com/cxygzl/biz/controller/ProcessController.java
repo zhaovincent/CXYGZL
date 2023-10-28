@@ -1,13 +1,16 @@
 package com.cxygzl.biz.controller;
 
+import com.cxygzl.biz.constants.ValidGroup;
 import com.cxygzl.biz.service.IProcessService;
 import com.cxygzl.biz.vo.ProcessDataQueryVO;
 import com.cxygzl.biz.vo.ProcessVO;
 import com.cxygzl.common.dto.R;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
+@Validated
 @RestController
 @RequestMapping(value = {"process", "api/process"})
 public class ProcessController {
@@ -33,7 +36,7 @@ public class ProcessController {
      * @return
      */
     @PostMapping("create")
-    public R create(@RequestBody ProcessVO processVO) {
+    public R create(@Validated(value= ValidGroup.Crud.Create.class) @RequestBody ProcessVO processVO) {
         return processService.create(processVO);
     }
 

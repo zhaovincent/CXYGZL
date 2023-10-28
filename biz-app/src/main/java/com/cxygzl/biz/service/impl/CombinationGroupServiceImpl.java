@@ -67,12 +67,18 @@ public class CombinationGroupServiceImpl implements ICombinationGroupService {
 
                 String settings = process.getSettings();
                 FlowSettingDto flowSettingDto = JsonUtil.parseObject(settings, FlowSettingDto.class);
-                FlowSettingDto.DbRecord dbRecord = flowSettingDto.getDbRecord();
-
-
                 Boolean dbRecordEnable = false;
-                if (dbRecord != null) {
-                    dbRecordEnable = dbRecord.getEnable();
+
+                if(flowSettingDto!=null){
+                    FlowSettingDto.DbRecord dbRecord = flowSettingDto.getDbRecord();
+
+
+                    if (dbRecord != null) {
+                        dbRecordEnable = dbRecord.getEnable();
+                    }
+
+                }else{
+                    log.info("流程设置为空:{}",process.getFlowId());
                 }
 
 

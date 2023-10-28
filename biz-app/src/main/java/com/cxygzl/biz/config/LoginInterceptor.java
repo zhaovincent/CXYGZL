@@ -31,7 +31,7 @@ public class LoginInterceptor implements WebMvcConfigurer {
                     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
                         boolean login = StpUtil.isLogin();
                         if (!login) {
-                            log.info("未登录地址:{}", request.getServletPath());
+                            log.debug("未登录地址:{}", request.getServletPath());
                             throw new LoginExpiredException(ResultCode.TOKEN_EXPIRED.getMsg(),
                                     ResultCode.TOKEN_EXPIRED.getCode(),
                                     "");

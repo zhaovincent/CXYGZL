@@ -78,6 +78,7 @@ public class ProcessInstanceController {
         return processInstanceService.queryMineEndTask(pageDto);
 
     }
+
     /**
      * 查询当前登录用户已办任务的流程实例
      *
@@ -98,11 +99,22 @@ public class ProcessInstanceController {
      * @param pageDto
      * @return
      */
-    @SneakyThrows
     @PostMapping("queryMineStarted")
     public R queryMineStarted(@RequestBody ProcessDataQueryVO pageDto) {
         return processInstanceService.queryMineStarted(pageDto);
     }
+
+    /**
+     * 查询流程实例详情
+     *
+     * @param processInstanceId
+     * @return
+     */
+    @GetMapping("queryDetailByProcessInstanceId")
+    public R queryDetailByProcessInstanceId(String processInstanceId) {
+        return processInstanceService.queryDetailByProcessInstanceId(processInstanceId);
+    }
+
 
     /**
      * 查询抄送我的
@@ -115,6 +127,7 @@ public class ProcessInstanceController {
     public R queryMineCC(@RequestBody ProcessDataQueryVO pageDto) {
         return processInstanceService.queryMineCC(pageDto);
     }
+
     /**
      * 查询抄送我的流程实例
      *

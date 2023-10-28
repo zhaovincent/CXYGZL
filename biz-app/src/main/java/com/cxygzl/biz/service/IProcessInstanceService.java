@@ -63,6 +63,13 @@ public interface IProcessInstanceService  {
     R queryMineStarted(ProcessDataQueryVO pageDto);
 
     /**
+     * 查询流程实例详情
+     * @param processInstanceId
+     * @return
+     */
+    R queryDetailByProcessInstanceId(String processInstanceId);
+
+    /**
      * 查询抄送给我的
      * @param pageDto
      * @return
