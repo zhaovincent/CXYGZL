@@ -15,6 +15,7 @@ import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.vo.NextNodeQueryVO;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.TaskDto;
 import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.third.UserDto;
@@ -160,17 +161,21 @@ public class TaskServiceImpl implements ITaskService {
             ProcessInstanceAssignUserRecord processInstanceAssignUserRecord = processNodeRecordAssignUserService.lambdaQuery()
                     .eq(ProcessInstanceAssignUserRecord::getTaskId, taskId)
                     .eq(ProcessInstanceAssignUserRecord::getUserId, StpUtil.getLoginIdAsString())
-                    .one();
+                    .orderByDesc(ProcessInstanceAssignUserRecord::getCreateTime).list().get(0);
+            //查询未执行的人员--待办人员
+            R<List<TaskDto>> listR = CoreHttpUtil.queryTaskAssignee(processInstanceAssignUserRecord.getNodeId(),
+                    processInstanceAssignUserRecord.getProcessInstanceId());
+            if(!listR.isOk()){
+                return R.fail(listR.getMsg());
+            }
+            List<TaskDto> taskDtoList = listR.getData();
+            //过滤一下要减签的
+            List<TaskDto> collect =
+                    taskDtoList.stream().filter(w -> targetUserIdList.contains(w.getAssign())).collect(Collectors.toList());
 
-            List<ProcessInstanceAssignUserRecord> list = processNodeRecordAssignUserService.lambdaQuery()
-                    .eq(ProcessInstanceAssignUserRecord::getProcessInstanceId, processInstanceAssignUserRecord.getProcessInstanceId())
-                    .eq(ProcessInstanceAssignUserRecord::getFlowUniqueId, processInstanceAssignUserRecord.getFlowUniqueId())
-                    .eq(ProcessInstanceAssignUserRecord::getNodeId, processInstanceAssignUserRecord.getNodeId())
-                    .eq(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.JXZ.getCode())
-                    .in(ProcessInstanceAssignUserRecord::getUserId, targetUserIdList)
-                    .list();
-            if (CollUtil.isNotEmpty(list)) {
-                Set<String> uidSet = list.stream().map(w -> w.getUserId()).collect(Collectors.toSet());
+
+            if (CollUtil.isNotEmpty(collect)) {
+                Set<String> uidSet = collect.stream().map(w -> w.getAssign()).collect(Collectors.toSet());
 
                 List<String> userNameList = new ArrayList<>();
                 for (String s : uidSet) {
@@ -217,24 +222,31 @@ public class TaskServiceImpl implements ITaskService {
         //判断当前用户是否已经存在了
         String taskId = taskParamDto.getTaskId();
 
+
+
         {
             ProcessInstanceAssignUserRecord processInstanceAssignUserRecord = processNodeRecordAssignUserService.lambdaQuery()
                     .eq(ProcessInstanceAssignUserRecord::getTaskId, taskId)
                     .eq(ProcessInstanceAssignUserRecord::getUserId, StpUtil.getLoginIdAsString())
-                    .one();
+                    .orderByDesc(ProcessInstanceAssignUserRecord::getCreateTime).list().get(0);
 
-            List<ProcessInstanceAssignUserRecord> list = processNodeRecordAssignUserService.lambdaQuery()
-                    .eq(ProcessInstanceAssignUserRecord::getProcessInstanceId, processInstanceAssignUserRecord.getProcessInstanceId())
-                    .eq(ProcessInstanceAssignUserRecord::getFlowUniqueId, processInstanceAssignUserRecord.getFlowUniqueId())
-                    .eq(ProcessInstanceAssignUserRecord::getNodeId, processInstanceAssignUserRecord.getNodeId())
-                    .eq(ProcessInstanceAssignUserRecord::getStatus, NodeStatusEnum.JXZ.getCode())
-                    .in(ProcessInstanceAssignUserRecord::getUserId, targetUserIdList)
-                    .list();
-            if (list.size() != targetUserIdList.size()) {
+            //查询未执行的人员--待办人员
+            R<List<TaskDto>> listR = CoreHttpUtil.queryTaskAssignee(processInstanceAssignUserRecord.getNodeId(),
+                    processInstanceAssignUserRecord.getProcessInstanceId());
+            if(!listR.isOk()){
+                return R.fail(listR.getMsg());
+            }
+            List<TaskDto> taskDtoList = listR.getData();
+            //过滤一下要减签的
+            List<TaskDto> collect =
+                    taskDtoList.stream().filter(w -> targetUserIdList.contains(w.getAssign())).collect(Collectors.toList());
+
+
+            if (collect.size() != targetUserIdList.size()) {
                 List<String> userNameList = new ArrayList<>();
 
                 for (String s : targetUserIdList) {
-                    boolean b = list.stream().anyMatch(w -> StrUtil.equals(w.getUserId(), s));
+                    boolean b = collect.stream().anyMatch(w -> StrUtil.equals(w.getAssign(), s));
                     if (b) {
                         continue;
                     }
@@ -245,7 +257,7 @@ public class TaskServiceImpl implements ITaskService {
                 return R.fail(StrUtil.format("用户：{}的任务非进行中，不能减签", CollUtil.join(userNameList, ",")));
             }
 
-            List<String> executionIdList = list.stream().map(w -> w.getExecutionId()).collect(Collectors.toList());
+            List<String> executionIdList = collect.stream().map(w -> w.getExecutionId()).collect(Collectors.toList());
 
             taskParamDto.setTargetExecutionIdList(executionIdList);
         }

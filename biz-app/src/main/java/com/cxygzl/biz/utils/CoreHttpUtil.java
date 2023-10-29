@@ -74,6 +74,25 @@ public class CoreHttpUtil {
     }
 
     /**
+     * queryTaskAssignee
+     *
+     * @param nodeId
+     * @param processInstanceId
+     * @return
+     */
+    public static R<List<TaskDto>> queryTaskAssignee(String nodeId,String processInstanceId) {
+        TaskParamDto variableQueryParamDto = new TaskParamDto();
+        variableQueryParamDto.setNodeId(nodeId);
+        variableQueryParamDto.setProcessInstanceId(processInstanceId);
+
+        String post = post(variableQueryParamDto, "/flow/queryTaskAssignee");
+        R<List<TaskDto>> listR = JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<List<TaskDto>>>() {
+        });
+        return listR;
+
+    }
+
+    /**
      * 查询流程变量
      * 全部都是
      *
@@ -152,9 +171,9 @@ public class CoreHttpUtil {
      * @param jsonObject
      * @return
      */
-    public static com.cxygzl.common.dto.R<PageResultDto<TaskDto>> queryAssignTask(TaskQueryParamDto jsonObject) {
+    public static com.cxygzl.common.dto.R<PageResultDto<TaskDto>> queryTodoTask(TaskQueryParamDto jsonObject) {
 
-        String post = post(jsonObject, "/flow/queryAssignTask");
+        String post = post(jsonObject, "/flow/queryTodoTask");
 
         com.cxygzl.common.dto.R<PageResultDto<TaskDto>> r = JsonUtil.parseObject(post, new JsonUtil.TypeReference<com.cxygzl.common.dto.R<PageResultDto<TaskDto>>>() {
         });

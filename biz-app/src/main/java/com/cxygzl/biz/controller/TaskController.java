@@ -4,7 +4,10 @@ import com.cxygzl.biz.service.ITaskService;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskParamDto;
 import lombok.SneakyThrows;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
@@ -99,7 +102,7 @@ public class TaskController {
      */
     @SneakyThrows
     @PostMapping("delAssignee")
-    public R delAssignee(@RequestBody TaskParamDto completeParamDto) {
+    public R delAssignee(  @RequestBody TaskParamDto completeParamDto) {
 
         return taskService.delAssignee(completeParamDto);
 

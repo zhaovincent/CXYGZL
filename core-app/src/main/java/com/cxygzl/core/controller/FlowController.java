@@ -98,6 +98,7 @@ public class FlowController {
 
     /**
      * 查看流程实例执行图片
+     *
      * @param processInstanceId
      * @param response
      */
@@ -209,6 +210,7 @@ public class FlowController {
 
     /**
      * 获取我已办的流程实例
+     *
      * @param processQueryParamDto
      * @return
      */
@@ -216,8 +218,8 @@ public class FlowController {
     public R queryCompletedProcessInstance(@RequestBody ProcessQueryParamDto processQueryParamDto) {
         HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery();
 
-        if(CollUtil.isNotEmpty(processQueryParamDto.getFlowIdList())){
-            historicProcessInstanceQuery= historicProcessInstanceQuery.processDefinitionKeyIn(processQueryParamDto.getFlowIdList());
+        if (CollUtil.isNotEmpty(processQueryParamDto.getFlowIdList())) {
+            historicProcessInstanceQuery = historicProcessInstanceQuery.processDefinitionKeyIn(processQueryParamDto.getFlowIdList());
         }
 
         List<HistoricProcessInstance> list = historicProcessInstanceQuery
@@ -230,20 +232,19 @@ public class FlowController {
         long count = historicProcessInstanceQuery
 
                 .involvedUser(processQueryParamDto.getAssign())
-              .count();
+                .count();
 
 
-
-        List<ProcessInstanceDto> processInstanceParamDtoList=new ArrayList<>();
+        List<ProcessInstanceDto> processInstanceParamDtoList = new ArrayList<>();
 
         for (HistoricProcessInstance historicProcessInstance : list) {
 
-            HistoricProcessInstanceEntityImpl historicProcessInstanceEntity= (HistoricProcessInstanceEntityImpl) historicProcessInstance;
+            HistoricProcessInstanceEntityImpl historicProcessInstanceEntity = (HistoricProcessInstanceEntityImpl) historicProcessInstance;
             String processInstanceId = historicProcessInstanceEntity.getProcessInstanceId();
             String flowId = historicProcessInstanceEntity.getProcessDefinitionKey();
             String processName = historicProcessInstanceEntity.getProcessDefinitionName();
 
-            ProcessInstanceDto processInstanceDto=new ProcessInstanceDto();
+            ProcessInstanceDto processInstanceDto = new ProcessInstanceDto();
             processInstanceDto.setProcessInstanceId(processInstanceId);
             processInstanceDto.setFlowId(flowId);
             processInstanceDto.setProcessName(processName);
@@ -320,18 +321,46 @@ public class FlowController {
         return R.success(pageResultDto);
     }
 
+
+    /**
+     * 查询任务的执行人
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @PostMapping("/queryTaskAssignee")
+    public R queryTaskAssignee(@RequestBody TaskParamDto taskParamDto) {
+
+        List<Task> list =
+                taskService.createTaskQuery().taskDefinitionKey(taskParamDto.getNodeId()).processInstanceId(taskParamDto.getProcessInstanceId()).list();
+
+
+        List<TaskDto> taskDtoList=new ArrayList<>();
+        for (Task task : list) {
+            TaskDto taskDto=new TaskDto();
+            taskDto.setAssign(task.getAssignee());
+            taskDto.setExecutionId(task.getExecutionId());
+            taskDtoList.add(taskDto);
+        }
+
+
+        return R.success(taskDtoList);
+    }
+
     /**
      * 查询用户待办任务
      *
      * @param taskQueryParamDto
      * @return
      */
-    @PostMapping("/queryAssignTask")
-    public R queryAssignTask(@RequestBody TaskQueryParamDto taskQueryParamDto) {
+    @PostMapping("/queryTodoTask")
+    public R queryTodoTask(@RequestBody TaskQueryParamDto taskQueryParamDto) {
 
         String assign = taskQueryParamDto.getAssign();
 
         TaskQuery taskQuery = taskService.createTaskQuery();
+
+
         List<Task> tasks =
                 taskQuery.taskAssignee(assign).orderByTaskCreateTime().desc().listPage((taskQueryParamDto.getPageNum() - 1) * taskQueryParamDto.getPageSize(),
                         taskQueryParamDto.getPageSize());

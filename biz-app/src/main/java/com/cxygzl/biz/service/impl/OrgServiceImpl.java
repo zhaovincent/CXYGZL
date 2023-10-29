@@ -330,7 +330,7 @@ public class OrgServiceImpl implements IOrgService {
             taskQueryParamDto.setPageSize(1);
             taskQueryParamDto.setAssign(String.valueOf(user.getId()));
 
-            R<PageResultDto<TaskDto>> r = CoreHttpUtil.queryAssignTask(taskQueryParamDto);
+            R<PageResultDto<TaskDto>> r = CoreHttpUtil.queryTodoTask(taskQueryParamDto);
 
 
             PageResultDto<TaskDto> pageResultDto = r.getData();

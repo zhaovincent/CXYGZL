@@ -118,7 +118,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         TaskQueryParamDto taskQueryParamDto = BeanUtil.copyProperties(pageVO, TaskQueryParamDto.class);
         taskQueryParamDto.setAssign(StpUtil.getLoginIdAsString());
 
-        com.cxygzl.common.dto.R<PageResultDto<TaskDto>> r = CoreHttpUtil.queryAssignTask(taskQueryParamDto);
+        com.cxygzl.common.dto.R<PageResultDto<TaskDto>> r = CoreHttpUtil.queryTodoTask(taskQueryParamDto);
 
 
         PageResultDto<TaskDto> pageResultDto = r.getData();
