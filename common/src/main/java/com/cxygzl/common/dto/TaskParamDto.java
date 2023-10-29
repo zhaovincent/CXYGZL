@@ -1,5 +1,6 @@
 package com.cxygzl.common.dto;
 
+import com.cxygzl.common.dto.flow.UploadValue;
 import lombok.Data;
 
 import java.util.List;
@@ -19,6 +20,9 @@ public class TaskParamDto {
     private Boolean approveResult;
     private String approveDesc;
     private List<String> processInstanceIdList;
+
+    private List<UploadValue> approveFileList;
+    private List<UploadValue> approveImageList;
 
     /**
      * 节点id

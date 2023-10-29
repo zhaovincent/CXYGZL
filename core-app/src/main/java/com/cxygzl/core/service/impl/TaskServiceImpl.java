@@ -6,10 +6,12 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cxygzl.common.constants.ApproveAttachmentTypeEnum;
 import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.constants.TaskTypeEnum;
 import com.cxygzl.common.dto.*;
+import com.cxygzl.common.dto.flow.UploadValue;
 import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.cmd.InjectRevokeGatewayCmd;
 import com.cxygzl.core.service.ITaskService;
@@ -22,6 +24,7 @@ import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.*;
 import org.flowable.engine.repository.ProcessDefinition;
+import org.flowable.engine.task.Attachment;
 import org.flowable.engine.task.Comment;
 import org.flowable.task.api.DelegationState;
 import org.flowable.task.api.Task;
@@ -86,13 +89,20 @@ public class TaskServiceImpl implements ITaskService {
                 approveResult ? TaskTypeEnum.PASS.getValue() : TaskTypeEnum.REFUSE.getValue());
 
         String descType = approveResult ? ApproveDescTypeEnum.PASS.getType() : ApproveDescTypeEnum.REFUSE.getType();
+        String commentId=null;
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            saveUserCommentToTask(task, descType,
+            Comment comment = saveUserCommentToTask(task, descType,
                     taskParamDto.getApproveDesc(),
                     taskParamDto.getUserId(), "提交任务并添加了评论");
+            commentId=comment.getId();
         } else {
-            saveSysCommentToTask(task, descType, "提交任务", taskParamDto.getUserId());
+            Comment comment = saveSysCommentToTask(task, descType, "提交任务", taskParamDto.getUserId());
+            commentId=comment.getId();
+
         }
+//保存图片和文件
+        saveAttachment(taskParamDto,task, commentId);
+
         Map<String, Object> paramMap = taskParamDto.getParamMap();
         taskService.complete(task.getId(), paramMap);
 
@@ -114,19 +124,25 @@ public class TaskServiceImpl implements ITaskService {
             return R.fail("任务不存在");
         }
 
+        String commentId=null;
 
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            saveUserCommentToTask(task, ApproveDescTypeEnum.FRONT_JOIN.getType(),
+            Comment comment = saveUserCommentToTask(task, ApproveDescTypeEnum.FRONT_JOIN.getType(),
                     taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
                     StrUtil.format("委派任务给:[{}]并添加了评论",
                             taskParamDto.getTargetUserName()
                     ));
+            commentId=comment.getId();
 
         } else {
-            saveSysCommentToTask(task, ApproveDescTypeEnum.FRONT_JOIN.getType(), StrUtil.format("委派任务给:{}",
+            Comment comment = saveSysCommentToTask(task, ApproveDescTypeEnum.FRONT_JOIN.getType(), StrUtil.format("委派任务给:{}",
                     taskParamDto.getTargetUserName()
             ), taskParamDto.getUserId());
+
+            commentId=comment.getId();
+
         }
+        saveAttachment(taskParamDto,task,commentId);
 
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
@@ -157,14 +173,21 @@ public class TaskServiceImpl implements ITaskService {
         }
 
 
+        String commentId=null;
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            saveUserCommentToTask(task, ApproveDescTypeEnum.RESOLVE.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
+            Comment comment = saveUserCommentToTask(task, ApproveDescTypeEnum.RESOLVE.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
                     "完成任务并添加了评论");
+            commentId=comment.getId();
 
         } else {
-            saveSysCommentToTask(task, ApproveDescTypeEnum.RESOLVE.getType(), StrUtil.format("完成任务"
+            Comment comment = saveSysCommentToTask(task, ApproveDescTypeEnum.RESOLVE.getType(), StrUtil.format("完成任务"
             ), taskParamDto.getUserId());
+            commentId=comment.getId();
+
         }
+
+        saveAttachment(taskParamDto,task,commentId);
+
 
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 TaskTypeEnum.RESOLVE.getValue()
@@ -195,17 +218,23 @@ public class TaskServiceImpl implements ITaskService {
         taskService.setVariableLocal(task.getId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
                 TaskTypeEnum.BACK_JOIN.getValue()
         );
+        String commentId=null;
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            saveUserCommentToTask(task, ApproveDescTypeEnum.BACK_JOIN.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
+            Comment comment = saveUserCommentToTask(task, ApproveDescTypeEnum.BACK_JOIN.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
                     StrUtil.format("转办任务给:[{}]并添加了评论",
                             taskParamDto.getTargetUserName()
                     ));
+            commentId=comment.getId();
 
         } else {
-            saveSysCommentToTask(task, ApproveDescTypeEnum.BACK_JOIN.getType(), StrUtil.format("转办任务给:{}",
+            Comment comment = saveSysCommentToTask(task, ApproveDescTypeEnum.BACK_JOIN.getType(), StrUtil.format("转办任务给:{}",
                     taskParamDto.getTargetUserName()
             ), taskParamDto.getUserId());
+            commentId=comment.getId();
+
         }
+        saveAttachment(taskParamDto,task,commentId);
+
 
         //设置变量
         taskService.setVariables(taskParamDto.getTaskId(), taskParamDto.getParamMap());
@@ -248,17 +277,23 @@ public class TaskServiceImpl implements ITaskService {
         );
         String userId = taskParamDto.getUserId();
         String targetUserName = CollUtil.join(taskParamDto.getTargetUserNameList(), ",");
+
+        String commentId=null;
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            saveUserCommentToTask(task, ApproveDescTypeEnum.DEL_ASSIGNEE.getType(), taskParamDto.getApproveDesc(), userId,
+            Comment comment = saveUserCommentToTask(task, ApproveDescTypeEnum.DEL_ASSIGNEE.getType(), taskParamDto.getApproveDesc(), userId,
                     StrUtil.format("减签任务:[{}]并添加了评论",
                             targetUserName
                     ));
+            commentId=comment.getId();
 
         } else {
-            saveSysCommentToTask(task, ApproveDescTypeEnum.DEL_ASSIGNEE.getType(), StrUtil.format("减签任务:{}",
+            Comment comment = saveSysCommentToTask(task, ApproveDescTypeEnum.DEL_ASSIGNEE.getType(), StrUtil.format("减签任务:{}",
                     targetUserName
             ), userId);
+            commentId=comment.getId();
+
         }
+        saveAttachment(taskParamDto,task,commentId);
 
         List<String> targetExecutionIdList = taskParamDto.getTargetExecutionIdList();
         for (String s : targetExecutionIdList) {
@@ -303,18 +338,24 @@ public class TaskServiceImpl implements ITaskService {
         );
         String userId = taskParamDto.getUserId();
         String targetUserName = CollUtil.join(taskParamDto.getTargetUserNameList(), ",");
+        String commentId =null;
+
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            saveUserCommentToTask(task, ApproveDescTypeEnum.ADD_ASSIGNEE.getType(), taskParamDto.getApproveDesc(), userId,
+            Comment comment = saveUserCommentToTask(task, ApproveDescTypeEnum.ADD_ASSIGNEE.getType(), taskParamDto.getApproveDesc(), userId,
                     StrUtil.format("加签任务给:[{}]并添加了评论",
                             targetUserName
                     ));
+              commentId = comment.getId();
 
         } else {
-            saveSysCommentToTask(task, ApproveDescTypeEnum.ADD_ASSIGNEE.getType(), StrUtil.format("加签任务给:{}",
+            Comment comment = saveSysCommentToTask(task, ApproveDescTypeEnum.ADD_ASSIGNEE.getType(), StrUtil.format("加签任务给:{}",
                     targetUserName
             ), userId);
+            commentId = comment.getId();
+
         }
 
+        saveAttachment(taskParamDto,task,commentId);
 
         List<String> targetUserIdList = taskParamDto.getTargetUserIdList();
         for (String s : targetUserIdList) {
@@ -368,13 +409,18 @@ public class TaskServiceImpl implements ITaskService {
                 TaskTypeEnum.REJECT.getValue()
         );
 
+        String commentId=null;
 
         if (StrUtil.isNotBlank(taskParamDto.getApproveDesc())) {
-            saveUserCommentToTask(task, ApproveDescTypeEnum.REJECT.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
+            Comment comment = saveUserCommentToTask(task, ApproveDescTypeEnum.REJECT.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
                     "驳回了任务并添加了评论");
+            commentId=comment.getId();
         } else {
-            saveSysCommentToTask(task, ApproveDescTypeEnum.REJECT.getType(), "驳回了任务", taskParamDto.getUserId());
+            Comment comment = saveSysCommentToTask(task, ApproveDescTypeEnum.REJECT.getType(), "驳回了任务", taskParamDto.getUserId());
+            commentId=comment.getId();
+
         }
+        saveAttachment(taskParamDto,task,commentId);
 
         runtimeService.createChangeActivityStateBuilder()
                 .processInstanceId(taskParamDto.getProcessInstanceId())
@@ -470,20 +516,48 @@ public class TaskServiceImpl implements ITaskService {
         return process.findFlowElementsOfType(UserTask.class)
                 .stream().collect(Collectors.toMap(UserTask::getId, a -> a, (k1, k2) -> k1));
     }
-    private void saveUserCommentToTask(Task task, String type, String desc, String userId, String descTitle) {
+
+    private void saveAttachment(TaskParamDto taskParamDto,Task task,String commentId){
+        log.info("保存附件的任务id：{}",task.getId());
+        List<UploadValue> approveImageList = taskParamDto.getApproveImageList();
+        List<UploadValue> approveFileList = taskParamDto.getApproveFileList();
+        if(CollUtil.isNotEmpty(approveImageList)){
+            for (UploadValue uploadValue : approveImageList) {
+                taskService.createAttachment(ApproveAttachmentTypeEnum.IMAGE.getType(),task.getId(),
+                        task.getProcessInstanceId(),uploadValue.getName()
+                        ,commentId,uploadValue.getUrl());
+
+
+            }
+
+        }
+        if(CollUtil.isNotEmpty(approveFileList)){
+            for (UploadValue uploadValue : approveFileList) {
+                taskService.createAttachment(ApproveAttachmentTypeEnum.FILE.getType(),task.getId(),
+                        task.getProcessInstanceId(),uploadValue.getName()
+                        ,commentId,uploadValue.getUrl());
+
+            }
+
+        }
+    }
+
+    private Comment saveUserCommentToTask(Task task, String type, String desc, String userId, String descTitle) {
 
         TaskCommentDto taskCommentDto = TaskCommentDto.builder().content(desc).title(descTitle).sys(false).userId(userId).build();
         Comment comment = taskService.addComment(task.getId(), task.getProcessInstanceId(),
                 type, JsonUtil.toJSONString(taskCommentDto));
+        return comment;
 
 
     }
 
-    private void saveSysCommentToTask(Task task, String type, String desc, String userId) {
+    private Comment saveSysCommentToTask(Task task, String type, String desc, String userId) {
         TaskCommentDto taskCommentDto = TaskCommentDto.builder().content(desc).sys(true).userId(userId).build();
 
         Comment comment = taskService.addComment(task.getId(), task.getProcessInstanceId(),
                 type, JsonUtil.toJSONString(taskCommentDto));
+        return comment;
 
 
     }
@@ -593,17 +667,29 @@ public class TaskServiceImpl implements ITaskService {
     @Override
     public R queryTaskComments(VariableQueryParamDto paramDto) {
 
+
+
         String taskId = paramDto.getTaskId();
+
+
 
         List<Comment> taskComments = new ArrayList<>();
 
         for (String s : ApproveDescTypeEnum.getTypeList()) {
             List<Comment> approveDescList = taskService.getTaskComments(taskId, s);
             taskComments.addAll(approveDescList);
+
+
         }
+
+        //查询所有的附件
+        List<Attachment> taskAttachments = taskService.getTaskAttachments(taskId);
+
 
 
         List<SimpleApproveDescDto> simpleApproveDescDtoList = new ArrayList<>();
+
+
         for (Comment comment : taskComments) {
             String id = comment.getId();
             Date time = comment.getTime();
@@ -622,7 +708,42 @@ public class TaskServiceImpl implements ITaskService {
             simpleApproveDescDto.setUserId(userId);
             simpleApproveDescDto.setType(comment.getType());
             simpleApproveDescDto.setMessage(fullMessage);
+
+
+            //图片文件
+            {
+                List<Attachment> collect = taskAttachments.stream()
+                        .filter(w -> StrUtil.equals(w.getDescription(), id))
+                        .filter(w -> StrUtil.equals(w.getType(), ApproveAttachmentTypeEnum.IMAGE.getType()))
+                        .collect(Collectors.toList());
+                List<UploadValue> approveImageList=new ArrayList<>();
+                for (Attachment attachment : collect) {
+                    UploadValue uploadValue=new UploadValue();
+                    uploadValue.setUrl(attachment.getUrl());
+                    uploadValue.setName(attachment.getName());
+                    approveImageList.add(uploadValue);
+                }
+                simpleApproveDescDto.setApproveImageList(approveImageList);
+            }
+
+            {
+                List<Attachment> collect = taskAttachments.stream()
+                        .filter(w -> StrUtil.equals(w.getDescription(), id))
+                        .filter(w -> StrUtil.equals(w.getType(), ApproveAttachmentTypeEnum.FILE.getType()))
+                        .collect(Collectors.toList());
+                List<UploadValue> approveImageList=new ArrayList<>();
+                for (Attachment attachment : collect) {
+                    UploadValue uploadValue=new UploadValue();
+                    uploadValue.setUrl(attachment.getUrl());
+                    uploadValue.setName(attachment.getName());
+                    approveImageList.add(uploadValue);
+                }
+                simpleApproveDescDto.setApproveFileList(approveImageList);
+            }
+
             simpleApproveDescDtoList.add(simpleApproveDescDto);
+
+
         }
         return R.success(simpleApproveDescDtoList);
     }

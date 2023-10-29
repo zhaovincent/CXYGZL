@@ -35,12 +35,14 @@ public class Process  extends BaseEntity {
     /**
      * 表单名称
      */
+    @NotBlank(groups = {ValidGroup.Crud.Create.class},message = "表单名称不能为空")
     @TableField("`name`")
     private String name;
 
     /**
      * 图标配置
      */
+    @NotBlank(groups = {ValidGroup.Crud.Create.class},message = "表单头像不能为空")
     @TableField("`logo`")
     private String logo;
 
@@ -108,6 +110,7 @@ public class Process  extends BaseEntity {
     /**
      * 管理员
      */
+    @NotBlank(groups = {ValidGroup.Crud.Create.class},message = "管理员不能为空")
     @TableField("`admin`")
     private String admin;
 

@@ -472,6 +472,8 @@ public class NodeFormatUtil {
                             .descTypeStr(ApproveDescTypeEnum.get(simpleApproveDescDto.getType()).getName())
                             .showTimeStr(nodeDateShow(simpleApproveDescDto.getDate()))
                             .date(simpleApproveDescDto.getDate())
+                            .approveImageList(simpleApproveDescDto.getApproveImageList())
+                            .approveFileList(simpleApproveDescDto.getApproveFileList())
                             .build();
 
                     descList.add(descVo);

@@ -1,8 +1,10 @@
 package com.cxygzl.common.dto;
 
+import com.cxygzl.common.dto.flow.UploadValue;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class SimpleApproveDescDto {
@@ -14,5 +16,9 @@ public class SimpleApproveDescDto {
     private String userId;
     private String type;
     private Boolean sys;
+
+
+    private List<UploadValue> approveFileList;
+    private List<UploadValue> approveImageList;
 
 }
