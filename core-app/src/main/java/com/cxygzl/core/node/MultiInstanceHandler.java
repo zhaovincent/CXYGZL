@@ -3,6 +3,7 @@ package com.cxygzl.core.node;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
+import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.FlowSettingDto;
 import com.cxygzl.common.dto.R;
@@ -126,6 +127,17 @@ public class MultiInstanceHandler {
 
                             List<Node> parentNodeUntilRoot = NodeUtil.getParentNodeUntilRoot(rootNode, nodeId);
                             log.info("上级所有的节点：{}",parentNodeUntilRoot.stream().map(w->w.getId()).collect(Collectors.toList()));
+
+                            if(CollUtil.isNotEmpty(parentNodeUntilRoot)){
+                                Node node1 = parentNodeUntilRoot.get(0);
+                                if(node1.getType().intValue()== NodeTypeEnum.APPROVAL.getValue()){
+                                    long count = taskDtos.stream().filter(w -> w.getNodeId().equals(node1.getId()))
+                                            .filter(w -> w.getAssign().equals(s)).count();
+                                    if(count>0){
+                                        existUserIdList.add(s);
+                                    }
+                                }
+                            }
 
                         }
                     }
