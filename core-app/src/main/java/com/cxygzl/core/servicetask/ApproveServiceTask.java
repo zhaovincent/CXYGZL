@@ -50,6 +50,8 @@ public class ApproveServiceTask implements JavaDelegate {
 
         Integer result = execution.getVariable(StrUtil.format("{}_{}", nodeId, APPROVE_NODE_RESULT), Integer.class);
 
+        log.info("审批服务任务 结果:{}  {} {}",flowId,nodeIdO,result);
+
         if (result != null) {
 
             //判断整体流程是通过还是拒绝

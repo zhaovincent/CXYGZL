@@ -1,5 +1,7 @@
 package com.cxygzl.common.constants;
 
+import lombok.Data;
+
 public class ProcessInstanceConstant {
     /**
      * 空执行人
@@ -39,6 +41,17 @@ public class ProcessInstanceConstant {
      * 聚合网关标识
      */
     public static final String MERGE_GATEWAY_FLAG = "_merge_gateway";
+
+    /**
+     * 流程设置 去重的value
+     */
+    @Data
+    public static class ProcessSettingDistinctValueClass {
+        //只要有一次审批通过 就去重
+        public static final int ALL = 1;
+        //仅在连续出现时，自动去重
+        public static final int CONTINUED = 2;
+    }
 
     /**
      * 审批人员类型
@@ -126,6 +139,7 @@ public class ProcessInstanceConstant {
         public static final int OK = 1;
         public static final int REFUSE = 2;
     }
+
     /**
      * 用户任务---处理人和发起人一致
      */

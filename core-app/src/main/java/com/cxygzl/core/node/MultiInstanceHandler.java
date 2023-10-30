@@ -4,12 +4,15 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.dto.FlowSettingDto;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.TaskDto;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.flow.SameAsStarter;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.utils.JsonUtil;
+import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.FlowableUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -26,14 +29,13 @@ import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.AP
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_RESULT;
 
 /**
- *  多实例任务处理
+ * 多实例任务处理
  */
 @Component("multiInstanceHandler")
 @Slf4j
 public class MultiInstanceHandler {
 
     /**
-     *
      * 审批人节点
      * 处理执行人
      *
@@ -103,6 +105,33 @@ public class MultiInstanceHandler {
 
                     }
                 }
+            }
+            //处理是否去重的问题
+            FlowSettingDto flowSettingDto = BizHttpUtil.queryProcessSetting(flowId).getData();
+            FlowSettingDto.Distinct distinct = flowSettingDto.getDistinct();
+            if (distinct != null && distinct.getEnable()) {
+                List<String> existUserIdList=new ArrayList<>();
+                for (String s : userIdList) {
+                    List<TaskDto> taskDtos = FlowableUtils.queryApproveDataAtUnFinishedProcess(entity.getProcessInstanceId(), s);
+                    if(!taskDtos.isEmpty()){
+                        //存在已经审批过的了
+                        if(distinct.getValue().intValue()==ProcessInstanceConstant.ProcessSettingDistinctValueClass.ALL){
+                            existUserIdList.add(s);
+
+                        }
+                        if(distinct.getValue().intValue()==ProcessInstanceConstant.ProcessSettingDistinctValueClass.CONTINUED){
+                            //判断上一个节点是否是审批节点 并且 也是同一个人
+
+                            Node rootNode = NodeDataStoreFactory.getInstance().getNode(flowId, ProcessInstanceConstant.VariableKey.STARTER);
+
+                            List<Node> parentNodeUntilRoot = NodeUtil.getParentNodeUntilRoot(rootNode, nodeId);
+                            log.info("上级所有的节点：{}",parentNodeUntilRoot.stream().map(w->w.getId()).collect(Collectors.toList()));
+
+                        }
+                    }
+
+                }
+                userIdList.removeAll(existUserIdList);
             }
 
             assignSet.addAll(userIdList);

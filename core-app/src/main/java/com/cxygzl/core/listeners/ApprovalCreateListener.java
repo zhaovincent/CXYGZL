@@ -1,6 +1,5 @@
 package com.cxygzl.core.listeners;
 
-import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
@@ -12,12 +11,11 @@ import com.cxygzl.core.node.NodeDataStoreFactory;
 import com.cxygzl.core.utils.BizHttpUtil;
 import com.cxygzl.core.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.task.service.delegate.DelegateTask;
 import org.flowable.task.service.delegate.TaskListener;
 import org.flowable.task.service.impl.persistence.entity.TaskEntityImpl;
-
-import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_NODE_RESULT;
 
 /**
  * 审批节点
@@ -57,6 +55,8 @@ public class ApprovalCreateListener implements TaskListener {
             if (StrUtil.equals(handler, ProcessInstanceConstant.USER_TASK_NOBODY_HANDLER_TO_PASS)) {
                 //直接通过
 
+                RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
+                runtimeService.setVariableLocal(taskEntity.getExecutionId(),ProcessInstanceConstant.VariableKey.APPROVE_RESULT, true);
                 taskService.complete(taskEntity.getId());
             }
             if (StrUtil.equals(handler, ProcessInstanceConstant.USER_TASK_NOBODY_HANDLER_TO_ADMIN)) {
@@ -79,10 +79,9 @@ public class ApprovalCreateListener implements TaskListener {
             }
             if (StrUtil.equals(handler, ProcessInstanceConstant.USER_TASK_NOBODY_HANDLER_TO_REFUSE)) {
                 //自动拒绝
-
-                Dict dict = Dict.create().set(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                        ProcessInstanceConstant.ApproveResult.REFUSE);
-                taskService.complete(taskEntity.getId(),dict);
+                RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
+                runtimeService.setVariableLocal(taskEntity.getExecutionId(),ProcessInstanceConstant.VariableKey.APPROVE_RESULT, false);
+                taskService.complete(taskEntity.getId());
 
 
             }

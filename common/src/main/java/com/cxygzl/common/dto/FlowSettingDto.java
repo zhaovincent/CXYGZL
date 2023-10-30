@@ -25,11 +25,26 @@ public class FlowSettingDto {
     private HttpSetting frontCheck;
 
     private DbRecord  dbRecord;
+    private Distinct  distinct;
 
+    /**
+     * 是否记录报表
+     */
     @Data
     public static class DbRecord{
 
         private Boolean enable;
+    }
+
+    /**
+     * 是否去重
+     * {@link com.cxygzl.common.constants.ProcessInstanceConstant.ProcessSettingDistinctValueClass}
+     */
+    @Data
+    public static class Distinct{
+
+        private Boolean enable;
+        private Integer value;
     }
 
 }
