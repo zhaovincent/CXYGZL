@@ -2,6 +2,7 @@ package com.cxygzl.core.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.cxygzl.common.config.NotWriteLogAnno;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
@@ -331,8 +332,12 @@ public class FlowController {
     @PostMapping("/queryTaskAssignee")
     public R queryTaskAssignee(@RequestBody TaskParamDto taskParamDto) {
 
+        TaskQuery taskQuery = taskService.createTaskQuery();
+        if(StrUtil.isNotBlank(taskParamDto.getNodeId())){
+            taskQuery = taskQuery.taskDefinitionKey(taskParamDto.getNodeId());
+        }
         List<Task> list =
-                taskService.createTaskQuery().taskDefinitionKey(taskParamDto.getNodeId()).processInstanceId(taskParamDto.getProcessInstanceId()).list();
+                taskQuery.processInstanceId(taskParamDto.getProcessInstanceId()).list();
 
 
         List<TaskDto> taskDtoList=new ArrayList<>();
@@ -340,6 +345,15 @@ public class FlowController {
             TaskDto taskDto=new TaskDto();
             taskDto.setAssign(task.getAssignee());
             taskDto.setExecutionId(task.getExecutionId());
+            taskDto.setTaskId(task.getId());
+            taskDto.setTaskName(task.getName());
+            taskDto.setNodeId(task.getTaskDefinitionKey());
+
+            String processDefinitionId = task.getProcessDefinitionId();
+            //流程id
+            String flowId = NodeUtil.getFlowId(processDefinitionId);
+
+            taskDto.setFlowId(flowId);
             taskDtoList.add(taskDto);
         }
 

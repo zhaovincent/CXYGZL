@@ -11,6 +11,7 @@ import lombok.Getter;
 public enum MessageTypeEnum {
 
     TODO_TASK("TodoTask","待办任务"),
+    URGE_TASK("UrgeTask","催办任务"),
     ;
 
 

@@ -122,6 +122,19 @@ public class TaskController {
         return taskService.stopProcessInstance(completeParamDto);
 
     }
+    /**
+     * 催办
+     *
+     * @param completeParamDto
+     * @return
+     */
+    @SneakyThrows
+    @PostMapping("urgeProcessInstance")
+    public R urgeProcessInstance(@RequestBody TaskParamDto completeParamDto) {
+
+        return taskService.urgeProcessInstance(completeParamDto);
+
+    }
 
 
     /**

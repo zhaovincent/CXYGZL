@@ -13,11 +13,13 @@ import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.vo.NextNodeQueryVO;
+import com.cxygzl.common.constants.MessageTypeEnum;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskDto;
 import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.NodeUtil;
@@ -35,7 +37,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TaskServiceImpl implements ITaskService {
     @Resource
-    private IProcessService processService;
+    private IRemoteService remoteService;
     @Resource
     private IProcessInstanceNodeRecordService processInstanceNodeRecordService;
     @Resource
@@ -165,7 +167,7 @@ public class TaskServiceImpl implements ITaskService {
             //查询未执行的人员--待办人员
             R<List<TaskDto>> listR = CoreHttpUtil.queryTaskAssignee(processInstanceAssignUserRecord.getNodeId(),
                     processInstanceAssignUserRecord.getProcessInstanceId());
-            if(!listR.isOk()){
+            if (!listR.isOk()) {
                 return R.fail(listR.getMsg());
             }
             List<TaskDto> taskDtoList = listR.getData();
@@ -223,7 +225,6 @@ public class TaskServiceImpl implements ITaskService {
         String taskId = taskParamDto.getTaskId();
 
 
-
         {
             ProcessInstanceAssignUserRecord processInstanceAssignUserRecord = processNodeRecordAssignUserService.lambdaQuery()
                     .eq(ProcessInstanceAssignUserRecord::getTaskId, taskId)
@@ -233,7 +234,7 @@ public class TaskServiceImpl implements ITaskService {
             //查询未执行的人员--待办人员
             R<List<TaskDto>> listR = CoreHttpUtil.queryTaskAssignee(processInstanceAssignUserRecord.getNodeId(),
                     processInstanceAssignUserRecord.getProcessInstanceId());
-            if(!listR.isOk()){
+            if (!listR.isOk()) {
                 return R.fail(listR.getMsg());
             }
             List<TaskDto> taskDtoList = listR.getData();
@@ -303,6 +304,46 @@ public class TaskServiceImpl implements ITaskService {
             return R.fail(r.getMsg());
         }
 
+
+        return R.success();
+    }
+
+    /**
+     * 催办
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @Transactional
+    @Override
+    public R urgeProcessInstance(TaskParamDto taskParamDto) {
+        List<TaskDto> taskDtoList = CoreHttpUtil.queryTaskAssignee(null, taskParamDto.getProcessInstanceId()).getData();
+        if (taskDtoList.isEmpty()) {
+            return R.fail("暂无待审批任务需要催办");
+        }
+
+        String loginIdAsString = StpUtil.getLoginIdAsString();
+        UserDto userDto = ApiStrategyFactory.getStrategy().getUser(loginIdAsString);
+
+        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
+                taskParamDto.getProcessInstanceId()).one();
+
+        for (TaskDto taskDto : taskDtoList) {
+            MessageDto messageDto = new MessageDto();
+            messageDto.setType(MessageTypeEnum.URGE_TASK.getType());
+            messageDto.setReaded(false);
+            messageDto.setUserId(taskDto.getAssign());
+            messageDto.setUniqueId(taskDto.getTaskId());
+            messageDto.setContent(StrUtil.format("[{}]提醒您审批他的[{}]:{}",userDto.getName(),processInstanceRecord.getName(),
+                    taskParamDto.getApproveDesc()));
+            messageDto.setTitle("催办任务");
+            messageDto.setFlowId(taskDto.getFlowId());
+
+
+            messageDto.setProcessInstanceId(taskParamDto.getProcessInstanceId());
+
+            remoteService.saveMessage(messageDto);
+        }
 
         return R.success();
     }
@@ -409,14 +450,14 @@ public class TaskServiceImpl implements ITaskService {
         if (!nodeQueryVO.getContainGateway()) {
             NodeUtil.handleChildrenAfterJump(currentProcessRootNode, processInstanceNodeRecordList.get(0).getNodeId(), currentNode);
             processInstanceRecordService.lambdaUpdate()
-                    .set(ProcessInstanceRecord::getProcess,  JsonUtil.toJSONString(currentProcessRootNode))
+                    .set(ProcessInstanceRecord::getProcess, JsonUtil.toJSONString(currentProcessRootNode))
                     .eq(ProcessInstanceRecord::getId, processInstanceRecord.getId())
                     .update(new ProcessInstanceRecord());
         } else {
             //经过网关
             NodeUtil.handleChildrenAfterJump(currentProcessRootNode, nodeQueryVO.getGatewayId(), currentNode);
             processInstanceRecordService.lambdaUpdate()
-                    .set(ProcessInstanceRecord::getProcess,  JsonUtil.toJSONString(currentProcessRootNode))
+                    .set(ProcessInstanceRecord::getProcess, JsonUtil.toJSONString(currentProcessRootNode))
                     .eq(ProcessInstanceRecord::getId, processInstanceRecord.getId())
                     .update(new ProcessInstanceRecord());
         }
@@ -484,7 +525,7 @@ public class TaskServiceImpl implements ITaskService {
                     nodeQueryVO.setContainGateway(true);
                 }
 
-            }else{
+            } else {
                 processInstanceNodeRecordList.add(instanceNodeRecord);
 
             }

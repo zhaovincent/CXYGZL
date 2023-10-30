@@ -61,6 +61,13 @@ public interface ITaskService {
     R stopProcessInstance(TaskParamDto taskParamDto);
 
     /**
+     * 催办
+     * @param taskParamDto
+     * @return
+     */
+    R urgeProcessInstance(TaskParamDto taskParamDto);
+
+    /**
      * 退回
      * @param taskParamDto
      * @return
