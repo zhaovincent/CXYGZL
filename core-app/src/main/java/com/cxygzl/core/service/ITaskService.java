@@ -3,7 +3,6 @@ package com.cxygzl.core.service;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.VariableQueryParamDto;
-import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * @author Huijun Zhao
@@ -24,49 +23,49 @@ public interface ITaskService {
      * @param taskParamDto
      * @return
      */
-    R delegateTask(@RequestBody TaskParamDto taskParamDto);
+    R delegateTask( TaskParamDto taskParamDto);
 
     /**
      * 加签任务完成
      * @param taskParamDto
      * @return
      */
-    R resolveTask(@RequestBody TaskParamDto taskParamDto);
+    R resolveTask( TaskParamDto taskParamDto);
 
     /**
      * 转交
      * @param taskParamDto
      * @return
      */
-    R setAssignee(@RequestBody TaskParamDto taskParamDto);
+    R setAssignee( TaskParamDto taskParamDto);
 
     /**
      * 删除执行人
      * @param taskParamDto
      * @return
      */
-    R delAssignee(@RequestBody TaskParamDto taskParamDto);
+    R delAssignee( TaskParamDto taskParamDto);
 
     /**
      * 添加执行人
      * @param taskParamDto
      * @return
      */
-    R addAssignee(@RequestBody TaskParamDto taskParamDto);
+    R addAssignee( TaskParamDto taskParamDto);
 
     /**
      * 驳回
      * @param taskParamDto
      * @return
      */
-    R back(@RequestBody TaskParamDto taskParamDto);
+    R back( TaskParamDto taskParamDto);
 
     /**
      * 撤回
      * @param taskParamDto
      * @return
      */
-    R revoke(@RequestBody TaskParamDto taskParamDto);
+    R revoke( TaskParamDto taskParamDto);
     /**
      * 查询任务
      *
@@ -89,5 +88,12 @@ public interface ITaskService {
      * @param paramDto
      * @return
      */
-    R queryTaskVariables(@RequestBody VariableQueryParamDto paramDto);
+    R queryTaskVariables( VariableQueryParamDto paramDto);
+
+    /**
+     * 提交评论
+     * @param taskParamDto
+     * @return
+     */
+    R submitComment(TaskParamDto taskParamDto);
 }

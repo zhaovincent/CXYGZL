@@ -23,6 +23,20 @@ public class TaskController {
 
 
     /**
+     * 提交评论
+     *
+     * @param completeParamDto
+     * @return
+     */
+    @SneakyThrows
+    @PostMapping("submitComment")
+    public R submitComment(@RequestBody TaskParamDto completeParamDto) {
+
+        return taskService.submitComment(completeParamDto);
+
+    }
+
+    /**
      * 完成任务
      *
      * @param completeParamDto

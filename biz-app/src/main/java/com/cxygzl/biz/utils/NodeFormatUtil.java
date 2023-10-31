@@ -2,6 +2,7 @@ package com.cxygzl.biz.utils;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
@@ -369,6 +370,13 @@ public class NodeFormatUtil {
             }
             nodeFormatUserVoList.addAll(tempList);
 
+        } else if (node.getType().intValue() == NodeTypeEnum.COMMENT.getValue()) {
+            //评论节点
+
+            nodeVo.setStatus(NodeStatusEnum.YJS.getCode());
+            buildCommentDesc(node,nodeVo);
+
+
         }
         nodeVo.setUserVoList(nodeFormatUserVoList);
 
@@ -534,6 +542,51 @@ public class NodeFormatUtil {
             nodeFormatUserVoList.add(nodeFormatUserVo);
         }
         return processInstanceAssignUserRecordList;
+    }
+
+    private static void buildCommentDesc(Node node,  NodeVo nodeVo) {
+
+
+
+        //处理用户评论
+        {
+
+
+            List<ProcessFormatNodeApproveDescVo> descList = new ArrayList();
+
+            {
+
+                Object value = node.getValue();
+                SimpleApproveDescDto simpleApproveDescDto = Convert.convert(SimpleApproveDescDto.class, value);
+
+                NodeFormatUserVo nodeFormatUserVo = buildUser(simpleApproveDescDto.getUserId());
+                    ProcessFormatNodeApproveDescVo descVo = ProcessFormatNodeApproveDescVo.builder()
+                            .user(nodeFormatUserVo)
+                            .desc(simpleApproveDescDto.getMessage())
+                            .descType(simpleApproveDescDto.getType())
+                            .sys(simpleApproveDescDto.getSys())
+                            .descTypeStr(ApproveDescTypeEnum.get(simpleApproveDescDto.getType()).getName())
+                            .showTimeStr(nodeDateShow(simpleApproveDescDto.getDate()))
+                            .date(simpleApproveDescDto.getDate())
+                            .approveImageList(simpleApproveDescDto.getApproveImageList())
+                            .approveFileList(simpleApproveDescDto.getApproveFileList())
+                            .build();
+
+                    descList.add(descVo);
+
+
+            }
+
+
+            nodeVo.setApproveDescList(descList);
+
+        }
+
+
+
+
+
+
     }
 
 

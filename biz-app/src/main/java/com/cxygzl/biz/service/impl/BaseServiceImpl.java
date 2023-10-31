@@ -477,7 +477,7 @@ public class BaseServiceImpl implements IBaseService {
                     simpleApproveDescDtoList.stream().filter(w -> !w.getSys()).collect(Collectors.toList());
 
             PrintDataResultVO.Approve approve = new PrintDataResultVO.Approve();
-            approve.setUserName(user.getName());
+            approve.setUserName(user==null?"":user.getName());
             approve.setNodeName(processInstanceAssignUserRecord.getNodeName());
             approve.setTaskType(taskType);
             approve.setTaskTypeShow(StrUtil.isBlankIfStr(taskType) ? "-" : TaskTypeEnum.getByValue(taskType).getName());

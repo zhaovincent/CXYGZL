@@ -312,6 +312,18 @@ public class CoreHttpUtil {
         return JsonUtil.parseObject(post,R.class);
 
     }
+    /**
+     * 提交评论
+     *
+     * @param jsonObject
+     * @return
+     */
+    public static R submitComment(TaskParamDto jsonObject) {
+
+        String post = post(jsonObject, "/task/submitComment");
+        return JsonUtil.parseObject(post,R.class);
+
+    }
 
     /**
      * 委派任务

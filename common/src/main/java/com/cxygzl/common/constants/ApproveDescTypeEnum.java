@@ -25,6 +25,8 @@ public enum ApproveDescTypeEnum {
     REJECT("rejectDesc","驳回"),
     REVOKE("revokeDesc","撤回"),
 
+    COMMENT("comment","评论"),
+
     ;
 
     public static List<String> getTypeList(){

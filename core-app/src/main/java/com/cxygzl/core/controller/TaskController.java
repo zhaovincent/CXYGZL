@@ -59,6 +59,17 @@ public class TaskController {
 
 
     /**
+     * 提交评论
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @Transactional
+    @PostMapping("/submitComment")
+    public R submitComment(@RequestBody TaskParamDto taskParamDto) {
+        return taskService.submitComment(taskParamDto);
+    }
+    /**
      * 完成任务
      *
      * @param taskParamDto

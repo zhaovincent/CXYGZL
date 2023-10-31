@@ -9,6 +9,14 @@ import com.cxygzl.common.dto.TaskParamDto;
 public interface ITaskService {
 
     /**
+     * 提交评论
+     *
+     * @param taskParamDto
+     * @return
+     */
+    R submitComment(TaskParamDto taskParamDto);
+
+    /**
      * 完成任务
      *
      * @param taskParamDto

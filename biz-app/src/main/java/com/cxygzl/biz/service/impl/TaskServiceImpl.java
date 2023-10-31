@@ -2,6 +2,8 @@ package com.cxygzl.biz.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Dict;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.config.exception.BusinessException;
@@ -13,12 +15,15 @@ import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.vo.NextNodeQueryVO;
+import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.MessageTypeEnum;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.SimpleApproveDescDto;
 import com.cxygzl.common.dto.TaskDto;
 import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.dto.flow.UploadValue;
 import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.JsonUtil;
@@ -29,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -50,6 +56,41 @@ public class TaskServiceImpl implements ITaskService {
     private IProcessInstanceExecutionService executionService;
     @Resource
     private IProcessInstanceAssignUserRecordService processInstanceAssignUserRecordService;
+
+    /**
+     * 提交评论
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @Override
+    public R submitComment(TaskParamDto taskParamDto) {
+
+        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, taskParamDto.getProcessInstanceId()).one();
+        String process = processInstanceRecord.getProcess();
+        Node node = JsonUtil.parseObject(process, Node.class);
+        //找到根路径的最后一个没有执行的节点
+        SimpleApproveDescDto simpleApproveDescDto=new SimpleApproveDescDto();
+        simpleApproveDescDto.setDate(new Date());
+
+        Dict set = Dict.create().set("content", taskParamDto.getApproveDesc()).set("title", "添加了评论").set("userId", StpUtil.getLoginIdAsString()).set("sys", false);
+        simpleApproveDescDto.setMessage(JsonUtil.toJSONString(set));
+        simpleApproveDescDto.setMsgId(IdUtil.fastUUID());
+        simpleApproveDescDto.setUserId(StpUtil.getLoginIdAsString());
+        simpleApproveDescDto.setType(ApproveDescTypeEnum.COMMENT.getType());
+        simpleApproveDescDto.setSys(false);
+        List<UploadValue> approveFileList = taskParamDto.getApproveFileList();
+        simpleApproveDescDto.setApproveFileList(approveFileList);
+
+        List<UploadValue> approveImageList=taskParamDto.getApproveImageList();
+        simpleApproveDescDto.setApproveImageList(approveImageList);
+
+        com.cxygzl.biz.utils.NodeUtil.addCommentNode(node,StpUtil.getLoginIdAsString(),simpleApproveDescDto);
+        processInstanceRecord.setProcess(JsonUtil.toJSONString(node));
+        processInstanceRecordService.updateById(processInstanceRecord);
+
+        return R.success();
+    }
 
     /**
      * 完成任务

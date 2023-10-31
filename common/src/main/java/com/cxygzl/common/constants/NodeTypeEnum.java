@@ -25,6 +25,7 @@ public enum NodeTypeEnum {
     SUB_PROCESS( "子流程",9,false),
     ROUTE( "路由",10,false),
     ASYN_TRIGGER( "异步触发器",11,false),
+    COMMENT( "评论",-3,false),
 
     ;
 
