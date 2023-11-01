@@ -148,4 +148,27 @@ public class LayoutFormStrategyImpl implements InitializingBean, FormStrategy {
         }
         return JsonUtil.toJSONString(list);
     }
+
+    /**
+     * 数据的长度
+     *
+     * @param s
+     * @return
+     */
+    @Override
+    public int length(String s) {
+        return 0;
+    }
+
+    /**
+     * 获取excel显示内容
+     *
+     * @param s
+     * @param index
+     * @return
+     */
+    @Override
+    public String getExcelShow(String s, int index) {
+        return s;
+    }
 }

@@ -91,4 +91,27 @@ public class InputFormStrategyImpl implements InitializingBean, FormStrategy {
     public String printShow(FormItemVO formItemVO, Object value) {
         return value == null ? null : value.toString();
     }
+
+    /**
+     * 数据的长度
+     *
+     * @param s
+     * @return
+     */
+    @Override
+    public int length(String s) {
+        return 1;
+    }
+
+    /**
+     * 获取excel显示内容
+     *
+     * @param s
+     * @param index
+     * @return
+     */
+    @Override
+    public String getExcelShow(String s, int index) {
+        return s;
+    }
 }

@@ -116,4 +116,27 @@ public class DateFormStrategyImpl implements InitializingBean, FormStrategy {
         String dateVal = value.toString();
         return dateVal;
     }
+
+    /**
+     * 数据的长度
+     *
+     * @param s
+     * @return
+     */
+    @Override
+    public int length(String s) {
+        return 1;
+    }
+
+    /**
+     * 获取excel显示内容
+     *
+     * @param s
+     * @param index
+     * @return
+     */
+    @Override
+    public String getExcelShow(String s, int index) {
+        return s;
+    }
 }

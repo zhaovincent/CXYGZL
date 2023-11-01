@@ -125,4 +125,28 @@ public class AreaFormStrategyImpl implements InitializingBean, FormStrategy {
         AreaFormValue areaFormValue = JsonUtil.parseObject(JsonUtil.toJSONString(value), AreaFormValue.class);
         return areaFormValue.getName();
     }
+
+    /**
+     * 数据的长度
+     *
+     * @param s
+     * @return
+     */
+    @Override
+    public int length(String s) {
+        return 1;
+    }
+
+    /**
+     * 获取excel显示内容
+     *
+     * @param s
+     * @param index
+     * @return
+     */
+    @Override
+    public String getExcelShow(String s, int index) {
+        AreaFormValue areaFormValue = JsonUtil.parseObject(s, AreaFormValue.class);
+        return areaFormValue.getName();
+    }
 }

@@ -152,4 +152,31 @@ public class RelatedProcessFormStrategyImpl implements InitializingBean, FormStr
         String collect = selectValueList.subList(0, 3).stream().map(w -> w.getProcessName()).collect(Collectors.joining(","));
         return StrUtil.format("{}等{}个",collect,selectValueList.size());
     }
+
+    /**
+     * 数据的长度
+     *
+     * @param s
+     * @return
+     */
+    @Override
+    public int length(String s) {
+        List<RelatedProcessValue> list = JsonUtil.parseArray(s, RelatedProcessValue.class);
+
+        return list.size();
+    }
+
+    /**
+     * 获取excel显示内容
+     *
+     * @param s
+     * @param index
+     * @return
+     */
+    @Override
+    public String getExcelShow(String s, int index) {
+        List<RelatedProcessValue> list = JsonUtil.parseArray(s, RelatedProcessValue.class);
+
+        return list.get(index).getProcessName();
+    }
 }

@@ -166,4 +166,31 @@ public class OrgFormStrategyImpl implements InitializingBean, FormStrategy {
         String collect = nodeUserList.subList(0, 2).stream().map(w -> w.getName()).collect(Collectors.joining(","));
         return StrUtil.format("{} 等{}个",collect,nodeUserList.size());
     }
+
+    /**
+     * 数据的长度
+     *
+     * @param s
+     * @return
+     */
+    @Override
+    public int length(String s) {
+        List<NodeUser> nodeUserList = JsonUtil.parseArray(s, NodeUser.class);
+
+        return nodeUserList.size();
+    }
+
+    /**
+     * 获取excel显示内容
+     *
+     * @param s
+     * @param index
+     * @return
+     */
+    @Override
+    public String getExcelShow(String s, int index) {
+        List<NodeUser> nodeUserList = JsonUtil.parseArray(s, NodeUser.class);
+
+        return nodeUserList.get(index).getName();
+    }
 }

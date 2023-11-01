@@ -84,7 +84,7 @@ public class FormStrategyFactory {
      * @return
      */
     public static DataRow buildInsertSql(List<FormItemVO> formItemVOList, String flowId, String processInstanceId,
-                                        Map<String, Object> paramMap) {
+                                         Map<String, Object> paramMap) {
         DataRow dataRow = new OriginalDataRow();
 
         for (FormItemVO formItemVO : formItemVOList) {
@@ -116,13 +116,25 @@ public class FormStrategyFactory {
 
 
         long snowflakeNextId = IdUtil.getSnowflakeNextId();
-        dataRow.put("id",snowflakeNextId);
-        dataRow.put("process_instance_id",processInstanceId);
-        dataRow.put("flow_id",flowId);
+        dataRow.put("id", snowflakeNextId);
+        dataRow.put("process_instance_id", processInstanceId);
+        dataRow.put("flow_id", flowId);
 
 
         return dataRow;
     }
 
+    /**
+     * 数据长度
+     * @param s
+     * @param formType
+     * @return
+     */
+    public static int length(String s, String formType) {
+        if (StrUtil.isBlank(s)) {
+            return 0;
+        }
+        return getStrategy(formType).length(s);
+    }
 
 }

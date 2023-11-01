@@ -143,4 +143,31 @@ public class UploadFormStrategyImpl implements InitializingBean, FormStrategy {
 
         return StrUtil.format("{}个", uploadValueList.size());
     }
+
+    /**
+     * 数据的长度
+     *
+     * @param s
+     * @return
+     */
+    @Override
+    public int length(String s) {
+        List<UploadValue> list = JsonUtil.parseArray(s, UploadValue.class);
+
+        return list.size();
+    }
+
+    /**
+     * 获取excel显示内容
+     *
+     * @param s
+     * @param index
+     * @return
+     */
+    @Override
+    public String getExcelShow(String s, int index) {
+        List<UploadValue> list = JsonUtil.parseArray(s, UploadValue.class);
+
+        return StrUtil.format("{}个",list.size());
+    }
 }

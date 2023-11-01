@@ -58,5 +58,20 @@ public interface FormStrategy {
      */
     String printShow(FormItemVO formItemVO,Object value);
 
+    /**
+     * 数据的长度
+     * @param s
+     * @return
+     */
+    int length(String s);
+
+    /**
+     * 获取excel显示内容
+     * @param s
+     * @param index
+     * @return
+     */
+    String getExcelShow(String s,int index);
+
 
 }

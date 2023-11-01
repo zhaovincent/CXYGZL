@@ -17,12 +17,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <easy-captcha.version>1.6.2</easy-captcha.version>
         <weixin-java-miniapp.version>4.5.0</weixin-java-miniapp.version>
-
+        <poi.version>5.2.4</poi.version>
     </properties>
 
 
     <dependencies>
-
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
         <!--mysq驱动以下两个都需要 如果是pg换成pg相应的依赖-->
         <!-- https://mvnrepository.com/artifact/org.anyline/anyline-data-jdbc-mysql -->
         <dependency>

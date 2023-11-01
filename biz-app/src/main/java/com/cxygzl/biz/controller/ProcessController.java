@@ -64,5 +64,14 @@ public class ProcessController {
     public R queryDataList(@RequestBody ProcessDataQueryVO pageDto){
         return processService.queryDataList(pageDto);
     }
+    /**
+     * 导出数据列表
+     * @param pageDto
+     * @return
+     */
+    @PostMapping("exportDataList")
+    public R exportDataList(@RequestBody ProcessDataQueryVO pageDto){
+        return processService.exportDataList(pageDto);
+    }
 
 }

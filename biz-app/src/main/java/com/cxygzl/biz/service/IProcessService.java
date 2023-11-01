@@ -61,6 +61,13 @@ public interface IProcessService extends IService<Process> {
     R queryDataList(ProcessDataQueryVO pageDto);
 
     /**
+     * 导出数据报表
+     * @param pageDto
+     * @return
+     */
+    R exportDataList(ProcessDataQueryVO pageDto);
+
+    /**
      * 查询所有关联的流程id
      * @param flowIdList
      * @return

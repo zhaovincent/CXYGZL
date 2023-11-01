@@ -153,4 +153,31 @@ public class SelectFormStrategyImpl implements InitializingBean, FormStrategy {
         String collect = selectValueList.subList(0, 3).stream().map(w -> w.getValue()).collect(Collectors.joining(","));
         return StrUtil.format("{}等{}个",collect,selectValueList.size());
     }
+
+    /**
+     * 数据的长度
+     *
+     * @param s
+     * @return
+     */
+    @Override
+    public int length(String s) {
+        List<SelectValue> list = JsonUtil.parseArray(s, SelectValue.class);
+
+        return list.size();
+    }
+
+    /**
+     * 获取excel显示内容
+     *
+     * @param s
+     * @param index
+     * @return
+     */
+    @Override
+    public String getExcelShow(String s, int index) {
+        List<SelectValue> list = JsonUtil.parseArray(s, SelectValue.class);
+
+        return list.get(index).getValue();
+    }
 }

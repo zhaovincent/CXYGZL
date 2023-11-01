@@ -8,7 +8,9 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cxygzl.biz.api.ApiStrategyFactory;
@@ -341,8 +343,8 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                 Process process = this.getByFlowId(processVO.getFlowId());
 
                 FlowSettingDto flowSettingDto = JsonUtil.parseObject(process.getSettings(), FlowSettingDto.class);
-                FlowSettingDto.DbRecord dbRecord =null;
-                if(flowSettingDto!=null){
+                FlowSettingDto.DbRecord dbRecord = null;
+                if (flowSettingDto != null) {
                     dbRecord = flowSettingDto.getDbRecord();
                 }
                 if (dbRecord == null || !dbRecord.getEnable()) {
@@ -462,7 +464,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         PageNavi navi = new DefaultPageNavi(pageDto.getPageNum(), pageDto.getPageSize());
 
 
-        DataSet dataSet = anylineService.querys(StrUtil.format("tb_{}", uniqueId), navi,"order by create_time desc");
+        DataSet dataSet = anylineService.querys(StrUtil.format("tb_{}", uniqueId), navi, "order by create_time desc");
         List<DataRow> rows = dataSet.getRows();
 
         List records = new ArrayList();
@@ -492,7 +494,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                         headList.add(set);
                     }
                     Object v = row.get(formItemVO.getId());
-                    List<JSONObject> jsonArray = v == null ?new ArrayList<>() :
+                    List<JSONObject> jsonArray = v == null ? new ArrayList<>() :
                             (v instanceof String ? JsonUtil.parseArray(v.toString()) : JsonUtil.parseArray(JsonUtil.toJSONString(v)));
 
                     int subIndex = 1;
@@ -520,13 +522,207 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
             ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
             dict.set("startTime", DateUtil.formatDateTime(processInstanceRecord.getCreateTime()));
             UserDto user = ApiStrategyFactory.getStrategy().getUser(processInstanceRecord.getUserId());
-            dict.set("startUserName",user.getName());
+            dict.set("startUserName", user.getName());
             records.add(dict);
             index++;
         }
         dataMap.put("records", records);
         dataMap.put("total", dataSet.total());
         return R.success(dataMap);
+    }
+
+    /**
+     * 导出数据报表
+     *
+     * @param pageDto
+     * @return
+     */
+    @Override
+    public R exportDataList(ProcessDataQueryVO pageDto) {
+
+        Process process = getByFlowId(pageDto.getFlowId());
+
+        String formItems = process.getFormItems();
+        List<FormItemVO> formItemVOList = JsonUtil.parseArray(formItems, FormItemVO.class);
+
+
+        //记录每个序号占用的行数
+        Map<Integer, Integer> indexLengthMap = new HashMap<>();
+
+        int page = 1;
+        int count = 100;
+        List records = new ArrayList();
+
+        //合并的数据集合
+        Map<Integer,Map<Integer,Integer>> mergeMapList=new HashMap();
+
+        while (true) {
+            String uniqueId = process.getUniqueId();
+            PageNavi navi = new DefaultPageNavi(page, count);
+            DataSet dataSet = anylineService.querys(StrUtil.format("tb_{}", uniqueId), navi, "order by create_time desc");
+            List<DataRow> rows = dataSet.getRows();
+            if (rows.isEmpty()) {
+                break;
+            }
+
+
+
+
+            int index= 1;
+            for (DataRow row : rows) {
+                String processInstanceId = row.getString("process_instance_id");
+                ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
+                UserDto user = ApiStrategyFactory.getStrategy().getUser(processInstanceRecord.getUserId());
+
+                //每个数据长度数组
+                List<Integer> lengthList = new ArrayList<>();
+
+
+                for (FormItemVO formItemVO : formItemVOList) {
+                    Object value = row.get(formItemVO.getId());
+                    String s = value == null ? null : JsonUtil.toJSONString(value);
+                    //dict.set(formItemVO.getName(), value);
+
+                    int length = FormStrategyFactory.length(s, formItemVO.getType());
+                    if (length > 1) {
+                        lengthList.add(length);
+                    }
+                }
+
+                int minV = 1;
+
+                for (int i = 0; i < lengthList.size(); i++) {
+                    minV = NumberUtil.multiple(lengthList.get(i), minV);
+
+                }
+                int indexNo = (page - 1) * count + index;
+                indexLengthMap.put(indexNo, minV);
+                log.info("最小公倍数:{}", minV);
+
+                //找到每个索引起始位置
+                int startIndex=0;
+                for(int i = 1; i< indexNo; i++){
+                    startIndex+=indexLengthMap.get(i);
+                }
+                log.info("序号:{} 起始索引位置{}", indexNo,startIndex);
+
+
+                //前三列
+                {
+                    Map<Integer, Integer> mergeMap = mergeMapList.get(0);
+                    if(mergeMap==null){
+                        mergeMap=new HashMap<>();
+                    }
+
+                    mergeMap.put(startIndex+1,startIndex+minV);
+                    mergeMapList.put(0,mergeMap);
+                }
+
+                {
+                    Map<Integer, Integer> mergeMap = mergeMapList.get(1);
+                    if(mergeMap==null){
+                        mergeMap=new HashMap<>();
+                    }
+
+                    mergeMap.put(startIndex+1,startIndex+minV);
+                    mergeMapList.put(1,mergeMap);
+                }
+
+                {
+                    Map<Integer, Integer> mergeMap = mergeMapList.get(2);
+                    if(mergeMap==null){
+                        mergeMap=new HashMap<>();
+                    }
+
+                    mergeMap.put(startIndex+1,startIndex+minV);
+                    mergeMapList.put(2,mergeMap);
+                }
+
+
+                for (int i = 0; i < minV; i++) {
+                    Dict dict = Dict.create();
+                    dict.set("序号", indexNo);
+                    dict.set("发起人", user.getName());
+                    dict.set("发起时间", DateUtil.formatDateTime(processInstanceRecord.getCreateTime()));
+
+
+                    int tempIndex=3;
+
+                    for (FormItemVO formItemVO : formItemVOList) {
+
+                        Map<Integer, Integer> mergeMap = mergeMapList.get(tempIndex);
+                        if(mergeMap==null){
+                            mergeMap=new HashMap<>();
+                        }
+
+
+                        Object value = row.get(formItemVO.getId());
+                        String s = value == null ? null : JsonUtil.toJSONString(value);
+                        dict.set(formItemVO.getName(), value);
+
+
+                        int length = FormStrategyFactory.length(s, formItemVO.getType());
+                        if (length > 1) {
+                            //计算出每条数据占用的行数
+                            int i1 = minV / length;
+                            //计算出当前应该是第几条数据
+                            int i2 = (i ) / i1;
+                            String excelShow = FormStrategyFactory.getStrategy(formItemVO.getType()).getExcelShow(s, i2);
+                            dict.set(formItemVO.getName(), excelShow);
+
+
+                            mergeMap.put(startIndex+1+i2*i1,startIndex+1+i2*i1+i1-1);
+
+
+                        }else{
+                            if(StrUtil.isNotBlank(s)){
+                                String excelShow =
+                                        FormStrategyFactory.getStrategy(formItemVO.getType()).getExcelShow(s, 0);
+                                dict.set(formItemVO.getName(), excelShow);
+                            }
+
+                            mergeMap.put(startIndex+1,startIndex+minV);
+                        }
+                        mergeMapList.put(tempIndex,mergeMap);
+
+                        tempIndex++;
+
+                    }
+                    records.add(dict);
+
+                }
+
+                index++;
+
+            }
+
+            page++;
+
+        }
+
+        String format = StrUtil.format("/tmp/{}.xls", IdUtil.fastSimpleUUID());
+        ExcelWriter writer = new ExcelWriter(format, "表1");
+        // writer.merge(1,2,0,0,"23",false);
+
+        for (Map.Entry<Integer, Map<Integer, Integer>> integerMapEntry : mergeMapList.entrySet()) {
+            Integer key = integerMapEntry.getKey();
+            Map<Integer, Integer> value = integerMapEntry.getValue();
+            for (Map.Entry<Integer, Integer> integerIntegerEntry : value.entrySet()) {
+                writer.merge(integerIntegerEntry.getKey(),integerIntegerEntry.getValue(),key,key,"",false);
+
+            }
+
+
+        }
+
+        writer.write(records, true);
+        writer.close();
+
+        //拼装url
+        log.info("路径：{}", format);
+
+        return R.success();
+
     }
 
     /**
