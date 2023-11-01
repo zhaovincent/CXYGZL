@@ -7,7 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import com.cxygzl.biz.form.FormStrategy;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.dto.flow.FormItemVO;
-import com.cxygzl.common.dto.flow.SelectValue;
+import com.cxygzl.common.dto.flow.RelatedProcessValue;
 import com.cxygzl.common.utils.JsonUtil;
 import org.anyline.metadata.Column;
 import org.springframework.beans.factory.InitializingBean;
@@ -18,11 +18,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class SelectFormStrategyImpl implements InitializingBean, FormStrategy {
+public class RelatedProcessFormStrategyImpl implements InitializingBean, FormStrategy {
     @Override
     public void afterPropertiesSet() throws Exception {
-        afterPropertiesSet(FormTypeEnum.SINGLE_SELECT.getType());
-        afterPropertiesSet(FormTypeEnum.MULTI_SELECT.getType());
+        afterPropertiesSet(FormTypeEnum.RELATED_PROCESS.getType());
     }
 
     /**
@@ -119,13 +118,13 @@ public class SelectFormStrategyImpl implements InitializingBean, FormStrategy {
      */
     @Override
     public List<String> getInsertValue(FormItemVO formItemVO, Object value) {
-        List<SelectValue> selectValueList = BeanUtil.copyToList(Convert.toList(value), SelectValue.class);
+        List<RelatedProcessValue> selectValueList = BeanUtil.copyToList(Convert.toList(value), RelatedProcessValue.class);
 
         if (CollUtil.isEmpty(selectValueList)) {
             return null;
         }
-        String id = selectValueList.stream().map(w -> w.getKey()).collect(Collectors.joining("||"));
-        String name = selectValueList.stream().map(w -> w.getValue()).collect(Collectors.joining("||"));
+        String id = selectValueList.stream().map(w -> w.getProcessInstanceId()).collect(Collectors.joining("||"));
+        String name = selectValueList.stream().map(w -> w.getProcessName()).collect(Collectors.joining("||"));
 
         return CollUtil.newArrayList(id, name, JsonUtil.toJSONString(selectValueList));
     }
@@ -142,15 +141,15 @@ public class SelectFormStrategyImpl implements InitializingBean, FormStrategy {
         if (value == null) {
             return null;
         }
-        List<SelectValue> selectValueList = BeanUtil.copyToList(Convert.toList(value), SelectValue.class);
+        List<RelatedProcessValue> selectValueList = BeanUtil.copyToList(Convert.toList(value), RelatedProcessValue.class);
 
         if (CollUtil.isEmpty(selectValueList)) {
             return null;
         }
         if (selectValueList.size() < 4) {
-            return selectValueList.stream().map(w -> w.getValue()).collect(Collectors.joining(","));
+            return selectValueList.stream().map(w -> w.getProcessName()).collect(Collectors.joining(","));
         }
-        String collect = selectValueList.subList(0, 3).stream().map(w -> w.getValue()).collect(Collectors.joining(","));
+        String collect = selectValueList.subList(0, 3).stream().map(w -> w.getProcessName()).collect(Collectors.joining(","));
         return StrUtil.format("{}等{}个",collect,selectValueList.size());
     }
 }
