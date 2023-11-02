@@ -18,11 +18,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class UploadFormStrategyImpl implements InitializingBean, FormStrategy {
+public class UploadFileFormStrategyImpl implements InitializingBean, FormStrategy {
     @Override
     public void afterPropertiesSet() throws Exception {
         afterPropertiesSet(FormTypeEnum.UPLOAD_FILE.getType());
-        afterPropertiesSet(FormTypeEnum.UPLOAD_IMAGE.getType());
     }
 
     /**
@@ -168,6 +167,6 @@ public class UploadFormStrategyImpl implements InitializingBean, FormStrategy {
     public String getExcelShow(String s, int index) {
         List<UploadValue> list = JsonUtil.parseArray(s, UploadValue.class);
 
-        return StrUtil.format("{}个",list.size());
+        return list.get(index).getName();
     }
 }

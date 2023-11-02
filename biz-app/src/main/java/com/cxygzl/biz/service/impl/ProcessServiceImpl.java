@@ -5,11 +5,13 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -20,11 +22,9 @@ import com.cxygzl.biz.entity.ProcessStarter;
 import com.cxygzl.biz.entity.ProcessSubProcess;
 import com.cxygzl.biz.form.FormStrategyFactory;
 import com.cxygzl.biz.mapper.ProcessMapper;
-import com.cxygzl.biz.service.IProcessInstanceRecordService;
-import com.cxygzl.biz.service.IProcessService;
-import com.cxygzl.biz.service.IProcessStarterService;
-import com.cxygzl.biz.service.IProcessSubProcessService;
+import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
+import com.cxygzl.biz.vo.ExcelPicVo;
 import com.cxygzl.biz.vo.ProcessDataQueryVO;
 import com.cxygzl.biz.vo.ProcessVO;
 import com.cxygzl.common.constants.FormTypeEnum;
@@ -40,6 +40,7 @@ import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.NodeUtil;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.DataRow;
 import org.anyline.entity.DataSet;
@@ -47,9 +48,15 @@ import org.anyline.entity.DefaultPageNavi;
 import org.anyline.entity.PageNavi;
 import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -75,6 +82,9 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
     @Resource
     public AnylineService anylineService;
+
+    @Resource
+    public IFileService fileService;
 
     /**
      * 获取详细数据
@@ -537,6 +547,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
      * @param pageDto
      * @return
      */
+    @SneakyThrows
     @Override
     public R exportDataList(ProcessDataQueryVO pageDto) {
 
@@ -555,6 +566,8 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
         //合并的数据集合
         Map<Integer,Map<Integer,Integer>> mergeMapList=new HashMap();
+
+        List<ExcelPicVo> excelPicVoList=new ArrayList<>();
 
         while (true) {
             String uniqueId = process.getUniqueId();
@@ -658,7 +671,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
                         Object value = row.get(formItemVO.getId());
                         String s = value == null ? null : JsonUtil.toJSONString(value);
-                        dict.set(formItemVO.getName(), value);
+                        dict.set(formItemVO.getName(), "");
 
 
                         int length = FormStrategyFactory.length(s, formItemVO.getType());
@@ -668,7 +681,22 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                             //计算出当前应该是第几条数据
                             int i2 = (i ) / i1;
                             String excelShow = FormStrategyFactory.getStrategy(formItemVO.getType()).getExcelShow(s, i2);
-                            dict.set(formItemVO.getName(), excelShow);
+                            if(formItemVO.getType().equals(FormTypeEnum.UPLOAD_IMAGE.getType())){
+                                int tempF=tempIndex;
+                                int startIndexF=startIndex+1+i2*i1;
+                                //签名是图片
+                                long c = excelPicVoList.stream().filter(w -> w.getCol() == tempF && w.getRow() == (startIndexF)).count();
+                                if(c==0){
+                                    ExcelPicVo excelPicVo=new ExcelPicVo();
+                                    excelPicVo.setRow(startIndexF);
+                                    excelPicVo.setCol(tempIndex);
+                                    excelPicVo.setUrl(excelShow);
+                                    excelPicVoList.add(excelPicVo);
+                                }
+                            }else{
+                                dict.set(formItemVO.getName(), excelShow);
+                            }
+
 
 
                             mergeMap.put(startIndex+1+i2*i1,startIndex+1+i2*i1+i1-1);
@@ -678,7 +706,25 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                             if(StrUtil.isNotBlank(s)){
                                 String excelShow =
                                         FormStrategyFactory.getStrategy(formItemVO.getType()).getExcelShow(s, 0);
-                                dict.set(formItemVO.getName(), excelShow);
+
+                                int tempF=tempIndex;
+                                int startIndexF=startIndex+1;
+
+                                if(StrUtil.equalsAny(formItemVO.getType(),FormTypeEnum.UPLOAD_IMAGE.getType(),FormTypeEnum.SIGNATURE.getType())){
+
+                                    //签名是图片
+                                    long c = excelPicVoList.stream().filter(w -> w.getCol() == tempF && w.getRow() == (startIndexF)).count();
+                                    if(c==0){
+                                        ExcelPicVo excelPicVo=new ExcelPicVo();
+                                        excelPicVo.setRow(startIndex+1);
+                                        excelPicVo.setCol(tempIndex);
+                                        excelPicVo.setUrl(excelShow);
+                                        excelPicVoList.add(excelPicVo);
+                                    }
+
+                                }else{
+                                    dict.set(formItemVO.getName(), excelShow);
+                                }
                             }
 
                             mergeMap.put(startIndex+1,startIndex+minV);
@@ -702,18 +748,43 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
         String format = StrUtil.format("/tmp/{}.xls", IdUtil.fastSimpleUUID());
         ExcelWriter writer = new ExcelWriter(format, "表1");
-        // writer.merge(1,2,0,0,"23",false);
+
 
         for (Map.Entry<Integer, Map<Integer, Integer>> integerMapEntry : mergeMapList.entrySet()) {
             Integer key = integerMapEntry.getKey();
             Map<Integer, Integer> value = integerMapEntry.getValue();
             for (Map.Entry<Integer, Integer> integerIntegerEntry : value.entrySet()) {
-                writer.merge(integerIntegerEntry.getKey(),integerIntegerEntry.getValue(),key,key,"",false);
+                if(integerIntegerEntry.getKey().intValue()<integerIntegerEntry.getValue()){
+                    writer.merge(integerIntegerEntry.getKey(),integerIntegerEntry.getValue(),key,key,"",false);
+
+                }
 
             }
 
 
         }
+
+        for (ExcelPicVo excelPicVo : excelPicVoList) {
+            File file = new File(StrUtil.format("/tmp/{}.{}",IdUtil.fastSimpleUUID(),FileUtil.getSuffix(excelPicVo.getUrl())));
+            FileOutputStream fileOutputStream=new FileOutputStream(file);
+            HttpUtil.download(excelPicVo.getUrl(),fileOutputStream,true);
+            byte[] pictureData=FileUtil.readBytes(file);
+            //处理图片
+            Sheet sheet = writer.getSheet();
+            Drawing<?> drawingPatriarch = sheet.createDrawingPatriarch();
+            ClientAnchor anchor = drawingPatriarch.createAnchor(0, 0, 0, 0,excelPicVo.getCol(),excelPicVo.getRow(),excelPicVo.getCol()+1,excelPicVo.getRow()+1 );
+            //随单元格改变位置和大小
+            anchor.setAnchorType(ClientAnchor.AnchorType.MOVE_AND_RESIZE);
+
+            //添加图片
+            int pictureTypeJpeg = HSSFWorkbook.PICTURE_TYPE_JPEG;
+            if(FileUtil.getSuffix(excelPicVo.getUrl()).toLowerCase().contains("png")){
+                pictureTypeJpeg = HSSFWorkbook.PICTURE_TYPE_PNG;
+            }
+            int pictureIndex = sheet.getWorkbook().addPicture(pictureData, pictureTypeJpeg);
+            drawingPatriarch.createPicture(anchor, pictureIndex);
+        }
+
 
         writer.write(records, true);
         writer.close();
@@ -721,7 +792,9 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         //拼装url
         log.info("路径：{}", format);
 
-        return R.success();
+        R<String> r = fileService.save(FileUtil.readBytes(format), StrUtil.format("{}-报表.xls", process.getName()));
+
+        return r;
 
     }
 
