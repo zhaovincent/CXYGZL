@@ -2,10 +2,7 @@ package com.cxygzl.biz.service;
 
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.ProcessDataQueryVO;
-import com.cxygzl.common.dto.NotifyMessageDto;
-import com.cxygzl.common.dto.PageDto;
-import com.cxygzl.common.dto.ProcessInstanceParamDto;
-import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.*;
 
 /**
  * 流程实例进程
@@ -100,5 +97,24 @@ public interface IProcessInstanceService  {
      */
     R detail(String processInstanceId);
 
+    /**
+     * 导出流程实例数据
+     * @param processInstanceId
+     * @return
+     */
+    R export(String processInstanceId);
+
+    /**
+     * 终止流程
+     * @param processInstanceId
+     * @return
+     */
+    R stopProcessInstance(String processInstanceId);
+    /**
+     * 催办
+     * @param taskParamDto
+     * @return
+     */
+    R urgeProcessInstance(TaskParamDto taskParamDto);
 
 }

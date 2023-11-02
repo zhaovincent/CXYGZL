@@ -686,13 +686,15 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                                 int startIndexF=startIndex+1+i2*i1;
                                 //签名是图片
                                 long c = excelPicVoList.stream().filter(w -> w.getCol() == tempF && w.getRow() == (startIndexF)).count();
-                                if(c==0){
-                                    ExcelPicVo excelPicVo=new ExcelPicVo();
-                                    excelPicVo.setRow(startIndexF);
-                                    excelPicVo.setCol(tempIndex);
-                                    excelPicVo.setUrl(excelShow);
-                                    excelPicVoList.add(excelPicVo);
-                                }
+//                                if(c==0){
+//                                    ExcelPicVo excelPicVo=new ExcelPicVo();
+//                                    excelPicVo.setRow(startIndexF);
+//                                    excelPicVo.setCol(tempIndex);
+//                                    excelPicVo.setUrl(excelShow);
+//                                    excelPicVoList.add(excelPicVo);
+//                                }
+                                dict.set(formItemVO.getName(), excelShow);
+
                             }else{
                                 dict.set(formItemVO.getName(), excelShow);
                             }
@@ -714,13 +716,14 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
                                     //签名是图片
                                     long c = excelPicVoList.stream().filter(w -> w.getCol() == tempF && w.getRow() == (startIndexF)).count();
-                                    if(c==0){
-                                        ExcelPicVo excelPicVo=new ExcelPicVo();
-                                        excelPicVo.setRow(startIndex+1);
-                                        excelPicVo.setCol(tempIndex);
-                                        excelPicVo.setUrl(excelShow);
-                                        excelPicVoList.add(excelPicVo);
-                                    }
+//                                    if(c==0){
+//                                        ExcelPicVo excelPicVo=new ExcelPicVo();
+//                                        excelPicVo.setRow(startIndex+1);
+//                                        excelPicVo.setCol(tempIndex);
+//                                        excelPicVo.setUrl(excelShow);
+//                                        excelPicVoList.add(excelPicVo);
+//                                    }
+                                    dict.set(formItemVO.getName(), excelShow);
 
                                 }else{
                                     dict.set(formItemVO.getName(), excelShow);

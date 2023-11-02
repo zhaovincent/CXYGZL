@@ -4,10 +4,7 @@ import com.cxygzl.biz.service.IProcessInstanceService;
 import com.cxygzl.biz.service.IProcessInstanceUserCopyService;
 import com.cxygzl.biz.vo.NodeFormatParamVo;
 import com.cxygzl.biz.vo.ProcessDataQueryVO;
-import com.cxygzl.common.dto.NotifyMessageDto;
-import com.cxygzl.common.dto.PageDto;
-import com.cxygzl.common.dto.ProcessInstanceParamDto;
-import com.cxygzl.common.dto.R;
+import com.cxygzl.common.dto.*;
 import lombok.SneakyThrows;
 import org.springframework.web.bind.annotation.*;
 
@@ -173,5 +170,42 @@ public class ProcessInstanceController {
     @GetMapping("detail")
     public R detail(String processInstanceId) {
         return processInstanceService.detail(processInstanceId);
+    }
+    /**
+     * 导出流程详情
+     *
+     * @param processInstanceId
+     * @return
+     */
+    @PostMapping("export/{processInstanceId}")
+    public R export(@PathVariable String processInstanceId) {
+        return processInstanceService.export(processInstanceId);
+    }
+
+    /**
+     * 结束流程
+     *
+     * @param processInstanceId
+     * @return
+     */
+    @SneakyThrows
+    @PostMapping("stopProcessInstance/{processInstanceId}")
+    public R stopProcessInstance(@PathVariable String processInstanceId) {
+
+        return processInstanceService.stopProcessInstance(processInstanceId);
+
+    }
+    /**
+     * 催办
+     *
+     * @param completeParamDto
+     * @return
+     */
+    @SneakyThrows
+    @PostMapping("urgeProcessInstance")
+    public R urgeProcessInstance(@RequestBody TaskParamDto completeParamDto) {
+
+        return processInstanceService.urgeProcessInstance(completeParamDto);
+
     }
 }

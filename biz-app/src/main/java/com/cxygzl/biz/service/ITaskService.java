@@ -61,19 +61,8 @@ public interface ITaskService {
      */
     R delAssignee(TaskParamDto taskParamDto);
 
-    /**
-     * 结束流程
-     * @param taskParamDto
-     * @return
-     */
-    R stopProcessInstance(TaskParamDto taskParamDto);
 
-    /**
-     * 催办
-     * @param taskParamDto
-     * @return
-     */
-    R urgeProcessInstance(TaskParamDto taskParamDto);
+
 
     /**
      * 退回

@@ -321,73 +321,8 @@ public class TaskServiceImpl implements ITaskService {
         return R.success();
     }
 
-    /**
-     * 结束流程
-     *
-     * @param taskParamDto
-     * @return
-     */
-    @Transactional
-    @Override
-    public R stopProcessInstance(TaskParamDto taskParamDto) {
-
-        String processInstanceId = taskParamDto.getProcessInstanceId();
-
-        List<String> allStopProcessInstanceIdList = getAllStopProcessInstanceIdList(processInstanceId);
-        CollUtil.reverse(allStopProcessInstanceIdList);
-        allStopProcessInstanceIdList.add(processInstanceId);
-
-        taskParamDto.setProcessInstanceIdList(allStopProcessInstanceIdList);
-        taskParamDto.setUserId(StpUtil.getLoginIdAsString());
-        com.cxygzl.common.dto.R r = CoreHttpUtil.stopProcessInstance(taskParamDto);
-
-        if (!r.isOk()) {
-            return R.fail(r.getMsg());
-        }
 
 
-        return R.success();
-    }
-
-    /**
-     * 催办
-     *
-     * @param taskParamDto
-     * @return
-     */
-    @Transactional
-    @Override
-    public R urgeProcessInstance(TaskParamDto taskParamDto) {
-        List<TaskDto> taskDtoList = CoreHttpUtil.queryTaskAssignee(null, taskParamDto.getProcessInstanceId()).getData();
-        if (taskDtoList.isEmpty()) {
-            return R.fail("暂无待审批任务需要催办");
-        }
-
-        String loginIdAsString = StpUtil.getLoginIdAsString();
-        UserDto userDto = ApiStrategyFactory.getStrategy().getUser(loginIdAsString);
-
-        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
-                taskParamDto.getProcessInstanceId()).one();
-
-        for (TaskDto taskDto : taskDtoList) {
-            MessageDto messageDto = new MessageDto();
-            messageDto.setType(MessageTypeEnum.URGE_TASK.getType());
-            messageDto.setReaded(false);
-            messageDto.setUserId(taskDto.getAssign());
-            messageDto.setUniqueId(taskDto.getTaskId());
-            messageDto.setContent(StrUtil.format("[{}]提醒您审批他的[{}]:{}",userDto.getName(),processInstanceRecord.getName(),
-                    taskParamDto.getApproveDesc()));
-            messageDto.setTitle("催办任务");
-            messageDto.setFlowId(taskDto.getFlowId());
-
-
-            messageDto.setProcessInstanceId(taskParamDto.getProcessInstanceId());
-
-            remoteService.saveMessage(messageDto);
-        }
-
-        return R.success();
-    }
 
     /**
      * 退回
@@ -410,20 +345,6 @@ public class TaskServiceImpl implements ITaskService {
         return R.success();
     }
 
-    private List<String> getAllStopProcessInstanceIdList(String processInstanceId) {
-        List<ProcessInstanceRecord> list = processInstanceRecordService.lambdaQuery()
-                .eq(ProcessInstanceRecord::getParentProcessInstanceId, processInstanceId).list();
-
-        List<String> collect = list.stream().map(w -> w.getProcessInstanceId()).collect(Collectors.toList());
-
-        for (ProcessInstanceRecord processInstanceRecord : list) {
-            List<String> allStopProcessInstanceIdList = getAllStopProcessInstanceIdList(processInstanceRecord.getProcessInstanceId());
-
-            collect.addAll(allStopProcessInstanceIdList);
-
-        }
-        return collect;
-    }
 
     /**
      * 撤回

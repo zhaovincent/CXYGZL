@@ -4,9 +4,13 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.constants.NodeStatusEnum;
@@ -14,25 +18,26 @@ import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.form.FormStrategyFactory;
 import com.cxygzl.biz.service.*;
-import com.cxygzl.biz.utils.CoreHttpUtil;
-import com.cxygzl.biz.utils.FormUtil;
-import com.cxygzl.biz.utils.NodeFormatUtil;
-import com.cxygzl.biz.utils.NodeImageUtil;
+import com.cxygzl.biz.utils.*;
 import com.cxygzl.biz.vo.*;
 import com.cxygzl.biz.vo.node.NodeImageVO;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.FormTypeEnum;
+import com.cxygzl.common.constants.MessageTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.*;
+import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.DataRow;
 import org.anyline.service.AnylineService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -45,7 +50,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     @Resource
-    private IUserService userService;
+    private IFileService fileService;
     @Resource
     private IProcessInstanceRecordService processInstanceRecordService;
     @Resource
@@ -63,6 +68,9 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
     @Resource
     private AnylineService anylineService;
+    @Resource
+    @Lazy
+    private IRemoteService remoteService;
 
     /**
      * 消息通知事件
@@ -662,14 +670,14 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         String formItems = process.getFormItems();
         List<FormItemVO> formItemVOList = JsonUtil.parseArray(formItems, FormItemVO.class);
 
-        Map<String, String> formPermMap=new HashMap<>();
+        Map<String, String> formPermMap = new HashMap<>();
 
-        if(StrUtil.isNotBlank(nodeId)){
+        if (StrUtil.isNotBlank(nodeId)) {
             String data = processNodeDataService.getNodeData(flowId, nodeId).getData();
             Node node = JsonUtil.parseObject(data, Node.class);
             Map<String, String> map = node.getFormPerms();
             formPermMap.putAll(map);
-        }else{
+        } else {
             for (FormItemVO formItemVO : formItemVOList) {
                 formPermMap.put(formItemVO.getId(), ProcessInstanceConstant.FormPermClass.READ);
             }
@@ -891,5 +899,178 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 .build();
 
         return com.cxygzl.common.dto.R.success(taskDetailViewVO);
+    }
+
+    /**
+     * 导出流程实例数据
+     *
+     * @param processInstanceId
+     * @return
+     */
+    @Override
+    public R export(String processInstanceId) {
+        //查询变量参数
+        VariableQueryParamDto variableQueryParamDto = new VariableQueryParamDto();
+        variableQueryParamDto.setExecutionId(processInstanceId);
+        Map<String, Object> paramMap = CoreHttpUtil.queryVariables(variableQueryParamDto).getData();
+
+        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
+
+        List records = new ArrayList();
+
+        UserDto user = ApiStrategyFactory.getStrategy().getUser(processInstanceRecord.getUserId());
+        DeptDto dept = ApiStrategyFactory.getStrategy().getDept(user.getDeptId());
+
+        //计算需要几行
+        Process process = processService.getByFlowId(processInstanceRecord.getFlowId());
+        String formItems = process.getFormItems();
+        List<FormItemVO> formItemVOList = JsonUtil.parseArray(formItems, FormItemVO.class);
+
+        //找出明细
+        List<FormItemVO> layoutFormList = formItemVOList.stream().filter(w -> StrUtil.equals(w.getType(), FormTypeEnum.LAYOUT.getType())).collect(Collectors.toList());
+        if (layoutFormList.isEmpty()) {
+            Integer result = processInstanceRecord.getResult();
+            Date endTime = processInstanceRecord.getEndTime();
+            Integer duration = null;
+            if (endTime != null) {
+                int second1 = DateUtil.second(endTime);
+                int second2 = DateUtil.second(processInstanceRecord.getCreateTime());
+
+                duration = second1 - second2;
+            }
+
+            Dict set = Dict.create()
+                    .set("标题", processInstanceRecord.getName())
+                    .set("审批状态", NodeStatusEnum.get(processInstanceRecord.getStatus()).getName())
+                    .set("审批结果", result == null ? "" : (result == ProcessInstanceConstant.ApproveResult.OK ? "同意" : "拒绝"))
+                    .set("发起时间", processInstanceRecord.getCreateTime())
+                    .set("完成时间", endTime)
+                    .set("耗时", DataUtil.getDate(duration))
+                    .set("发起人UserID", user.getId())
+                    .set("发起人姓名", user.getName())
+                    .set("发起人部门", dept.getName())
+                    .set("审批记录(含处理人UserID)", dept.getName());
+
+            if (endTime == null) {
+                List<TaskDto> taskDtoList = CoreHttpUtil.queryTaskAssignee(null, processInstanceId).getData();
+                Set<String> userIdSet = taskDtoList.stream().map(w -> w.getAssign()).collect(Collectors.toSet());
+                List<String> userNameList = new ArrayList<>();
+                for (String s : userIdSet) {
+                    UserDto u = ApiStrategyFactory.getStrategy().getUser(s);
+                    userNameList.add(u.getName());
+                }
+                set.set("当前处理人姓名", CollUtil.join(userNameList, ","));
+            }
+
+            for (FormItemVO formItemVO : formItemVOList) {
+                Object o = paramMap.get(formItemVO.getId());
+                set.set(formItemVO.getName(), o);
+            }
+            records.add(set);
+        }
+
+        String format = StrUtil.format("/tmp/{}.xls", IdUtil.fastSimpleUUID());
+        ExcelWriter writer = new ExcelWriter(format, "表1");
+
+
+        writer.write(records, true);
+        writer.close();
+
+        //拼装url
+
+        R<String> r = fileService.save(FileUtil.readBytes(format), StrUtil.format("{}.xls", process.getName()));
+
+        return r;
+    }
+
+    private void handApproveRecord(Node node, List<String> list) {
+        Node childNode = node.getChildNode();
+        if (!NodeUtil.isNode(childNode)) {
+            return;
+        }
+
+    }
+
+    /**
+     * 终止流程
+     *
+     * @param processInstanceId
+     * @return
+     */
+    @Override
+    public R stopProcessInstance(String processInstanceId) {
+
+
+        TaskParamDto taskParamDto = new TaskParamDto();
+
+        List<String> allStopProcessInstanceIdList = getAllStopProcessInstanceIdList(processInstanceId);
+        CollUtil.reverse(allStopProcessInstanceIdList);
+        allStopProcessInstanceIdList.add(processInstanceId);
+
+        taskParamDto.setProcessInstanceIdList(allStopProcessInstanceIdList);
+        taskParamDto.setUserId(StpUtil.getLoginIdAsString());
+        com.cxygzl.common.dto.R r = CoreHttpUtil.stopProcessInstance(taskParamDto);
+
+        if (!r.isOk()) {
+            return R.fail(r.getMsg());
+        }
+
+
+        return R.success();
+    }
+
+    private List<String> getAllStopProcessInstanceIdList(String processInstanceId) {
+        List<ProcessInstanceRecord> list = processInstanceRecordService.lambdaQuery()
+                .eq(ProcessInstanceRecord::getParentProcessInstanceId, processInstanceId).list();
+
+        List<String> collect = list.stream().map(w -> w.getProcessInstanceId()).collect(Collectors.toList());
+
+        for (ProcessInstanceRecord processInstanceRecord : list) {
+            List<String> allStopProcessInstanceIdList = getAllStopProcessInstanceIdList(processInstanceRecord.getProcessInstanceId());
+
+            collect.addAll(allStopProcessInstanceIdList);
+
+        }
+        return collect;
+    }
+
+    /**
+     * 催办
+     *
+     * @param taskParamDto
+     * @return
+     */
+    @Transactional
+    @Override
+    public R urgeProcessInstance(TaskParamDto taskParamDto) {
+        List<TaskDto> taskDtoList = CoreHttpUtil.queryTaskAssignee(null, taskParamDto.getProcessInstanceId()).getData();
+        if (taskDtoList.isEmpty()) {
+            return R.fail("暂无待审批任务需要催办");
+        }
+
+        String loginIdAsString = StpUtil.getLoginIdAsString();
+        UserDto userDto = ApiStrategyFactory.getStrategy().getUser(loginIdAsString);
+
+        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
+                taskParamDto.getProcessInstanceId()).one();
+
+        for (TaskDto taskDto : taskDtoList) {
+            com.cxygzl.common.dto.third.MessageDto messageDto = new com.cxygzl.common.dto.third.MessageDto();
+            messageDto.setType(MessageTypeEnum.URGE_TASK.getType());
+            messageDto.setReaded(false);
+            messageDto.setUserId(taskDto.getAssign());
+            messageDto.setUniqueId(taskDto.getTaskId());
+            messageDto.setContent(StrUtil.format("[{}]提醒您审批他的[{}]:{}", userDto.getName(), processInstanceRecord.getName(),
+                    taskParamDto.getApproveDesc()));
+            messageDto.setTitle("催办任务");
+            messageDto.setFlowId(taskDto.getFlowId());
+
+
+            messageDto.setProcessInstanceId(taskParamDto.getProcessInstanceId());
+
+            remoteService.saveMessage(messageDto);
+        }
+
+        return R.success();
     }
 }

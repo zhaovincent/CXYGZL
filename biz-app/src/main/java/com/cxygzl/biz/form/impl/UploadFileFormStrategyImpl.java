@@ -167,6 +167,6 @@ public class UploadFileFormStrategyImpl implements InitializingBean, FormStrateg
     public String getExcelShow(String s, int index) {
         List<UploadValue> list = JsonUtil.parseArray(s, UploadValue.class);
 
-        return list.get(index).getName();
+        return list.get(index).getUrl();
     }
 }

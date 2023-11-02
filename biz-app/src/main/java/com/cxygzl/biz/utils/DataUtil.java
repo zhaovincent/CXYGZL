@@ -11,6 +11,22 @@ import java.util.stream.Collectors;
 public class DataUtil {
 
     /**
+     * 转换秒为时分秒的形式
+     *
+     * @param seconds 待转换的秒
+     * @return
+     */
+    public static String getDate(Integer seconds) {
+        if(seconds==null){
+            return null;
+        }
+        int h = seconds / 3600;
+        int m = (seconds % 3600) / 60;
+        int s = (seconds % 3600) % 60;
+        return h + ":" + m + ":" + s ;
+    }
+
+    /**
      * 根据当前部门id，向上查找所有的部门
      *
      * @param deptId
