@@ -929,44 +929,20 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         //找出明细
         List<FormItemVO> layoutFormList = formItemVOList.stream().filter(w -> StrUtil.equals(w.getType(), FormTypeEnum.LAYOUT.getType())).collect(Collectors.toList());
         if (layoutFormList.isEmpty()) {
-            Integer result = processInstanceRecord.getResult();
-            Date endTime = processInstanceRecord.getEndTime();
-            Integer duration = null;
-            if (endTime != null) {
-                int second1 = DateUtil.second(endTime);
-                int second2 = DateUtil.second(processInstanceRecord.getCreateTime());
-
-                duration = second1 - second2;
-            }
-
-            Dict set = Dict.create()
-                    .set("标题", processInstanceRecord.getName())
-                    .set("审批状态", NodeStatusEnum.get(processInstanceRecord.getStatus()).getName())
-                    .set("审批结果", result == null ? "" : (result == ProcessInstanceConstant.ApproveResult.OK ? "同意" : "拒绝"))
-                    .set("发起时间", processInstanceRecord.getCreateTime())
-                    .set("完成时间", endTime)
-                    .set("耗时", DataUtil.getDate(duration))
-                    .set("发起人UserID", user.getId())
-                    .set("发起人姓名", user.getName())
-                    .set("发起人部门", dept.getName())
-                    .set("审批记录(含处理人UserID)", dept.getName());
-
-            if (endTime == null) {
-                List<TaskDto> taskDtoList = CoreHttpUtil.queryTaskAssignee(null, processInstanceId).getData();
-                Set<String> userIdSet = taskDtoList.stream().map(w -> w.getAssign()).collect(Collectors.toSet());
-                List<String> userNameList = new ArrayList<>();
-                for (String s : userIdSet) {
-                    UserDto u = ApiStrategyFactory.getStrategy().getUser(s);
-                    userNameList.add(u.getName());
-                }
-                set.set("当前处理人姓名", CollUtil.join(userNameList, ","));
-            }
-
-            for (FormItemVO formItemVO : formItemVOList) {
-                Object o = paramMap.get(formItemVO.getId());
-                set.set(formItemVO.getName(), o);
-            }
+            Dict set = createExcelCommonContent( processInstanceRecord, user, dept, formItemVOList, paramMap);
             records.add(set);
+        } else {
+            for (FormItemVO formItemVO : layoutFormList) {
+                Object o = paramMap.get(formItemVO.getId());
+                if (o == null) {
+                    continue;
+                }
+                List<?> list = Convert.toList(o);
+                for (Object object : list) {
+                    Dict set = createExcelCommonContent( processInstanceRecord, user, dept, formItemVOList, paramMap);
+                    records.add(set);
+                }
+            }
         }
 
         String format = StrUtil.format("/tmp/{}.xls", IdUtil.fastSimpleUUID());
@@ -981,6 +957,51 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         R<String> r = fileService.save(FileUtil.readBytes(format), StrUtil.format("{}.xls", process.getName()));
 
         return r;
+    }
+
+    private static Dict createExcelCommonContent(ProcessInstanceRecord processInstanceRecord, UserDto user, DeptDto dept, List<FormItemVO> formItemVOList, Map<String, Object> paramMap) {
+        String processInstanceId = processInstanceRecord.getProcessInstanceId();
+        Integer result = processInstanceRecord.getResult();
+        Date endTime = processInstanceRecord.getEndTime();
+        Integer duration = null;
+        if (endTime != null) {
+            int second1 = DateUtil.second(endTime);
+            int second2 = DateUtil.second(processInstanceRecord.getCreateTime());
+
+            duration = second1 - second2;
+        }
+
+        Dict set = Dict.create()
+                .set("标题", processInstanceRecord.getName())
+                .set("审批状态", NodeStatusEnum.get(processInstanceRecord.getStatus()).getName())
+                .set("审批结果", result == null ? "" : (result == ProcessInstanceConstant.ApproveResult.OK ? "同意" : "拒绝"))
+                .set("发起时间", processInstanceRecord.getCreateTime())
+                .set("完成时间", endTime)
+                .set("耗时", DataUtil.getDate(duration))
+                .set("发起人UserID", user.getId())
+                .set("发起人姓名", user.getName())
+                .set("发起人部门", dept.getName())
+                .set("审批记录(含处理人UserID)", dept.getName());
+
+        if (endTime == null) {
+            List<TaskDto> taskDtoList = CoreHttpUtil.queryTaskAssignee(null, processInstanceId).getData();
+            Set<String> userIdSet = taskDtoList.stream().map(w -> w.getAssign()).collect(Collectors.toSet());
+            List<String> userNameList = new ArrayList<>();
+            for (String s : userIdSet) {
+                UserDto u = ApiStrategyFactory.getStrategy().getUser(s);
+                userNameList.add(u.getName());
+            }
+            set.set("当前处理人姓名", CollUtil.join(userNameList, ","));
+        }
+
+        for (FormItemVO formItemVO : formItemVOList) {
+            if(formItemVO.getType().equals(FormTypeEnum.LAYOUT.getType())){
+                continue;
+            }
+            Object o = paramMap.get(formItemVO.getId());
+            set.set(formItemVO.getName(), o);
+        }
+        return set;
     }
 
     private void handApproveRecord(Node node, List<String> list) {
