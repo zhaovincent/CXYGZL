@@ -680,7 +680,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                             int i1 = minV / length;
                             //计算出当前应该是第几条数据
                             int i2 = (i ) / i1;
-                            String excelShow = FormStrategyFactory.getStrategy(formItemVO.getType()).getExcelShow(s, i2);
+                            String excelShow = FormStrategyFactory.getStrategy(formItemVO.getType()).getExcelDataShow(s, i2);
                             if(formItemVO.getType().equals(FormTypeEnum.UPLOAD_IMAGE.getType())){
                                 int tempF=tempIndex;
                                 int startIndexF=startIndex+1+i2*i1;
@@ -707,7 +707,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                         }else{
                             if(StrUtil.isNotBlank(s)){
                                 String excelShow =
-                                        FormStrategyFactory.getStrategy(formItemVO.getType()).getExcelShow(s, 0);
+                                        FormStrategyFactory.getStrategy(formItemVO.getType()).getExcelDataShow(s, 0);
 
                                 int tempF=tempIndex;
                                 int startIndexF=startIndex+1;

@@ -66,12 +66,20 @@ public interface FormStrategy {
     int length(String s);
 
     /**
-     * 获取excel显示内容
+     * 获取报表excel显示内容
      * @param s
      * @param index
      * @return
      */
-    String getExcelShow(String s,int index);
+    String getExcelDataShow(String s, int index);
+
+    /**
+     * 获取流程详情 excel显示
+     *
+     * @param s
+     * @return
+     */
+    String getProcessInstanceExcelShow(String s);
 
 
 }

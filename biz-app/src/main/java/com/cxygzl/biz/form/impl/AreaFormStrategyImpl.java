@@ -145,7 +145,19 @@ public class AreaFormStrategyImpl implements InitializingBean, FormStrategy {
      * @return
      */
     @Override
-    public String getExcelShow(String s, int index) {
+    public String getExcelDataShow(String s, int index) {
+        AreaFormValue areaFormValue = JsonUtil.parseObject(s, AreaFormValue.class);
+        return areaFormValue.getName();
+    }
+
+    /**
+     * 获取流程详情 excel显示
+     *
+     * @param s
+     * @return
+     */
+    @Override
+    public String getProcessInstanceExcelShow(String s) {
         AreaFormValue areaFormValue = JsonUtil.parseObject(s, AreaFormValue.class);
         return areaFormValue.getName();
     }

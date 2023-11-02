@@ -35,6 +35,8 @@ import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.DataRow;
 import org.anyline.service.AnylineService;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -926,21 +928,106 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         String formItems = process.getFormItems();
         List<FormItemVO> formItemVOList = JsonUtil.parseArray(formItems, FormItemVO.class);
 
+        //需要表格内部换行的
+        Set<Integer> brColList=new LinkedHashSet<>();
+
         //找出明细
         List<FormItemVO> layoutFormList = formItemVOList.stream().filter(w -> StrUtil.equals(w.getType(), FormTypeEnum.LAYOUT.getType())).collect(Collectors.toList());
         if (layoutFormList.isEmpty()) {
             Dict set = createExcelCommonContent( processInstanceRecord, user, dept, formItemVOList, paramMap);
+            int colIndex=0;
+            for (FormItemVO formItemVO : formItemVOList) {
+                Object o = paramMap.get(formItemVO.getId());
+                set.set(formItemVO.getName(), o==null?"":
+                        FormStrategyFactory.getStrategy(formItemVO.getType()).getProcessInstanceExcelShow(JsonUtil.toJSONString(o)));
+                if(StrUtil.equalsAny(formItemVO.getType(),FormTypeEnum.UPLOAD_IMAGE.getType())){
+                    brColList.add(colIndex);
+                }
+                colIndex++;
+            }
             records.add(set);
         } else {
-            for (FormItemVO formItemVO : layoutFormList) {
-                Object o = paramMap.get(formItemVO.getId());
+
+
+            for (FormItemVO layoutFormItem : layoutFormList) {
+
+                Object o = paramMap.get(layoutFormItem.getId());
                 if (o == null) {
                     continue;
                 }
                 List<?> list = Convert.toList(o);
+                if(list.isEmpty()){
+                    continue;
+                }
+                int index=1;
                 for (Object object : list) {
+                    int colIndex=0;
                     Dict set = createExcelCommonContent( processInstanceRecord, user, dept, formItemVOList, paramMap);
+                    for (FormItemVO formItemVO : formItemVOList) {
+
+                        if (StrUtil.equals(formItemVO.getType(), FormTypeEnum.LAYOUT.getType())) {
+                            if(formItemVO.getId().equals(layoutFormItem.getId())){
+                                set.put(formItemVO.getName(),StrUtil.format("{}{}",formItemVO.getName(),index));
+                                colIndex++;
+                                Map<String, Object> map = BeanUtil.beanToMap(object);
+                                List<FormItemVO> subItemList = Convert.toList(FormItemVO.class,
+                                        formItemVO.getProps().getValue());
+                                for (FormItemVO itemVO : subItemList) {
+                                    Object value = map.get(itemVO.getId());
+                                    String v = value == null ? "" :
+                                            FormStrategyFactory.getStrategy(itemVO.getType()).getProcessInstanceExcelShow(JsonUtil.toJSONString(value));
+                                    set.put(itemVO.getName(), v);
+
+
+                                    if(StrUtil.equalsAny(itemVO.getType(),FormTypeEnum.UPLOAD_IMAGE.getType())){
+
+                                        if(StrUtil.isNotBlank(v)){
+                                            set.put(itemVO.getName(), new XSSFRichTextString(v));
+
+                                        }
+
+                                        brColList.add(colIndex);
+                                    }
+                                    colIndex++;
+                                }
+
+                            }else{
+                                set.put(formItemVO.getName(),"");
+                                colIndex++;
+                                List<FormItemVO> subItemList = Convert.toList(FormItemVO.class,
+                                        formItemVO.getProps().getValue());
+
+                                for (FormItemVO itemVO : subItemList) {
+                                    set.put(itemVO.getName(),"");
+
+                                    if(StrUtil.equalsAny(itemVO.getType(),FormTypeEnum.UPLOAD_IMAGE.getType())){
+                                        brColList.add(colIndex);
+                                    }
+                                    colIndex++;
+
+                                }
+                            }
+
+                        }else{
+                            Object value = paramMap.get(formItemVO.getId());
+                            String v = value == null ? "" :
+                                    FormStrategyFactory.getStrategy(formItemVO.getType()).getProcessInstanceExcelShow(JsonUtil.toJSONString(value));
+                            set.put(formItemVO.getName(), v);
+
+                            if(StrUtil.equalsAny(formItemVO.getType(),FormTypeEnum.UPLOAD_IMAGE.getType())){
+                                if(StrUtil.isNotBlank(v)){
+                                    set.put(formItemVO.getName(), new XSSFRichTextString(v));
+
+                                }
+
+                                brColList.add(colIndex);
+                            }
+                            colIndex++;
+                        }
+                    }
                     records.add(set);
+
+                    index++;
                 }
             }
         }
@@ -948,6 +1035,15 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         String format = StrUtil.format("/tmp/{}.xls", IdUtil.fastSimpleUUID());
         ExcelWriter writer = new ExcelWriter(format, "表1");
 
+        for(int k=1;k<records.size();k++){
+            for (int x:brColList) {
+                CellStyle cellStyle = writer.getOrCreateCellStyle(x +11, k);
+                cellStyle.setWrapText(true);
+                writer.setStyle(cellStyle,x+11,k);
+            }
+
+        }
+        writer.autoSizeColumnAll();
 
         writer.write(records, true);
         writer.close();
@@ -981,7 +1077,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 .set("发起人UserID", user.getId())
                 .set("发起人姓名", user.getName())
                 .set("发起人部门", dept.getName())
-                .set("审批记录(含处理人UserID)", dept.getName());
+                .set("审批记录(含处理人UserID)", "");
 
         if (endTime == null) {
             List<TaskDto> taskDtoList = CoreHttpUtil.queryTaskAssignee(null, processInstanceId).getData();
@@ -994,13 +1090,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
             set.set("当前处理人姓名", CollUtil.join(userNameList, ","));
         }
 
-        for (FormItemVO formItemVO : formItemVOList) {
-            if(formItemVO.getType().equals(FormTypeEnum.LAYOUT.getType())){
-                continue;
-            }
-            Object o = paramMap.get(formItemVO.getId());
-            set.set(formItemVO.getName(), o);
-        }
+
         return set;
     }
 

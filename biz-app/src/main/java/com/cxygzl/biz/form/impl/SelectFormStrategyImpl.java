@@ -175,9 +175,23 @@ public class SelectFormStrategyImpl implements InitializingBean, FormStrategy {
      * @return
      */
     @Override
-    public String getExcelShow(String s, int index) {
+    public String getExcelDataShow(String s, int index) {
         List<SelectValue> list = JsonUtil.parseArray(s, SelectValue.class);
 
         return list.get(index).getValue();
+    }
+
+    /**
+     * 获取流程详情 excel显示
+     *
+     * @param s
+     * @return
+     */
+    @Override
+    public String getProcessInstanceExcelShow(String s) {
+        List<SelectValue> list = JsonUtil.parseArray(s, SelectValue.class);
+
+        return list.stream().map(w->w.getValue()).collect(Collectors.joining(","));
+
     }
 }

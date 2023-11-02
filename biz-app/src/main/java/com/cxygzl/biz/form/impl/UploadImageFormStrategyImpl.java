@@ -164,9 +164,23 @@ public class UploadImageFormStrategyImpl implements InitializingBean, FormStrate
      * @return
      */
     @Override
-    public String getExcelShow(String s, int index) {
+    public String getExcelDataShow(String s, int index) {
         List<UploadValue> list = JsonUtil.parseArray(s, UploadValue.class);
 
         return list.get(index).getUrl();
+    }
+
+    /**
+     * 获取流程详情 excel显示
+     *
+     * @param s
+     * @return
+     */
+    @Override
+    public String getProcessInstanceExcelShow(String s) {
+        List<UploadValue> list = JsonUtil.parseArray(s, UploadValue.class);
+
+        return list.stream().map(w->w.getUrl()).collect(Collectors.joining("\r\n\r\n\r\n\r\n"));
+
     }
 }

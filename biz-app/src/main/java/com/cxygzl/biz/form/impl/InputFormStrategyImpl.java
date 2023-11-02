@@ -111,7 +111,18 @@ public class InputFormStrategyImpl implements InitializingBean, FormStrategy {
      * @return
      */
     @Override
-    public String getExcelShow(String s, int index) {
+    public String getExcelDataShow(String s, int index) {
+        return s;
+    }
+
+    /**
+     * 获取流程详情 excel显示
+     *
+     * @param s
+     * @return
+     */
+    @Override
+    public String getProcessInstanceExcelShow(String s) {
         return s;
     }
 }

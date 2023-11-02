@@ -174,9 +174,23 @@ public class RelatedProcessFormStrategyImpl implements InitializingBean, FormStr
      * @return
      */
     @Override
-    public String getExcelShow(String s, int index) {
+    public String getExcelDataShow(String s, int index) {
         List<RelatedProcessValue> list = JsonUtil.parseArray(s, RelatedProcessValue.class);
 
         return list.get(index).getProcessName();
+    }
+
+    /**
+     * 获取流程详情 excel显示
+     *
+     * @param s
+     * @return
+     */
+    @Override
+    public String getProcessInstanceExcelShow(String s) {
+        List<RelatedProcessValue> list = JsonUtil.parseArray(s, RelatedProcessValue.class);
+
+        return list.stream().map(w->w.getProcessName()).collect(Collectors.joining(","));
+
     }
 }

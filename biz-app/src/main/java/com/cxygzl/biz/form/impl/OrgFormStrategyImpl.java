@@ -188,9 +188,21 @@ public class OrgFormStrategyImpl implements InitializingBean, FormStrategy {
      * @return
      */
     @Override
-    public String getExcelShow(String s, int index) {
+    public String getExcelDataShow(String s, int index) {
         List<NodeUser> nodeUserList = JsonUtil.parseArray(s, NodeUser.class);
 
         return nodeUserList.get(index).getName();
+    }
+
+    /**
+     * 获取流程详情 excel显示
+     *
+     * @param s
+     * @return
+     */
+    @Override
+    public String getProcessInstanceExcelShow(String s) {
+        List<NodeUser> nodeUserList = JsonUtil.parseArray(s, NodeUser.class);
+        return nodeUserList.stream().map(w->w.getName()).collect(Collectors.joining(","));
     }
 }
