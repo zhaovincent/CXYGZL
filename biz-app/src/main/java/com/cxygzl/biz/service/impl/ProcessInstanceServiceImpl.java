@@ -35,7 +35,7 @@ import com.cxygzl.common.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.anyline.entity.DataRow;
 import org.anyline.service.AnylineService;
-import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -1039,13 +1039,24 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
             for (int x:brColList) {
                 CellStyle cellStyle = writer.getOrCreateCellStyle(x +11, k);
                 cellStyle.setWrapText(true);
+                cellStyle.setAlignment(HorizontalAlignment.CENTER);
+                cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
                 writer.setStyle(cellStyle,x+11,k);
             }
 
         }
-        writer.autoSizeColumnAll();
+
+        //定义宽度
+        writer.setColumnWidth(3,20);
+        writer.setColumnWidth(4,20);
+        writer.setColumnWidth(5,20);
+        writer.setColumnWidth(6,20);
+        writer.setColumnWidth(7,20);
+        writer.setColumnWidth(8,20);
 
         writer.write(records, true);
+        //writer.autoSizeColumnAll();
+
         writer.close();
 
         //拼装url
@@ -1054,7 +1065,6 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         return r;
     }
-
     private static Dict createExcelCommonContent(ProcessInstanceRecord processInstanceRecord, UserDto user, DeptDto dept, List<FormItemVO> formItemVOList, Map<String, Object> paramMap) {
         String processInstanceId = processInstanceRecord.getProcessInstanceId();
         Integer result = processInstanceRecord.getResult();

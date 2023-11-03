@@ -48,10 +48,6 @@ import org.anyline.entity.DefaultPageNavi;
 import org.anyline.entity.PageNavi;
 import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.Drawing;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -686,14 +682,14 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                                 int startIndexF=startIndex+1+i2*i1;
                                 //签名是图片
                                 long c = excelPicVoList.stream().filter(w -> w.getCol() == tempF && w.getRow() == (startIndexF)).count();
-//                                if(c==0){
-//                                    ExcelPicVo excelPicVo=new ExcelPicVo();
-//                                    excelPicVo.setRow(startIndexF);
-//                                    excelPicVo.setCol(tempIndex);
-//                                    excelPicVo.setUrl(excelShow);
-//                                    excelPicVoList.add(excelPicVo);
-//                                }
-                                dict.set(formItemVO.getName(), excelShow);
+                                if(c==0){
+                                    ExcelPicVo excelPicVo=new ExcelPicVo();
+                                    excelPicVo.setRow(startIndexF);
+                                    excelPicVo.setCol(tempIndex);
+                                    excelPicVo.setUrl(excelShow);
+                                    excelPicVoList.add(excelPicVo);
+                                }
+                               // dict.set(formItemVO.getName(), excelShow);
 
                             }else{
                                 dict.set(formItemVO.getName(), excelShow);
@@ -716,14 +712,14 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
                                     //签名是图片
                                     long c = excelPicVoList.stream().filter(w -> w.getCol() == tempF && w.getRow() == (startIndexF)).count();
-//                                    if(c==0){
-//                                        ExcelPicVo excelPicVo=new ExcelPicVo();
-//                                        excelPicVo.setRow(startIndex+1);
-//                                        excelPicVo.setCol(tempIndex);
-//                                        excelPicVo.setUrl(excelShow);
-//                                        excelPicVoList.add(excelPicVo);
-//                                    }
-                                    dict.set(formItemVO.getName(), excelShow);
+                                    if(c==0){
+                                        ExcelPicVo excelPicVo=new ExcelPicVo();
+                                        excelPicVo.setRow(startIndex+1);
+                                        excelPicVo.setCol(tempIndex);
+                                        excelPicVo.setUrl(excelShow);
+                                        excelPicVoList.add(excelPicVo);
+                                    }
+                                    //dict.set(formItemVO.getName(), excelShow);
 
                                 }else{
                                     dict.set(formItemVO.getName(), excelShow);
@@ -771,29 +767,13 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
             File file = new File(StrUtil.format("/tmp/{}.{}",IdUtil.fastSimpleUUID(),FileUtil.getSuffix(excelPicVo.getUrl())));
             FileOutputStream fileOutputStream=new FileOutputStream(file);
             HttpUtil.download(excelPicVo.getUrl(),fileOutputStream,true);
-            byte[] pictureData=FileUtil.readBytes(file);
-            //处理图片
-            Sheet sheet = writer.getSheet();
-            Drawing<?> drawingPatriarch = sheet.createDrawingPatriarch();
-            ClientAnchor anchor = drawingPatriarch.createAnchor(0, 0, 0, 0,excelPicVo.getCol(),excelPicVo.getRow(),excelPicVo.getCol()+1,excelPicVo.getRow()+1 );
-            //随单元格改变位置和大小
-            anchor.setAnchorType(ClientAnchor.AnchorType.MOVE_AND_RESIZE);
-
-            //添加图片
-            int pictureTypeJpeg = HSSFWorkbook.PICTURE_TYPE_JPEG;
-            if(FileUtil.getSuffix(excelPicVo.getUrl()).toLowerCase().contains("png")){
-                pictureTypeJpeg = HSSFWorkbook.PICTURE_TYPE_PNG;
-            }
-            int pictureIndex = sheet.getWorkbook().addPicture(pictureData, pictureTypeJpeg);
-            drawingPatriarch.createPicture(anchor, pictureIndex);
+            writer.writeImg(file,excelPicVo.getCol(),excelPicVo.getRow(),excelPicVo.getCol()+1,excelPicVo.getRow()+1);
         }
 
 
         writer.write(records, true);
         writer.close();
 
-        //拼装url
-        log.info("路径：{}", format);
 
         R<String> r = fileService.save(FileUtil.readBytes(format), StrUtil.format("{}-报表.xls", process.getName()));
 
