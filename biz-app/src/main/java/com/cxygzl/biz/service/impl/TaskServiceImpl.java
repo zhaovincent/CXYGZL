@@ -8,23 +8,19 @@ import cn.hutool.core.util.StrUtil;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.config.exception.BusinessException;
 import com.cxygzl.biz.constants.NodeStatusEnum;
-import com.cxygzl.biz.entity.ProcessInstanceAssignUserRecord;
-import com.cxygzl.biz.entity.ProcessInstanceExecution;
-import com.cxygzl.biz.entity.ProcessInstanceNodeRecord;
-import com.cxygzl.biz.entity.ProcessInstanceRecord;
+import com.cxygzl.biz.entity.*;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.vo.NextNodeQueryVO;
 import com.cxygzl.common.constants.ApproveDescTypeEnum;
-import com.cxygzl.common.constants.MessageTypeEnum;
 import com.cxygzl.common.constants.NodeTypeEnum;
+import com.cxygzl.common.constants.TaskTypeEnum;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.SimpleApproveDescDto;
 import com.cxygzl.common.dto.TaskDto;
 import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.UploadValue;
-import com.cxygzl.common.dto.third.MessageDto;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.common.utils.NodeUtil;
@@ -110,6 +106,26 @@ public class TaskServiceImpl implements ITaskService {
         if (!r.isOk()) {
             return R.fail(r.getMsg());
         }
+
+        UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
+        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, taskParamDto.getProcessInstanceId()).one();
+
+        ProcessInstanceOperRecord processInstanceOperRecord=new ProcessInstanceOperRecord();
+        processInstanceOperRecord.setUserId(userId);
+        processInstanceOperRecord.setFlowId(processInstanceRecord.getFlowId());
+        processInstanceOperRecord.setProcessInstanceId(taskParamDto.getProcessInstanceId());
+        processInstanceOperRecord.setComment(taskParamDto.getApproveDesc());
+        if(taskParamDto.getApproveResult()){
+            processInstanceOperRecord.setTaskType(TaskTypeEnum.PASS.getValue());
+            processInstanceOperRecord.setTaskDesc(StrUtil.format("{}[{}] | 提交审批 | {} ",user.getName(),userId ,"同意"));
+        }else{
+            processInstanceOperRecord.setTaskType(TaskTypeEnum.REFUSE.getValue());
+            processInstanceOperRecord.setTaskDesc(StrUtil.format("{}[{}] | 提交审批 | {} ",user.getName(),userId,"拒绝"));
+        }
+
+        processInstanceOperRecord.setImageList(JsonUtil.toJSONString(taskParamDto.getApproveImageList()));
+        processInstanceOperRecord.setFileList(JsonUtil.toJSONString(taskParamDto.getApproveFileList()));
+
 
 
         return R.success();

@@ -47,6 +47,9 @@ public class JsonUtil {
 
     @SneakyThrows
     public static String toJSONString(Object obj) {
+        if(obj==null){
+            return null;
+        }
         if (obj instanceof String) {
             return Convert.toStr(obj);
         }
