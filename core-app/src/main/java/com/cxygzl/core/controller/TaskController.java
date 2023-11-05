@@ -44,7 +44,16 @@ public class TaskController {
     public R queryTaskComments(@RequestBody VariableQueryParamDto paramDto) {
             return taskService.queryTaskComments(paramDto);
     }
-
+    /**
+     * 查询流程实例评论
+     *
+     * @param processInstanceId
+     * @return
+     */
+    @GetMapping("queryProcessInstanceComments")
+    public R queryProcessInstanceComments(String processInstanceId){
+        return taskService.queryProcessInstanceComments(processInstanceId);
+    }
 
     /**
      * 查询任务
@@ -151,7 +160,7 @@ public class TaskController {
     }
 
 
- 
+
 
 
     /**

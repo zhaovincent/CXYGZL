@@ -22,6 +22,7 @@ public class TaskResultDto {
 
 
     private String nodeId;
+    private String nodeName;
     private String executionId;
     /**
      * 实例id

@@ -74,6 +74,23 @@ public class CoreHttpUtil {
     }
 
     /**
+     * 查询流程评论
+     * 全部都是
+     *
+     * @param processInstanceId
+     * @return
+     */
+    public static R<List<SimpleApproveDescDto>> queryProcessInstanceComments(String processInstanceId) {
+
+
+        String post = get("/task/queryProcessInstanceComments?processInstanceId="+processInstanceId);
+        R<List<SimpleApproveDescDto>> listR = JsonUtil.parseObject(post, new JsonUtil.TypeReference<R<List<SimpleApproveDescDto>>>() {
+        });
+        return listR;
+
+    }
+
+    /**
      * queryTaskAssignee
      *
      * @param nodeId

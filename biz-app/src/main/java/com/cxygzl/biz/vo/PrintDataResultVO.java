@@ -1,6 +1,5 @@
 package com.cxygzl.biz.vo;
 
-import com.cxygzl.common.dto.SimpleApproveDescDto;
 import lombok.Data;
 
 import java.util.List;
@@ -33,12 +32,9 @@ public class PrintDataResultVO {
     }
     @Data
     public static class Approve{
-        private String userName;
         private String nodeName;
-        private String taskType;
-        private String taskTypeShow;
-        private String date;
-        private List<SimpleApproveDescDto> comment;
+        private String operType;
+        private String desc;
     }
 
 }

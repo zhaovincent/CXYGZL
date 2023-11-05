@@ -20,52 +20,60 @@ public interface ITaskService {
 
     /**
      * 委派任务
+     *
      * @param taskParamDto
      * @return
      */
-    R delegateTask( TaskParamDto taskParamDto);
+    R delegateTask(TaskParamDto taskParamDto);
 
     /**
      * 加签任务完成
+     *
      * @param taskParamDto
      * @return
      */
-    R resolveTask( TaskParamDto taskParamDto);
+    R resolveTask(TaskParamDto taskParamDto);
 
     /**
      * 转交
+     *
      * @param taskParamDto
      * @return
      */
-    R setAssignee( TaskParamDto taskParamDto);
+    R setAssignee(TaskParamDto taskParamDto);
 
     /**
      * 删除执行人
+     *
      * @param taskParamDto
      * @return
      */
-    R delAssignee( TaskParamDto taskParamDto);
+    R delAssignee(TaskParamDto taskParamDto);
 
     /**
      * 添加执行人
+     *
      * @param taskParamDto
      * @return
      */
-    R addAssignee( TaskParamDto taskParamDto);
+    R addAssignee(TaskParamDto taskParamDto);
 
     /**
      * 驳回
+     *
      * @param taskParamDto
      * @return
      */
-    R back( TaskParamDto taskParamDto);
+    R back(TaskParamDto taskParamDto);
 
     /**
      * 撤回
+     *
      * @param taskParamDto
      * @return
      */
-    R revoke( TaskParamDto taskParamDto);
+    R revoke(TaskParamDto taskParamDto);
+
     /**
      * 查询任务
      *
@@ -84,14 +92,24 @@ public interface ITaskService {
     R queryTaskComments(VariableQueryParamDto paramDto);
 
     /**
+     * 查询流程实例评论
+     *
+     * @param processInstanceId
+     * @return
+     */
+    R queryProcessInstanceComments(String processInstanceId);
+
+    /**
      * 查询任务变量
+     *
      * @param paramDto
      * @return
      */
-    R queryTaskVariables( VariableQueryParamDto paramDto);
+    R queryTaskVariables(VariableQueryParamDto paramDto);
 
     /**
      * 提交评论
+     *
      * @param taskParamDto
      * @return
      */

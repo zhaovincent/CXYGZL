@@ -36,6 +36,18 @@ public class ProcessInstanceOperRecord extends BaseEntity {
     private String flowId;
 
     /**
+     * 节点id
+     */
+    @TableField("`node_id`")
+    private String nodeId;
+
+    /**
+     * 节点名称
+     */
+    @TableField("`node_name`")
+    private String nodeName;
+
+    /**
      * 流程实例id
      */
     @TableField("`process_instance_id`")
@@ -48,16 +60,16 @@ public class ProcessInstanceOperRecord extends BaseEntity {
     private String comment;
 
     /**
-     * 任务类型
+     * 操作类型
      */
-    @TableField("`task_type`")
-    private String taskType;
+    @TableField("`oper_type`")
+    private String operType;
 
     /**
-     * 任务描述
+     * 操作描述
      */
-    @TableField("`task_desc`")
-    private String taskDesc;
+    @TableField("`oper_desc`")
+    private String operDesc;
 
     /**
      * 图片列表

@@ -22,10 +22,7 @@ import com.cxygzl.biz.utils.*;
 import com.cxygzl.biz.vo.*;
 import com.cxygzl.biz.vo.node.NodeImageVO;
 import com.cxygzl.biz.vo.node.NodeVo;
-import com.cxygzl.common.constants.FormTypeEnum;
-import com.cxygzl.common.constants.MessageTypeEnum;
-import com.cxygzl.common.constants.NodeUserTypeEnum;
-import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.constants.*;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.*;
 import com.cxygzl.common.dto.third.DeptDto;
@@ -57,6 +54,9 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     private IProcessInstanceRecordService processInstanceRecordService;
     @Resource
     private IProcessInstanceCopyService processCopyService;
+
+    @Resource
+    private IProcessInstanceOperRecordService processInstanceOperRecordService;
 
     @Resource
     private IProcessNodeDataService processNodeDataService;
@@ -111,6 +111,9 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
             return com.cxygzl.common.dto.R.fail(r.getMsg());
         }
         String data = r.getData();
+
+
+        processInstanceOperRecordService.saveStartProcessRecord(userId, data,processInstanceParamDto.getFlowId());
 
 
         return com.cxygzl.common.dto.R.success(data);
@@ -918,6 +921,13 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
 
+
+        //审批记录
+        List<ProcessInstanceOperRecord> processInstanceOperRecordList = processInstanceOperRecordService.lambdaQuery().eq(ProcessInstanceOperRecord::getProcessInstanceId,
+                processInstanceId).list();
+
+        String operDesc = processInstanceOperRecordList.stream().map(w -> w.getOperDesc()).collect(Collectors.joining("\r\n\r\n\r\n"));
+
         List records = new ArrayList();
 
         UserDto user = ApiStrategyFactory.getStrategy().getUser(processInstanceRecord.getUserId());
@@ -934,7 +944,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         //找出明细
         List<FormItemVO> layoutFormList = formItemVOList.stream().filter(w -> StrUtil.equals(w.getType(), FormTypeEnum.LAYOUT.getType())).collect(Collectors.toList());
         if (layoutFormList.isEmpty()) {
-            Dict set = createExcelCommonContent( processInstanceRecord, user, dept, formItemVOList, paramMap);
+            Dict set = createExcelCommonContent( processInstanceRecord, user, dept, operDesc);
             int colIndex=0;
             for (FormItemVO formItemVO : formItemVOList) {
                 Object o = paramMap.get(formItemVO.getId());
@@ -962,7 +972,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 int index=1;
                 for (Object object : list) {
                     int colIndex=0;
-                    Dict set = createExcelCommonContent( processInstanceRecord, user, dept, formItemVOList, paramMap);
+                    Dict set = createExcelCommonContent( processInstanceRecord, user, dept, operDesc);
                     for (FormItemVO formItemVO : formItemVOList) {
 
                         if (StrUtil.equals(formItemVO.getType(), FormTypeEnum.LAYOUT.getType())) {
@@ -1053,6 +1063,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         writer.setColumnWidth(6,20);
         writer.setColumnWidth(7,20);
         writer.setColumnWidth(8,20);
+        writer.setColumnWidth(9,50);
 
         writer.write(records, true);
         //writer.autoSizeColumnAll();
@@ -1065,7 +1076,8 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         return r;
     }
-    private static Dict createExcelCommonContent(ProcessInstanceRecord processInstanceRecord, UserDto user, DeptDto dept, List<FormItemVO> formItemVOList, Map<String, Object> paramMap) {
+    private static Dict createExcelCommonContent(ProcessInstanceRecord processInstanceRecord, UserDto user,
+                                                 DeptDto dept, String operDesc) {
         String processInstanceId = processInstanceRecord.getProcessInstanceId();
         Integer result = processInstanceRecord.getResult();
         Date endTime = processInstanceRecord.getEndTime();
@@ -1087,7 +1099,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 .set("发起人UserID", user.getId())
                 .set("发起人姓名", user.getName())
                 .set("发起人部门", dept.getName())
-                .set("审批记录(含处理人UserID)", "");
+                .set("审批记录(含处理人UserID)", operDesc);
 
         if (endTime == null) {
             List<TaskDto> taskDtoList = CoreHttpUtil.queryTaskAssignee(null, processInstanceId).getData();
@@ -1135,7 +1147,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         if (!r.isOk()) {
             return R.fail(r.getMsg());
         }
-
+        processInstanceOperRecordService.saveCancelProcessRecord(StpUtil.getLoginIdAsString(), processInstanceId);
 
         return R.success();
     }

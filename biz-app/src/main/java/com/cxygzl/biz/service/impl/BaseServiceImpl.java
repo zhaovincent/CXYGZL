@@ -19,7 +19,6 @@ import com.cxygzl.biz.utils.NodeFormatUtil;
 import com.cxygzl.biz.vo.*;
 import com.cxygzl.biz.vo.node.NodeVo;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
-import com.cxygzl.common.constants.TaskTypeEnum;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.FormItemVO;
 import com.cxygzl.common.dto.flow.Node;
@@ -32,8 +31,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -53,6 +54,8 @@ public class BaseServiceImpl implements IBaseService {
     private IProcessInstanceNodeRecordService processNodeRecordService;
     @Resource
     private IProcessInstanceAssignUserRecordService processNodeRecordAssignUserService;
+    @Resource
+    private IProcessInstanceOperRecordService processInstanceOperRecordService;
 
     @Resource
     private RedisTemplate redisTemplate;
@@ -460,29 +463,18 @@ public class BaseServiceImpl implements IBaseService {
 
         //流程审批节点
         List approveList = new ArrayList();
-        List<ProcessInstanceAssignUserRecord> processInstanceAssignUserRecordList = processNodeRecordAssignUserService.lambdaQuery().eq(ProcessInstanceAssignUserRecord::getProcessInstanceId, processInstanceId)
-                .orderByAsc(ProcessInstanceAssignUserRecord::getCreateTime)
-                .list();
-        for (ProcessInstanceAssignUserRecord processInstanceAssignUserRecord : processInstanceAssignUserRecordList) {
 
-            String userId = processInstanceAssignUserRecord.getUserId();
-            UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
+        List<ProcessInstanceOperRecord> processInstanceOperRecordList = processInstanceOperRecordService.lambdaQuery().eq(ProcessInstanceOperRecord::getProcessInstanceId,
+                processInstanceId).list();
 
-            Date endTime = processInstanceAssignUserRecord.getEndTime();
-            String taskType = processInstanceAssignUserRecord.getTaskType();
 
-            List<SimpleApproveDescDto> simpleApproveDescDtoList = CoreHttpUtil.queryTaskComments(processInstanceAssignUserRecord.getTaskId()).getData();
-            //非系统评论
-            List<SimpleApproveDescDto> notSysApproveDescDtoList =
-                    simpleApproveDescDtoList.stream().filter(w -> !w.getSys()).collect(Collectors.toList());
+        for (ProcessInstanceOperRecord processInstanceOperRecord : processInstanceOperRecordList) {
+
 
             PrintDataResultVO.Approve approve = new PrintDataResultVO.Approve();
-            approve.setUserName(user==null?"":user.getName());
-            approve.setNodeName(processInstanceAssignUserRecord.getNodeName());
-            approve.setTaskType(taskType);
-            approve.setTaskTypeShow(StrUtil.isBlankIfStr(taskType) ? "-" : TaskTypeEnum.getByValue(taskType).getName());
-            approve.setDate(endTime == null ? null : DateUtil.format(endTime, "yyyy-MM-dd HH:mm"));
-            approve.setComment(notSysApproveDescDtoList);
+            approve.setNodeName(processInstanceOperRecord.getNodeName());
+            approve.setDesc(processInstanceOperRecord.getOperDesc());
+            approve.setOperType(processInstanceOperRecord.getOperType());
 
 
             approveList.add(approve);

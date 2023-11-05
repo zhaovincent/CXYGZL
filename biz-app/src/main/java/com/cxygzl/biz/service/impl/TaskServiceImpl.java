@@ -8,13 +8,16 @@ import cn.hutool.core.util.StrUtil;
 import com.cxygzl.biz.api.ApiStrategyFactory;
 import com.cxygzl.biz.config.exception.BusinessException;
 import com.cxygzl.biz.constants.NodeStatusEnum;
-import com.cxygzl.biz.entity.*;
+import com.cxygzl.biz.entity.ProcessInstanceAssignUserRecord;
+import com.cxygzl.biz.entity.ProcessInstanceExecution;
+import com.cxygzl.biz.entity.ProcessInstanceNodeRecord;
+import com.cxygzl.biz.entity.ProcessInstanceRecord;
 import com.cxygzl.biz.service.*;
 import com.cxygzl.biz.utils.CoreHttpUtil;
 import com.cxygzl.biz.vo.NextNodeQueryVO;
 import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.NodeTypeEnum;
-import com.cxygzl.common.constants.TaskTypeEnum;
+import com.cxygzl.common.constants.OperTypeEnum;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.SimpleApproveDescDto;
 import com.cxygzl.common.dto.TaskDto;
@@ -52,6 +55,8 @@ public class TaskServiceImpl implements ITaskService {
     private IProcessInstanceExecutionService executionService;
     @Resource
     private IProcessInstanceAssignUserRecordService processInstanceAssignUserRecordService;
+    @Resource
+    private IProcessInstanceOperRecordService processInstanceOperRecordService;
 
     /**
      * 提交评论
@@ -66,7 +71,7 @@ public class TaskServiceImpl implements ITaskService {
         String process = processInstanceRecord.getProcess();
         Node node = JsonUtil.parseObject(process, Node.class);
         //找到根路径的最后一个没有执行的节点
-        SimpleApproveDescDto simpleApproveDescDto=new SimpleApproveDescDto();
+        SimpleApproveDescDto simpleApproveDescDto = new SimpleApproveDescDto();
         simpleApproveDescDto.setDate(new Date());
 
         Dict set = Dict.create().set("content", taskParamDto.getApproveDesc()).set("title", "添加了评论").set("userId", StpUtil.getLoginIdAsString()).set("sys", false);
@@ -78,10 +83,10 @@ public class TaskServiceImpl implements ITaskService {
         List<UploadValue> approveFileList = taskParamDto.getApproveFileList();
         simpleApproveDescDto.setApproveFileList(approveFileList);
 
-        List<UploadValue> approveImageList=taskParamDto.getApproveImageList();
+        List<UploadValue> approveImageList = taskParamDto.getApproveImageList();
         simpleApproveDescDto.setApproveImageList(approveImageList);
 
-        com.cxygzl.biz.utils.NodeUtil.addCommentNode(node,StpUtil.getLoginIdAsString(),simpleApproveDescDto);
+        com.cxygzl.biz.utils.NodeUtil.addCommentNode(node, StpUtil.getLoginIdAsString(), simpleApproveDescDto);
         processInstanceRecord.setProcess(JsonUtil.toJSONString(node));
         processInstanceRecordService.updateById(processInstanceRecord);
 
@@ -107,29 +112,16 @@ public class TaskServiceImpl implements ITaskService {
             return R.fail(r.getMsg());
         }
 
-        UserDto user = ApiStrategyFactory.getStrategy().getUser(userId);
-        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, taskParamDto.getProcessInstanceId()).one();
-
-        ProcessInstanceOperRecord processInstanceOperRecord=new ProcessInstanceOperRecord();
-        processInstanceOperRecord.setUserId(userId);
-        processInstanceOperRecord.setFlowId(processInstanceRecord.getFlowId());
-        processInstanceOperRecord.setProcessInstanceId(taskParamDto.getProcessInstanceId());
-        processInstanceOperRecord.setComment(taskParamDto.getApproveDesc());
-        if(taskParamDto.getApproveResult()){
-            processInstanceOperRecord.setTaskType(TaskTypeEnum.PASS.getValue());
-            processInstanceOperRecord.setTaskDesc(StrUtil.format("{}[{}] | 提交审批 | {} ",user.getName(),userId ,"同意"));
-        }else{
-            processInstanceOperRecord.setTaskType(TaskTypeEnum.REFUSE.getValue());
-            processInstanceOperRecord.setTaskDesc(StrUtil.format("{}[{}] | 提交审批 | {} ",user.getName(),userId,"拒绝"));
+        if (taskParamDto.getApproveResult()) {
+            processInstanceOperRecordService.saveRecord(userId, taskParamDto, OperTypeEnum.PASS.getValue(), "提交任务");
+        } else {
+            processInstanceOperRecordService.saveRecord(userId, taskParamDto, OperTypeEnum.REFUSE.getValue(), "提交任务");
         }
-
-        processInstanceOperRecord.setImageList(JsonUtil.toJSONString(taskParamDto.getApproveImageList()));
-        processInstanceOperRecord.setFileList(JsonUtil.toJSONString(taskParamDto.getApproveFileList()));
-
 
 
         return R.success();
     }
+
 
     /**
      * 前加签
@@ -153,6 +145,9 @@ public class TaskServiceImpl implements ITaskService {
         }
         //成功了 处理节点
 
+        processInstanceOperRecordService.saveRecord(StpUtil.getLoginIdAsString(), taskParamDto,
+                OperTypeEnum.FRONT_JOIN.getValue(), "委派任务");
+
 
         return R.success();
     }
@@ -173,6 +168,9 @@ public class TaskServiceImpl implements ITaskService {
         if (!r.isOk()) {
             return R.fail(r.getMsg());
         }
+
+        processInstanceOperRecordService.saveRecord(StpUtil.getLoginIdAsString(), taskParamDto,
+                OperTypeEnum.RESOLVE.getValue(), "完成任务");
 
 
         return R.success();
@@ -198,6 +196,8 @@ public class TaskServiceImpl implements ITaskService {
         }
 
 
+        processInstanceOperRecordService.saveRecord(StpUtil.getLoginIdAsString(), taskParamDto,
+                OperTypeEnum.BACK_JOIN.getValue(), "转办任务");
         return R.success();
     }
 
@@ -260,6 +260,8 @@ public class TaskServiceImpl implements ITaskService {
         }
 
 
+        processInstanceOperRecordService.saveRecord(StpUtil.getLoginIdAsString(), taskParamDto,
+                OperTypeEnum.ADD_ASSIGNEE.getValue(), "添加审批人");
         return R.success();
     }
 
@@ -333,11 +335,11 @@ public class TaskServiceImpl implements ITaskService {
             return R.fail(r.getMsg());
         }
 
+        processInstanceOperRecordService.saveRecord(StpUtil.getLoginIdAsString(), taskParamDto,
+                OperTypeEnum.DEL_ASSIGNEE.getValue(), "减少审批人");
 
         return R.success();
     }
-
-
 
 
     /**
@@ -358,6 +360,8 @@ public class TaskServiceImpl implements ITaskService {
         }
 
 
+        processInstanceOperRecordService.saveRecord(StpUtil.getLoginIdAsString(), taskParamDto,
+                OperTypeEnum.REJECT.getValue(), "驳回任务");
         return R.success();
     }
 
@@ -465,6 +469,8 @@ public class TaskServiceImpl implements ITaskService {
             throw new BusinessException(r.getMsg());
         }
 
+        processInstanceOperRecordService.saveRecord(StpUtil.getLoginIdAsString(), taskParamDto,
+                OperTypeEnum.REVOKE.getValue(), "撤回任务");
         return r;
     }
 

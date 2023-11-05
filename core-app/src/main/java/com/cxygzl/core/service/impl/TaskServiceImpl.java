@@ -589,6 +589,7 @@ public class TaskServiceImpl implements ITaskService {
         String executionId = null;
         String flowUniqueId = null;
         String assignee = null;
+        String nodeName = null;
 
         boolean taskExist = true;
 
@@ -603,6 +604,7 @@ public class TaskServiceImpl implements ITaskService {
                 }
                 taskExist = false;
                 taskDefinitionKey = historicTaskInstance.getTaskDefinitionKey();
+                nodeName = historicTaskInstance.getName();
                 processInstanceId = historicTaskInstance.getProcessInstanceId();
                 executionId = historicTaskInstance.getExecutionId();
                 assignee = historicTaskInstance.getAssignee();
@@ -618,6 +620,7 @@ public class TaskServiceImpl implements ITaskService {
                 delegationState = task.getDelegationState();
                 processInstanceId = task.getProcessInstanceId();
                 executionId = task.getExecutionId();
+                nodeName=task.getName();
                 assignee = task.getAssignee();
                 delegateVariable = taskService.getVariableLocal(taskId, "delegate");
 
@@ -648,6 +651,7 @@ public class TaskServiceImpl implements ITaskService {
         taskResultDto.setFlowId(flowId);
         taskResultDto.setUserId(assignee);
         taskResultDto.setNodeId(taskDefinitionKey);
+        taskResultDto.setNodeName(nodeName);
         taskResultDto.setCurrentTask(taskExist && StrUtil.equals(userId, assignee));
         taskResultDto.setExecutionId(executionId);
         taskResultDto.setDelegate(Convert.toBool(delegateVariable, false));
@@ -747,6 +751,83 @@ public class TaskServiceImpl implements ITaskService {
 
         }
         return R.success(simpleApproveDescDtoList);
+    }
+
+    /**
+     * 查询流程实例评论
+     *
+     * @param processInstanceId
+     * @return
+     */
+    @Override
+    public R queryProcessInstanceComments(String processInstanceId) {
+        List<Comment> taskComments = taskService.getProcessInstanceComments(processInstanceId);
+
+
+        List<Attachment> taskAttachments = taskService.getProcessInstanceAttachments(processInstanceId);
+
+
+        List<SimpleApproveDescDto> simpleApproveDescDtoList = new ArrayList<>();
+
+
+        for (Comment comment : taskComments) {
+            String id = comment.getId();
+            Date time = comment.getTime();
+            String fullMessage = comment.getFullMessage();
+            TaskCommentDto taskCommentDto = JsonUtil.parseObject(fullMessage, TaskCommentDto.class);
+
+
+            String userId = taskCommentDto.getUserId();
+            Boolean isSys = taskCommentDto.getSys();
+
+
+            SimpleApproveDescDto simpleApproveDescDto = new SimpleApproveDescDto();
+            simpleApproveDescDto.setDate(time);
+            simpleApproveDescDto.setMsgId(id);
+            simpleApproveDescDto.setSys(isSys);
+            simpleApproveDescDto.setUserId(userId);
+            simpleApproveDescDto.setType(comment.getType());
+            simpleApproveDescDto.setMessage(fullMessage);
+
+
+            //图片文件
+            {
+                List<Attachment> collect = taskAttachments.stream()
+                        .filter(w -> StrUtil.equals(w.getDescription(), id))
+                        .filter(w -> StrUtil.equals(w.getType(), ApproveAttachmentTypeEnum.IMAGE.getType()))
+                        .collect(Collectors.toList());
+                List<UploadValue> approveImageList=new ArrayList<>();
+                for (Attachment attachment : collect) {
+                    UploadValue uploadValue=new UploadValue();
+                    uploadValue.setUrl(attachment.getUrl());
+                    uploadValue.setName(attachment.getName());
+                    approveImageList.add(uploadValue);
+                }
+                simpleApproveDescDto.setApproveImageList(approveImageList);
+            }
+
+            {
+                List<Attachment> collect = taskAttachments.stream()
+                        .filter(w -> StrUtil.equals(w.getDescription(), id))
+                        .filter(w -> StrUtil.equals(w.getType(), ApproveAttachmentTypeEnum.FILE.getType()))
+                        .collect(Collectors.toList());
+                List<UploadValue> approveImageList=new ArrayList<>();
+                for (Attachment attachment : collect) {
+                    UploadValue uploadValue=new UploadValue();
+                    uploadValue.setUrl(attachment.getUrl());
+                    uploadValue.setName(attachment.getName());
+                    approveImageList.add(uploadValue);
+                }
+                simpleApproveDescDto.setApproveFileList(approveImageList);
+            }
+
+            simpleApproveDescDtoList.add(simpleApproveDescDto);
+
+
+        }
+
+        return R.success(simpleApproveDescDtoList);
+
     }
 
     /**
