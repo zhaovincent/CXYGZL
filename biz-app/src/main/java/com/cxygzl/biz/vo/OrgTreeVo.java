@@ -5,10 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @author : willian fu
- * @version : 1.0
- */
+
 @Data
 @Builder
 @NoArgsConstructor

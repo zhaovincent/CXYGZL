@@ -8,10 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * @author : willian fu
- * @date : 2022/6/27
- */
+
 @RestController
 @RequestMapping(value = {"org","api/org"})
 public class OrgController {

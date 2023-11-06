@@ -8,10 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 import java.util.List;
 
-/**
- * @author : willian fu
- * @date : 2020/9/21
- */
+
 @Data
 @Builder
 @NoArgsConstructor

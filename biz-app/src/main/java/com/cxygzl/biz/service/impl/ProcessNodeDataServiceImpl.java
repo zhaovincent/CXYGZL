@@ -70,10 +70,13 @@ public class ProcessNodeDataServiceImpl extends ServiceImpl<ProcessNodeDataMappe
 
         ProcessNodeData processNodeData = this.lambdaQuery().eq(ProcessNodeData::getFlowId, flowId).eq(ProcessNodeData::getNodeId, nodeId).one();
 
-        if(processNodeData!=null){
+        if (processNodeData != null) {
 
             cache.put(StrUtil.format("{}||{}", flowId, nodeId), processNodeData.getData());
 
+        }
+        if (processNodeData == null) {
+            return R.fail("数据不存在");
         }
 
         return R.success(processNodeData == null ? null : processNodeData.getData());
@@ -82,6 +85,6 @@ public class ProcessNodeDataServiceImpl extends ServiceImpl<ProcessNodeDataMappe
     @Override
     public R<Node> getNode(String flowId, String nodeId) {
         String data = getNodeData(flowId, nodeId).getData();
-        return R.success(JsonUtil.parseObject(data,Node.class));
+        return R.success(JsonUtil.parseObject(data, Node.class));
     }
 }

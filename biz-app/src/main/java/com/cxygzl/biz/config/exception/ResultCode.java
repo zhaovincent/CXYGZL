@@ -5,10 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 
-/**
- * @author : willian fu
- * @date : 2022/6/27
- */
+
 @AllArgsConstructor
 public enum ResultCode {
 

@@ -6,11 +6,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-/**
- * @author : willian fu
- * @version : 1.0
- * 设置跨域
- */
 @Configuration
 public class GlobalCorsConfig {// extends WebMvcConfigurerAdapter {
 

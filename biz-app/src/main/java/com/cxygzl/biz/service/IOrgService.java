@@ -4,10 +4,7 @@ import com.cxygzl.biz.entity.Dept;
 import com.cxygzl.biz.entity.User;
 import com.cxygzl.common.dto.R;
 
-/**
- * @author : willian fu
- * @version : 1.0
- */
+
 public interface IOrgService {
 
 

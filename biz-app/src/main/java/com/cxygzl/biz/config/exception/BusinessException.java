@@ -2,10 +2,7 @@ package com.cxygzl.biz.config.exception;
 
 import lombok.Getter;
 
-/**
- * @author : willian fu
- * @date : 2022/6/27
- */
+
 @Getter
 public class BusinessException extends RuntimeException {
     private final int code;

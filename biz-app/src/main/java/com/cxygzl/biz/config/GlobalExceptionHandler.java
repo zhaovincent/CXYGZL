@@ -12,10 +12,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.stream.Collectors;
 
-/**
- * @author : willian fu
- * @date : 2022/6/27
- */
 @Slf4j
 @Component
 @RestControllerAdvice

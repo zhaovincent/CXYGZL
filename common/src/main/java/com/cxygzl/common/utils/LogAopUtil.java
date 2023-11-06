@@ -1,5 +1,6 @@
 package com.cxygzl.common.utils;
 
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.dto.R;
 import com.yomahub.tlog.context.TLogContext;
@@ -64,6 +65,8 @@ public class LogAopUtil {
         }
         long l1 = System.currentTimeMillis();
 
+        String s = RandomUtil.randomString(6);
+
 
         if (notWriteLogAnno != null && notWriteLogAnno.all()) {
 
@@ -74,7 +77,7 @@ public class LogAopUtil {
                     paramMap.remove(p);
                 }
             }
-            logger.info(" 入参   类:  " + className + " 方法:  " + method.getName() + " 参数:  " + JsonUtil.toJSONString(paramMap));
+            logger.info(s + " 入参   类:  " + className + " 方法:  " + method.getName() + " 参数:  " + JsonUtil.toJSONString(paramMap));
         }
 
         proceed = point.proceed(args);
@@ -89,7 +92,7 @@ public class LogAopUtil {
 
         long l2 = System.currentTimeMillis();
 
-        logger.info("返回日志 类：{} 方法：{} 结果：{} 响应时间:{}", className, method.getName(), JsonUtil.toJSONString(proceed), l2 - l1);
+        logger.info(s + "返回日志 类：{} 方法：{} 结果：{} 响应时间:{}", className, method.getName(), JsonUtil.toJSONString(proceed), l2 - l1);
 
         return proceed;
 
