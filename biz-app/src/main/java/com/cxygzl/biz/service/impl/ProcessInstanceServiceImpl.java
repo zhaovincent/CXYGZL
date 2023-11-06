@@ -1184,10 +1184,14 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         String loginIdAsString = StpUtil.getLoginIdAsString();
         UserDto userDto = ApiStrategyFactory.getStrategy().getUser(loginIdAsString);
 
-        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
-                taskParamDto.getProcessInstanceId()).one();
+        ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery()
+                .eq(ProcessInstanceRecord::getProcessInstanceId, taskParamDto.getProcessInstanceId())
+                .one();
 
         for (TaskDto taskDto : taskDtoList) {
+            if(StrUtil.equals(taskDto.getAssign(),loginIdAsString)){
+                continue;
+            }
             com.cxygzl.common.dto.third.MessageDto messageDto = new com.cxygzl.common.dto.third.MessageDto();
             messageDto.setType(MessageTypeEnum.URGE_TASK.getType());
             messageDto.setReaded(false);
