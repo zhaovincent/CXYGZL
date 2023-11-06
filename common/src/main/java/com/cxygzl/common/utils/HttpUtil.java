@@ -68,6 +68,8 @@ public class HttpUtil {
 
     public static String get(String url, String baseUrl) {
 
+        log.info("get请求地址：{} {}",url,baseUrl);
+
         return HttpRequest
                 .get(StrUtil.format("{}{}", baseUrl, url))
                 .timeout(TIME_OUT)
