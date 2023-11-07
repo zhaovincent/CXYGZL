@@ -30,6 +30,7 @@ public enum FormTypeEnum {
     UPLOAD_IMAGE("UploadImage","图片",new ArrayList<>()),
     SINGLE_SELECT("SingleSelect","单选",new ArrayList<>()),
     MULTI_SELECT("MultiSelect","多选",new ArrayList<>()),
+    CASCADE("Cascade","级联",new ArrayList<>()),
     SELECT_DEPT("SelectDept","单部门",new ArrayList<>()),
     SELECT_USER("SelectUser","单用户",new ArrayList<>()),
     SELECT_MULTI_DEPT("SelectMultiDept","多部门",new ArrayList<>()),
