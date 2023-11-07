@@ -15,10 +15,7 @@ import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
-import com.cxygzl.common.dto.flow.AreaFormValue;
-import com.cxygzl.common.dto.flow.Condition;
-import com.cxygzl.common.dto.flow.NodeUser;
-import com.cxygzl.common.dto.flow.SelectValue;
+import com.cxygzl.common.dto.flow.*;
 import com.cxygzl.common.dto.third.UserFieldDto;
 import com.cxygzl.common.utils.AreaUtil;
 import com.cxygzl.common.utils.JsonUtil;
@@ -103,6 +100,21 @@ public class ExpressionHandler {
 
 
     }
+    /**
+     * 级联处理
+     *
+     * @param key
+     * @param symbol
+     * @param param
+     * @param execution
+     * @return
+     */
+    public boolean cascadeHandler(String key, String symbol, Object param, DelegateExecution execution) {
+
+        return cascadeHandler(key, symbol, param, execution.getVariable(key));
+
+
+    }
 
     public boolean areaHandler(String key, String symbol, Object param, Object value) {
 
@@ -133,6 +145,72 @@ public class ExpressionHandler {
 
         AreaFormValue areaFormValueValue = BeanUtil.copyProperties(value, AreaFormValue.class);
         String valueCode = areaFormValueValue.getCode();
+
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.EQUAL, symbol)) {
+            return StrUtil.equals(paramCode, valueCode);
+        }
+
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.NOT_EQUAL, symbol)) {
+            return !StrUtil.equals(paramCode, valueCode);
+        }
+
+
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.IN, symbol)) {
+            return AreaUtil.contain(paramCode, valueCode);
+        }
+
+
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.NOT_IN, symbol)) {
+            return !AreaUtil.contain(paramCode, valueCode);
+
+        }
+
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.CONTAIN, symbol)) {
+            return AreaUtil.contain(valueCode, paramCode);
+
+        }
+
+
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.NOT_CONTAIN, symbol)) {
+            return !AreaUtil.contain(valueCode, paramCode);
+
+        }
+
+
+        return false;
+
+    }
+
+    public boolean cascadeHandler(String key, String symbol, Object param, Object value) {
+
+
+
+
+        log.debug("表单值：key={} value={}", key, JsonUtil.toJSONString(value));
+        log.debug("条件 标识:{} 参数：{}", symbol, JsonUtil.toJSONString(param));
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
+
+            return value == null || StrUtil.isBlankIfStr(value) || Convert.toMap(Object.class, Object.class, value).size() == 0;
+
+        }
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_EMPTY)) {
+
+            return value != null && !StrUtil.isBlankIfStr(value) && Convert.toMap(Object.class, Object.class, value).size() > 0;
+
+        }
+
+
+        //表单值为空
+        if (value == null || Convert.toMap(Object.class, Object.class, value).size() == 0) {
+            return false;
+        }
+        String unescape = EscapeUtil.unescape(param.toString());
+
+        CascadeFormValue areaFormValueParam = JsonUtil.parseObject(unescape, CascadeFormValue.class);
+        String paramCode = areaFormValueParam.getKey();
+
+        CascadeFormValue areaFormValueValue = BeanUtil.copyProperties(value, CascadeFormValue.class);
+        String valueCode = areaFormValueValue.getKey();
 
         if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.EQUAL, symbol)) {
             return StrUtil.equals(paramCode, valueCode);

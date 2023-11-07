@@ -233,6 +233,10 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 AreaFormValue areaFormValue = BeanUtil.copyProperties(o, AreaFormValue.class);
                 formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", areaFormValue.getName()));
 
+            } else     if (StrUtil.equals(type, FormTypeEnum.CASCADE.getType())) {
+                CascadeFormValue areaFormValue = BeanUtil.copyProperties(o, CascadeFormValue.class);
+                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", areaFormValue.getLabel()));
+
             } else if (StrUtil.equalsAny(type, FormTypeEnum.SINGLE_SELECT.getType(), FormTypeEnum.MULTI_SELECT.getType())) {
                 List<SelectValue> selectValueList = BeanUtil.copyToList(Convert.toList(o), SelectValue.class);
                 formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", selectValueList.stream().map(w -> w.getValue()).collect(Collectors.joining(","))));
