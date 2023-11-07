@@ -4,6 +4,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
+import com.cxygzl.common.constants.ApproveResultEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.Refuse;
@@ -62,7 +63,7 @@ public class ApproveServiceTask implements JavaDelegate {
             RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
 
 
-            if (result == ProcessInstanceConstant.ApproveResult.REFUSE) {
+            if (result ==  ApproveResultEnum.REFUSE.getValue().intValue()) {
                 //跳转
                 String targetKey = ProcessInstanceConstant.VariableKey.END;
 

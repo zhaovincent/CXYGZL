@@ -85,6 +85,7 @@ public class ProcessStartedEventListener implements EventListenerStrategy, Initi
             processInstanceRecordParamDto.setParentProcessInstanceId(nestedProcessInstanceId);
             processInstanceRecordParamDto.setFlowId(flowId);
             processInstanceRecordParamDto.setProcessInstanceId(processInstanceId);
+            processInstanceRecordParamDto.setProcessInstanceBizKey(entity.getProcessInstanceBusinessKey() );
             processInstanceRecordParamDto.setFormData(JsonUtil.toJSONString(variables));
             BizHttpUtil.startProcessEvent(processInstanceRecordParamDto);
         }

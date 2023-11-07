@@ -331,6 +331,7 @@ public class RemoteServiceImpl implements IRemoteService {
         entity.setUserId(processInstanceRecordParamDto.getUserId());
         entity.setFlowId(processInstanceRecordParamDto.getFlowId());
         entity.setProcessInstanceId(processInstanceRecordParamDto.getProcessInstanceId());
+        entity.setProcessInstanceBizKey(processInstanceRecordParamDto.getProcessInstanceBizKey());
         entity.setGroupId(processGroup.getId());
         entity.setGroupName(processGroup.getGroupName());
         entity.setStatus(NodeStatusEnum.JXZ.getCode());

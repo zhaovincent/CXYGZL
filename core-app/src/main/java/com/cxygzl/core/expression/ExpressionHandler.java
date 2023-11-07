@@ -11,6 +11,7 @@ import cn.hutool.core.util.EscapeUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.cxygzl.common.constants.ApproveResultEnum;
 import com.cxygzl.common.constants.FormTypeEnum;
 import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
@@ -763,7 +764,7 @@ public class ExpressionHandler {
         }
         if (flag == 5) {
             //子流程默认传递审批结果是通过
-            return ProcessInstanceConstant.ApproveResult.OK;
+            return ApproveResultEnum.PASS.getValue();
 
         }
         if (flag == 6) {

@@ -453,11 +453,12 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     @Override
     public com.cxygzl.common.dto.R end(ProcessInstanceParamDto processInstanceParamDto) {
         processInstanceRecordService.lambdaUpdate()
-                .set(ProcessInstanceRecord::getResult, processInstanceParamDto.getResult())
                 .set(ProcessInstanceRecord::getEndTime, new Date())
                 .set(!processInstanceParamDto.getCancel(), ProcessInstanceRecord::getStatus,
                         NodeStatusEnum.YJS.getCode())
                 .set(processInstanceParamDto.getCancel(), ProcessInstanceRecord::getStatus, NodeStatusEnum.YCX.getCode())
+                .set(processInstanceParamDto.getCancel(), ProcessInstanceRecord::getResult,  ApproveResultEnum.CANCEL.getValue())
+                .set(!processInstanceParamDto.getCancel(), ProcessInstanceRecord::getResult, processInstanceParamDto.getResult())
                 .eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceParamDto.getProcessInstanceId())
                 .eq(ProcessInstanceRecord::getStatus, NodeStatusEnum.JXZ.getCode())
                 .update(new ProcessInstanceRecord());
@@ -1096,7 +1097,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         Dict set = Dict.create()
                 .set("标题", processInstanceRecord.getName())
                 .set("审批状态", NodeStatusEnum.get(processInstanceRecord.getStatus()).getName())
-                .set("审批结果", result == null ? "" : (result == ProcessInstanceConstant.ApproveResult.OK ? "同意" : "拒绝"))
+                .set("审批结果", result == null ? "" : ( ApproveResultEnum.getByValue(result).getName()))
                 .set("发起时间", processInstanceRecord.getCreateTime())
                 .set("完成时间", endTime)
                 .set("耗时", DataUtil.getDate(duration))

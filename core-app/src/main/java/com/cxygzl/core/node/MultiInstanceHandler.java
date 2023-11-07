@@ -3,6 +3,7 @@ package com.cxygzl.core.node;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
+import com.cxygzl.common.constants.ApproveResultEnum;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.FlowSettingDto;
@@ -287,13 +288,13 @@ public class MultiInstanceHandler {
             //或签
             if (okNum > 0) {
                 entity.setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                        ProcessInstanceConstant.ApproveResult.OK);
+                        ApproveResultEnum.PASS.getValue());
 
                 return true;
             }
             if (nrOfCompletedInstances == nrOfInstances) {
                 entity.setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                        ProcessInstanceConstant.ApproveResult.REFUSE);
+                        ApproveResultEnum.REFUSE.getValue());
 
                 return true;
             }
@@ -306,13 +307,13 @@ public class MultiInstanceHandler {
             //顺签
             if (failNum > 0) {
                 entity.setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                        ProcessInstanceConstant.ApproveResult.REFUSE);
+                        ApproveResultEnum.REFUSE.getValue());
 
                 return true;
             }
             if (nrOfCompletedInstances == nrOfInstances) {
                 entity.setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                        ProcessInstanceConstant.ApproveResult.OK);
+                        ApproveResultEnum.PASS.getValue());
 
                 return true;
             }
@@ -330,14 +331,14 @@ public class MultiInstanceHandler {
             //会签
             if (Convert.toBigDecimal(okNum * 100).compareTo(Convert.toBigDecimal(nrOfInstances).multiply(modePercentage)) >= 0) {
                 entity.setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                        ProcessInstanceConstant.ApproveResult.OK);
+                        ApproveResultEnum.PASS.getValue());
                 return true;
             } else {
                 //如果剩余的数量不可能达到比例 也结束了
                 if (Convert.toBigDecimal((nrOfInstances - nrOfCompletedInstances + okNum) * 100).compareTo(Convert.toBigDecimal(nrOfInstances).multiply(modePercentage)) < 0) {
 
                     entity.setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                            ProcessInstanceConstant.ApproveResult.REFUSE);
+                            ApproveResultEnum.REFUSE.getValue());
 
                     return true;
                 }
@@ -345,7 +346,7 @@ public class MultiInstanceHandler {
                 if (nrOfCompletedInstances == nrOfInstances) {
                     //未满足条件
                     entity.setVariable(StrUtil.format("{}_{}", node.getId(), APPROVE_NODE_RESULT),
-                            ProcessInstanceConstant.ApproveResult.REFUSE);
+                            ApproveResultEnum.REFUSE.getValue());
 
 
                     return true;

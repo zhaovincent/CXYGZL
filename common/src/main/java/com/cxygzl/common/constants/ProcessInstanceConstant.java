@@ -132,13 +132,6 @@ public class ProcessInstanceConstant {
     }
 
 
-    /**
-     * 节点审批结果
-     */
-    public static class ApproveResult {
-        public static final int OK = 1;
-        public static final int REFUSE = 2;
-    }
 
     /**
      * 用户任务---处理人和发起人一致

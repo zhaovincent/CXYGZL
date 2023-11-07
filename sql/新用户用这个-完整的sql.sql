@@ -1360,3 +1360,5 @@ CREATE TABLE `process_instance_oper_record` (
                                                 KEY `idx_id` (`id`) USING BTREE,
                                                 KEY `idx_dep_id` (`user_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='流程记录';
+ALTER TABLE  `process_instance_record`
+    ADD COLUMN `process_instance_biz_key` varchar(50) NULL COMMENT '流程实例业务key' AFTER `process_instance_id`;

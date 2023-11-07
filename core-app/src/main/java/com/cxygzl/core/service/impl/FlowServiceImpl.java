@@ -1,6 +1,7 @@
 package com.cxygzl.core.service.impl;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.dto.*;
@@ -25,7 +26,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.List;
 import java.util.Map;
 
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.ENABLE_SKIP_EXPRESSION;
@@ -99,7 +99,7 @@ public class FlowServiceImpl implements IFlowService {
         //支持自动跳过
         paramMap.put(ENABLE_SKIP_EXPRESSION, true);
 
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(flowId,
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(flowId,StrUtil.format("PI{}", IdUtil.fastSimpleUUID()),
                 paramMap);
 
         String processInstanceId = processInstance.getProcessInstanceId();
