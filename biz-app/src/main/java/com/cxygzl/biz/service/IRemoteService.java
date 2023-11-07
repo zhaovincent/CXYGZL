@@ -175,6 +175,13 @@ public interface IRemoteService {
     R<FlowSettingDto> queryProcessSetting(String flowId);
 
     /**
+     * 查询流程数据
+     * @param flowId
+     * @return
+     */
+    R<ProcessDto> queryProcess(String flowId);
+
+    /**
      * 保存流程节点数据
      * @param processNodeDataDto
      * @return

@@ -26,6 +26,19 @@ public class FlowSettingDto {
 
     private DbRecord  dbRecord;
     private Distinct  distinct;
+    private CustomRule  customRule;
+
+    /**
+     * 自定义编码
+     */
+    @Data
+    public static class CustomRule{
+
+        private Boolean enable;
+        private String prefix;
+        private Integer middle;
+        private Integer serino;
+    }
 
     /**
      * 是否记录报表

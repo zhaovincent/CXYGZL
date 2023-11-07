@@ -101,6 +101,8 @@ public class ProcessInstanceConstant {
         public static final String SYS_CODE = "cxygzl";
         //发起人
         public static final String STARTER = "root";
+        //流程编号
+        public static final String PROCESS_INSTANCE_CODE = "processInstanceCode";
         //结束
         public static final String END = "end";
         //是否撤回

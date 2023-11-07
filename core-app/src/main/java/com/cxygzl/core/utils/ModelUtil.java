@@ -8,6 +8,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.dto.ProcessDto;
 import com.cxygzl.common.dto.flow.HttpSettingData;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.NodeUtil;
@@ -864,6 +865,8 @@ public class ModelUtil {
         callActivity.setId(node.getId());
         callActivity.setName(node.getNodeName());
         callActivity.setCalledElement(node.getSubFlowId());
+        ProcessDto processDto = BizHttpUtil.queryProcess(node.getSubFlowId()).getData();
+        callActivity.setBusinessKey(processDto.getUniqueId());
         if (node.getMultiple()) {
 
 

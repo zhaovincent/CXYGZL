@@ -190,6 +190,18 @@ public class BizHttpUtil {
     }
 
     /**
+     * 查询流程
+     *
+     * @param flowId 流程id
+     */
+    public static R<ProcessDto> queryProcess(String flowId) {
+        String s = get("/remote/queryProcess?flowId=" + flowId);
+        R<ProcessDto> longR = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<ProcessDto>>() {
+        });
+        return longR;
+    }
+
+    /**
      * 查询节点数据
      *
      * @param flowId

@@ -332,6 +332,7 @@ public class RemoteServiceImpl implements IRemoteService {
         entity.setFlowId(processInstanceRecordParamDto.getFlowId());
         entity.setProcessInstanceId(processInstanceRecordParamDto.getProcessInstanceId());
         entity.setProcessInstanceBizKey(processInstanceRecordParamDto.getProcessInstanceBizKey());
+        entity.setProcessInstanceBizCode(processInstanceRecordParamDto.getProcessInstanceBizCode());
         entity.setGroupId(processGroup.getId());
         entity.setGroupName(processGroup.getGroupName());
         entity.setStatus(NodeStatusEnum.JXZ.getCode());
@@ -538,6 +539,19 @@ public class RemoteServiceImpl implements IRemoteService {
             return R.fail("该流程没有设置");
         }
         return R.success(JsonUtil.parseObject(settings, FlowSettingDto.class));
+    }
+
+    /**
+     * 查询流程数据
+     *
+     * @param flowId
+     * @return
+     */
+    @Override
+    public R<ProcessDto> queryProcess(String flowId) {
+        Process process = processService.getByFlowId(flowId);
+
+        return R.success(BeanUtil.copyProperties(process,ProcessDto.class));
     }
 
     /**

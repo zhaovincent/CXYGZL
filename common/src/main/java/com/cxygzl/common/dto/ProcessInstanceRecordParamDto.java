@@ -35,6 +35,10 @@ public class ProcessInstanceRecordParamDto {
      * 流程实例业务key
      */
     private String processInstanceBizKey;
+    /**
+     * 业务编码
+     */
+    private String processInstanceBizCode;
 
     private String parentProcessInstanceId;
 

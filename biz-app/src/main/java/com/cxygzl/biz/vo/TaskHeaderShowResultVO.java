@@ -19,6 +19,7 @@ public class TaskHeaderShowResultVO {
     private String processName;
     private Date startTime;
     private Integer processInstanceResult;
+    private String processInstanceBizKey;
 
 
 }

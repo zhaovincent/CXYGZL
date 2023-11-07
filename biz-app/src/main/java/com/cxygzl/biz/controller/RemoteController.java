@@ -28,23 +28,26 @@ public class RemoteController {
      */
     /**
      * 根据用户id查询角色id集合
+     *
      * @param userId
      * @return
      */
     @GetMapping("queryRoleIdListByUserId")
-    public R<List<String>> queryRoleIdListByUserId(String userId){
+    public R<List<String>> queryRoleIdListByUserId(String userId) {
         return remoteService.queryRoleIdListByUserId(userId);
     }
 
     /**
      * 根据部门id获取部门列表
+     *
      * @param deptIdList
      * @return
      */
     @PostMapping("queryDeptList")
-    public R<List<DeptDto>> queryDeptList(@RequestBody List<String> deptIdList){
+    public R<List<DeptDto>> queryDeptList(@RequestBody List<String> deptIdList) {
         return remoteService.queryDeptList(deptIdList);
     }
+
     /**
      * 保存待办任务
      *
@@ -269,25 +272,37 @@ public class RemoteController {
         return remoteService.queryProcessSetting(flowId);
     }
 
+    /**
+     * 查询流程数据
+     *
+     * @param flowId
+     * @return
+     */
+    @GetMapping("queryProcess")
+    public R<ProcessDto> queryProcess(String flowId) {
+        return remoteService.queryProcess(flowId);
+    }
 
     /**
      * 保存节点数据
+     *
      * @param processNodeDataDto
      * @return
      */
     @PostMapping("saveNodeData")
-    public R saveNodeData(@RequestBody ProcessNodeDataDto processNodeDataDto){
+    public R saveNodeData(@RequestBody ProcessNodeDataDto processNodeDataDto) {
         return remoteService.saveNodeData(processNodeDataDto);
     }
 
     /**
      * 获取节点数据
+     *
      * @param flowId
      * @param nodeId
      * @return
      */
     @GetMapping("getNodeData")
-    public R<String> getNodeData(String flowId,String nodeId){
+    public R<String> getNodeData(String flowId, String nodeId) {
         return remoteService.getNodeData(flowId, nodeId);
     }
 }

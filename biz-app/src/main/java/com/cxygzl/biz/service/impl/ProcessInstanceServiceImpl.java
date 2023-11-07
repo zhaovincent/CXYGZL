@@ -35,6 +35,7 @@ import org.anyline.service.AnylineService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,6 +68,8 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     private IProcessInstanceNodeRecordService processNodeRecordService;
     @Resource
     private IProcessInstanceAssignUserRecordService processNodeRecordAssignUserService;
+    @Resource
+    private RedisTemplate redisTemplate;
 
     @Resource
     private AnylineService anylineService;
@@ -105,6 +108,11 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         NodeUser rootUser = NodeUser.builder().id(userId).name(user.getName()).type(NodeUserTypeEnum.USER.getKey()).build();
         paramMap.put(ProcessInstanceConstant.VariableKey.STARTER, CollUtil.newArrayList(rootUser));
 
+        //业务key
+        Process process = processService.getByFlowId(processInstanceParamDto.getFlowId());
+        processInstanceParamDto.setBizKey(process.getUniqueId());
+
+
         com.cxygzl.common.dto.R<String> r = CoreHttpUtil.startProcess(processInstanceParamDto);
 
         if (!r.isOk()) {
@@ -113,7 +121,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         String data = r.getData();
 
 
-        processInstanceOperRecordService.saveStartProcessRecord(userId, data,processInstanceParamDto.getFlowId());
+        processInstanceOperRecordService.saveStartProcessRecord(userId, data, processInstanceParamDto.getFlowId());
 
 
         return com.cxygzl.common.dto.R.success(data);
@@ -233,7 +241,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 AreaFormValue areaFormValue = BeanUtil.copyProperties(o, AreaFormValue.class);
                 formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", areaFormValue.getName()));
 
-            } else     if (StrUtil.equals(type, FormTypeEnum.CASCADE.getType())) {
+            } else if (StrUtil.equals(type, FormTypeEnum.CASCADE.getType())) {
                 CascadeFormValue areaFormValue = BeanUtil.copyProperties(o, CascadeFormValue.class);
                 formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", areaFormValue.getLabel()));
 
@@ -457,7 +465,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 .set(!processInstanceParamDto.getCancel(), ProcessInstanceRecord::getStatus,
                         NodeStatusEnum.YJS.getCode())
                 .set(processInstanceParamDto.getCancel(), ProcessInstanceRecord::getStatus, NodeStatusEnum.YCX.getCode())
-                .set(processInstanceParamDto.getCancel(), ProcessInstanceRecord::getResult,  ApproveResultEnum.CANCEL.getValue())
+                .set(processInstanceParamDto.getCancel(), ProcessInstanceRecord::getResult, ApproveResultEnum.CANCEL.getValue())
                 .set(!processInstanceParamDto.getCancel(), ProcessInstanceRecord::getResult, processInstanceParamDto.getResult())
                 .eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceParamDto.getProcessInstanceId())
                 .eq(ProcessInstanceRecord::getStatus, NodeStatusEnum.JXZ.getCode())
@@ -944,18 +952,18 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         List<FormItemVO> formItemVOList = JsonUtil.parseArray(formItems, FormItemVO.class);
 
         //需要表格内部换行的
-        Set<Integer> brColList=new LinkedHashSet<>();
+        Set<Integer> brColList = new LinkedHashSet<>();
 
         //找出明细
         List<FormItemVO> layoutFormList = formItemVOList.stream().filter(w -> StrUtil.equals(w.getType(), FormTypeEnum.LAYOUT.getType())).collect(Collectors.toList());
         if (layoutFormList.isEmpty()) {
-            Dict set = createExcelCommonContent( processInstanceRecord, user, dept, operDesc);
-            int colIndex=0;
+            Dict set = createExcelCommonContent(processInstanceRecord, user, dept, operDesc);
+            int colIndex = 0;
             for (FormItemVO formItemVO : formItemVOList) {
                 Object o = paramMap.get(formItemVO.getId());
-                set.set(formItemVO.getName(), o==null?"":
+                set.set(formItemVO.getName(), o == null ? "" :
                         FormStrategyFactory.getStrategy(formItemVO.getType()).getProcessInstanceExcelShow(JsonUtil.toJSONString(o)));
-                if(StrUtil.equalsAny(formItemVO.getType(),FormTypeEnum.UPLOAD_IMAGE.getType())){
+                if (StrUtil.equalsAny(formItemVO.getType(), FormTypeEnum.UPLOAD_IMAGE.getType())) {
                     brColList.add(colIndex);
                 }
                 colIndex++;
@@ -971,18 +979,18 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                     continue;
                 }
                 List<?> list = Convert.toList(o);
-                if(list.isEmpty()){
+                if (list.isEmpty()) {
                     continue;
                 }
-                int index=1;
+                int index = 1;
                 for (Object object : list) {
-                    int colIndex=0;
-                    Dict set = createExcelCommonContent( processInstanceRecord, user, dept, operDesc);
+                    int colIndex = 0;
+                    Dict set = createExcelCommonContent(processInstanceRecord, user, dept, operDesc);
                     for (FormItemVO formItemVO : formItemVOList) {
 
                         if (StrUtil.equals(formItemVO.getType(), FormTypeEnum.LAYOUT.getType())) {
-                            if(formItemVO.getId().equals(layoutFormItem.getId())){
-                                set.put(formItemVO.getName(),StrUtil.format("{}{}",formItemVO.getName(),index));
+                            if (formItemVO.getId().equals(layoutFormItem.getId())) {
+                                set.put(formItemVO.getName(), StrUtil.format("{}{}", formItemVO.getName(), index));
                                 colIndex++;
                                 Map<String, Object> map = BeanUtil.beanToMap(object);
                                 List<FormItemVO> subItemList = Convert.toList(FormItemVO.class,
@@ -994,9 +1002,9 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                                     set.put(itemVO.getName(), v);
 
 
-                                    if(StrUtil.equalsAny(itemVO.getType(),FormTypeEnum.UPLOAD_IMAGE.getType())){
+                                    if (StrUtil.equalsAny(itemVO.getType(), FormTypeEnum.UPLOAD_IMAGE.getType())) {
 
-                                        if(StrUtil.isNotBlank(v)){
+                                        if (StrUtil.isNotBlank(v)) {
                                             set.put(itemVO.getName(), new XSSFRichTextString(v));
 
                                         }
@@ -1006,16 +1014,16 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                                     colIndex++;
                                 }
 
-                            }else{
-                                set.put(formItemVO.getName(),"");
+                            } else {
+                                set.put(formItemVO.getName(), "");
                                 colIndex++;
                                 List<FormItemVO> subItemList = Convert.toList(FormItemVO.class,
                                         formItemVO.getProps().getValue());
 
                                 for (FormItemVO itemVO : subItemList) {
-                                    set.put(itemVO.getName(),"");
+                                    set.put(itemVO.getName(), "");
 
-                                    if(StrUtil.equalsAny(itemVO.getType(),FormTypeEnum.UPLOAD_IMAGE.getType())){
+                                    if (StrUtil.equalsAny(itemVO.getType(), FormTypeEnum.UPLOAD_IMAGE.getType())) {
                                         brColList.add(colIndex);
                                     }
                                     colIndex++;
@@ -1023,14 +1031,14 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                                 }
                             }
 
-                        }else{
+                        } else {
                             Object value = paramMap.get(formItemVO.getId());
                             String v = value == null ? "" :
                                     FormStrategyFactory.getStrategy(formItemVO.getType()).getProcessInstanceExcelShow(JsonUtil.toJSONString(value));
                             set.put(formItemVO.getName(), v);
 
-                            if(StrUtil.equalsAny(formItemVO.getType(),FormTypeEnum.UPLOAD_IMAGE.getType())){
-                                if(StrUtil.isNotBlank(v)){
+                            if (StrUtil.equalsAny(formItemVO.getType(), FormTypeEnum.UPLOAD_IMAGE.getType())) {
+                                if (StrUtil.isNotBlank(v)) {
                                     set.put(formItemVO.getName(), new XSSFRichTextString(v));
 
                                 }
@@ -1050,25 +1058,28 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         String format = StrUtil.format("/tmp/{}.xls", IdUtil.fastSimpleUUID());
         ExcelWriter writer = new ExcelWriter(format, "表1");
 
-        for(int k=1;k<records.size();k++){
-            for (int x:brColList) {
-                CellStyle cellStyle = writer.getOrCreateCellStyle(x +11, k);
+        for (int k = 1; k < records.size(); k++) {
+            for (int x : brColList) {
+                CellStyle cellStyle = writer.getOrCreateCellStyle(x + 11, k);
                 cellStyle.setWrapText(true);
                 cellStyle.setAlignment(HorizontalAlignment.CENTER);
                 cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-                writer.setStyle(cellStyle,x+11,k);
+                writer.setStyle(cellStyle, x + 11, k);
             }
 
         }
 
         //定义宽度
-        writer.setColumnWidth(3,20);
-        writer.setColumnWidth(4,20);
-        writer.setColumnWidth(5,20);
-        writer.setColumnWidth(6,20);
-        writer.setColumnWidth(7,20);
-        writer.setColumnWidth(8,20);
-        writer.setColumnWidth(9,50);
+        writer.setColumnWidth(1, 20);
+        writer.setColumnWidth(2, 20);
+        writer.setColumnWidth(3, 20);
+        writer.setColumnWidth(4, 20);
+        writer.setColumnWidth(5, 20);
+        writer.setColumnWidth(6, 20);
+        writer.setColumnWidth(7, 20);
+        writer.setColumnWidth(8, 20);
+        writer.setColumnWidth(9, 20);
+        writer.setColumnWidth(10, 50);
 
         writer.write(records, true);
         //writer.autoSizeColumnAll();
@@ -1081,6 +1092,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         return r;
     }
+
     private static Dict createExcelCommonContent(ProcessInstanceRecord processInstanceRecord, UserDto user,
                                                  DeptDto dept, String operDesc) {
         String processInstanceId = processInstanceRecord.getProcessInstanceId();
@@ -1096,8 +1108,9 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         Dict set = Dict.create()
                 .set("标题", processInstanceRecord.getName())
+                .set("编号", processInstanceRecord.getProcessInstanceBizKey())
                 .set("审批状态", NodeStatusEnum.get(processInstanceRecord.getStatus()).getName())
-                .set("审批结果", result == null ? "" : ( ApproveResultEnum.getByValue(result).getName()))
+                .set("审批结果", result == null ? "" : (ApproveResultEnum.getByValue(result).getName()))
                 .set("发起时间", processInstanceRecord.getCreateTime())
                 .set("完成时间", endTime)
                 .set("耗时", DataUtil.getDate(duration))
@@ -1194,7 +1207,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 .one();
 
         for (TaskDto taskDto : taskDtoList) {
-            if(StrUtil.equals(taskDto.getAssign(),loginIdAsString)){
+            if (StrUtil.equals(taskDto.getAssign(), loginIdAsString)) {
                 continue;
             }
             com.cxygzl.common.dto.third.MessageDto messageDto = new com.cxygzl.common.dto.third.MessageDto();

@@ -329,6 +329,7 @@ public class BaseServiceImpl implements IBaseService {
         taskHeaderShowResultVO.setProcessName(processInstanceRecord.getName());
         taskHeaderShowResultVO.setStartTime(processInstanceRecord.getCreateTime());
         taskHeaderShowResultVO.setProcessInstanceResult(processInstanceRecord.getResult());
+        taskHeaderShowResultVO.setProcessInstanceBizKey(processInstanceRecord.getProcessInstanceBizKey());
 
 
         return R.success(taskHeaderShowResultVO);
@@ -416,6 +417,7 @@ public class BaseServiceImpl implements IBaseService {
         printDataResultVO.setProcessInstanceResult(processInstanceRecord.getResult());
         printDataResultVO.setProcessStatus(processInstanceRecord.getStatus());
         printDataResultVO.setProcessInstanceId(processInstanceRecord.getProcessInstanceId());
+        printDataResultVO.setProcessInstanceBizKey(processInstanceRecord.getProcessInstanceBizKey());
         printDataResultVO.setProcessStatusShow(NodeStatusEnum.get(processInstanceRecord.getStatus()).getName());
         printDataResultVO.setStarterName(starterUser.getName());
         printDataResultVO.setStarterDeptName(dept.getName());

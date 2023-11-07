@@ -15,6 +15,10 @@ public class ProcessInstanceParamDto {
      */
     private String flowId;
     /**
+     * 业务key
+     */
+    private String bizKey;
+    /**
      * 参数集合
      */
     private Map<String,Object> paramMap=new HashMap<>();

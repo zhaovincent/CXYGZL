@@ -62,6 +62,12 @@ public class ProcessInstanceRecord  extends BaseEntity {
     private String processInstanceBizKey;
 
     /**
+     * 流程实例业务编码
+     */
+    @TableField("`process_instance_biz_code`")
+    private String processInstanceBizCode;
+
+    /**
      * 表单数据
      */
     @TableField("`form_data`")

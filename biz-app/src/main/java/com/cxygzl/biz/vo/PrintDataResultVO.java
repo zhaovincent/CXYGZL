@@ -15,6 +15,7 @@ public class PrintDataResultVO {
     private Integer processInstanceResult;
     private Integer processStatus;
     private String processInstanceId;
+    private String processInstanceBizKey;
     private String processStatusShow;
     private String starterName;
     private String starterDeptName;
