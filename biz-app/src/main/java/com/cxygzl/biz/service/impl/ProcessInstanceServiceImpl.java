@@ -1108,7 +1108,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         Dict set = Dict.create()
                 .set("标题", processInstanceRecord.getName())
-                .set("编号", processInstanceRecord.getProcessInstanceBizKey())
+                .set("编号", processInstanceRecord.getProcessInstanceBizCode())
                 .set("审批状态", NodeStatusEnum.get(processInstanceRecord.getStatus()).getName())
                 .set("审批结果", result == null ? "" : (ApproveResultEnum.getByValue(result).getName()))
                 .set("发起时间", processInstanceRecord.getCreateTime())
