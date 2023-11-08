@@ -254,6 +254,19 @@ public class CoreHttpUtil {
     }
 
     /**
+     * 转交--管理员
+     *
+     * @param jsonObject
+     * @return
+     */
+    public static R setAssigneeByAdmin(AdminHandOverDto jsonObject) {
+
+        String post = post(jsonObject, "/task/setAssigneeByAdmin");
+        return JsonUtil.parseObject(post,R.class);
+
+    }
+
+    /**
      * 加签
      *
      * @param jsonObject

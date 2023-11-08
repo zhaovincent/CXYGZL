@@ -219,4 +219,19 @@ public class ProcessInstanceController {
         return processInstanceService.urgeProcessInstance(completeParamDto);
 
     }
+
+
+    /**
+     * 查询进行中的任务
+     *
+     * @param processInstanceId
+     * @return
+     */
+    @SneakyThrows
+    @PostMapping("queryTaskListInProgress/{processInstanceId}")
+    public R queryTaskListInProgress(@PathVariable String processInstanceId) {
+
+        return processInstanceService.queryTaskListInProgress(processInstanceId);
+
+    }
 }

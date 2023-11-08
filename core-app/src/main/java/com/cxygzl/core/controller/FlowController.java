@@ -348,6 +348,7 @@ public class FlowController {
             taskDto.setTaskId(task.getId());
             taskDto.setTaskName(task.getName());
             taskDto.setNodeId(task.getTaskDefinitionKey());
+            taskDto.setProcessInstanceId(task.getProcessInstanceId());
 
             String processDefinitionId = task.getProcessDefinitionId();
             //流程id

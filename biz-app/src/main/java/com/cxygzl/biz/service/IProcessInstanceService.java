@@ -124,4 +124,11 @@ public interface IProcessInstanceService  {
      */
     R urgeProcessInstance(TaskParamDto taskParamDto);
 
+    /**
+     * 查询处理中的任务
+     * @param processInstanceId
+     * @return
+     */
+    R queryTaskListInProgress(String processInstanceId);
+
 }

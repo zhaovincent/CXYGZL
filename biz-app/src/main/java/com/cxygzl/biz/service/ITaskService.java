@@ -1,5 +1,6 @@
 package com.cxygzl.biz.service;
 
+import com.cxygzl.common.dto.AdminHandOverDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskParamDto;
 
@@ -77,5 +78,12 @@ public interface ITaskService {
      * @return
      */
     R revoke(TaskParamDto taskParamDto);
+
+    /**
+     * 管理员设置执行人--转交
+     * @param adminHandOverDto
+     * @return
+     */
+    R setAssigneeByAdmin(AdminHandOverDto adminHandOverDto);
 
 }

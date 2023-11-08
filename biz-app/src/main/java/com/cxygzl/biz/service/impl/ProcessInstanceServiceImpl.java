@@ -1310,4 +1310,26 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         return R.success();
     }
+
+    /**
+     * 查询处理中的任务
+     *
+     * @param processInstanceId
+     * @return
+     */
+    @Override
+    public R queryTaskListInProgress(String processInstanceId) {
+
+        R<List<TaskDto>> listR = CoreHttpUtil.queryTaskAssignee(null, processInstanceId);
+        if(!listR.isOk()){
+            return listR;
+        }
+        List<TaskDto> taskDtoList = listR.getData();
+        for (TaskDto taskDto : taskDtoList) {
+            UserDto userDto = ApiStrategyFactory.getStrategy().getUser(taskDto.getAssign());
+            taskDto.setUserName(userDto.getName());
+        }
+
+        return listR;
+    }
 }

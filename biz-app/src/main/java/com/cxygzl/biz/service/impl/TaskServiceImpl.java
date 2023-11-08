@@ -18,10 +18,7 @@ import com.cxygzl.biz.vo.NextNodeQueryVO;
 import com.cxygzl.common.constants.ApproveDescTypeEnum;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.OperTypeEnum;
-import com.cxygzl.common.dto.R;
-import com.cxygzl.common.dto.SimpleApproveDescDto;
-import com.cxygzl.common.dto.TaskDto;
-import com.cxygzl.common.dto.TaskParamDto;
+import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.dto.flow.UploadValue;
 import com.cxygzl.common.dto.third.UserDto;
@@ -517,5 +514,16 @@ public class TaskServiceImpl implements ITaskService {
 
         nodeQueryVO.setProcessInstanceNodeRecordList(processInstanceNodeRecordList);
         return nodeQueryVO;
+    }
+
+    /**
+     * 管理员设置执行人--转交
+     *
+     * @param adminHandOverDto
+     * @return
+     */
+    @Override
+    public R setAssigneeByAdmin(AdminHandOverDto adminHandOverDto) {
+        return CoreHttpUtil.setAssigneeByAdmin(adminHandOverDto);
     }
 }

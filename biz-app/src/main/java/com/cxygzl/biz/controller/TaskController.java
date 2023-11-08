@@ -1,6 +1,7 @@
 package com.cxygzl.biz.controller;
 
 import com.cxygzl.biz.service.ITaskService;
+import com.cxygzl.common.dto.AdminHandOverDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskParamDto;
 import lombok.SneakyThrows;
@@ -15,7 +16,7 @@ import javax.annotation.Resource;
  * 任务实例
  */
 @RestController
-@RequestMapping(value = {"task","api/task"})
+@RequestMapping(value = {"task", "api/task"})
 public class TaskController {
 
     @Resource
@@ -116,38 +117,46 @@ public class TaskController {
      */
     @SneakyThrows
     @PostMapping("delAssignee")
-    public R delAssignee(  @RequestBody TaskParamDto completeParamDto) {
+    public R delAssignee(@RequestBody TaskParamDto completeParamDto) {
 
         return taskService.delAssignee(completeParamDto);
 
     }
 
 
-
-
-
-
     /**
      * 退回
+     *
      * @param taskParamDto
      * @return
      */
     @PostMapping("back")
-    public R back(@RequestBody TaskParamDto taskParamDto){
+    public R back(@RequestBody TaskParamDto taskParamDto) {
         return taskService.back(taskParamDto);
     }
 
 
     /**
      * 撤回
+     *
      * @param taskParamDto
      * @return
      */
     @PostMapping("revoke")
-    public R revoke(@RequestBody TaskParamDto taskParamDto){
+    public R revoke(@RequestBody TaskParamDto taskParamDto) {
         return taskService.revoke(taskParamDto);
     }
 
 
+    /**
+     * 管理员设置执行人--转交
+     *
+     * @param adminHandOverDto
+     * @return
+     */
+    @PostMapping("setAssigneeByAdmin")
+    public R setAssigneeByAdmin(@RequestBody AdminHandOverDto adminHandOverDto) {
+        return taskService.setAssigneeByAdmin(adminHandOverDto);
+    }
 
 }

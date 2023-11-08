@@ -1,5 +1,6 @@
 package com.cxygzl.core.controller;
 
+import com.cxygzl.common.dto.AdminHandOverDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskParamDto;
 import com.cxygzl.common.dto.VariableQueryParamDto;
@@ -172,6 +173,19 @@ public class TaskController {
     @PostMapping("revoke")
     public R revoke(@RequestBody TaskParamDto taskParamDto) {
         return taskService.revoke(taskParamDto);
+
+    }
+
+
+    /**
+     * 管理员转交
+     *
+     * @param adminHandOverDto
+     * @return
+     */
+    @PostMapping("setAssigneeByAdmin")
+    public R setAssigneeByAdmin(@RequestBody AdminHandOverDto adminHandOverDto) {
+        return taskService.setAssigneeByAdmin(adminHandOverDto);
 
     }
 
