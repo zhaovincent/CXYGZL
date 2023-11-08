@@ -1,8 +1,10 @@
 package com.cxygzl.core.controller;
 
 import com.cxygzl.common.dto.IndexPageStatistics;
+import com.cxygzl.common.dto.ProcessInstanceParamDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.VariableQueryParamDto;
+import com.cxygzl.core.service.IProcessInstanceService;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RuntimeService;
@@ -34,6 +36,10 @@ public class ProcessInstanceController {
 
     @Resource
     private RuntimeService runtimeService;
+
+
+    @Resource
+    private IProcessInstanceService processInstanceService;
 
 
     /**
@@ -87,6 +93,16 @@ public class ProcessInstanceController {
         return R.success(variables);
 
 
+    }
+
+    /**
+     * 删除流程
+     * @param processInstanceParamDto
+     * @return
+     */
+    @PostMapping("delete")
+    public R delete(@RequestBody ProcessInstanceParamDto processInstanceParamDto){
+        return processInstanceService.delete(processInstanceParamDto);
     }
 
 

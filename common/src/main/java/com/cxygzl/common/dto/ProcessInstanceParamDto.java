@@ -38,5 +38,9 @@ public class ProcessInstanceParamDto {
      * 结果
      */
     private Integer result;
+    /**
+     * 原因
+     */
+    private String reason;
 
 }
