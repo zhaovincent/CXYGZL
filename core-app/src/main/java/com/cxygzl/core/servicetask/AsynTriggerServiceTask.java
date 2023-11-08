@@ -53,7 +53,7 @@ public class AsynTriggerServiceTask implements JavaDelegate {
         String result = null;
         try {
 
-            result = HttpUtil.flowExtenstionHttpRequest(backNotify, variables, flowId, processInstanceId, s);
+            result = HttpUtil.flowExtenstionHttpRequest(backNotify, variables, flowId, processInstanceId, s, null);
 
             log.info(" 返回值:{}", result);
         } catch (Exception e) {

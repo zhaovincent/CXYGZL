@@ -189,6 +189,8 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 record.setRootUserName(startUser.getName());
                 record.setRootUserAvatarUrl(startUser.getAvatarUrl());
                 record.setStartTime(processInstanceRecord.getCreateTime());
+                record.setProcessInstanceBizCode(processInstanceRecord.getProcessInstanceBizCode());
+
 
 
             }
@@ -347,6 +349,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 record.setRootUserAvatarUrl(startUser.getAvatarUrl());
                 record.setStartTime(processInstanceRecord.getCreateTime());
                 record.setProcessInstanceResult(processInstanceRecord.getResult());
+                record.setProcessInstanceBizCode(processInstanceRecord.getProcessInstanceBizCode());
             }
             Map<String, Object> paramMap = new LinkedHashMap<>();
             {
@@ -564,6 +567,84 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     }
 
     /**
+     * 查询流程实例
+     *
+     * @param pageDto
+     * @return
+     */
+    @Override
+    public R queryList(ProcessDataQueryVO pageDto) {
+
+
+        //查询所有的流程id
+        List<String> allFlowIdList = new ArrayList<>();
+        if (CollUtil.isNotEmpty(pageDto.getFlowIdList())) {
+            List<String> data = processService.getAllRelatedFlowId(pageDto.getFlowIdList()).getData();
+            allFlowIdList.addAll(data);
+        }
+
+        List<NodeUser> starterList = pageDto.getStarterList();
+        List<String> startTime = pageDto.getStartTime();
+        List<String> finishTime = pageDto.getFinishTime();
+        Page<ProcessInstanceRecord> instanceRecordPage = processInstanceRecordService.lambdaQuery()
+                .in(CollUtil.isNotEmpty(allFlowIdList), ProcessInstanceRecord::getFlowId,
+                        allFlowIdList)
+                .eq(pageDto.getStatus()!=null,ProcessInstanceRecord::getStatus,pageDto.getStatus())
+                .ge(CollUtil.isNotEmpty(startTime)&& startTime.size()>=2,ProcessInstanceRecord::getCreateTime,
+                        (CollUtil.isNotEmpty(startTime)&& startTime.size()>=2)?(DateUtil.parseDate(startTime.get(0))):null
+                        )
+                .le(CollUtil.isNotEmpty(startTime)&& startTime.size()>=2,ProcessInstanceRecord::getCreateTime,
+                        (CollUtil.isNotEmpty(startTime)&& startTime.size()>=2)?(DateUtil.endOfDay(DateUtil.parseDate(startTime.get(1)))):null
+                        )
+                .ge(CollUtil.isNotEmpty(finishTime)&& finishTime.size()>=2,ProcessInstanceRecord::getEndTime,
+                        (CollUtil.isNotEmpty(finishTime)&& finishTime.size()>=2)?(DateUtil.parseDate(finishTime.get(0))):null
+                        )
+                .le(CollUtil.isNotEmpty(finishTime)&& finishTime.size()>=2,ProcessInstanceRecord::getEndTime,
+                        (CollUtil.isNotEmpty(finishTime)&& finishTime.size()>=2)?(DateUtil.endOfDay(DateUtil.parseDate(finishTime.get(1)))):null
+                        )
+                .in(CollUtil.isNotEmpty(starterList),ProcessInstanceRecord::getUserId, starterList ==null?new ArrayList<>(): starterList.stream().map(w->w.getId()).collect(Collectors.toList()))
+                .eq(StrUtil.isNotBlank(pageDto.getProcessBizCode()),ProcessInstanceRecord::getProcessInstanceBizCode,pageDto.getProcessBizCode())
+                .orderByDesc(ProcessInstanceRecord::getCreateTime)
+                .page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()));
+
+        List<ProcessInstanceRecord> records = instanceRecordPage.getRecords();
+        if (CollUtil.isEmpty(records)) {
+            return com.cxygzl.common.dto.R.success(instanceRecordPage);
+        }
+
+
+        //流程配置
+        Set<String> flowIdSet = records.stream().map(w -> w.getFlowId()).collect(Collectors.toSet());
+        List<Process> processList = processService.lambdaQuery().in(Process::getFlowId, flowIdSet).list();
+
+        List<ProcessInstanceRecordVO> processInstanceRecordVOList = BeanUtil.copyToList(records, ProcessInstanceRecordVO.class);
+
+
+        for (ProcessInstanceRecordVO record : processInstanceRecordVOList) {
+            String formData = record.getFormData();
+
+            UserDto userDto = ApiStrategyFactory.getStrategy().getUser(record.getUserId());
+
+            //处理表单数据
+            Process process = processList.stream().filter(w -> StrUtil.equals(w.getFlowId(), record.getFlowId())).findFirst().get();
+            List<Dict> formValueShowList = getFormValueShowList(process, record.getFlowId(), ProcessInstanceConstant.VariableKey.STARTER, JsonUtil.parseObject(formData, new JsonUtil.TypeReference<Map<String, Object>>() {
+            }));
+
+            record.setFormValueShowList(formValueShowList);
+            record.setFormData(null);
+            record.setProcess(null);
+            record.setRootUserAvatarUrl(userDto.getAvatarUrl());
+            record.setRootUserName(userDto.getName());
+
+        }
+        Page page = BeanUtil.copyProperties(instanceRecordPage, Page.class);
+        page.setRecords(processInstanceRecordVOList);
+
+
+        return com.cxygzl.common.dto.R.success(page);
+    }
+
+    /**
      * 查询流程实例详情
      *
      * @param processInstanceId
@@ -664,6 +745,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 record.setFormValueShowList(formValueShowList);
                 record.setFormData(null);
                 record.setProcessInstanceResult(processInstanceRecord.getResult());
+                record.setProcessInstanceBizCode(processInstanceRecord.getProcessInstanceBizCode());
 
             }
         }

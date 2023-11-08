@@ -79,6 +79,10 @@ public class TaskDto {
      */
     private Date startTime;
     /**
+     * 流程实例业务编码
+     */
+    private String processInstanceBizCode;
+    /**
      * 流程名称
      */
     private String processName;
@@ -92,5 +96,6 @@ public class TaskDto {
     private List<String> selectUserNodeId;
 
     private Integer processInstanceResult;
+
 
 }

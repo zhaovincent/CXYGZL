@@ -102,6 +102,17 @@ public class ProcessInstanceController {
     }
 
     /**
+     * 发起的流程列表
+     *
+     * @param pageDto
+     * @return
+     */
+    @PostMapping("queryList")
+    public R queryList(@RequestBody ProcessDataQueryVO pageDto) {
+        return processInstanceService.queryList(pageDto);
+    }
+
+    /**
      * 查询流程实例详情
      *
      * @param processInstanceId

@@ -17,4 +17,9 @@ public class ProcessInstanceCopyVo extends ProcessInstanceCopy {
 
     private Integer processInstanceResult;
     private Integer processInstanceStatus;
+
+    /**
+     * 流程实例业务编码
+     */
+    private String processInstanceBizCode;
 }

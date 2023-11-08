@@ -200,7 +200,7 @@ public class FormServiceImpl implements IFormService {
         String result = com.cxygzl.common.utils.HttpUtil.flowExtenstionHttpRequest(dynamicFormConfig,
                 paramMap,
                 flowId,
-                processInstanceId, null);
+                processInstanceId, null, null);
         if(StrUtil.isBlank(result)){
             throw new BusinessException("网络请求异常");
         }

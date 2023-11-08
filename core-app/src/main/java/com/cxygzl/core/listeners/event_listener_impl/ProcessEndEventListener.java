@@ -73,7 +73,7 @@ public class ProcessEndEventListener implements EventListenerStrategy, Initializ
                     HttpSetting backNotify = flowSettingDto.getBackNotify();
                     if (backNotify != null && backNotify.getEnable()) {
 
-                        String result = HttpUtil.flowExtenstionHttpRequest(backNotify, variables, flowId, processInstanceId, null);
+                        String result = HttpUtil.flowExtenstionHttpRequest(backNotify, variables, flowId, processInstanceId, null, processInstanceParamDto.getCancel());
 
 
 

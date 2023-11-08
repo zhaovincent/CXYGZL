@@ -110,8 +110,8 @@ public class ProcessStartedEventListener implements EventListenerStrategy, Initi
 
                 StringRedisTemplate redisTemplate = SpringUtil.getBean(StringRedisTemplate.class);
 
-                Long increment = redisTemplate.opsForValue().increment(StrUtil.format("rediskey-{}",
-                       entity.getProcessInstanceBusinessKey()));
+                Long increment = redisTemplate.opsForValue().increment(StrUtil.format("rediskey-{}-{}",
+                      prefix,middleS));
 
                 processInstanceBizCode = StrUtil.format("{}{}{}", prefix, middleS, StrUtil.fillBefore(String.valueOf(increment), '0', serino));
 
@@ -135,7 +135,7 @@ public class ProcessStartedEventListener implements EventListenerStrategy, Initi
                 HttpSetting frontNotify = flowSettingDto.getFrontNotify();
                 if (frontNotify != null && frontNotify.getEnable()) {
 
-                    String result = HttpUtil.flowExtenstionHttpRequest(frontNotify, variables, flowId, processInstanceId, null);
+                    String result = HttpUtil.flowExtenstionHttpRequest(frontNotify, variables, flowId, processInstanceId, null, null);
 
 
                     if (StrUtil.isNotBlank(result)) {

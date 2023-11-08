@@ -87,10 +87,11 @@ public class HttpUtil {
      * @param flowId
      * @param processInstanceId
      * @param messageNotifyId
+     * @param cancel
      * @return
      */
     public static String flowExtenstionHttpRequest(HttpSetting httpSetting, Map<String, Object> paramMap, String flowId,
-                                                   String processInstanceId, String messageNotifyId) {
+                                                   String processInstanceId, String messageNotifyId,Boolean cancel ) {
         Map<String, String> headerParamMap = new HashMap<>();
         {
             List<HttpSettingData> headerSetting = httpSetting.getHeader();
@@ -114,6 +115,7 @@ public class HttpUtil {
             bodyMap.put("flowId", flowId);
             bodyMap.put("processInstanceId", processInstanceId);
             bodyMap.put("messageNotifyId", messageNotifyId);
+            bodyMap.put("isCancel", cancel);
             List<HttpSettingData> bodySetting = httpSetting.getBody();
             for (HttpSettingData httpSettingData : bodySetting) {
                 String field = httpSettingData.getField();

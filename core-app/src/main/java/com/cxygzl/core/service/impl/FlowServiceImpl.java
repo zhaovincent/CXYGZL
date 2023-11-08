@@ -121,7 +121,7 @@ public class FlowServiceImpl implements IFlowService {
             HttpSetting frontCheck = flowSettingDto.getFrontCheck();
             if (frontCheck != null && frontCheck.getEnable()) {
 
-                String result = HttpUtil.flowExtenstionHttpRequest(frontCheck, paramMap, flowId, null, null);
+                String result = HttpUtil.flowExtenstionHttpRequest(frontCheck, paramMap, flowId, null, null, null);
 
 
                 if (StrUtil.isNotBlank(result)) {
