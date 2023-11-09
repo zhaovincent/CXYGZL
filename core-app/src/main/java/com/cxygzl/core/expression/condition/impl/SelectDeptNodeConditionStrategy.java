@@ -51,7 +51,8 @@ public class SelectDeptNodeConditionStrategy implements NodeConditionStrategy, I
 
         ExpressionHandler bean = SpringUtil.getBean(ExpressionHandler.class);
 
-        return bean.deptCompare( id, EscapeUtil.escape(JsonUtil.toJSONString(value)),compare,paramMap);
+        return bean.deptCompare(EscapeUtil.escape(JsonUtil.toJSONString(value)),compare,
+                paramMap.get(id));
     }
 
     @Override

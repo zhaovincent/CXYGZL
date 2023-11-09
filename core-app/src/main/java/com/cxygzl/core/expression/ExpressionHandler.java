@@ -200,7 +200,6 @@ public class ExpressionHandler {
         }
 
 
-
         //表单值为空
         if (value == null || Convert.toMap(Object.class, Object.class, value).size() == 0) {
             return false;
@@ -220,8 +219,6 @@ public class ExpressionHandler {
         if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.NOT_EQUAL, symbol)) {
             return !StrUtil.equals(paramCode, valueCode);
         }
-
-
 
 
         return false;
@@ -336,7 +333,7 @@ public class ExpressionHandler {
 
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EQUAL)) {
             //等于
-            if(valueList.size()!=paramList.size()){
+            if (valueList.size() != paramList.size()) {
                 return false;
             }
             paramList.removeAll(valueList);
@@ -347,7 +344,7 @@ public class ExpressionHandler {
 
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_EQUAL)) {
             //不等于
-            if(valueList.size()!=paramList.size()){
+            if (valueList.size() != paramList.size()) {
                 return true;
             }
             paramList.removeAll(valueList);
@@ -356,7 +353,7 @@ public class ExpressionHandler {
 
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.IN)) {
             //属于
-            if(valueList.size()>paramList.size()){
+            if (valueList.size() > paramList.size()) {
                 return false;
             }
 
@@ -390,12 +387,12 @@ public class ExpressionHandler {
             int size = paramList.size();
             paramList.removeAll(valueList);
 
-            return paramList.size()==size;
+            return paramList.size() == size;
         }
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.INTERSECTION)) {
             int size = paramList.size();
             paramList.removeAll(valueList);
-            return paramList.size()<size;
+            return paramList.size() < size;
         }
         return false;
     }
@@ -564,17 +561,17 @@ public class ExpressionHandler {
 
 
     public boolean deptCompare(String key, String param, String symbol, DelegateExecution execution) {
-        return deptCompare(key, param, symbol, execution.getVariables());
+        Map<String, Object> variables = execution.getVariables();
+        return deptCompare(param, symbol, variables.get(key));
     }
 
-    public boolean deptCompare(String key, String param, String symbol, Map<String, Object> paramMap) {
+    public boolean deptCompare(  String param, String symbol,Object value) {
         param = EscapeUtil.unescape(param);
 
 
-        Object value = paramMap.get(key);
 
         String jsonString = JsonUtil.toJSONString(value);
-        log.debug("表单值：key={} value={} symbol={}", key, jsonString, symbol);
+        log.debug("表单值：  value={} symbol={}", jsonString, symbol);
         log.debug("条件  参数：{}", param);
 
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EMPTY)) {
@@ -604,7 +601,7 @@ public class ExpressionHandler {
         List<String> deptIdList = paramDeptList.stream().map(w -> (w.getId())).collect(Collectors.toList());
 
         String deptId = nodeUserDto.getId();
-        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.IN)) {
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.IN_CHILD)) {
             //属于
             List<DeptDto> deptDtoList = BizHttpUtil.queryParentDepList(deptId).getData();
             List<String> collect = deptDtoList.stream().map(w -> w.getId()).collect(Collectors.toList());
@@ -612,31 +609,32 @@ public class ExpressionHandler {
             int oldSize = deptIdList.size();
             deptIdList.removeAll(collect);
 
-            return deptIdList.size()<oldSize;
+            return deptIdList.size() < oldSize;
         }
 
-        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_IN)) {
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_IN_CHILD)) {
             //不属于
             List<DeptDto> deptDtoList = BizHttpUtil.queryParentDepList(deptId).getData();
             List<String> collect = deptDtoList.stream().map(w -> w.getId()).collect(Collectors.toList());
 
             int oldSize = deptIdList.size();
             deptIdList.removeAll(collect);
-            return deptIdList.size()>=oldSize;
+            return deptIdList.size() >= oldSize;
         }
 
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.IN)) {
+            //属于
 
-        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EQUAL)) {
-            //==
-            return deptIdList.contains(deptId)&&deptIdList.size()==1;
+
+            return deptIdList.contains(deptId);
         }
 
+        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_IN)) {
+            //不属于
+            return !deptIdList.contains(deptId);
 
-
-        if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_EQUAL)) {
-            //!==
-            return !deptIdList.contains(deptId)||deptIdList.size()>1;
         }
+
 
         if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.CONTAIN)) {
             //包含
@@ -655,14 +653,13 @@ public class ExpressionHandler {
             int size = deptIdList.size();
 
             deptIdList.removeAll(collect);
-            return deptIdList.size()==size;
+            return deptIdList.size() == size;
         }
 
 
         return false;
 
     }
-
 
 
     /**
@@ -717,91 +714,13 @@ public class ExpressionHandler {
         //获取用户值
 
 
-        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.RANGE, userKey)) {
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.RANGE_USER, userKey)) {
             //参数
             List<NodeUser> paramDeptList = JsonUtil.parseArray(JsonUtil.toJSONString(o), NodeUser.class);
 
-            List<String> deptIdList = paramDeptList.stream().filter(w -> StrUtil.equals(w.getType(), NodeUserTypeEnum.DEPT.getKey())).map(w -> (w.getId())).collect(Collectors.toList());
             List<String> userIdList = paramDeptList.stream().filter(w -> StrUtil.equals(w.getType(),
                     NodeUserTypeEnum.USER.getKey())).map(w -> (w.getId())).collect(Collectors.toList());
 
-            if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.EQUAL) || CollUtil.isEmpty(deptIdList)) {
-                //==
-                if (userIdList.contains(nodeUserDto.getId())) {
-                    return true;
-                }
-                if (CollUtil.isEmpty(deptIdList)) {
-                    return false;
-                }
-                Map<String, Object> map = BizHttpUtil.queryUserInfo(nodeUserDto.getId()).getData();
-
-
-                String str = MapUtil.getStr(map, "deptId");
-                if (deptIdList.contains(str)) {
-                    return true;
-                }
-                return false;
-
-            }
-            if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_EQUAL) || CollUtil.isEmpty(deptIdList)) {
-                //!==
-                if (userIdList.contains(nodeUserDto.getId())) {
-                    return false;
-                }
-                if (CollUtil.isEmpty(deptIdList)) {
-                    return true;
-                }
-                Map<String, Object> map = BizHttpUtil.queryUserInfo(nodeUserDto.getId()).getData();
-
-
-                String str = MapUtil.getStr(map, "deptId");
-                if (deptIdList.contains(str)) {
-                    return false;
-                }
-                return true;
-            }
-            if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.CONTAIN)) {
-                //包含
-                if (userIdList.size() > 1) {
-                    return false;
-                }
-                if (userIdList.size()==1&&!userIdList.contains(nodeUserDto.getId())) {
-                    return false;
-                }
-                if (CollUtil.isEmpty(deptIdList)) {
-                    return true;
-                }
-
-                //查询人员的下级部门
-                List<DeptDto> deptDtoList = BizHttpUtil.queryChildDeptListByUserId(nodeUserDto.getId()).getData();
-                List<String> collect = deptDtoList.stream().map(w -> w.getId()).collect(Collectors.toList());
-                deptIdList.removeAll(collect);
-                if (deptIdList.isEmpty()) {
-                    return true;
-                }
-                return false;
-            }
-
-            if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.NOT_CONTAIN)) {
-                //不包含
-
-                if (userIdList.contains(nodeUserDto.getId())) {
-                    return false;
-                }
-                if (CollUtil.isEmpty(deptIdList)) {
-                    return true;
-                }
-
-                //查询人员的下级部门
-                int oldSize = deptIdList.size();
-                List<DeptDto> deptDtoList = BizHttpUtil.queryChildDeptListByUserId(nodeUserDto.getId()).getData();
-                List<String> collect = deptDtoList.stream().map(w -> w.getId()).collect(Collectors.toList());
-                deptIdList.removeAll(collect);
-                if (deptIdList.size() == oldSize) {
-                    return true;
-                }
-                return false;
-            }
 
             if (StrUtil.equals(symbol, ProcessInstanceConstant.ConditionSymbol.IN)) {
                 //属于
@@ -809,20 +728,8 @@ public class ExpressionHandler {
                 if (userIdList.contains(nodeUserDto.getId())) {
                     return true;
                 }
-                if (CollUtil.isEmpty(deptIdList)) {
-                    return false;
-                }
-
-                //查询人员的上级部门
-                int oldSize = deptIdList.size();
-                List<DeptDto> deptDtoList = BizHttpUtil.queryParentDepListByUserId(nodeUserDto.getId()).getData();
-                List<String> collect = deptDtoList.stream().map(w -> w.getId()).collect(Collectors.toList());
 
 
-                deptIdList.removeAll(collect);
-                if (deptIdList.size() < oldSize) {
-                    return true;
-                }
                 return false;
             }
 
@@ -833,24 +740,27 @@ public class ExpressionHandler {
                 if (userIdList.contains(nodeUserDto.getId())) {
                     return false;
                 }
-                if (CollUtil.isEmpty(deptIdList)) {
-                    return true;
-                }
 
-                //查询人员的上级部门
-                int oldSize = deptIdList.size();
-                List<DeptDto> deptDtoList = BizHttpUtil.queryParentDepListByUserId(nodeUserDto.getId()).getData();
-                List<String> collect = deptDtoList.stream().map(w -> w.getId()).collect(Collectors.toList());
-
-
-                deptIdList.removeAll(collect);
-                if (deptIdList.isEmpty()) {
-                    return false;
-                }
                 return true;
             }
 
             return false;
+        }
+        //获取用户值
+
+
+        if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.RANGE_DEPT, userKey)) {
+            //参数
+
+            Map<String, Object> map = BizHttpUtil.queryUserInfo(nodeUserDto.getId()).getData();
+            String deptId = MapUtil.getStr(map, "deptId");
+            NodeUser n=new NodeUser();
+            n.setId(deptId);
+            n.setType(NodeUserTypeEnum.DEPT.getKey());
+
+
+            return deptCompare( Convert.toStr(o), symbol,CollUtil.newArrayList(n) );
+
         }
         if (StrUtil.equals(ProcessInstanceConstant.ConditionSymbol.ROLE, userKey)) {
             // 角色

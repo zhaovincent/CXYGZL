@@ -215,10 +215,19 @@ public class ProcessInstanceConstant {
         public static final String IN = "in";
         //不存在于
         public static final String NOT_IN = "notin";
+
+        //存在于
+        public static final String IN_CHILD = "in_child";
+        //不存在于
+        public static final String NOT_IN_CHILD = "notin_child";
         //重合
         public static final String INTERSECTION = "intersection";
         //范围
         public static final String RANGE = "range";
+        //范围
+        public static final String RANGE_USER = "rangeUser";
+        //范围
+        public static final String RANGE_DEPT = "rangeDept";
         //角色
         public static final String ROLE = "role";
         //不为空
