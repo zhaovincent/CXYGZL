@@ -23,6 +23,7 @@ public interface NodeConditionStrategy {
      *
      * @param condition
      */
+    @Deprecated
     String handleExpression(Condition condition);
 
     /**

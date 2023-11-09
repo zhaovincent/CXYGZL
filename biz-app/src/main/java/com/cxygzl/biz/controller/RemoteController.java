@@ -148,6 +148,42 @@ public class RemoteController {
 
         return remoteService.queryParentDepListByUserId(userId);
     }
+    /**
+     * 查询上级部门
+     *
+     * @param deptId
+     * @return
+     */
+    @SneakyThrows
+    @GetMapping("queryParentDepList")
+    public R<List<DeptDto>> queryParentDepList(String deptId) {
+
+        return remoteService.queryParentDepList(deptId);
+    }
+    /**
+     * 查询子级部门
+     *
+     * @param deptId
+     * @return
+     */
+    @SneakyThrows
+    @GetMapping("queryChildDeptList")
+    public R<List<DeptDto>> queryChildDeptList(String deptId) {
+
+        return remoteService.queryChildDeptList(deptId);
+    }
+    /**
+     * 根据用户id查询子级部门列表
+     *
+     * @param userId
+     * @return
+     */
+    @SneakyThrows
+    @GetMapping("queryChildDeptListByUserId")
+    public R<List<DeptDto>> queryChildDeptListByUserId(String userId) {
+
+        return remoteService.queryChildDeptListByUserId(userId);
+    }
 
     /**
      * 开始节点事件

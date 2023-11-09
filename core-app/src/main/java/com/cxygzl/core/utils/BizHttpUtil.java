@@ -164,6 +164,39 @@ public class BizHttpUtil {
         });
         return r;
     }
+    /**
+     * 查询上级部门
+     *
+     * @param deptId
+     */
+    public static R<List<com.cxygzl.common.dto.third.DeptDto>> queryParentDepList(String deptId) {
+        String s = get("/remote/queryParentDepList?deptId=" + deptId);
+        R<List<com.cxygzl.common.dto.third.DeptDto>> r = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<List<DeptDto>>>() {
+        });
+        return r;
+    }
+    /**
+     * 查询子级部门
+     *
+     * @param deptId
+     */
+    public static R<List<com.cxygzl.common.dto.third.DeptDto>> queryChildDeptList(String deptId) {
+        String s = get("/remote/queryChildDeptList?deptId=" + deptId);
+        R<List<com.cxygzl.common.dto.third.DeptDto>> r = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<List<DeptDto>>>() {
+        });
+        return r;
+    }
+    /**
+     * 根据用户id查询子级部门id集合
+     *
+     * @param userId 用户id
+     */
+    public static R<List<com.cxygzl.common.dto.third.DeptDto>> queryChildDeptListByUserId(String userId) {
+        String s = get("/remote/queryChildDeptListByUserId?userId=" + userId);
+        R<List<com.cxygzl.common.dto.third.DeptDto>> r = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R<List<DeptDto>>>() {
+        });
+        return r;
+    }
 
     /**
      * 查询流程管理员

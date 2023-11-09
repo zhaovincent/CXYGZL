@@ -17,4 +17,9 @@ public class AdminHandOverDto {
 
     private String processInstanceId;
 
+    private String currentUserId;
+    private String currentUserName;
+
+
+
 }

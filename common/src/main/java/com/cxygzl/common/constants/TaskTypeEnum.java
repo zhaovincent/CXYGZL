@@ -17,6 +17,7 @@ public enum TaskTypeEnum {
     REVOKE( "撤回","revoke"),
     FRONT_JOIN( "委派","frontJoin"),
     BACK_JOIN( "转办","backJoin"),
+    BACK_JOIN_ADMIN( "管理员转交","backJoinByAdmin"),
     CANCEL( "取消","cancel"),
     ADD_ASSIGNEE( "加签","addAssignee"),
     DEL_ASSIGNEE( "减签","delAssignee"),

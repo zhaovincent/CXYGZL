@@ -19,6 +19,7 @@ public enum ApproveDescTypeEnum {
     RESOLVE("resolveDesc","完成"),
     REFUSE("refuseDesc","拒绝"),
     BACK_JOIN("backJoinDesc","转办"),
+    BACK_JOIN_ADMIN("backJoinByAdminDesc","管理员转交"),
     ADD_ASSIGNEE("addAssigneeDesc","加签"),
     DEL_ASSIGNEE("delAssigneeDesc","减签"),
     FRONT_JOIN("frontJoinDesc","委派"),

@@ -93,6 +93,27 @@ public interface IRemoteService {
     R<List<DeptDto>> queryParentDepListByUserId(String userId);
 
     /**
+     * 查询上级部门
+     * @param deptId
+     * @return
+     */
+    R<List<DeptDto>> queryParentDepList(String deptId);
+
+    /**
+     * 根据用户查询子级部门
+     * @param userId
+     * @return
+     */
+    R<List<DeptDto>> queryChildDeptListByUserId(String userId);
+
+    /**
+     * 获取子级部门集合
+     * @param deptId
+     * @return
+     */
+    R<List<DeptDto>> queryChildDeptList(String deptId);
+
+    /**
      * 开始节点事件
      * @param recordParamDto
      * @return

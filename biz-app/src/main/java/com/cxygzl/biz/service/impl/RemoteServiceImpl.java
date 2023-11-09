@@ -128,7 +128,6 @@ public class RemoteServiceImpl implements IRemoteService {
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
 
 
-
         ProcessInstanceCopy processInstanceCopy = BeanUtil.copyProperties(copyDto, ProcessInstanceCopy.class);
         processInstanceCopy.setGroupId(Long.valueOf(processInstanceRecord.getGroupId()));
         processInstanceCopy.setGroupName(processInstanceRecord.getGroupName());
@@ -143,8 +142,8 @@ public class RemoteServiceImpl implements IRemoteService {
                 .eq(ProcessInstanceUserCopy::getProcessInstanceId, copyDto.getProcessInstanceId())
                 .count();
 
-        log.info("抄送数量:{} {} {}",copyDto.getUserId(),copyDto.getProcessInstanceId(),count);
-        if(count==0){
+        log.info("抄送数量:{} {} {}", copyDto.getUserId(), copyDto.getProcessInstanceId(), count);
+        if (count == 0) {
             ProcessInstanceUserCopy processInstanceUserCopy = BeanUtil.copyProperties(copyDto, ProcessInstanceUserCopy.class);
             processInstanceUserCopy.setGroupId(Long.valueOf(processInstanceRecord.getGroupId()));
             processInstanceUserCopy.setGroupName(processInstanceRecord.getGroupName());
@@ -263,8 +262,48 @@ public class RemoteServiceImpl implements IRemoteService {
         UserDto user = ApiStrategyFactory.getStrategy().getUser(String.valueOf(userId));
         String deptId = (user.getDeptId());
 
+
+        return queryParentDepList(deptId);
+    }
+
+    /**
+     * 查询上级部门
+     *
+     * @param deptId
+     * @return
+     */
+    @Override
+    public R<List<DeptDto>> queryParentDepList(String deptId) {
+
         List<com.cxygzl.common.dto.third.DeptDto> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
         List<com.cxygzl.common.dto.third.DeptDto> deptList = DataUtil.selectParentByDept(deptId, allDept);
+
+        return R.success(deptList);
+    }
+
+    /**
+     * 根据用户查询子级部门
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public R<List<DeptDto>> queryChildDeptListByUserId(String userId) {
+        UserDto user = ApiStrategyFactory.getStrategy().getUser(String.valueOf(userId));
+        String deptId = (user.getDeptId());
+        return queryChildDeptList(deptId);
+    }
+
+    /**
+     * 获取子级部门集合
+     *
+     * @param deptId
+     * @return
+     */
+    @Override
+    public R<List<DeptDto>> queryChildDeptList(String deptId) {
+        List<com.cxygzl.common.dto.third.DeptDto> allDept = ApiStrategyFactory.getStrategy().loadAllDept(null);
+        List<com.cxygzl.common.dto.third.DeptDto> deptList = DataUtil.selectChildrenByDept(deptId, allDept);
 
         return R.success(deptList);
     }
@@ -551,7 +590,7 @@ public class RemoteServiceImpl implements IRemoteService {
     public R<ProcessDto> queryProcess(String flowId) {
         Process process = processService.getByFlowId(flowId);
 
-        return R.success(BeanUtil.copyProperties(process,ProcessDto.class));
+        return R.success(BeanUtil.copyProperties(process, ProcessDto.class));
     }
 
     /**

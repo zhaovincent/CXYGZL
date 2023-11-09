@@ -98,7 +98,7 @@ public class TaskServiceImpl implements ITaskService {
                     taskParamDto.getUserId(), "提交任务并添加了评论", task.getId(), task.getProcessInstanceId());
             commentId = comment.getId();
         } else {
-            Comment comment = saveSysCommentToTask(task, descType, "提交任务", taskParamDto.getUserId());
+            Comment comment = saveSysCommentToTask(descType, "提交任务", taskParamDto.getUserId(), task.getId(), task.getProcessInstanceId());
             commentId = comment.getId();
 
         }
@@ -137,9 +137,9 @@ public class TaskServiceImpl implements ITaskService {
             commentId = comment.getId();
 
         } else {
-            Comment comment = saveSysCommentToTask(task, ApproveDescTypeEnum.FRONT_JOIN.getType(), StrUtil.format("委派任务给:{}",
+            Comment comment = saveSysCommentToTask(ApproveDescTypeEnum.FRONT_JOIN.getType(), StrUtil.format("委派任务给:{}",
                     taskParamDto.getTargetUserName()
-            ), taskParamDto.getUserId());
+            ), taskParamDto.getUserId(),  task.getId(), task.getProcessInstanceId());
 
             commentId = comment.getId();
 
@@ -182,8 +182,8 @@ public class TaskServiceImpl implements ITaskService {
             commentId = comment.getId();
 
         } else {
-            Comment comment = saveSysCommentToTask(task, ApproveDescTypeEnum.RESOLVE.getType(), StrUtil.format("完成任务"
-            ), taskParamDto.getUserId());
+            Comment comment = saveSysCommentToTask(ApproveDescTypeEnum.RESOLVE.getType(), StrUtil.format("完成任务"
+            ), taskParamDto.getUserId(),  task.getId(), task.getProcessInstanceId());
             commentId = comment.getId();
 
         }
@@ -229,9 +229,9 @@ public class TaskServiceImpl implements ITaskService {
             commentId = comment.getId();
 
         } else {
-            Comment comment = saveSysCommentToTask(task, ApproveDescTypeEnum.BACK_JOIN.getType(), StrUtil.format("转办任务给:{}",
+            Comment comment = saveSysCommentToTask(ApproveDescTypeEnum.BACK_JOIN.getType(), StrUtil.format("转办任务给:{}",
                     taskParamDto.getTargetUserName()
-            ), taskParamDto.getUserId());
+            ), taskParamDto.getUserId(),  task.getId(), task.getProcessInstanceId());
             commentId = comment.getId();
 
         }
@@ -289,9 +289,9 @@ public class TaskServiceImpl implements ITaskService {
             commentId = comment.getId();
 
         } else {
-            Comment comment = saveSysCommentToTask(task, ApproveDescTypeEnum.DEL_ASSIGNEE.getType(), StrUtil.format("减签任务:{}",
+            Comment comment = saveSysCommentToTask(ApproveDescTypeEnum.DEL_ASSIGNEE.getType(), StrUtil.format("减签任务:{}",
                     targetUserName
-            ), userId);
+            ), userId,  task.getId(), task.getProcessInstanceId());
             commentId = comment.getId();
 
         }
@@ -350,9 +350,9 @@ public class TaskServiceImpl implements ITaskService {
             commentId = comment.getId();
 
         } else {
-            Comment comment = saveSysCommentToTask(task, ApproveDescTypeEnum.ADD_ASSIGNEE.getType(), StrUtil.format("加签任务给:{}",
+            Comment comment = saveSysCommentToTask(ApproveDescTypeEnum.ADD_ASSIGNEE.getType(), StrUtil.format("加签任务给:{}",
                     targetUserName
-            ), userId);
+            ), userId,  task.getId(), task.getProcessInstanceId());
             commentId = comment.getId();
 
         }
@@ -418,7 +418,7 @@ public class TaskServiceImpl implements ITaskService {
                     "驳回了任务并添加了评论", task.getId(), task.getProcessInstanceId());
             commentId = comment.getId();
         } else {
-            Comment comment = saveSysCommentToTask(task, ApproveDescTypeEnum.REJECT.getType(), "驳回了任务", taskParamDto.getUserId());
+            Comment comment = saveSysCommentToTask(ApproveDescTypeEnum.REJECT.getType(), "驳回了任务", taskParamDto.getUserId(),  task.getId(), task.getProcessInstanceId());
             commentId = comment.getId();
 
         }
@@ -490,7 +490,7 @@ public class TaskServiceImpl implements ITaskService {
                 saveUserCommentToTask(ApproveDescTypeEnum.REVOKE.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
                         "撤回了任务并添加了评论", task.getId(), task.getProcessInstanceId());
             } else {
-                saveSysCommentToTask(task, ApproveDescTypeEnum.REVOKE.getType(), "撤回了任务", taskParamDto.getUserId());
+                saveSysCommentToTask(ApproveDescTypeEnum.REVOKE.getType(), "撤回了任务", taskParamDto.getUserId(),  task.getId(), task.getProcessInstanceId());
             }
         }
 
@@ -555,10 +555,10 @@ public class TaskServiceImpl implements ITaskService {
 
     }
 
-    private Comment saveSysCommentToTask(Task task, String type, String desc, String userId) {
+    private Comment saveSysCommentToTask( String type, String desc, String userId,String taskId,String processInstanceId) {
         TaskCommentDto taskCommentDto = TaskCommentDto.builder().content(desc).sys(true).userId(userId).build();
 
-        Comment comment = taskService.addComment(task.getId(), task.getProcessInstanceId(),
+        Comment comment = taskService.addComment(taskId, processInstanceId,
                 type, JsonUtil.toJSONString(taskCommentDto));
         return comment;
 
@@ -912,6 +912,7 @@ public class TaskServiceImpl implements ITaskService {
 
         List<Task> existList = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
 
+
         for (TaskDto taskDto : taskDtoList) {
             String assign = taskDto.getAssign();
             if (StrUtil.equals(assign, user.getId())) {
@@ -923,9 +924,37 @@ public class TaskServiceImpl implements ITaskService {
                     .filter(w -> StrUtil.equals(w.getAssignee(), user.getId()))
                     .filter(w -> StrUtil.equals(w.getTaskDefinitionKey(), nodeId)).findAny().orElse(null);
             if (task != null) {
+                taskService.setVariableLocal(taskDto.getTaskId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
+                        TaskTypeEnum.BACK_JOIN_ADMIN.getValue()
+                );
+                {
+                    saveSysCommentToTask(ApproveDescTypeEnum.BACK_JOIN_ADMIN.getType(), StrUtil.format("用户[{}]已经有该任务，管理员[{}]删除用户[{}]的任务",
+                            user.getName(),
+                            adminHandOverDto.getCurrentUserName(),
+                            taskDto.getUserName()
+
+                    ), adminHandOverDto.getCurrentUserName(), taskDto.getTaskId(), processInstanceId);
+
+
+                }
+
+
                 //如果接收人已经在这个节点有任务了 则直接删除旧的任务
                 runtimeService.deleteMultiInstanceExecution(taskDto.getExecutionId(), false);
             } else {
+
+                taskService.setVariableLocal(taskDto.getTaskId(), ProcessInstanceConstant.VariableKey.TASK_TYPE,
+                        TaskTypeEnum.BACK_JOIN_ADMIN.getValue()
+                );
+                {
+                     saveSysCommentToTask(ApproveDescTypeEnum.BACK_JOIN_ADMIN.getType(), StrUtil.format("管理员[{}]转交任务给:{}",adminHandOverDto.getCurrentUserName(),
+                             user.getName()
+                    ), adminHandOverDto.getCurrentUserName(), taskDto.getTaskId(), processInstanceId);
+
+
+                }
+
+
                 taskService.setAssignee(taskDto.getTaskId(), user.getId());
             }
         }
