@@ -16,6 +16,7 @@ import com.cxygzl.common.utils.JsonUtil;
 import java.util.List;
 import java.util.Map;
 
+import static com.cxygzl.common.constants.ProcessInstanceConstant.USER_TASK_NOBODY_HANDLER_TO_PASS;
 import static com.cxygzl.common.constants.ProcessInstanceConstant.USER_TASK_NOBODY_HANDLER_TO_REFUSE;
 
 /**
@@ -77,23 +78,23 @@ public class NodeUtil {
 
     }
 
-    public static void addCommentNode(Node node,String userId,Object value) {
+    public static void addCommentNode(Node node, String userId, Object value) {
         if (!com.cxygzl.common.utils.NodeUtil.isNode(node)) {
             return;
         }
         Node childNode = node.getChildNode();
-        if(!com.cxygzl.common.utils.NodeUtil.isNode(childNode)){
+        if (!com.cxygzl.common.utils.NodeUtil.isNode(childNode)) {
             return;
         }
-        if(childNode.getType()!=NodeTypeEnum.END.getValue().intValue()&&(NodeTypeEnum.COMMENT.getValue().intValue()==childNode.getType()||StrUtil.isNotBlank(childNode.getExecutionId()))){
-            addCommentNode(childNode,userId,value);
+        if (childNode.getType() != NodeTypeEnum.END.getValue().intValue() && (NodeTypeEnum.COMMENT.getValue().intValue() == childNode.getType() || StrUtil.isNotBlank(childNode.getExecutionId()))) {
+            addCommentNode(childNode, userId, value);
             return;
         }
 
 
-        if (StrUtil.isNotBlank(node.getExecutionId())||NodeTypeEnum.COMMENT.getValue().intValue()==node.getType()||childNode.getType()==NodeTypeEnum.END.getValue().intValue()) {
+        if (StrUtil.isNotBlank(node.getExecutionId()) || NodeTypeEnum.COMMENT.getValue().intValue() == node.getType() || childNode.getType() == NodeTypeEnum.END.getValue().intValue()) {
             Node tempNode = new Node();
-            tempNode.setId("N"+ IdUtil.fastSimpleUUID());
+            tempNode.setId("N" + IdUtil.fastSimpleUUID());
             tempNode.setNodeName("评论");
             tempNode.setChildNode(childNode);
             tempNode.setType(NodeTypeEnum.COMMENT.getValue());
@@ -105,7 +106,7 @@ public class NodeUtil {
             return;
         }
 
-        addCommentNode(childNode,userId,value);
+        addCommentNode(childNode, userId, value);
     }
 
 
@@ -125,6 +126,10 @@ public class NodeUtil {
             if (node.getAssignedType() == ProcessInstanceConstant.AssignedTypeClass.SYSTEM_REFUSE) {
                 Nobody nobody = new Nobody();
                 nobody.setHandler(USER_TASK_NOBODY_HANDLER_TO_REFUSE);
+                node.setNobody(nobody);
+            } else if (node.getAssignedType() == ProcessInstanceConstant.AssignedTypeClass.SYSTEM_PASS) {
+                Nobody nobody = new Nobody();
+                nobody.setHandler(USER_TASK_NOBODY_HANDLER_TO_PASS);
                 node.setNobody(nobody);
             }
         }
