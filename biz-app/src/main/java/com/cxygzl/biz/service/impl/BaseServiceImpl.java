@@ -392,6 +392,9 @@ public class BaseServiceImpl implements IBaseService {
         taskOperDataResultVO.setNode(node);
         taskOperDataResultVO.setProcess(JsonUtil.parseObject(process, Node.class));
 
+        Boolean needSignature = node.getNeedSignature();
+
+        taskOperDataResultVO.setNeedSignature(needSignature);
 
         return R.success(taskOperDataResultVO);
     }

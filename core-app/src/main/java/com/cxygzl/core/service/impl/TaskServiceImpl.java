@@ -3,6 +3,7 @@ package com.cxygzl.core.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -102,8 +103,14 @@ public class TaskServiceImpl implements ITaskService {
             commentId = comment.getId();
 
         }
-//保存图片和文件
+        //保存图片和文件
         saveAttachment(taskParamDto, commentId, task.getId(), task.getProcessInstanceId());
+        //保存签名图片
+       if(StrUtil.isNotBlank(taskParamDto.getSignUrl())) {
+            taskService.createAttachment(ApproveAttachmentTypeEnum.SIGN_IMAGE.getType(), task.getId(),
+                    task.getProcessInstanceId(), FileUtil.getName(taskParamDto.getSignUrl())
+                    , commentId,taskParamDto.getSignUrl());
+        }
 
         Map<String, Object> paramMap = taskParamDto.getParamMap();
         taskService.complete(task.getId(), paramMap);
@@ -743,6 +750,15 @@ public class TaskServiceImpl implements ITaskService {
                     approveImageList.add(uploadValue);
                 }
                 simpleApproveDescDto.setApproveFileList(approveImageList);
+            }
+
+            {
+                List<Attachment> collect = taskAttachments.stream()
+                        .filter(w -> StrUtil.equals(w.getDescription(), id))
+                        .filter(w -> StrUtil.equals(w.getType(), ApproveAttachmentTypeEnum.SIGN_IMAGE.getType()))
+                        .collect(Collectors.toList());
+
+                simpleApproveDescDto.setSignUrlList(collect.stream().map(w->w.getUrl()).collect(Collectors.toList()));
             }
 
             simpleApproveDescDtoList.add(simpleApproveDescDto);

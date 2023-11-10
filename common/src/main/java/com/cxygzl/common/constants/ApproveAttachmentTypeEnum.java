@@ -10,6 +10,7 @@ public enum ApproveAttachmentTypeEnum {
 
 
     IMAGE("image","图片"),
+    SIGN_IMAGE("sign","签名图片"),
     FILE("file","文件"),
 
 

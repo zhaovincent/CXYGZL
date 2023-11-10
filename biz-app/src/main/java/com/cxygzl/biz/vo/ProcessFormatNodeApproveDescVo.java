@@ -35,5 +35,6 @@ public class ProcessFormatNodeApproveDescVo {
 
     private List<UploadValue> approveFileList;
     private List<UploadValue> approveImageList;
-
+    //签字图片
+    private List<String> signUrlList;
 }

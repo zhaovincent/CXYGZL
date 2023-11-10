@@ -19,6 +19,8 @@ public class SimpleApproveDescDto {
 
 
     private List<UploadValue> approveFileList;
+    //签字图片
+    private List<String> signUrlList;
     private List<UploadValue> approveImageList;
 
 }

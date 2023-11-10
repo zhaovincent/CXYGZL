@@ -482,6 +482,7 @@ public class NodeFormatUtil {
                             .date(simpleApproveDescDto.getDate())
                             .approveImageList(simpleApproveDescDto.getApproveImageList())
                             .approveFileList(simpleApproveDescDto.getApproveFileList())
+                            .signUrlList(simpleApproveDescDto.getSignUrlList())
                             .build();
 
                     descList.add(descVo);

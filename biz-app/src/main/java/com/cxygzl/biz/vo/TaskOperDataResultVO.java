@@ -22,5 +22,6 @@ public class TaskOperDataResultVO {
     private Node node;
     private Node process;
 
+    private Boolean needSignature;
 
 }

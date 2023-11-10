@@ -60,6 +60,10 @@ public class Node  implements Cloneable, Serializable {
      * 部门主管级别
      */
     private Integer deptLeaderLevel;
+    /**
+     * 是否需要签名
+     */
+    private Boolean needSignature;
     private String formUserId;
     private String formUserName;
     private List<NodeUser> nodeUserList;

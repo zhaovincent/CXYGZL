@@ -70,5 +70,9 @@ public class TaskParamDto {
      * 执行id
      */
     private String executionId;
+    /**
+     * 签名url
+     */
+    private String signUrl;
 
 }
