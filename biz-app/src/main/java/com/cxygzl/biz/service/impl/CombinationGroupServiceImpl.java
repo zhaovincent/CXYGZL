@@ -48,7 +48,7 @@ public class CombinationGroupServiceImpl implements ICombinationGroupService {
 
         List<FormGroupVo> formGroupVos = new LinkedList<>();
 
-        List<ProcessGroup> processGroupList = processGroupService.lambdaQuery().orderByAsc(ProcessGroup::getSort).list();
+        List<ProcessGroup> processGroupList = processGroupService.lambdaQuery().orderByDesc(ProcessGroup::getSort).list();
 
         processGroupList.forEach(group -> {
             FormGroupVo formGroupVo = FormGroupVo.builder()
@@ -112,7 +112,7 @@ public class CombinationGroupServiceImpl implements ICombinationGroupService {
 
         List<FormGroupVo> formGroupVos = new LinkedList<>();
 
-        List<ProcessGroup> processGroupList = processGroupService.lambdaQuery().orderByAsc(ProcessGroup::getSort).list();
+        List<ProcessGroup> processGroupList = processGroupService.lambdaQuery().orderByDesc(ProcessGroup::getSort).list();
 
         processGroupList.forEach(group -> {
             FormGroupVo formGroupVo = FormGroupVo.builder()

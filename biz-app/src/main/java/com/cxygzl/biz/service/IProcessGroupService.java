@@ -30,6 +30,27 @@ public interface IProcessGroupService extends IService<ProcessGroup> {
     R create(ProcessGroup processGroup);
 
     /**
+     * 上移
+     * @param processGroup
+     * @return
+     */
+    R topSort(ProcessGroup processGroup);
+
+    /**
+     * 下移
+     * @param processGroup
+     * @return
+     */
+    R bottomSort(ProcessGroup processGroup);
+
+    /**
+     * 修改组
+     * @param processGroup
+     * @return
+     */
+    R edit(ProcessGroup processGroup);
+
+    /**
      *  删除分组
      * @param id
      * @return
