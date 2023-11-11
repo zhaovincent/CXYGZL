@@ -49,6 +49,7 @@ import org.anyline.entity.PageNavi;
 import org.anyline.metadata.Table;
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -216,6 +217,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
      * @param processVO
      * @return
      */
+    @Transactional
     @Override
     public R create(ProcessVO processVO) {
 
@@ -231,6 +233,9 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                     .list();
             if (StrUtil.isNotBlank(processVO.getFlowId())) {
                 Process process = this.getByFlowId(processVO.getFlowId());
+                if (process.getHidden()) {
+                    return R.fail("流程不存在，请退出流程重新打开编辑");
+                }
                 uniqueId = process.getUniqueId();
 
                 String finalUniqueId = uniqueId;
@@ -561,9 +566,9 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         List records = new ArrayList();
 
         //合并的数据集合
-        Map<Integer,Map<Integer,Integer>> mergeMapList=new HashMap();
+        Map<Integer, Map<Integer, Integer>> mergeMapList = new HashMap();
 
-        List<ExcelPicVo> excelPicVoList=new ArrayList<>();
+        List<ExcelPicVo> excelPicVoList = new ArrayList<>();
 
         while (true) {
             String uniqueId = process.getUniqueId();
@@ -575,9 +580,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
             }
 
 
-
-
-            int index= 1;
+            int index = 1;
             for (DataRow row : rows) {
                 String processInstanceId = row.getString("process_instance_id");
                 ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceId).one();
@@ -609,42 +612,42 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                 log.info("最小公倍数:{}", minV);
 
                 //找到每个索引起始位置
-                int startIndex=0;
-                for(int i = 1; i< indexNo; i++){
-                    startIndex+=indexLengthMap.get(i);
+                int startIndex = 0;
+                for (int i = 1; i < indexNo; i++) {
+                    startIndex += indexLengthMap.get(i);
                 }
-                log.info("序号:{} 起始索引位置{}", indexNo,startIndex);
+                log.info("序号:{} 起始索引位置{}", indexNo, startIndex);
 
 
                 //前三列
                 {
                     Map<Integer, Integer> mergeMap = mergeMapList.get(0);
-                    if(mergeMap==null){
-                        mergeMap=new HashMap<>();
+                    if (mergeMap == null) {
+                        mergeMap = new HashMap<>();
                     }
 
-                    mergeMap.put(startIndex+1,startIndex+minV);
-                    mergeMapList.put(0,mergeMap);
+                    mergeMap.put(startIndex + 1, startIndex + minV);
+                    mergeMapList.put(0, mergeMap);
                 }
 
                 {
                     Map<Integer, Integer> mergeMap = mergeMapList.get(1);
-                    if(mergeMap==null){
-                        mergeMap=new HashMap<>();
+                    if (mergeMap == null) {
+                        mergeMap = new HashMap<>();
                     }
 
-                    mergeMap.put(startIndex+1,startIndex+minV);
-                    mergeMapList.put(1,mergeMap);
+                    mergeMap.put(startIndex + 1, startIndex + minV);
+                    mergeMapList.put(1, mergeMap);
                 }
 
                 {
                     Map<Integer, Integer> mergeMap = mergeMapList.get(2);
-                    if(mergeMap==null){
-                        mergeMap=new HashMap<>();
+                    if (mergeMap == null) {
+                        mergeMap = new HashMap<>();
                     }
 
-                    mergeMap.put(startIndex+1,startIndex+minV);
-                    mergeMapList.put(2,mergeMap);
+                    mergeMap.put(startIndex + 1, startIndex + minV);
+                    mergeMapList.put(2, mergeMap);
                 }
 
 
@@ -655,13 +658,13 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                     dict.set("发起时间", DateUtil.formatDateTime(processInstanceRecord.getCreateTime()));
 
 
-                    int tempIndex=3;
+                    int tempIndex = 3;
 
                     for (FormItemVO formItemVO : formItemVOList) {
 
                         Map<Integer, Integer> mergeMap = mergeMapList.get(tempIndex);
-                        if(mergeMap==null){
-                            mergeMap=new HashMap<>();
+                        if (mergeMap == null) {
+                            mergeMap = new HashMap<>();
                         }
 
 
@@ -675,60 +678,59 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
                             //计算出每条数据占用的行数
                             int i1 = minV / length;
                             //计算出当前应该是第几条数据
-                            int i2 = (i ) / i1;
+                            int i2 = (i) / i1;
                             String excelShow = FormStrategyFactory.getStrategy(formItemVO.getType()).getExcelDataShow(s, i2);
-                            if(formItemVO.getType().equals(FormTypeEnum.UPLOAD_IMAGE.getType())){
-                                int tempF=tempIndex;
-                                int startIndexF=startIndex+1+i2*i1;
+                            if (formItemVO.getType().equals(FormTypeEnum.UPLOAD_IMAGE.getType())) {
+                                int tempF = tempIndex;
+                                int startIndexF = startIndex + 1 + i2 * i1;
                                 //签名是图片
                                 long c = excelPicVoList.stream().filter(w -> w.getCol() == tempF && w.getRow() == (startIndexF)).count();
-                                if(c==0){
-                                    ExcelPicVo excelPicVo=new ExcelPicVo();
+                                if (c == 0) {
+                                    ExcelPicVo excelPicVo = new ExcelPicVo();
                                     excelPicVo.setRow(startIndexF);
                                     excelPicVo.setCol(tempIndex);
                                     excelPicVo.setUrl(excelShow);
                                     excelPicVoList.add(excelPicVo);
                                 }
-                               // dict.set(formItemVO.getName(), excelShow);
+                                // dict.set(formItemVO.getName(), excelShow);
 
-                            }else{
+                            } else {
                                 dict.set(formItemVO.getName(), excelShow);
                             }
 
 
+                            mergeMap.put(startIndex + 1 + i2 * i1, startIndex + 1 + i2 * i1 + i1 - 1);
 
-                            mergeMap.put(startIndex+1+i2*i1,startIndex+1+i2*i1+i1-1);
 
-
-                        }else{
-                            if(StrUtil.isNotBlank(s)){
+                        } else {
+                            if (StrUtil.isNotBlank(s)) {
                                 String excelShow =
                                         FormStrategyFactory.getStrategy(formItemVO.getType()).getExcelDataShow(s, 0);
 
-                                int tempF=tempIndex;
-                                int startIndexF=startIndex+1;
+                                int tempF = tempIndex;
+                                int startIndexF = startIndex + 1;
 
-                                if(StrUtil.equalsAny(formItemVO.getType(),FormTypeEnum.UPLOAD_IMAGE.getType(),FormTypeEnum.SIGNATURE.getType())){
+                                if (StrUtil.equalsAny(formItemVO.getType(), FormTypeEnum.UPLOAD_IMAGE.getType(), FormTypeEnum.SIGNATURE.getType())) {
 
                                     //签名是图片
                                     long c = excelPicVoList.stream().filter(w -> w.getCol() == tempF && w.getRow() == (startIndexF)).count();
-                                    if(c==0){
-                                        ExcelPicVo excelPicVo=new ExcelPicVo();
-                                        excelPicVo.setRow(startIndex+1);
+                                    if (c == 0) {
+                                        ExcelPicVo excelPicVo = new ExcelPicVo();
+                                        excelPicVo.setRow(startIndex + 1);
                                         excelPicVo.setCol(tempIndex);
                                         excelPicVo.setUrl(excelShow);
                                         excelPicVoList.add(excelPicVo);
                                     }
                                     //dict.set(formItemVO.getName(), excelShow);
 
-                                }else{
+                                } else {
                                     dict.set(formItemVO.getName(), excelShow);
                                 }
                             }
 
-                            mergeMap.put(startIndex+1,startIndex+minV);
+                            mergeMap.put(startIndex + 1, startIndex + minV);
                         }
-                        mergeMapList.put(tempIndex,mergeMap);
+                        mergeMapList.put(tempIndex, mergeMap);
 
                         tempIndex++;
 
@@ -753,8 +755,8 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
             Integer key = integerMapEntry.getKey();
             Map<Integer, Integer> value = integerMapEntry.getValue();
             for (Map.Entry<Integer, Integer> integerIntegerEntry : value.entrySet()) {
-                if(integerIntegerEntry.getKey().intValue()<integerIntegerEntry.getValue()){
-                    writer.merge(integerIntegerEntry.getKey(),integerIntegerEntry.getValue(),key,key,"",false);
+                if (integerIntegerEntry.getKey().intValue() < integerIntegerEntry.getValue()) {
+                    writer.merge(integerIntegerEntry.getKey(), integerIntegerEntry.getValue(), key, key, "", false);
 
                 }
 
@@ -764,10 +766,10 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         }
 
         for (ExcelPicVo excelPicVo : excelPicVoList) {
-            File file = new File(StrUtil.format("/tmp/{}.{}",IdUtil.fastSimpleUUID(),FileUtil.getSuffix(excelPicVo.getUrl())));
-            FileOutputStream fileOutputStream=new FileOutputStream(file);
-            HttpUtil.download(excelPicVo.getUrl(),fileOutputStream,true);
-            writer.writeImg(file,excelPicVo.getCol(),excelPicVo.getRow(),excelPicVo.getCol()+1,excelPicVo.getRow()+1);
+            File file = new File(StrUtil.format("/tmp/{}.{}", IdUtil.fastSimpleUUID(), FileUtil.getSuffix(excelPicVo.getUrl())));
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            HttpUtil.download(excelPicVo.getUrl(), fileOutputStream, true);
+            writer.writeImg(file, excelPicVo.getCol(), excelPicVo.getRow(), excelPicVo.getCol() + 1, excelPicVo.getRow() + 1);
         }
 
 
