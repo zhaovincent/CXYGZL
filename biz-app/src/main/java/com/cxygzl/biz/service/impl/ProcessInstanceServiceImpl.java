@@ -251,6 +251,11 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
                 }
             }else{
+                if(o==null||StrUtil.isBlankIfStr(o)){
+                    formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", ""));
+                    return;
+
+                }
                 String label = FormStrategyFactory.getStrategy(type).getProcessInstanceExcelShow(JsonUtil.toJSONString(o));
                 formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", label));
 

@@ -160,7 +160,11 @@ public class CascadeFormStrategyImpl implements InitializingBean, FormStrategy {
      */
     @Override
     public String getProcessInstanceExcelShow(String s) {
-        CascadeFormValue areaFormValue = JsonUtil.parseObject(s, CascadeFormValue.class);
-        return CollUtil.join(areaFormValue.getLabelList()," / ");
+        try {
+            CascadeFormValue areaFormValue = JsonUtil.parseObject(s, CascadeFormValue.class);
+            return CollUtil.join(areaFormValue.getLabelList()," / ");
+        } catch (Exception e) {
+            return "";
+        }
     }
 }
