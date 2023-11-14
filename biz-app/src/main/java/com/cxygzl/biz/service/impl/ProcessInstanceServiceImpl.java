@@ -239,38 +239,10 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
             }
             //表单类型
             String type = formItemVO.getType();
-            if (StrUtil.equals(type, FormTypeEnum.AREA.getType())) {
-                AreaFormValue areaFormValue = BeanUtil.copyProperties(o, AreaFormValue.class);
-                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", areaFormValue.getName()));
 
-            } else if (StrUtil.equals(type, FormTypeEnum.CASCADE.getType())) {
-                CascadeFormValue areaFormValue = BeanUtil.copyProperties(o, CascadeFormValue.class);
-                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", areaFormValue.getLabel()));
-
-            } else if (StrUtil.equalsAny(type, FormTypeEnum.SINGLE_SELECT.getType(), FormTypeEnum.MULTI_SELECT.getType())) {
-                List<SelectValue> selectValueList = BeanUtil.copyToList(Convert.toList(o), SelectValue.class);
-                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", selectValueList.stream().map(w -> w.getValue()).collect(Collectors.joining(","))));
-
-            } else if (StrUtil.equalsAny(type,
-                    FormTypeEnum.SELECT_USER.getType(),
-                    FormTypeEnum.SELECT_MULTI_USER.getType(),
-                    FormTypeEnum.SELECT_MULTI_DEPT.getType(),
-                    FormTypeEnum.SELECT_DEPT.getType()
-            )) {
-                List<NodeUser> nodeUserList = BeanUtil.copyToList(Convert.toList(o), NodeUser.class);
-                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", nodeUserList.stream().map(w -> w.getName()).collect(Collectors.joining(","))));
-
-            } else if (StrUtil.equalsAny(type,
-                    FormTypeEnum.UPLOAD_FILE.getType(),
-                    FormTypeEnum.UPLOAD_IMAGE.getType()
-            )) {
-                List<UploadValue> uploadValueList = BeanUtil.copyToList(Convert.toList(o), UploadValue.class);
-                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", uploadValueList.stream().map(w -> w.getName()).collect(Collectors.joining(","))));
-
-            } else if (StrUtil.equalsAny(type,
+            if (StrUtil.equalsAny(type,
                     FormTypeEnum.LAYOUT.getType()
             )) {
-                //明细列表
                 Object formItemListSub = formItemVO.getProps().getValue();
 
                 List<Object> valueList = Convert.toList(Object.class, o);
@@ -278,12 +250,14 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                     buildFormValueShow(Convert.toMap(String.class, Object.class, o1), Convert.toList(FormItemVO.class, formItemListSub), formPermMap, formValueShowList);
 
                 }
-
-            } else {
-                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", Convert.toStr(o)));
-
+            }else{
+                String label = FormStrategyFactory.getStrategy(type).getProcessInstanceExcelShow(JsonUtil.toJSONString(o));
+                formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", label));
 
             }
+
+
+
 
         }
     }
