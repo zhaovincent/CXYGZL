@@ -9,5 +9,6 @@ public class RelatedProcessValue {
 
     private String processInstanceId;
     private String processName;
+    private Integer tabIndex;
 
 }
