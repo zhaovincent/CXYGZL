@@ -4,7 +4,7 @@ spring:
     port: 6379
     database: 14
   datasource:
-    url: jdbc:mysql://localhost:3306/cxygzl_biz_dd?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://myserver:3306/cxygzl_biz_dd?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: SD342Jf632JD^123
