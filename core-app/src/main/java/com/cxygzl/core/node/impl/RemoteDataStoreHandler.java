@@ -1,8 +1,5 @@
 package com.cxygzl.core.node.impl;
 
-import cn.hutool.cache.CacheUtil;
-import cn.hutool.cache.impl.LRUCache;
-import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.dto.ProcessNodeDataDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
@@ -20,8 +17,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Lazy
 public class RemoteDataStoreHandler implements IDataStoreHandler {
-
-    private LRUCache<String, String> cache = CacheUtil.newLRUCache(1000);
 
     /**
      * 节点数据存储
@@ -65,11 +60,6 @@ public class RemoteDataStoreHandler implements IDataStoreHandler {
 
 
 
-        String o = cache.get(StrUtil.format("{}||{}", flowId, nodeId));
-        if (StrUtil.isNotBlank(o)) {
-            log.debug("从缓存获取到数据 :{}  {} {}", flowId, nodeId, o);
-            return o;
-        }
 
 
         R<String> r = BizHttpUtil.queryNodeOriData(flowId, nodeId);
@@ -80,7 +70,6 @@ public class RemoteDataStoreHandler implements IDataStoreHandler {
 
         String data = r.getData();
 
-        cache.put(StrUtil.format("{}||{}", flowId, nodeId), data);
 
         return data;
     }

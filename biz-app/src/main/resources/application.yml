@@ -91,3 +91,6 @@ wx:
         token: #微信小程序消息服务器配置的token
         aesKey: #微信小程序消息服务器配置的EncodingAESKey
         msgDataFormat: JSON
+ko-time:
+  pointcut: execution(public * com.cxygzl.biz.service.impl.*.*(..))
+  log-enable: true

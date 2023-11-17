@@ -64,7 +64,9 @@ public class LoginInterceptor implements WebMvcConfigurer {
                         "/api/file/show/*",
                         "/api/file/show/*/*",
                         "/file/show/*/*",
-                        "/file/show/*"
+                        "/file/show/*",
+                        "/koTime",
+                        "/koTime/*"
                 )
         ;
 

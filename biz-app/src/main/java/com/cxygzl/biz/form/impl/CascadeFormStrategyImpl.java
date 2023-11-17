@@ -123,7 +123,7 @@ public class CascadeFormStrategyImpl implements InitializingBean, FormStrategy {
             return null;
         }
         CascadeFormValue areaFormValue = JsonUtil.parseObject(JsonUtil.toJSONString(value), CascadeFormValue.class);
-        return CollUtil.join(areaFormValue.getLabelList()," / ");
+        return CollUtil.join(areaFormValue.getLabelList(), " / ");
 
     }
 
@@ -148,7 +148,7 @@ public class CascadeFormStrategyImpl implements InitializingBean, FormStrategy {
     @Override
     public String getExcelDataShow(String s, int index) {
         CascadeFormValue areaFormValue = JsonUtil.parseObject(s, CascadeFormValue.class);
-        return CollUtil.join(areaFormValue.getLabelList()," / ");
+        return CollUtil.join(areaFormValue.getLabelList(), " / ");
 
     }
 
@@ -160,11 +160,9 @@ public class CascadeFormStrategyImpl implements InitializingBean, FormStrategy {
      */
     @Override
     public String getProcessInstanceExcelShow(String s) {
-        try {
-            CascadeFormValue areaFormValue = JsonUtil.parseObject(s, CascadeFormValue.class);
-            return CollUtil.join(areaFormValue.getLabelList()," / ");
-        } catch (Exception e) {
-            return "";
-        }
+
+        CascadeFormValue areaFormValue = JsonUtil.parseObject(s, CascadeFormValue.class);
+        return CollUtil.join(areaFormValue.getLabelList(), " / ");
+
     }
 }

@@ -15,7 +15,7 @@ public class AllEventListener implements FlowableEventListener {
      */
     @Override
     public void onEvent(FlowableEvent event) {
-        log.debug("监听器类型：{} {}",event.getType(),event.getClass().getCanonicalName());
+        log.info("监听器类型：{} {}",event.getType(),event.getClass().getCanonicalName());
         EventListenerStrategy strategy = EventListenerStrategyFactory.getStrategy(event.getType().name());
         if (strategy != null) {
             strategy.handle(event);
