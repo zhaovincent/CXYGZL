@@ -24,14 +24,11 @@ import java.io.File;
 @RequestMapping(value = {"file","api/file"})
 public class FileController {
 
-    @Value("${file.dir}")
-    private String fileDir;
-    @Value("${file.showUrl}")
-    private String fileShowUrl;
 
     @Resource
     private IFileService fileService;
-
+    @Value("${file.dir}")
+    private String fileDir;
 
 
     /**

@@ -17,7 +17,7 @@ logging:
 
 file:
   dir: /home/cxygzl/static
-  showUrl: https://dd.cxygzl.com/wj/
+  showUrl: https://dd.cxygzl.com/api/file/show
 
 ##核心模块访问路径
 core:

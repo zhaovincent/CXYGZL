@@ -17,7 +17,7 @@ logging:
 
 file:
   dir: /home/cxygzl/static
-  showUrl: https://pro.cxygzl.com/wj/
+  showUrl: https://pro.cxygzl.com/wj
 
 
 sa-token:
