@@ -92,5 +92,7 @@ wx:
         aesKey: #微信小程序消息服务器配置的EncodingAESKey
         msgDataFormat: JSON
 ko-time:
-  pointcut: execution(public * com.cxygzl.biz.service.impl.*.*(..))
+  pointcut: execution(public * com.cxygzl.biz.controller.*.*(..))
   log-enable: true
+  saver: redis
+  data-prefix: kotime

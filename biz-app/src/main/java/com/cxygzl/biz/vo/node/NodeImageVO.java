@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Huijun Zhao
@@ -20,6 +21,9 @@ public class NodeImageVO   {
 
     private List<Node> nodes;
     private List<Edge> edges;
+
+    private Map<String, Integer> nodeStatuMap;
+    private com.cxygzl.common.dto.flow.Node node;
 
 
     @Data

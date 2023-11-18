@@ -127,7 +127,7 @@ public class NodeFormatUtil {
 
 
         List<NodeFormatUserVo> nodeFormatUserVoList = new ArrayList<>();
-        if (type == NodeTypeEnum.APPROVAL.getValue().intValue()) {
+        if (type == NodeTypeEnum.APPROVAL.getValue().intValue()||type==NodeTypeEnum.CC.getValue().intValue()) {
 
             Integer assignedType = node.getAssignedType();
 
@@ -139,7 +139,7 @@ public class NodeFormatUtil {
 
 
             // 用户列表
-            if (StrUtil.isAllNotBlank(processInstanceId, node.getExecutionId())) {
+            if (StrUtil.isAllNotBlank(processInstanceId, node.getExecutionId())&&type!=NodeTypeEnum.CC.getValue().intValue()) {
 
                 buildApproveDesc(node, processInstanceId, nodeVo, nodeFormatUserVoList);
 
@@ -355,28 +355,18 @@ public class NodeFormatUtil {
                 buildApproveDesc(node, processInstanceId, nodeVo, nodeFormatUserVoList);
 
             }
-        } else if (node.getType().intValue() == NodeTypeEnum.CC.getValue()) {
-            //抄送节点
-
-            List<NodeUser> nodeUserList = node.getNodeUserList();
-
-            List<NodeFormatUserVo> tempList = buildUser(nodeUserList);
-            //如果当前节点已执行  则用户为已执行
-            if (StrUtil.isAllNotBlank(node.getExecutionId(), node.getFlowUniqueId())) {
-                for (NodeFormatUserVo nodeFormatUserVo : tempList) {
-                    nodeFormatUserVo.setStatus(NodeStatusEnum.YJS.getCode());
-
-                }
-            }
-            nodeFormatUserVoList.addAll(tempList);
-
-        } else if (node.getType().intValue() == NodeTypeEnum.COMMENT.getValue()) {
+        }  else if (node.getType().intValue() == NodeTypeEnum.COMMENT.getValue()) {
             //评论节点
 
             nodeVo.setStatus(NodeStatusEnum.YJS.getCode());
             buildCommentDesc(node,nodeVo);
 
 
+        }
+        if (StrUtil.isAllNotBlank(processInstanceId, node.getExecutionId())&&type==NodeTypeEnum.CC.getValue().intValue()) {
+            for (NodeFormatUserVo nodeFormatUserVo : nodeFormatUserVoList) {
+                nodeFormatUserVo.setStatus(NodeStatusEnum.YJS.getCode());
+            }
         }
         nodeVo.setUserVoList(nodeFormatUserVoList);
 

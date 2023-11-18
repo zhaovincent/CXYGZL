@@ -162,7 +162,7 @@ public class NodeUtil {
         Process process = processService.getByFlowId(flowId);
         Node node = JsonUtil.parseObject(process.getProcess(), Node.class);
 
-        Node parentNode = com.cxygzl.common.utils.NodeUtil.getParentNode(node, nodeId);
+        Node parentNode = com.cxygzl.common.utils.NodeUtil.getParentNode(node, nodeId, false);
         if (parentNode == null) {
             return null;
         }

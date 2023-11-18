@@ -289,8 +289,6 @@ public class NodeUtil {
     }
 
 
-
-
     /**
      * 一直到最上层的节点
      *
@@ -304,7 +302,7 @@ public class NodeUtil {
 
 
         while (true) {
-            Node parentNode = getParentNode(node, nodeId);
+            Node parentNode = getParentNode(node, nodeId, true);
 
             if (isNode(parentNode)) {
                 nodeList.add(parentNode);
@@ -323,9 +321,10 @@ public class NodeUtil {
      *
      * @param node
      * @param nodeId
+     * @param containEmptyNode
      * @return
      */
-    public static Node getParentNode(Node node, String nodeId) {
+    public static Node getParentNode(Node node, String nodeId, boolean containEmptyNode) {
 
         if (!isNode(node)) {
             return null;
@@ -345,12 +344,24 @@ public class NodeUtil {
             //条件分支
             List<Node> branchs = node.getConditionNodes();
             for (Node branch : branchs) {
+
+                if (containEmptyNode) {
+                    if (isNode(branch)&&StrUtil.equals(branch.getId(), nodeId)) {
+                        return node;
+                    }
+                    Node parentNode = getParentNode(branch, nodeId, containEmptyNode);
+                    if (parentNode != null) {
+                        return parentNode;
+                    }
+                    continue;
+                }
+
                 Node children = branch.getChildNode();
 
                 if (isNode(children) && StrUtil.equals(children.getId(), nodeId)) {
                     return node;
                 }
-                Node parentNode = getParentNode(children, nodeId);
+                Node parentNode = getParentNode(children, nodeId, containEmptyNode);
                 if (parentNode != null) {
                     return parentNode;
                 }
@@ -358,7 +369,7 @@ public class NodeUtil {
             }
         }
 
-        return getParentNode(childNode, nodeId);
+        return getParentNode(childNode, nodeId, containEmptyNode);
     }
 
     /**

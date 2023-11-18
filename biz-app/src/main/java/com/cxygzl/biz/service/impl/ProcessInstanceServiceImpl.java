@@ -192,7 +192,6 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 record.setProcessInstanceBizCode(processInstanceRecord.getProcessInstanceBizCode());
 
 
-
             }
             //是否是子流程发起任务
             Map<String, Object> paramMap = record.getParamMap();
@@ -250,8 +249,8 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                     buildFormValueShow(Convert.toMap(String.class, Object.class, o1), Convert.toList(FormItemVO.class, formItemListSub), formPermMap, formValueShowList);
 
                 }
-            }else{
-                if(o==null||StrUtil.isBlankIfStr(o)){
+            } else {
+                if (o == null || StrUtil.isBlankIfStr(o)) {
                     formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", ""));
                     return;
 
@@ -260,8 +259,6 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                 formValueShowList.add(Dict.create().set("key", formItemVOName).set("label", label));
 
             }
-
-
 
 
         }
@@ -568,21 +565,21 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         Page<ProcessInstanceRecord> instanceRecordPage = processInstanceRecordService.lambdaQuery()
                 .in(CollUtil.isNotEmpty(allFlowIdList), ProcessInstanceRecord::getFlowId,
                         allFlowIdList)
-                .eq(pageDto.getStatus()!=null,ProcessInstanceRecord::getStatus,pageDto.getStatus())
-                .ge(CollUtil.isNotEmpty(startTime)&& startTime.size()>=2,ProcessInstanceRecord::getCreateTime,
-                        (CollUtil.isNotEmpty(startTime)&& startTime.size()>=2)?(DateUtil.parseDate(startTime.get(0))):null
-                        )
-                .le(CollUtil.isNotEmpty(startTime)&& startTime.size()>=2,ProcessInstanceRecord::getCreateTime,
-                        (CollUtil.isNotEmpty(startTime)&& startTime.size()>=2)?(DateUtil.endOfDay(DateUtil.parseDate(startTime.get(1)))):null
-                        )
-                .ge(CollUtil.isNotEmpty(finishTime)&& finishTime.size()>=2,ProcessInstanceRecord::getEndTime,
-                        (CollUtil.isNotEmpty(finishTime)&& finishTime.size()>=2)?(DateUtil.parseDate(finishTime.get(0))):null
-                        )
-                .le(CollUtil.isNotEmpty(finishTime)&& finishTime.size()>=2,ProcessInstanceRecord::getEndTime,
-                        (CollUtil.isNotEmpty(finishTime)&& finishTime.size()>=2)?(DateUtil.endOfDay(DateUtil.parseDate(finishTime.get(1)))):null
-                        )
-                .in(CollUtil.isNotEmpty(starterList),ProcessInstanceRecord::getUserId, starterList ==null?new ArrayList<>(): starterList.stream().map(w->w.getId()).collect(Collectors.toList()))
-                .eq(StrUtil.isNotBlank(pageDto.getProcessBizCode()),ProcessInstanceRecord::getProcessInstanceBizCode,pageDto.getProcessBizCode())
+                .eq(pageDto.getStatus() != null, ProcessInstanceRecord::getStatus, pageDto.getStatus())
+                .ge(CollUtil.isNotEmpty(startTime) && startTime.size() >= 2, ProcessInstanceRecord::getCreateTime,
+                        (CollUtil.isNotEmpty(startTime) && startTime.size() >= 2) ? (DateUtil.parseDate(startTime.get(0))) : null
+                )
+                .le(CollUtil.isNotEmpty(startTime) && startTime.size() >= 2, ProcessInstanceRecord::getCreateTime,
+                        (CollUtil.isNotEmpty(startTime) && startTime.size() >= 2) ? (DateUtil.endOfDay(DateUtil.parseDate(startTime.get(1)))) : null
+                )
+                .ge(CollUtil.isNotEmpty(finishTime) && finishTime.size() >= 2, ProcessInstanceRecord::getEndTime,
+                        (CollUtil.isNotEmpty(finishTime) && finishTime.size() >= 2) ? (DateUtil.parseDate(finishTime.get(0))) : null
+                )
+                .le(CollUtil.isNotEmpty(finishTime) && finishTime.size() >= 2, ProcessInstanceRecord::getEndTime,
+                        (CollUtil.isNotEmpty(finishTime) && finishTime.size() >= 2) ? (DateUtil.endOfDay(DateUtil.parseDate(finishTime.get(1)))) : null
+                )
+                .in(CollUtil.isNotEmpty(starterList), ProcessInstanceRecord::getUserId, starterList == null ? new ArrayList<>() : starterList.stream().map(w -> w.getId()).collect(Collectors.toList()))
+                .eq(StrUtil.isNotBlank(pageDto.getProcessBizCode()), ProcessInstanceRecord::getProcessInstanceBizCode, pageDto.getProcessBizCode())
                 .orderByDesc(ProcessInstanceRecord::getCreateTime)
                 .page(new Page<>(pageDto.getPageNum(), pageDto.getPageSize()));
 
@@ -791,10 +788,51 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         Process process = processService.getByFlowId(flowId);
         String content = process.getProcess();
         Node node = JsonUtil.parseObject(content, Node.class);
-        NodeUtil.addEndNode(node);
+        // NodeUtil.addEndNode(node);
 
 
         NodeImageVO imageVO = NodeImageUtil.initPosition(node, procInsId);
+//        imageVO.setNode(JsonUtil.parseObject(processInstanceRecord.getProcess(), Node.class));
+        imageVO.setNode(node);
+
+        //获取所有执行的节点
+        List<ProcessInstanceNodeRecord> processNodeRecordList = processNodeRecordService.lambdaQuery()
+                .eq(ProcessInstanceNodeRecord::getProcessInstanceId, procInsId)
+                .in(ProcessInstanceNodeRecord::getStatus, CollUtil.newArrayList(NodeStatusEnum.JXZ.getCode(),
+                        NodeStatusEnum.YJS.getCode(),
+                        NodeStatusEnum.YCX.getCode()
+                ))
+                .list();
+
+        Map<String, Integer> nodeStatuMap = new HashMap<>();
+        for (ProcessInstanceNodeRecord processInstanceNodeRecord : processNodeRecordList) {
+            String nodeId = processInstanceNodeRecord.getNodeId();
+            Integer status = processInstanceNodeRecord.getStatus();
+            Integer s = nodeStatuMap.get(nodeId);
+            if (s == null) {
+                nodeStatuMap.put(nodeId, status);
+            } else {
+                if (status.intValue() == NodeStatusEnum.JXZ.getCode()) {
+                    nodeStatuMap.put(nodeId, status);
+                } else if (s.intValue() != NodeStatusEnum.JXZ.getCode()) {
+                    nodeStatuMap.put(nodeId, status);
+                }
+            }
+
+            //处理分支显示
+            List<Node> parentNodeUntilRoot = NodeUtil.getParentNodeUntilRoot(node, nodeId);
+            for (Node n : parentNodeUntilRoot) {
+                if (n.getType().intValue() == NodeTypeEnum.EMPTY.getValue()) {
+                    nodeStatuMap.put(n.getId(), NodeStatusEnum.YJS.getCode());
+                    break;
+
+                }
+            }
+
+        }
+
+        imageVO.setNodeStatuMap(nodeStatuMap);
+
 
         return com.cxygzl.common.dto.R.success(imageVO);
     }
@@ -1300,7 +1338,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     public R queryTaskListInProgress(String processInstanceId) {
 
         R<List<TaskDto>> listR = CoreHttpUtil.queryTaskAssignee(null, processInstanceId);
-        if(!listR.isOk()){
+        if (!listR.isOk()) {
             return listR;
         }
         List<TaskDto> taskDtoList = listR.getData();

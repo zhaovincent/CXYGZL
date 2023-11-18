@@ -11,8 +11,6 @@ import com.cxygzl.common.dto.ProcessNodeDataDto;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.JsonUtil;
-import com.yomahub.akali.annotation.AkaliHot;
-import com.yomahub.akali.enums.FlowGradeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +51,6 @@ public class ProcessNodeDataServiceImpl extends ServiceImpl<ProcessNodeDataMappe
      * @param nodeId
      * @return
      */
-    @AkaliHot(grade = FlowGradeEnum.FLOW_GRADE_QPS, count = 5, duration = 5)
     @Override
     public R<String> getNodeData(String flowId, String nodeId) {
         //发起人用户任务
@@ -77,7 +74,6 @@ public class ProcessNodeDataServiceImpl extends ServiceImpl<ProcessNodeDataMappe
      * @param nodeId
      * @return
      */
-    @AkaliHot(grade = FlowGradeEnum.FLOW_GRADE_QPS, count = 5, duration = 5)
     @Override
     public R<Node> getNode(String flowId, String nodeId) {
         String data = getNodeData(flowId, nodeId).getData();

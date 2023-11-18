@@ -97,7 +97,7 @@ public class ProcessInstanceNodeRecordServiceImpl extends ServiceImpl<ProcessIns
         //查询父级
         Process process = processService.getByFlowId(flowId);
         final Node rootNode = JsonUtil.parseObject(process.getProcess(), Node.class);
-        Node parentNode = NodeUtil.getParentNode(rootNode, nodeId);
+        Node parentNode = NodeUtil.getParentNode(rootNode, nodeId, false);
 
         //当前流程
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, processInstanceNodeRecordParamDto.getProcessInstanceId()).one();

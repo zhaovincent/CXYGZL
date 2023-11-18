@@ -50,7 +50,7 @@ public class LogAopUtil {
 
 
         }
-        if (StrUtil.equals(method.getName(), "error")) {
+        if (StrUtil.equals(method.getName(), "error")||StrUtil.contains(className,"kotime")) {
 
             return point.proceed(args);
 

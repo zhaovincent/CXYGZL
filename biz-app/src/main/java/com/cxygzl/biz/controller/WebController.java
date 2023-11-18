@@ -5,7 +5,6 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import com.cxygzl.common.config.NotWriteLogAnno;
 import lombok.SneakyThrows;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -13,7 +12,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 
-@Controller
 public class WebController {
 
     @RequestMapping("/")
