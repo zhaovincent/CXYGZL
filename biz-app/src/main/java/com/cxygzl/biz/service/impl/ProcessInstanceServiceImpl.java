@@ -1349,4 +1349,23 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
 
         return listR;
     }
+
+    /**
+     * 删除流程
+     *
+     * @param processInstanceId
+     * @return
+     */
+    @Override
+    public R deleteProcessInstance(String processInstanceId) {
+
+        String userId = StpUtil.getLoginIdAsString();
+        UserDto userDto = ApiStrategyFactory.getStrategy().getUser(userId);
+
+        ProcessInstanceParamDto processInstanceParamDto = new ProcessInstanceParamDto();
+        processInstanceParamDto.setProcessInstanceId(processInstanceId);
+        processInstanceParamDto.setReason(StrUtil.format("管理员[{}]删除流程",userDto.getName()));
+        R r = CoreHttpUtil.deleteProcessInstance(processInstanceParamDto);
+        return r;
+    }
 }

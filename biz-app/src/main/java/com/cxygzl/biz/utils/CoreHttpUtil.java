@@ -388,4 +388,19 @@ public class CoreHttpUtil {
     }
 
 
+    /**
+     * 删除流程
+     * @param processInstanceParamDto
+     * @return
+     */
+    public static com.cxygzl.common.dto.R deleteProcessInstance(ProcessInstanceParamDto processInstanceParamDto) {
+
+        String s = post(processInstanceParamDto,StrUtil.format("/process-instance/delete"));
+        com.cxygzl.common.dto.R r = JsonUtil.parseObject(s, new JsonUtil.TypeReference<R>() {
+        });
+        return r;
+
+    }
+
+
 }

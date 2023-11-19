@@ -131,4 +131,11 @@ public interface IProcessInstanceService  {
      */
     R queryTaskListInProgress(String processInstanceId);
 
+    /**
+     * 删除流程
+     * @param processInstanceId
+     * @return
+     */
+    R deleteProcessInstance(String processInstanceId);
+
 }

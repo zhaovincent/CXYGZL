@@ -234,4 +234,16 @@ public class ProcessInstanceController {
         return processInstanceService.queryTaskListInProgress(processInstanceId);
 
     }
+
+
+    /**
+     *  删除分组
+     * @param id
+     * @return
+     */
+    @DeleteMapping("delete/{id}")
+    public R delete(@PathVariable String id){
+        return processInstanceService.deleteProcessInstance(id);
+    }
+
 }

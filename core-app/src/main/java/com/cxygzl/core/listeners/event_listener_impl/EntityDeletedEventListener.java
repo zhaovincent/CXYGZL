@@ -45,6 +45,8 @@ public class EntityDeletedEventListener implements EventListenerStrategy, Initia
             entity = f.getEntity();
         }
 
+        log.info("实例删除了：{}",entity.getClass().getCanonicalName());
+
 
         if (entity != null && entity instanceof TaskEntityImpl) {
 

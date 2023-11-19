@@ -35,8 +35,10 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         String processInstanceId = processInstanceParamDto.getProcessInstanceId();
         if (runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).count() > 0) {
             runtimeService.deleteProcessInstance(processInstanceId, processInstanceParamDto.getReason());
-        } else {
+        } else if (historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstanceId).count() > 0) {
             historyService.deleteHistoricProcessInstance(processInstanceId);
+        } else {
+            return R.fail("流程实例不存在");
         }
         return R.success();
     }
