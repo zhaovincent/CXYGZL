@@ -93,6 +93,6 @@ wx:
         msgDataFormat: JSON
 ko-time:
   pointcut: execution(public * com.cxygzl.biz.controller.*.*(..))
-  log-enable: true
+  log-enable: false
   saver: redis
   data-prefix: kotime

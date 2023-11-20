@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author Huijun Zhao
@@ -32,14 +33,16 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
     @Transactional
     @Override
     public R delete(ProcessInstanceParamDto processInstanceParamDto) {
-        String processInstanceId = processInstanceParamDto.getProcessInstanceId();
-        if (runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).count() > 0) {
-            runtimeService.deleteProcessInstance(processInstanceId, processInstanceParamDto.getReason());
-        } else if (historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstanceId).count() > 0) {
-            historyService.deleteHistoricProcessInstance(processInstanceId);
-        } else {
-            return R.fail("流程实例不存在");
+
+
+        List<String> processInstanceIdList = processInstanceParamDto.getProcessInstanceIdList();
+        for (String processInstanceId : processInstanceIdList) {
+            if (runtimeService.createProcessInstanceQuery().processInstanceId(processInstanceId).count() > 0) {
+                runtimeService.deleteProcessInstance(processInstanceId, processInstanceParamDto.getReason());
+            }
         }
+
+
         return R.success();
     }
 }

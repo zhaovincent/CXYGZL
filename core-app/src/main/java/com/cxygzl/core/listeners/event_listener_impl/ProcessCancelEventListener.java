@@ -1,6 +1,7 @@
 package com.cxygzl.core.listeners.event_listener_impl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import com.cxygzl.common.dto.FlowSettingDto;
 import com.cxygzl.common.dto.ProcessInstanceParamDto;
 import com.cxygzl.common.dto.flow.HttpSetting;
@@ -9,12 +10,12 @@ import com.cxygzl.common.utils.HttpUtil;
 import com.cxygzl.common.utils.JsonUtil;
 import com.cxygzl.core.listeners.EventListenerStrategy;
 import com.cxygzl.core.utils.BizHttpUtil;
+import com.cxygzl.core.utils.NodeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
+import org.flowable.engine.RuntimeService;
 import org.flowable.engine.delegate.DelegateExecution;
-import org.flowable.engine.delegate.event.impl.FlowableProcessTerminatedEventImpl;
-import org.flowable.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -24,14 +25,14 @@ import java.util.Map;
 import static com.cxygzl.common.constants.ProcessInstanceConstant.VariableKey.APPROVE_RESULT;
 
 /**
- * 流程结束了
+ * 流程取消了
  * @author Huijun Zhao
  * @description
  * @date 2023-10-10 10:12
  */
 @Slf4j
 @Component
-public class ProcessEndEventListener implements EventListenerStrategy, InitializingBean {
+public class ProcessCancelEventListener implements EventListenerStrategy, InitializingBean {
     /**
      * 处理数据
      *
@@ -42,20 +43,24 @@ public class ProcessEndEventListener implements EventListenerStrategy, Initializ
     public void handle(FlowableEvent event) {
 
         //流程开完成
-        FlowableProcessTerminatedEventImpl e = (FlowableProcessTerminatedEventImpl) event;
+        org.flowable.engine.delegate.event.impl.FlowableProcessCancelledEventImpl e = (org.flowable.engine.delegate.event.impl.FlowableProcessCancelledEventImpl) event;
         DelegateExecution execution = e.getExecution();
         String processInstanceId = e.getProcessInstanceId();
-        ExecutionEntityImpl entity = (ExecutionEntityImpl) e.getEntity();
-        Map<String, Object> variables = execution.getVariables();
-        String flowId = entity.getProcessDefinitionKey();
+
+        String processDefinitionId = e.getProcessDefinitionId();
+        String flowId = NodeUtil.getFlowId(processDefinitionId);
+
+        RuntimeService runtimeService = SpringUtil.getBean(RuntimeService.class);
+        Map<String, Object> variables = runtimeService.getVariables(processInstanceId);
 
 
         //结果
         Integer finalResult = execution.getVariable(StrUtil.format("{}_{}", flowId, APPROVE_RESULT), Integer.class);
 
+
         ProcessInstanceParamDto processInstanceParamDto = new ProcessInstanceParamDto();
         processInstanceParamDto.setProcessInstanceId(processInstanceId);
-        processInstanceParamDto.setCancel(false);
+        processInstanceParamDto.setCancel(true);
         processInstanceParamDto.setResult(finalResult);
         processInstanceParamDto.setFlowId(flowId);
         processInstanceParamDto.setParamMap(variables);
@@ -86,12 +91,11 @@ public class ProcessEndEventListener implements EventListenerStrategy, Initializ
                 }
             }
         }
-
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        afterPropertiesSet(FlowableEngineEventType.PROCESS_COMPLETED_WITH_TERMINATE_END_EVENT.toString());
+        afterPropertiesSet(FlowableEngineEventType.PROCESS_CANCELLED.toString());
 
     }
 }

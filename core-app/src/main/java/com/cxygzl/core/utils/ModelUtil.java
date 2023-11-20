@@ -299,7 +299,7 @@ public class ModelUtil {
         node.setHeadId(node.getId());
         //设置节点的连线尾节点
         node.setTailId(node.getId());
-        node.setNodeName(StrUtil.format("{}[{}]", node.getNodeName(), RandomUtil.randomNumbers(5)));
+//        node.setNodeName(StrUtil.format("{}[{}]", node.getNodeName(), RandomUtil.randomNumbers(5)));
 
         //存储节点数据
         IDataStoreHandler nodeDataStoreHandler = NodeDataStoreFactory.getInstance();

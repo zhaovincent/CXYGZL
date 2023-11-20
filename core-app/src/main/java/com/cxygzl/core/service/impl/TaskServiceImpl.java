@@ -106,10 +106,10 @@ public class TaskServiceImpl implements ITaskService {
         //保存图片和文件
         saveAttachment(taskParamDto, commentId, task.getId(), task.getProcessInstanceId());
         //保存签名图片
-       if(StrUtil.isNotBlank(taskParamDto.getSignUrl())) {
+        if (StrUtil.isNotBlank(taskParamDto.getSignUrl())) {
             taskService.createAttachment(ApproveAttachmentTypeEnum.SIGN_IMAGE.getType(), task.getId(),
                     task.getProcessInstanceId(), FileUtil.getName(taskParamDto.getSignUrl())
-                    , commentId,taskParamDto.getSignUrl());
+                    , commentId, taskParamDto.getSignUrl());
         }
 
         Map<String, Object> paramMap = taskParamDto.getParamMap();
@@ -146,7 +146,7 @@ public class TaskServiceImpl implements ITaskService {
         } else {
             Comment comment = saveSysCommentToTask(ApproveDescTypeEnum.FRONT_JOIN.getType(), StrUtil.format("委派任务给:{}",
                     taskParamDto.getTargetUserName()
-            ), taskParamDto.getUserId(),  task.getId(), task.getProcessInstanceId());
+            ), taskParamDto.getUserId(), task.getId(), task.getProcessInstanceId());
 
             commentId = comment.getId();
 
@@ -190,7 +190,7 @@ public class TaskServiceImpl implements ITaskService {
 
         } else {
             Comment comment = saveSysCommentToTask(ApproveDescTypeEnum.RESOLVE.getType(), StrUtil.format("完成任务"
-            ), taskParamDto.getUserId(),  task.getId(), task.getProcessInstanceId());
+            ), taskParamDto.getUserId(), task.getId(), task.getProcessInstanceId());
             commentId = comment.getId();
 
         }
@@ -238,7 +238,7 @@ public class TaskServiceImpl implements ITaskService {
         } else {
             Comment comment = saveSysCommentToTask(ApproveDescTypeEnum.BACK_JOIN.getType(), StrUtil.format("转办任务给:{}",
                     taskParamDto.getTargetUserName()
-            ), taskParamDto.getUserId(),  task.getId(), task.getProcessInstanceId());
+            ), taskParamDto.getUserId(), task.getId(), task.getProcessInstanceId());
             commentId = comment.getId();
 
         }
@@ -298,7 +298,7 @@ public class TaskServiceImpl implements ITaskService {
         } else {
             Comment comment = saveSysCommentToTask(ApproveDescTypeEnum.DEL_ASSIGNEE.getType(), StrUtil.format("减签任务:{}",
                     targetUserName
-            ), userId,  task.getId(), task.getProcessInstanceId());
+            ), userId, task.getId(), task.getProcessInstanceId());
             commentId = comment.getId();
 
         }
@@ -359,7 +359,7 @@ public class TaskServiceImpl implements ITaskService {
         } else {
             Comment comment = saveSysCommentToTask(ApproveDescTypeEnum.ADD_ASSIGNEE.getType(), StrUtil.format("加签任务给:{}",
                     targetUserName
-            ), userId,  task.getId(), task.getProcessInstanceId());
+            ), userId, task.getId(), task.getProcessInstanceId());
             commentId = comment.getId();
 
         }
@@ -390,7 +390,8 @@ public class TaskServiceImpl implements ITaskService {
         String taskId = taskParamDto.getTaskId();
         String targetKey = taskParamDto.getTargetNodeId();
 
-        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        TaskQuery taskQuery = taskService.createTaskQuery();
+        Task task = taskQuery.taskId(taskId).singleResult();
 
         if (task == null) {
             return R.fail("任务不存在");
@@ -400,6 +401,18 @@ public class TaskServiceImpl implements ITaskService {
             return R.fail("任务处于挂起状态");
         }
 
+        //判断 如果有其他人已经完成任务 则不能驳回
+        {
+            long count = historyService.createHistoricTaskInstanceQuery()
+                    .taskDefinitionKey(task.getTaskDefinitionKey())
+                    .processInstanceId(task.getProcessInstanceId())
+                    .finished()
+                    .count();
+            if (count > 0) {
+                return R.fail("该节点有人完成任务了，不允许驳回");
+            }
+
+        }
 
         // 当前任务 task
 
@@ -425,7 +438,7 @@ public class TaskServiceImpl implements ITaskService {
                     "驳回了任务并添加了评论", task.getId(), task.getProcessInstanceId());
             commentId = comment.getId();
         } else {
-            Comment comment = saveSysCommentToTask(ApproveDescTypeEnum.REJECT.getType(), "驳回了任务", taskParamDto.getUserId(),  task.getId(), task.getProcessInstanceId());
+            Comment comment = saveSysCommentToTask(ApproveDescTypeEnum.REJECT.getType(), "驳回了任务", taskParamDto.getUserId(), task.getId(), task.getProcessInstanceId());
             commentId = comment.getId();
 
         }
@@ -497,7 +510,7 @@ public class TaskServiceImpl implements ITaskService {
                 saveUserCommentToTask(ApproveDescTypeEnum.REVOKE.getType(), taskParamDto.getApproveDesc(), taskParamDto.getUserId(),
                         "撤回了任务并添加了评论", task.getId(), task.getProcessInstanceId());
             } else {
-                saveSysCommentToTask(ApproveDescTypeEnum.REVOKE.getType(), "撤回了任务", taskParamDto.getUserId(),  task.getId(), task.getProcessInstanceId());
+                saveSysCommentToTask(ApproveDescTypeEnum.REVOKE.getType(), "撤回了任务", taskParamDto.getUserId(), task.getId(), task.getProcessInstanceId());
             }
         }
 
@@ -562,7 +575,7 @@ public class TaskServiceImpl implements ITaskService {
 
     }
 
-    private Comment saveSysCommentToTask( String type, String desc, String userId,String taskId,String processInstanceId) {
+    private Comment saveSysCommentToTask(String type, String desc, String userId, String taskId, String processInstanceId) {
         TaskCommentDto taskCommentDto = TaskCommentDto.builder().content(desc).sys(true).userId(userId).build();
 
         Comment comment = taskService.addComment(taskId, processInstanceId,
@@ -758,7 +771,7 @@ public class TaskServiceImpl implements ITaskService {
                         .filter(w -> StrUtil.equals(w.getType(), ApproveAttachmentTypeEnum.SIGN_IMAGE.getType()))
                         .collect(Collectors.toList());
 
-                simpleApproveDescDto.setSignUrlList(collect.stream().map(w->w.getUrl()).collect(Collectors.toList()));
+                simpleApproveDescDto.setSignUrlList(collect.stream().map(w -> w.getUrl()).collect(Collectors.toList()));
             }
 
             simpleApproveDescDtoList.add(simpleApproveDescDto);
@@ -963,8 +976,8 @@ public class TaskServiceImpl implements ITaskService {
                         TaskTypeEnum.BACK_JOIN_ADMIN.getValue()
                 );
                 {
-                     saveSysCommentToTask(ApproveDescTypeEnum.BACK_JOIN_ADMIN.getType(), StrUtil.format("管理员[{}]转交任务给:{}",adminHandOverDto.getCurrentUserName(),
-                             user.getName()
+                    saveSysCommentToTask(ApproveDescTypeEnum.BACK_JOIN_ADMIN.getType(), StrUtil.format("管理员[{}]转交任务给:{}", adminHandOverDto.getCurrentUserName(),
+                            user.getName()
                     ), adminHandOverDto.getCurrentUserName(), taskDto.getTaskId(), processInstanceId);
 
 

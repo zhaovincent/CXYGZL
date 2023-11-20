@@ -189,6 +189,7 @@ public class FlowController {
      * @param taskParamDto
      * @return
      */
+    @Deprecated
     @PostMapping("stopProcessInstance")
     public R stopProcessInstance(@RequestBody TaskParamDto taskParamDto) {
 

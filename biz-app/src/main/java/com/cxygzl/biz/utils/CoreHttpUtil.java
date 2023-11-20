@@ -296,9 +296,9 @@ public class CoreHttpUtil {
      * @param jsonObject
      * @return
      */
-    public static com.cxygzl.common.dto.R stopProcessInstance(TaskParamDto jsonObject) {
+    public static com.cxygzl.common.dto.R stopProcessInstance(ProcessInstanceParamDto jsonObject) {
 
-        String post = post(jsonObject, "/flow/stopProcessInstance");
+        String post = post(jsonObject, "/process-instance/delete");
         com.cxygzl.common.dto.R r = JsonUtil.parseObject(post, new JsonUtil.TypeReference<R>() {
         });
         return r;

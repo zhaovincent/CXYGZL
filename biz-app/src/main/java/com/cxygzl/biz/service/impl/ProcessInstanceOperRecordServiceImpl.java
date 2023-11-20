@@ -55,7 +55,11 @@ public class ProcessInstanceOperRecordServiceImpl extends ServiceImpl<ProcessIns
         processInstanceOperRecord.setProcessInstanceId(taskParamDto.getProcessInstanceId());
         processInstanceOperRecord.setComment(taskParamDto.getApproveDesc());
 
-        TaskResultDto taskResultDto = CoreHttpUtil.queryTask(taskParamDto.getTaskId(), null).getData();
+        R<TaskResultDto> taskResultDtoR = CoreHttpUtil.queryTask(taskParamDto.getTaskId(), null);
+        if(!taskResultDtoR.isOk()){
+            return taskResultDtoR;
+        }
+        TaskResultDto taskResultDto = taskResultDtoR.getData();
 
         processInstanceOperRecord.setNodeId(taskResultDto.getNodeId());
         processInstanceOperRecord.setNodeName(taskResultDto.getNodeName());

@@ -3,6 +3,7 @@ package com.cxygzl.common.dto;
 import lombok.Data;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,5 +43,6 @@ public class ProcessInstanceParamDto {
      * 原因
      */
     private String reason;
+    private List<String> processInstanceIdList;
 
 }

@@ -10,9 +10,6 @@ import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
  * 节点取消了
  * @author Huijun Zhao
@@ -41,18 +38,18 @@ public class ActivityCanceledEventListener implements EventListenerStrategy, Ini
         log.info("取消的节点：{}   {} {}  {}", activityId, activityName, processInstanceId, executionId);
         DelegateExecution execution = activityCancelledEvent.getExecution();
 
-        {
-            DelegateExecution parent = execution.getParent();
-            if (parent.isMultiInstanceRoot() && !execution.isMultiInstanceRoot()) {
-                List<String> childExecutionIdList = parent.getExecutions().stream().map(w -> w.getId()).collect(Collectors.toList());
-                if (childExecutionIdList.contains(execution.getId())) {
-
-                    return;
-                }
-            }
-
-
-        }
+//        {
+//            DelegateExecution parent = execution.getParent();
+//            if (parent.isMultiInstanceRoot() && !execution.isMultiInstanceRoot()) {
+//                List<String> childExecutionIdList = parent.getExecutions().stream().map(w -> w.getId()).collect(Collectors.toList());
+//                if (childExecutionIdList.contains(execution.getId())) {
+//
+//                    return;
+//                }
+//            }
+//
+//
+//        }
 
 
         {

@@ -1247,24 +1247,30 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      * @param processInstanceId
      * @return
      */
+    @Transactional
     @Override
     public R stopProcessInstance(String processInstanceId) {
 
 
-        TaskParamDto taskParamDto = new TaskParamDto();
+        String userId = StpUtil.getLoginIdAsString();
+        UserDto userDto = ApiStrategyFactory.getStrategy().getUser(userId);
+
+
+        ProcessInstanceParamDto processInstanceParamDto = new ProcessInstanceParamDto();
 
         List<String> allStopProcessInstanceIdList = getAllStopProcessInstanceIdList(processInstanceId);
         CollUtil.reverse(allStopProcessInstanceIdList);
         allStopProcessInstanceIdList.add(processInstanceId);
 
-        taskParamDto.setProcessInstanceIdList(allStopProcessInstanceIdList);
-        taskParamDto.setUserId(StpUtil.getLoginIdAsString());
-        com.cxygzl.common.dto.R r = CoreHttpUtil.stopProcessInstance(taskParamDto);
+        processInstanceParamDto.setProcessInstanceIdList(allStopProcessInstanceIdList);
+        processInstanceParamDto.setReason(StrUtil.format("发起人[{}]撤销流程",userDto.getName()));
+
+        com.cxygzl.common.dto.R r = CoreHttpUtil.stopProcessInstance(processInstanceParamDto);
 
         if (!r.isOk()) {
             return R.fail(r.getMsg());
         }
-        processInstanceOperRecordService.saveCancelProcessRecord(StpUtil.getLoginIdAsString(), processInstanceId);
+        processInstanceOperRecordService.saveCancelProcessRecord(userId, processInstanceId);
 
         return R.success();
     }
