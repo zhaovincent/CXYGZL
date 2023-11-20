@@ -178,7 +178,7 @@ public class BaseServiceImpl implements IBaseService {
         }
 
         String process = null;
-        if (StrUtil.isNotBlank(processInstanceId)) {
+        if (StrUtil.isNotBlank(processInstanceId)&&!StrUtil.equals(nodeFormatParamVo.getFrom(),"start")) {
             ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
                     processInstanceId).one();
             flowId = processInstanceRecord.getFlowId();
@@ -246,7 +246,7 @@ public class BaseServiceImpl implements IBaseService {
             }
 
 
-        } else if (StrUtil.isNotBlank(processInstanceId)) {
+        } else if (StrUtil.isNotBlank(processInstanceId)&&!StrUtil.equals(nodeFormatParamVo.getFrom(),"start")) {
             ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
                     processInstanceId).one();
             //任务里没有
@@ -274,12 +274,13 @@ public class BaseServiceImpl implements IBaseService {
 
         //查询所有的节点
         List<ProcessInstanceNodeRecordParamDto> processInstanceNodeRecordParamDtoList = new ArrayList<>();
-        if (StrUtil.isNotBlank(processInstanceId)) {
+        if (StrUtil.isNotBlank(processInstanceId)&&!StrUtil.equals(nodeFormatParamVo.getFrom(),"start")) {
             List<ProcessInstanceNodeRecord> list = processNodeRecordService.lambdaQuery().eq(ProcessInstanceNodeRecord::getProcessInstanceId, processInstanceId).list();
             processInstanceNodeRecordParamDtoList.addAll(BeanUtil.copyToList(list, ProcessInstanceNodeRecordParamDto.class));
         }
         List<NodeVo> processNodeShowDtos = NodeFormatUtil.formatProcessNodeShow(nodeDto,
-                processInstanceId, paramMap, processInstanceNodeRecordParamDtoList, disableSelectUser);
+                StrUtil.equals(nodeFormatParamVo.getFrom(),"start")?null: processInstanceId, paramMap,
+                processInstanceNodeRecordParamDtoList, disableSelectUser);
 
         NodeFormatResultVo nodeFormatResultVo = NodeFormatResultVo.builder()
                 .processNodeShowDtoList(processNodeShowDtos)

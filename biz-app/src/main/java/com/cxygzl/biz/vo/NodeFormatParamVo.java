@@ -12,6 +12,8 @@ public class NodeFormatParamVo {
     private String taskId;
     private String ccId;
 
+    private String from;
+
     private Map<String,Object> paramMap;
 
 }

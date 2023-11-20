@@ -577,15 +577,36 @@ public class FormServiceImpl implements IFormService {
                 for (FormItemVO itemVO : subList) {
                     String perm1 = MapUtil.getStr(formPerms, itemVO.getId(), ProcessInstanceConstant.FormPermClass.EDIT);
                     itemVO.setPerm(perm1);
-                    if (true) {
-                        handleForm(itemVO, processParamMap);
 
-                    }
+                    handleForm(itemVO, processParamMap);
+
+
                 }
 
+                List list=new ArrayList();
+                list.add(subList);
 
-                formItemVOProps.setValue(subList);
+                formItemVOProps.setValue(list);
+                formItemVOProps.setOriForm(subList);
 
+                if (StrUtil.isNotBlank(processInstanceId)) {
+
+                    List<Map<String, Object>> subParamList = MapUtil.get(processParamMap, formItemVO.getId(),
+                            new cn.hutool.core.lang.TypeReference<List<Map<String, Object>>>() {
+                            });
+
+
+                    List<List<FormItemVO>> l = new ArrayList<>();
+                    for (Map<String, Object> map : subParamList) {
+                        List<FormItemVO> subItemList = Convert.toList(FormItemVO.class, value);
+                        for (FormItemVO itemVO : subItemList) {
+                            Object value1 = map.get(itemVO.getId());
+                            FormUtil.handValue(itemVO, value1);
+                        }
+                        l.add(subItemList);
+                    }
+                    formItemVOProps.setValue(l);
+                }
 
             } else {
 

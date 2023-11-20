@@ -57,6 +57,7 @@ public class FormItemVO {
         private String unit;
         private Boolean halfSelect;
         private List expList;
+
         /**
          * 是否使用上次的内容
          * 签名表单
