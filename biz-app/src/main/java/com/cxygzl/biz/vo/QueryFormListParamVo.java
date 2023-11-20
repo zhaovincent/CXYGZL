@@ -37,4 +37,6 @@ public class QueryFormListParamVo {
      * 表单列表
      */
     private List<FormItemVO> formItemVOList;
+
+    private String from;
 }

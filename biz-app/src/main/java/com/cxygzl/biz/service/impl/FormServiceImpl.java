@@ -23,6 +23,7 @@ import com.cxygzl.common.constants.NodeUserTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
 import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.TaskResultDto;
+import com.cxygzl.common.dto.VariableQueryParamDto;
 import com.cxygzl.common.dto.flow.*;
 import com.cxygzl.common.dto.third.DeptDto;
 import com.cxygzl.common.dto.third.UserDto;
@@ -31,10 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -100,11 +98,11 @@ public class FormServiceImpl implements IFormService {
         if (ccId != null) {
             formItemVOList.addAll(getCCFormList(ccId));
 
-        } else if (StrUtil.isAllBlank(processInstanceId, taskId)) {
+        } else if (StrUtil.isAllBlank(processInstanceId, taskId) || StrUtil.equals(taskDto.getFrom(), "start")) {
             //没有流程实例 没有任务
 
 
-            formItemVOList.addAll(getStartFormList(flowId));
+            formItemVOList.addAll(getStartFormList(flowId, processInstanceId));
 
         } else if (StrUtil.isNotBlank(taskId)) {
 
@@ -201,7 +199,7 @@ public class FormServiceImpl implements IFormService {
                 paramMap,
                 flowId,
                 processInstanceId, null, null);
-        if(StrUtil.isBlank(result)){
+        if (StrUtil.isBlank(result)) {
             throw new BusinessException("网络请求异常");
         }
         JSONObject jsonObject = JsonUtil.parseObject(result);
@@ -541,9 +539,10 @@ public class FormServiceImpl implements IFormService {
      * 发起流程表单
      *
      * @param flowId
+     * @param processInstanceId
      * @return
      */
-    private List<FormItemVO> getStartFormList(String flowId) {
+    private List<FormItemVO> getStartFormList(String flowId, String processInstanceId) {
 
 
         Process oaForms = processService.getByFlowId(flowId);
@@ -555,6 +554,16 @@ public class FormServiceImpl implements IFormService {
 
         Map<String, String> formPerms = startNode.getFormPerms();
         List<FormItemVO> t = JsonUtil.parseArray(formItems, FormItemVO.class);
+
+
+        Map<String, Object> processParamMap = new HashMap<>();
+
+        if (StrUtil.isNotBlank(processInstanceId)) {
+            VariableQueryParamDto variableQueryParamDto = new VariableQueryParamDto();
+            variableQueryParamDto.setExecutionId(processInstanceId);
+            Map<String, Object> data = CoreHttpUtil.queryVariables(variableQueryParamDto).getData();
+            processParamMap.putAll(data);
+        }
 
         for (FormItemVO formItemVO : t) {
             String perm = MapUtil.getStr(formPerms, formItemVO.getId(), ProcessInstanceConstant.FormPermClass.EDIT);
@@ -569,7 +578,7 @@ public class FormServiceImpl implements IFormService {
                     String perm1 = MapUtil.getStr(formPerms, itemVO.getId(), ProcessInstanceConstant.FormPermClass.EDIT);
                     itemVO.setPerm(perm1);
                     if (true) {
-                        handleForm(itemVO);
+                        handleForm(itemVO, processParamMap);
 
                     }
                 }
@@ -578,10 +587,9 @@ public class FormServiceImpl implements IFormService {
                 formItemVOProps.setValue(subList);
 
 
-            }
-            if (true) {
+            } else {
 
-                handleForm(formItemVO);
+                handleForm(formItemVO, processParamMap);
             }
 
         }
@@ -594,8 +602,15 @@ public class FormServiceImpl implements IFormService {
      *
      * @param formItemVO
      */
-    private static void handleForm(FormItemVO formItemVO) {
+    private static void handleForm(FormItemVO formItemVO, Map<String, Object> processParamMap) {
         FormItemVO.Props formItemVOProps = formItemVO.getProps();
+
+        if (CollUtil.isNotEmpty(processParamMap)) {
+            Object o = processParamMap.get(formItemVO.getId());
+            formItemVOProps.setValue(o);
+            return;
+        }
+
         if (StrUtil.equalsAny(formItemVO.getType(), FormTypeEnum.SELECT_USER.getType(), FormTypeEnum.SELECT_MULTI_USER.getType())) {
             Boolean defaultRoot = formItemVOProps.getDefaultRoot();
             if (defaultRoot != null && defaultRoot) {
@@ -611,14 +626,14 @@ public class FormServiceImpl implements IFormService {
                 formItemVOProps.setValue(CollUtil.newArrayList(nodeUserDto));
             }
         }
-        if (StrUtil.equalsAny(formItemVO.getType(), FormTypeEnum.SIGNATURE.getType())&&formItemVOProps.getLastContent()&&StrUtil.isBlankIfStr(formItemVOProps.getValue())) {
+        if (StrUtil.equalsAny(formItemVO.getType(), FormTypeEnum.SIGNATURE.getType()) && formItemVOProps.getLastContent() && StrUtil.isBlankIfStr(formItemVOProps.getValue())) {
 
             ISignatureRecordService bean = SpringUtil.getBean(ISignatureRecordService.class);
 
             List<SignatureRecord> signatureRecordList = bean.lambdaQuery().eq(SignatureRecord::getUserId, StpUtil.getLoginIdAsString())
                     .orderByDesc(SignatureRecord::getCreateTime)
                     .list();
-            if(CollUtil.isNotEmpty(signatureRecordList)){
+            if (CollUtil.isNotEmpty(signatureRecordList)) {
                 SignatureRecord signatureRecord = signatureRecordList.get(0);
                 formItemVOProps.setValue(signatureRecord.getUrl());
 
