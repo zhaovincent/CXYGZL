@@ -20,6 +20,7 @@ import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.OperTypeEnum;
 import com.cxygzl.common.dto.*;
 import com.cxygzl.common.dto.flow.Node;
+import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.dto.flow.UploadValue;
 import com.cxygzl.common.dto.third.UserDto;
 import com.cxygzl.common.utils.JsonUtil;
@@ -524,6 +525,28 @@ public class TaskServiceImpl implements ITaskService {
      */
     @Override
     public R setAssigneeByAdmin(AdminHandOverDto adminHandOverDto) {
-        return CoreHttpUtil.setAssigneeByAdmin(adminHandOverDto);
+        String userId = StpUtil.getLoginIdAsString();
+
+        UserDto u = ApiStrategyFactory.getStrategy().getUser(userId);
+
+        adminHandOverDto.setCurrentUserId(userId);
+        adminHandOverDto.setCurrentUserName(u.getName());
+        NodeUser user = adminHandOverDto.getUser();
+        R r = CoreHttpUtil.setAssigneeByAdmin(adminHandOverDto);
+        if(!r.isOk()){
+            return r;
+        }
+        for (TaskDto taskDto : adminHandOverDto.getTaskDtoList()) {
+            TaskParamDto taskParamDto=new  TaskParamDto();
+            taskParamDto.setProcessInstanceId(taskDto.getProcessInstanceId());
+            taskParamDto.setTaskId(taskDto.getTaskId());
+            taskParamDto.setApproveDesc(StrUtil.format("管理员[{}]转交任务给:{}", adminHandOverDto.getCurrentUserName(),
+                    user.getName()
+            ));
+            processInstanceOperRecordService.saveRecord(userId, taskParamDto,
+                    OperTypeEnum.BACK_JOIN_ADMIN.getValue(), "管理员转交任务");
+        }
+
+        return r;
     }
 }

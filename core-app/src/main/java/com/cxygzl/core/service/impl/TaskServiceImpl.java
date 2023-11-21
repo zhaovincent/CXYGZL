@@ -957,9 +957,8 @@ public class TaskServiceImpl implements ITaskService {
                         TaskTypeEnum.BACK_JOIN_ADMIN.getValue()
                 );
                 {
-                    saveSysCommentToTask(ApproveDescTypeEnum.BACK_JOIN_ADMIN.getType(), StrUtil.format("用户[{}]已经有该任务，管理员[{}]删除用户[{}]的任务",
+                    saveSysCommentToTask(ApproveDescTypeEnum.BACK_JOIN_ADMIN.getType(), StrUtil.format("用户[{}]已经有该任务，删除用户[{}]的任务",
                             user.getName(),
-                            adminHandOverDto.getCurrentUserName(),
                             taskDto.getUserName()
 
                     ), adminHandOverDto.getCurrentUserName(), taskDto.getTaskId(), processInstanceId);
@@ -976,9 +975,10 @@ public class TaskServiceImpl implements ITaskService {
                         TaskTypeEnum.BACK_JOIN_ADMIN.getValue()
                 );
                 {
-                    saveSysCommentToTask(ApproveDescTypeEnum.BACK_JOIN_ADMIN.getType(), StrUtil.format("管理员[{}]转交任务给:{}", adminHandOverDto.getCurrentUserName(),
+                    saveSysCommentToTask(ApproveDescTypeEnum.BACK_JOIN_ADMIN.getType(), StrUtil.format("将[{}]的任务将转交给:{}",
+                            taskDto.getUserName(),
                             user.getName()
-                    ), adminHandOverDto.getCurrentUserName(), taskDto.getTaskId(), processInstanceId);
+                    ), adminHandOverDto.getCurrentUserId(), taskDto.getTaskId(), processInstanceId);
 
 
                 }

@@ -22,6 +22,8 @@ public enum OperTypeEnum {
     CANCEL( "取消","cancel"),
     ADD_ASSIGNEE( "加签","addAssignee"),
     DEL_ASSIGNEE( "减签","delAssignee"),
+    BACK_JOIN_ADMIN( "管理员转交","backJoinByAdmin"),
+
     ;
 
     public static OperTypeEnum getByValue(String value){
