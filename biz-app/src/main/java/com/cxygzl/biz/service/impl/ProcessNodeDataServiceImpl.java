@@ -76,7 +76,6 @@ public class ProcessNodeDataServiceImpl extends ServiceImpl<ProcessNodeDataMappe
      * @param nodeId
      * @return
      */
-    @Cacheable(key = "#flowId+'_'+#nodeId",cacheNames = "nodeCache")
     @Override
     public R<Node> getNode(String flowId, String nodeId) {
         String data = getNodeData(flowId, nodeId).getData();

@@ -405,7 +405,7 @@ public class NodeFormatUtil {
 
                     NodeVo p = new NodeVo();
                     p.setChildren(processNodeShowDtos);
-
+                    p.setId(branch.getId());
                     p.setPlaceholder(branch.getPlaceHolder());
                     branchList.add(p);
                 }
