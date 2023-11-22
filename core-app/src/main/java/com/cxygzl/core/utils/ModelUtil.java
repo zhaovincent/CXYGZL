@@ -202,6 +202,10 @@ public class ModelUtil {
             int size = branchs.size();
             for (Node branch : branchs) {
 
+                //保存分支数据
+                IDataStoreHandler nodeDataStoreHandler = NodeDataStoreFactory.getInstance();
+                nodeDataStoreHandler.save(process.getId(), branch.getId(), branch);
+
 
                 buildAllNodeOuterSequence(process, branch.getChildNode(), nodeDto.getTailId());
 
@@ -225,15 +229,15 @@ public class ModelUtil {
 
                     SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getId(), nodeDto.getTailId(),
                             expression,
-                            StrUtil.format("{}->{}", nodeDto.getNodeName(), nodeDto.getNodeName())
-                    );
+                            StrUtil.format("{}->{}", nodeDto.getNodeName(), nodeDto.getNodeName()),
+                            branch.getId());
                     process.addFlowElement(sequenceFlow);
                 } else {
 
                     SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getId(), branch.getChildNode().getHeadId(),
                             expression,
-                            StrUtil.format("{}->{}", nodeDto.getNodeName(), branch.getChildNode().getNodeName())
-                    );
+                            StrUtil.format("{}->{}", nodeDto.getNodeName(), branch.getChildNode().getNodeName()),
+                            branch.getId());
                     process.addFlowElement(sequenceFlow);
                 }
                 ord++;
@@ -244,15 +248,15 @@ public class ModelUtil {
 
                 SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getTailId(), children.getHeadId(),
                         "",
-                        StrUtil.format("{}->{}", nodeDto.getNodeName(), children.getNodeName())
-                );
+                        StrUtil.format("{}->{}", nodeDto.getNodeName(), children.getNodeName()),
+                        null);
                 process.addFlowElement(sequenceFlow);
 
             } else if (StrUtil.isAllNotBlank(nodeDto.getTailId(), nextId)) {
                 SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeDto.getTailId(), nextId,
                         "",
-                        StrUtil.format("{}->{}", nodeDto.getNodeName(), nextId)
-                );
+                        StrUtil.format("{}->{}", nodeDto.getNodeName(), nextId),
+                        null);
                 process.addFlowElement(sequenceFlow);
             }
 
@@ -270,7 +274,7 @@ public class ModelUtil {
                 buildAllNodeOuterSequence(process, children, nextId);
             } else if (nodeDto.getType() != NodeTypeEnum.END.getValue().intValue()) {
                 SequenceFlow seq = buildSingleSequenceFlow(nodeDto.getTailId(), nextId, "", StrUtil.format("{}->{}",
-                        nodeDto.getNodeName(), nextId));
+                        nodeDto.getNodeName(), nextId), null);
 
                 process.addFlowElement(seq);
 
@@ -700,8 +704,8 @@ public class ModelUtil {
 
 
         SequenceFlow sequenceFlow = buildSingleSequenceFlow(parentNode.getTailId(), node.getHeadId(), expression,
-                StrUtil.format("{}->{}", parentNode.getNodeName(), node.getNodeName())
-        );
+                StrUtil.format("{}->{}", parentNode.getNodeName(), node.getNodeName()),
+                null);
         sequenceFlowList.add(sequenceFlow);
 
 
@@ -1087,7 +1091,7 @@ public class ModelUtil {
 
 
             {
-                SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeId, gatewayId, "${12==12}", null);
+                SequenceFlow sequenceFlow = buildSingleSequenceFlow(nodeId, gatewayId, "${12==12}", null, null);
                 sequenceFlowList.add(sequenceFlow);
             }
 
@@ -1100,7 +1104,7 @@ public class ModelUtil {
 
 
             {
-                SequenceFlow sequenceFlow = buildSingleSequenceFlow(gatewayId, nodeId, "${12==12}", null);
+                SequenceFlow sequenceFlow = buildSingleSequenceFlow(gatewayId, nodeId, "${12==12}", null, null);
                 sequenceFlowList.add(sequenceFlow);
             }
 
@@ -1111,7 +1115,7 @@ public class ModelUtil {
 
 
             SequenceFlow sequenceFlow = buildSingleSequenceFlow(node.getId(), StrUtil.format("{}_user_task",
-                    node.getId()), "${12==12}", null);
+                    node.getId()), "${12==12}", null, null);
             sequenceFlowList.add(sequenceFlow);
 
 
@@ -1127,9 +1131,10 @@ public class ModelUtil {
      * @param childId    子级id
      * @param expression 表达式
      * @param name
+     * @param id
      * @return
      */
-    private static SequenceFlow buildSingleSequenceFlow(String pId, String childId, String expression, String name) {
+    private static SequenceFlow buildSingleSequenceFlow(String pId, String childId, String expression, String name,String id) {
         if (StrUtil.hasBlank(pId, childId)) {
             return null;
         }
@@ -1140,7 +1145,7 @@ public class ModelUtil {
         if (StrUtil.isNotBlank(name)) {
             sequenceFlow.setName(name);
         }
-        sequenceFlow.setId(StrUtil.format("sq-id-{}-{}", IdUtil.fastSimpleUUID(), RandomUtil.randomInt(1, 10000000)));
+        sequenceFlow.setId(StrUtil.isBlank(id)?(StrUtil.format("id_{}",IdUtil.fastSimpleUUID())):id);
         return sequenceFlow;
     }
 

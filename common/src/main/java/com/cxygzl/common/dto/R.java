@@ -2,6 +2,8 @@ package com.cxygzl.common.dto;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * 结果类
  * 统一返回值
@@ -9,7 +11,7 @@ import lombok.Data;
  * @param <T> 数据对象
  */
 @Data
-public class R<T> {
+public class R<T> implements Serializable {
     /**
      * 链路id
      */

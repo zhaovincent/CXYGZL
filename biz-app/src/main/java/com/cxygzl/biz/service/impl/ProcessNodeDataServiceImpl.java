@@ -12,6 +12,7 @@ import com.cxygzl.common.dto.R;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -51,6 +52,7 @@ public class ProcessNodeDataServiceImpl extends ServiceImpl<ProcessNodeDataMappe
      * @param nodeId
      * @return
      */
+    @Cacheable(key = "#flowId+'_'+#nodeId",cacheNames = "stringCache")
     @Override
     public R<String> getNodeData(String flowId, String nodeId) {
         //发起人用户任务
@@ -74,6 +76,7 @@ public class ProcessNodeDataServiceImpl extends ServiceImpl<ProcessNodeDataMappe
      * @param nodeId
      * @return
      */
+    @Cacheable(key = "#flowId+'_'+#nodeId",cacheNames = "nodeCache")
     @Override
     public R<Node> getNode(String flowId, String nodeId) {
         String data = getNodeData(flowId, nodeId).getData();

@@ -44,7 +44,7 @@ public class FileServiceImpl implements IFileService {
         String loginIdAsLong = StpUtil.getLoginIdAsString();
 
 
-        String format = StrUtil.format("{}-{}", IdUtil.fastSimpleUUID(), fileName);
+        String format = StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), FileUtil.getSuffix(fileName));
 
         //日期路径
         String s = DateUtil.formatDate(new DateTime());

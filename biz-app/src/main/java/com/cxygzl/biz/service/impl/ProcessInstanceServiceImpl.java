@@ -777,12 +777,7 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
      */
     @Override
     public R showImg(String procInsId) {
-//        String s = CoreHttpUtil.showImg(procInsId);
-//        com.cxygzl.common.dto.R<String> stringR = CommonUtil.parseObject(s, new TypeReference<com.cxygzl.common.dto.R<String>>() {
-//        });
-//        String data = stringR.getData();
 
-        //
         ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId, procInsId).one();
         String flowId = processInstanceRecord.getFlowId();
         Process process = processService.getByFlowId(flowId);
@@ -816,16 +811,6 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
                     nodeStatuMap.put(nodeId, status);
                 } else if (s.intValue() != NodeStatusEnum.JXZ.getCode()) {
                     nodeStatuMap.put(nodeId, status);
-                }
-            }
-
-            //处理分支显示
-            List<Node> parentNodeUntilRoot = NodeUtil.getParentNodeUntilRoot(node, nodeId);
-            for (Node n : parentNodeUntilRoot) {
-                if (n.getType().intValue() == NodeTypeEnum.EMPTY.getValue()) {
-                    nodeStatuMap.put(n.getId(), NodeStatusEnum.YJS.getCode());
-                    break;
-
                 }
             }
 
