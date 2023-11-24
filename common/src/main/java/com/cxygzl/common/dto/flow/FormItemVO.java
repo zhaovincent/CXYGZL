@@ -39,6 +39,23 @@ public class FormItemVO {
 
     private Props props;
 
+    private DynamicFormConfig dynamicFormConfig;
+
+    private Object dynamicForm;
+
+
+    /**
+     * 动态表单配置
+     */
+    @Data
+    public static class DynamicFormConfig{
+
+        private List<HttpSettingData> list;
+
+        private Node condition;
+
+    }
+
     @Data
     public static class Props{
         private Object value;
