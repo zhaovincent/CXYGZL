@@ -27,6 +27,8 @@ import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.image.impl.DefaultProcessDiagramGenerator;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
+import org.flowable.task.api.history.HistoricTaskInstance;
+import org.flowable.task.api.history.HistoricTaskInstanceQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -220,28 +222,41 @@ public class FlowController {
      */
     @PostMapping("/queryCompletedTask")
     public R queryCompletedTask(@RequestBody TaskQueryParamDto taskQueryParamDto) {
-        HistoricActivityInstanceQuery historicActivityInstanceQuery = historyService.createHistoricActivityInstanceQuery();
-        List<HistoricActivityInstance> list = historicActivityInstanceQuery
-                .taskAssignee(taskQueryParamDto.getAssign())
-                .finished()
-                .orderByHistoricActivityInstanceEndTime().desc()
+        HistoricTaskInstanceQuery historicTaskInstanceQuery = historyService.createHistoricTaskInstanceQuery();
+
+
+        List<HistoricTaskInstance> historicTaskInstanceList = historicTaskInstanceQuery.taskAssignee(taskQueryParamDto.getAssign())
+                .taskWithoutDeleteReason()
+                .finished().orderByTaskCreateTime().desc()
                 .listPage((taskQueryParamDto.getPageNum() - 1) * taskQueryParamDto.getPageSize(),
                         taskQueryParamDto.getPageSize());
-
-        long count = historicActivityInstanceQuery.taskAssignee(taskQueryParamDto.getAssign()).finished().count();
+//        HistoricActivityInstanceQuery historicActivityInstanceQuery = historyService.createHistoricActivityInstanceQuery();
+//        List<HistoricActivityInstance> list = historicActivityInstanceQuery
+//                .taskAssignee(taskQueryParamDto.getAssign())
+//                .finished()
+//                .orderByHistoricActivityInstanceEndTime().desc()
+//                .listPage((taskQueryParamDto.getPageNum() - 1) * taskQueryParamDto.getPageSize(),
+//                        taskQueryParamDto.getPageSize());
+//
+//        long count = historicActivityInstanceQuery.taskAssignee(taskQueryParamDto.getAssign()).finished().count();
+        long count = historicTaskInstanceQuery.taskAssignee(taskQueryParamDto.getAssign()).taskWithoutDeleteReason().finished().count();
         List<TaskDto> taskDtoList = new ArrayList<>();
 
-        for (HistoricActivityInstance historicActivityInstance : list) {
-            String activityId = historicActivityInstance.getActivityId();
-            String activityName = historicActivityInstance.getActivityName();
-            String executionId = historicActivityInstance.getExecutionId();
-            String taskId = historicActivityInstance.getTaskId();
-            Date startTime = historicActivityInstance.getStartTime();
-            Date endTime = historicActivityInstance.getEndTime();
-            Long durationInMillis = historicActivityInstance.getDurationInMillis();
-            String processInstanceId = historicActivityInstance.getProcessInstanceId();
+        for (HistoricTaskInstance instance : historicTaskInstanceList) {
 
-            String processDefinitionId = historicActivityInstance.getProcessDefinitionId();
+//        }
+//
+//        for (HistoricActivityInstance historicActivityInstance : list) {
+            String activityId = instance.getTaskDefinitionKey();
+            String activityName = instance.getName();
+            String executionId = instance.getExecutionId();
+            String taskId = instance.getId();
+            Date startTime = instance.getStartTime();
+            Date endTime = instance.getEndTime();
+            Long durationInMillis = instance.getDurationInMillis();
+            String processInstanceId = instance.getProcessInstanceId();
+
+            String processDefinitionId = instance.getProcessDefinitionId();
             //流程id
             String flowId = com.cxygzl.core.utils.NodeUtil.getFlowId(processDefinitionId);
 
@@ -254,7 +269,7 @@ public class FlowController {
             taskDto.setProcessInstanceId(processInstanceId);
             taskDto.setDurationInMillis(durationInMillis);
             taskDto.setTaskId(taskId);
-            taskDto.setAssign(historicActivityInstance.getAssignee());
+            taskDto.setAssign(instance.getAssignee());
             taskDto.setTaskName(activityName);
 
             taskDtoList.add(taskDto);
