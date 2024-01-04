@@ -26,6 +26,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
+            <version>4.3.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.yomahub</groupId>
             <artifactId>tlog-web-spring-boot-starter</artifactId>
             <version>1.5.1</version>

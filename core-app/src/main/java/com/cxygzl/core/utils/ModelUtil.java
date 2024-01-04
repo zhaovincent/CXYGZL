@@ -5,6 +5,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.cxygzl.common.constants.NodeTypeEnum;
 import com.cxygzl.common.constants.ProcessInstanceConstant;
+import com.cxygzl.common.dto.flow.ExpireSetting;
 import com.cxygzl.common.dto.flow.Node;
 import com.cxygzl.common.utils.NodeUtil;
 import com.cxygzl.core.expression.condition.NodeExpressionStrategyFactory;
@@ -373,6 +374,42 @@ public class ModelUtil {
 
         UserTask userTask = buildUserTask(node, createListener);
         flowElementList.add(userTask);
+
+        //设置过期时间
+        ExpireSetting expireSetting = node.getExpireSetting();
+        if (expireSetting != null && expireSetting.getEnable()) {
+            Integer value = expireSetting.getValue();
+            String valueUnit = expireSetting.getValueUnit();
+            if (valueUnit.length() == 1) {
+                //年月日
+                userTask.setDueDate(StrUtil.format("P{}{}", value, valueUnit));
+            } else {
+                //时分秒
+                userTask.setDueDate(StrUtil.format("PT{}{}", value,
+                        StrUtil.subAfter(valueUnit, "T", true)));
+
+            }
+
+
+            //定时器边界事件
+
+            BoundaryEvent boundaryEvent = new BoundaryEvent();
+            boundaryEvent.setId(StrUtil.format("id_boundary_{}", node.getId()));
+            boundaryEvent.setCancelActivity(false);
+            boundaryEvent.setAttachedToRef(userTask);
+            TimerEventDefinition eventDefinition = new TimerEventDefinition();
+            eventDefinition.setTimeDuration(userTask.getDueDate());
+            if(!expireSetting.getOnce()){
+                eventDefinition.setTimeCycle("R10/"+userTask.getDueDate());
+            }
+            boundaryEvent.addEventDefinition(eventDefinition);
+
+            ExtensionElement extensionElement = FlowableUtils.generateFlowNodeIdExtension(node.getId());
+
+            boundaryEvent.addExtensionElement(extensionElement);
+            flowElementList.add(boundaryEvent);
+
+        }
 
 
 

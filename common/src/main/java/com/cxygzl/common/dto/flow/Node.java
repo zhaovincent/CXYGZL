@@ -1,5 +1,6 @@
 package com.cxygzl.common.dto.flow;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -41,5 +42,9 @@ public class Node {
     private Boolean groupMode;
 
     private List<GroupCondition> conditionList;
-
+    /**
+     * 过期设置
+     */
+    @ApiModelProperty("过期设置")
+    private ExpireSetting expireSetting;
 }

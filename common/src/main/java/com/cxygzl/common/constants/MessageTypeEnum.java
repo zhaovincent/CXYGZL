@@ -11,6 +11,8 @@ import lombok.Getter;
 public enum MessageTypeEnum {
 
     TODO_TASK("TodoTask","待办任务"),
+    EXPIRED_TASK("ExpiredTask","超时提醒任务"),
+
     ;
 
 
