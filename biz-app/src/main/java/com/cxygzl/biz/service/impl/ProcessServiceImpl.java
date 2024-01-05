@@ -25,6 +25,7 @@ import com.cxygzl.common.dto.flow.NodeUser;
 import com.cxygzl.common.utils.CommonUtil;
 import com.cxygzl.common.utils.NodeUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -117,12 +118,18 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
      * @param processVO
      * @return
      */
+    @Transactional
     @Override
     public R create(Process processVO) {
 
         String processStr = processVO.getProcess();
 
-
+        if (StrUtil.isNotBlank(processVO.getFlowId())) {
+            Process process = this.getByFlowId(processVO.getFlowId());
+            if (process == null || process.getHidden()) {
+                return R.fail("流程不存在，请退出流程重新打开编辑");
+            }
+        }
 
         Node node = JSON.parseObject(processStr, Node.class);
         com.cxygzl.biz.utils.NodeUtil.handleStarterNode(node, JSON.parseArray(processVO.getFormItems(), FormItemVO.class));
