@@ -8,6 +8,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
+import com.baomidou.lock.annotation.Lock4j;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cxygzl.biz.entity.Process;
 import com.cxygzl.biz.entity.ProcessStarter;
@@ -119,6 +120,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
      * @return
      */
     @Transactional
+    @Lock4j(keys = {"#processVO.flowId"}, expire = 60000, acquireTimeout = 60000)
     @Override
     public R create(Process processVO) {
 
