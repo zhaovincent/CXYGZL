@@ -8,6 +8,7 @@ import cn.hutool.core.lang.Dict;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cxygzl.biz.api.ApiStrategyFactory;
@@ -332,15 +333,22 @@ public class ProcessInstanceServiceImpl implements IProcessInstanceService {
         if (StrUtil.isAllBlank(flowId, processInstanceId)) {
             return R.success(new ArrayList<>());
         }
+        Map<String, Object> paramMap = nodeFormatParamVo.getParamMap();
 
-        if (StrUtil.isBlankIfStr(flowId) && StrUtil.isNotBlank(processInstanceId)) {
+
+
+        if (  StrUtil.isNotBlank(processInstanceId)) {
             ProcessInstanceRecord processInstanceRecord = processInstanceRecordService.lambdaQuery().eq(ProcessInstanceRecord::getProcessInstanceId,
                     processInstanceId).one();
             flowId = processInstanceRecord.getFlowId();
 
+            String formData = processInstanceRecord.getFormData();
+            JSONObject jsonObject = JSON.parseObject(formData);
+
+
+            paramMap.putAll(jsonObject);
 
         }
-        Map<String, Object> paramMap = nodeFormatParamVo.getParamMap();
         if (StrUtil.isNotBlank(nodeFormatParamVo.getTaskId())) {
             String s = CoreHttpUtil.queryTaskVariables(nodeFormatParamVo.getTaskId(), null);
             R<Map<String, Object>> r = JSON.parseObject(s,
