@@ -74,7 +74,8 @@ public class MenuServiceImpl extends MPJBaseServiceImpl<MenuMapper, Menu> implem
 
         List<RouteBO> tempMenuList = this.selectJoinList(RouteBO.class,lambdaQueryWrapper);
 
-        Set<Long> collect = tempMenuList.stream().map(w -> w.getId()).collect(Collectors.toSet());
+        List<Long> collect = tempMenuList.stream().map(w -> w.getId()).distinct().collect(Collectors.toList());
+
 
         List<RouteBO> menuList=new ArrayList<>();
         for (Long aLong : collect) {
