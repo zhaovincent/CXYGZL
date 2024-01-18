@@ -140,7 +140,6 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
 
 
-
         R<String> r = CoreHttpUtil.createFlow(node, StpUtil.getLoginIdAsString());
         if (!r.isOk()) {
             return R.fail(r.getMsg());
@@ -160,10 +159,9 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
 
         }
 
-        Node startNode = CommonUtil.toObj(processStr, Node.class);
 
 
-        List<NodeUser> nodeUserList = startNode.getNodeUserList();
+        List<NodeUser> nodeUserList = node.getNodeUserList();
 
         StringBuilder stringBuilder=new StringBuilder("");
         if(CollUtil.isNotEmpty(nodeUserList)){
@@ -189,7 +187,7 @@ public class ProcessServiceImpl extends ServiceImpl<ProcessMapper, Process> impl
         p.setSettings(processVO.getSettings());
         p.setGroupId(processVO.getGroupId());
         p.setFormItems(processVO.getFormItems());
-        p.setProcess(processStr);
+        p.setProcess(JSON.toJSONString(node));
         p.setRemark(processVO.getRemark());
         p.setSort(0);
         p.setHidden(false);
