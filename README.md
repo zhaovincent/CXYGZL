@@ -1,4 +1,5 @@
-# <p align="center"><strong> CXYGZL-不只审批 </strong></p>
+# <p align="center"><strong> FlyFlow</strong></p>
+## <p align="center"><strong> 高效自动化的工作流程解决方案</strong></p>
 
 
 <p align="center">
@@ -12,16 +13,15 @@
 </p>
 
 ### 概述
-现在开源的工作流引擎，基本都是以BPMN.js为基础的，导致使用门槛过高，非专业人员无法驾驭。本工作流借鉴钉钉/飞书的方式，以低代码方式降低用户使用门槛，即使是普通企业用户也可以几分钟内就能搭建自己的工作流引擎。
-
+FlyFlow借鉴了钉钉与飞书的界面设计理念，致力于打造一款用户友好、快速上手的工作流程工具。相较于传统的基于BPMN.js的工作流引擎，我们提供的解决方案显著简化了操作逻辑，使得用户能够在极短的时间内构建定制化的业务流程，即便是不具备深厚技术背景的普通用户也能迅速掌握，实现零门槛的高效工作流配置。
 
 前端管理后台框架使用的是 [vue3-element-admin](https://gitee.com/youlaiorg/vue3-element-admin "vue3-element-admin")，流程图使用的是[Workflow-Vue3](https://github.com/StavinLi/Workflow-Vue3 "Workflow-Vue3")。在此特别感谢两个产品的作者无私奉献，让我抄了个近道，特别感谢。
 
-> 前端代码开源地址：[https://gitee.com/junyue/cxygzl-web-vue3](https://gitee.com/junyue/cxygzl-web-vue3 "https://gitee.com/junyue/cxygzl-web-vue3")
+> 前端代码开源地址：[https://gitee.com/junyue/flyflow-vue3](https://gitee.com/junyue/flyflow-vue3 "https://gitee.com/junyue/flyflow-vue3")
 
 ### 官网-文档
 
-[https://www.cxygzl.com](https://www.cxygzl.com "https://www.cxygzl.com")
+[https://www.flyflow.cc](https://www.flyflow.cc "https://www.flyflow.cc")
 
 ![msedge_mNNAqkgNd9.png](imgs/msedge_mNNAqkgNd9.png)
 
@@ -33,7 +33,7 @@
 
 ### 技术交流群
  
-添加作者个人微信进群`cxygzl666`备注：`cxygzl`
+添加作者个人微信进群`cxygzl666`备注：`flyflow`
 
 ### 关于开源协议以及补充协议
 

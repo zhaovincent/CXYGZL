@@ -15,7 +15,7 @@ spring:
     name: cxygzl-core-biz
   datasource:
     ##数据库地址
-    url: jdbc:mysql://localhost:3307/cxygzl_biz?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3307/cxygzl_biz_os?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     ##数据库账号
     username: root
